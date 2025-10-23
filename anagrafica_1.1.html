@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anagrafica Utente con Generazione (Switch)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .box {
+            border: 1px solid black;
+            width: 320px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .output {
+            min-width: 300px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            box-sizing: border-box;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="date"] {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+            padding: 6px;
+        }
+        input[type="button"] {
+            margin-top: 8px;
+            padding: 6px 10px;
+        }
+        h3 {
+            margin: 10px 0 5px;
+        }
+    </style>
+    <script>
+        function calcolaEta(dataNascita) {
+            const oggi = new Date();
+            const nascita = new Date(dataNascita);
+            let eta = oggi.getFullYear() - nascita.getFullYear();
+            const mese = oggi.getMonth() - nascita.getMonth();
+            if (mese < 0 || (mese === 0 && oggi.getDate() < nascita.getDate())) {
+                eta--;
+            }
+            return eta;
+        }
+ 
+        function calcolaGenerazione(anno) {
+            switch (true) {
+                case (anno >= 2013):
+                    return "Generazione Alpha";
+                case (anno >= 1997):
+                    return "Generazione Z";
+                case (anno >= 1981):
+                    return "Millennials";
+                case (anno >= 1965):
+                    return "Generazione X";
+                case (anno >= 1946):
+                    return "Baby Boomers";
+                case (anno >= 1928):
+                    return "Generazione Silenziosa";
+                case (anno >= 1901):
+                    return "Greatest Generation";
+                default:
+                    return "Non classificata";
+            }
+        }
+ 
+        function stampa() {
+            const nome = document.getElementById("demo").value;
+            const cognome = document.getElementById("demi").value;
+            const indirizzo = document.getElementById("demu").value;
+            const citta = document.getElementById("citta").value;
+            const cap = document.getElementById("cap").value;
+            const dataNascita = document.getElementById("nascita").value;
+ 
+            let eta = "Non disponibile";
+            let generazione = "Non classificata";
+ 
+            if (dataNascita) {
+                const anno = new Date(dataNascita).getFullYear();
+                eta = calcolaEta(dataNascita);
+                generazione = calcolaGenerazione(anno);
+            }
+ 
+            document.getElementById("output").innerHTML = `
+                <strong>Nome:</strong> ${nome}<br>
+                <strong>Cognome:</strong> ${cognome}<br>
+                <strong>Indirizzo:</strong> ${indirizzo}<br>
+                <strong>Città:</strong> ${citta}<br>
+                <strong>CAP:</strong> ${cap}<br>
+                <strong>Data di nascita:</strong> ${dataNascita}<br>
+                <strong>Età:</strong> ${eta} anni<br>
+                <strong>Generazione:</strong> ${generazione}
+            `;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h3>Nome</h3>
+            <input type="text" id="demo">
+ 
+            <h3>Cognome</h3>
+            <input type="text" id="demi">
+ 
+            <h3>Indirizzo</h3>
+            <input type="text" id="demu">
+ 
+            <h3>Città</h3>
+            <input type="text" id="citta">
+ 
+            <h3>CAP</h3>
+            <input type="text" id="cap">
+ 
+            <h3>Data di nascita</h3>
+            <input type="date" id="nascita">
+ 
+            <input type="button" value="Mostra dati" onclick="stampa()">
+        </div>
+ 
+        <div class="output" id="output">
+            <!-- Risultato generato -->
+        </div>
+    </div>
+</body>
+</html>
