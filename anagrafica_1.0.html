@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lavoro dell 09/10/25</title>
+    <style>
+        body{ font-family: Arial, sans-serif; }
+        .container{
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .box{
+            border: 1px solid black;
+            width: 320px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .output{
+            min-width: 260px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            box-sizing: border-box;
+        }
+        input[type="text"], input[type="email"]{
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+            padding: 6px;
+        }
+        input[type="button"]{
+            margin-top: 8px;
+            padding: 6px 10px;
+        }
+    </style>
+    <script>
+        function stampa(){
+            const nome = document.getElementById("demo").value;
+            const cognome = document.getElementById("demi").value;
+            const indirizzo = document.getElementById("demu").value;
+
+            document.getElementById("bo").innerText = nome;
+            document.getElementById("boo").innerText = cognome;
+            document.getElementById("booo").innerText = indirizzo;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h3>scrivi il tuo nome</h3>
+            <input type="text" id="demo">
+
+            <h3>scrivi il tuo cognome</h3>
+            <input type="text" id="demi">
+
+            <h3>scrivi il tuo indirizzo</h3>
+            <input type="email" id="demu">
+
+            <input type="button" value="cliccami" onclick="stampa()">
+        </div>
+
+        <div class="output">
+            <p id="bo"></p>
+            <p id="boo"></p>
+            <p id="booo"></p>
+        </div>
+    </div>
+</body>
+</html>
