@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversione in Binario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .box {
+            border: 1px solid black;
+            width: 320px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .output {
+            min-width: 260px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+            padding: 6px;
+        }
+        input[type="button"] {
+            margin-top: 8px;
+            padding: 6px 10px;
+        }
+    </style>
+    <script>
+        function convertiInBinario() {
+            // Ottieni i valori dalle caselle di testo
+            let octet1 = parseInt(document.getElementById("octet1").value);
+            let octet2 = parseInt(document.getElementById("octet2").value);
+            let octet3 = parseInt(document.getElementById("octet3").value);
+            let octet4 = parseInt(document.getElementById("octet4").value);
+
+
+            function toBinary(num) {
+                let bin = "";
+                for (let i = 7; i >= 0; i--) {
+                    bin += (num >> i) & 1; // Utilizzo l'operatore bitwise per ottenere ogni bit
+                }
+                return bin;
+            }
+
+
+            let bin1 = toBinary(octet1);
+            let bin2 = toBinary(octet2);
+            let bin3 = toBinary(octet3);
+            let bin4 = toBinary(octet4);
+
+
+            document.getElementById("binario1").innerText = bin1;
+            document.getElementById("binario2").innerText = bin2;
+            document.getElementById("binario3").innerText = bin3;
+            document.getElementById("binario4").innerText = bin4;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h3>Inserisci 4 numeri (da 0 a 255)</h3>
+            <input type="text" id="octet1" placeholder="0-2
