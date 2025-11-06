@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gioco Pokémon - Statistiche</title>
+  <title>Gioco Pokémon - Confronto Statistiche</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,10 +25,7 @@
     .pokemon img {
       width: 100px;
       height: 100px;
-    }
-    .stats {
-      margin-top: 10px;
-      font-size: 16px;
+      image-rendering: pixelated;
     }
     .options {
       margin-top: 20px;
@@ -53,16 +50,16 @@
   <div class="container">
     <div id="player" class="pokemon">
       <img id="player-sprite" src="" alt="Pokémon">
-      <div id="player-stats"></div>
+      <div id="player-name"></div>
     </div>
 
     <div id="opponent" class="pokemon">
       <img id="opponent-sprite" src="" alt="Pokémon">
-      <div id="opponent-stats"></div>
+      <div id="opponent-name"></div>
     </div>
   </div>
 
-  <div id="comparison" class="stats"></div>
+  <div id="comparison" class="stats" style="margin-top: 20px; font-size: 18px;"></div>
 
   <div class="options">
     <button id="greater">Il tuo Pokémon ha una statistica maggiore</button>
@@ -70,7 +67,7 @@
   </div>
 
   <script>
-    // Dati sui Pokémon (per il gioco)
+    // Lista Pokémon base (puoi ampliarla liberamente)
     const pokemonList = [
       { name: "Bulbasaur", id: 1, stats: { hp: 45, attack: 49, defense: 49, speed: 45 } },
       { name: "Charmander", id: 4, stats: { hp: 39, attack: 52, defense: 43, speed: 65 } },
@@ -78,26 +75,29 @@
       { name: "Pikachu", id: 25, stats: { hp: 35, attack: 55, defense: 40, speed: 90 } },
       { name: "Eevee", id: 133, stats: { hp: 55, attack: 55, defense: 50, speed: 55 } },
       { name: "Jigglypuff", id: 39, stats: { hp: 115, attack: 45, defense: 20, speed: 20 } },
-      // Aggiungi qui altri Pokémon se vuoi
     ];
 
-    // Funzione per generare un Pokémon casuale
+    const statNames = {
+      hp: "HP",
+      attack: "Attacco",
+      defense: "Difesa",
+      speed: "Velocità"
+    };
+
+    // Ottieni Pokémon casuale
     function getRandomPokemon() {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    // Funzione per aggiornare l'interfaccia con i dati dei Pokémon
+    // Aggiorna la visualizzazione dei Pokémon
     function updatePokemonDisplay(player, opponent) {
-      // Aggiorna il giocatore
-      document.getElementById("player-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/normal/${player.name.toLowerCase()}.png`;
-      document.getElementById("player-stats").innerText = `HP: ${player.stats.hp}, Attacco: ${player.stats.attack}, Difesa: ${player.stats.defense}, Velocità: ${player.stats.speed}`;
-
-      // Aggiorna l'avversario
-      document.getElementById("opponent-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/normal/${opponent.name.toLowerCase()}.png`;
-      document.getElementById("opponent-stats").innerText = `HP: ${opponent.stats.hp}, Attacco: ${opponent.stats.attack}, Difesa: ${opponent.stats.defense}, Velocità: ${opponent.stats.speed}`;
+      document.getElementById("player-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${player.name.toLowerCase()}.png`;
+      document.getElementById("opponent-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${opponent.name.toLowerCase()}.png`;
+      document.getElementById("player-name").innerText = player.name;
+      document.getElementById("opponent-name").innerText = opponent.name;
     }
 
-    // Funzione per determinare il confronto tra i Pokémon
+    // Scegli una statistica e confronta
     function getComparison(player, opponent) {
       const stats = ["hp", "attack", "defense", "speed"];
       const stat = stats[Math.floor(Math.random() * stats.length)];
@@ -111,7 +111,6 @@
       };
     }
 
-    // Funzione per gestire la risposta
     let score = 0;
     let gameOver = false;
 
@@ -130,7 +129,6 @@
       if (!gameOver) startRound();
     }
 
-    // Funzione per iniziare un nuovo turno
     function startRound() {
       const player = getRandomPokemon();
       const opponent = getRandomPokemon();
@@ -138,16 +136,15 @@
       updatePokemonDisplay(player, opponent);
 
       const comparison = getComparison(player, opponent);
-      document.getElementById("comparison").innerText = `Il tuo ${player.name} ha lo stat ${comparison.stat} maggiore di ${opponent.name}?`;
+      document.getElementById("comparison").innerText =
+        `Il tuo ${player.name} ha lo stat ${statNames[comparison.stat]} maggiore di ${opponent.name}?`;
 
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
     }
 
-    // Inizia il gioco
     startRound();
   </script>
 
 </body>
 </html>
-
