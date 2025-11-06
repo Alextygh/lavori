@@ -127,7 +127,7 @@
     // detect first two letters of language (e.g. "it", "en")
     let lang = navigator.language ? navigator.language.slice(0,2) : "en";
 
-    // TRANSLATIONS (you can add more languages here)
+    // TRANSLATIONS
     const translations = {
       it: {
         title: "Gioco Pokémon - Confronto Statistiche",
@@ -159,7 +159,6 @@
         wrong: "Wrong!",
         question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?`
       },
-      // example extra language entry; add or modify as needed
       es: {
         title: "Juego Pokémon - Comparar Stats",
         score: "Puntuación",
