@@ -1,4 +1,3 @@
-<!-- https://pokemondb.net/pokedex/all -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -70,6 +69,10 @@
       color: #d32f2f;
       margin-top: 15px;
     }
+    #wrongDetails {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -103,6 +106,7 @@
       <h2 id="gameOverTitle">Game Over!</h2>
       <p id="finalScore"></p>
       <p id="highScoreMessage"></p>
+      <p id="wrongDetails"></p>
       <button id="closePopup">Chiudi</button>
     </div>
   </div>
@@ -115,11 +119,38 @@
     let timeLeft = 10;
     let lang = navigator.language.slice(0, 2);
 
-    // 🌍 Traduzioni multilingua
+    // 🌍 Traduzioni
     const translations = {
-      it: { title: "Gioco Pokémon - Confronto Statistiche", score: "Punteggio", record: "Record", time: "Tempo", yes: "Sì", no: "No", gameOver: "Game Over!", newRecord: "🎉 Nuovo record!", currentRecord: "Record attuale", close: "Chiudi", timeout: "Tempo scaduto!", wrong: "Hai sbagliato!", question: (p1, stat, p2) => `Il tuo ${p1} ha più ${stat} di ${p2}?` },
-      en: { title: "Pokémon Game - Stat Comparison", score: "Score", record: "High Score", time: "Time", yes: "Yes", no: "No", gameOver: "Game Over!", newRecord: "🎉 New Record!", currentRecord: "Current record", close: "Close", timeout: "Time’s up!", wrong: "Wrong!", question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?` }
-      // ... (altre lingue omesse per brevità)
+      it: { 
+        title: "Gioco Pokémon - Confronto Statistiche", 
+        score: "Punteggio", 
+        record: "Record", 
+        time: "Tempo", 
+        yes: "Sì", 
+        no: "No", 
+        gameOver: "Game Over!", 
+        newRecord: "🎉 Nuovo record!", 
+        currentRecord: "Record attuale", 
+        close: "Chiudi", 
+        timeout: "Tempo scaduto!", 
+        wrong: "Hai sbagliato!", 
+        question: (p1, stat, p2) => `Il tuo ${p1} ha più ${stat} di ${p2}?` 
+      },
+      en: { 
+        title: "Pokémon Game - Stat Comparison", 
+        score: "Score", 
+        record: "High Score", 
+        time: "Time", 
+        yes: "Yes", 
+        no: "No", 
+        gameOver: "Game Over!", 
+        newRecord: "🎉 New Record!", 
+        currentRecord: "Current record", 
+        close: "Close", 
+        timeout: "Time’s up!", 
+        wrong: "Wrong!", 
+        question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?` 
+      }
     };
 
     const t = translations[lang] || translations.en;
@@ -153,12 +184,11 @@
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    // ✅ Normalizza solo per l'immagine (spazi → trattini, tutto minuscolo)
     function getSpriteUrl(name) {
       const normalized = name
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "") // rimuove punteggiatura
-        .replace(/\s+/g, "-");        // spazi -> trattino
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
       return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
     }
 
@@ -176,7 +206,9 @@
         stat,
         playerStat: player.stats[stat],
         opponentStat: opponent.stats[stat],
-        isGreater: player.stats[stat] > opponent.stats[stat]
+        isGreater: player.stats[stat] > opponent.stats[stat],
+        playerName: player.name,
+        opponentName: opponent.name
       };
     }
 
@@ -207,21 +239,33 @@
         document.getElementById("score").innerText = `${t.score}: ${score}`;
         startRound();
       } else {
-        triggerGameOver(t.wrong);
+        triggerGameOver(t.wrong, comparison);
       }
     }
 
-    function triggerGameOver(reason) {
+    function triggerGameOver(reason, comparison = null) {
       clearInterval(timer);
       gameOver = true;
       let newRecord = false;
+
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
         newRecord = true;
       }
+
       document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
       document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${highScore}`;
+
+      if (comparison) {
+        const statLabel = statNames[lang]?.[comparison.stat] || statNames.it[comparison.stat];
+        document.getElementById("wrongDetails").innerHTML =
+          `${reason}<br>${comparison.playerName}: ${comparison.playerStat} ${statLabel}<br>` +
+          `${comparison.opponentName}: ${comparison.opponentStat} ${statLabel}`;
+      } else {
+        document.getElementById("wrongDetails").innerText = reason;
+      }
+
       document.getElementById("gameOverPopup").style.display = "flex";
     }
 
