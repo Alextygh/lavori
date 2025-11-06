@@ -128,33 +128,59 @@
     let lang = navigator.language ? navigator.language.slice(0,2) : "en";
 
     // TRANSLATIONS
-const translations = {
-      it: { title:"Gioco Pokémon - Confronto Statistiche", score:"Punteggio", record:"Record", time:"Tempo", yes:"Sì", no:"No", gameOver:"Game Over!", newRecord:"🎉 Nuovo record!", currentRecord:"Record attuale", close:"Chiudi", timeout:"Tempo scaduto!", wrong:"Hai sbagliato!", question:(p1,s,p2)=>`Il tuo ${p1} ha più ${s} di ${p2}?` },
-      en: { title:"Pokémon Game - Stat Comparison", score:"Score", record:"High Score", time:"Time", yes:"Yes", no:"No", gameOver:"Game Over!", newRecord:"🎉 New Record!", currentRecord:"Current record", close:"Close", timeout:"Time’s up!", wrong:"Wrong!", question:(p1,s,p2)=>`Does your ${p1} have more ${s} than ${p2}?` },
-      es: { title:"Juego Pokémon - Comparar Stats", score:"Puntuación", record:"Récord", time:"Tiempo", yes:"Sí", no:"No", gameOver:"¡Fin del juego!", newRecord:"🎉 ¡Nuevo récord!", currentRecord:"Récord actual", close:"Cerrar", timeout:"¡Se acabó el tiempo!", wrong:"¡Incorrecto!", question:(p1,s,p2)=>`¿Tu ${p1} tiene más ${s} que ${p2}?` },
-      de: { title:"Pokémon-Spiel - Wertevergleich", score:"Punkte", record:"Rekord", time:"Zeit", yes:"Ja", no:"Nein", gameOver:"Spiel vorbei!", newRecord:"🎉 Neuer Rekord!", currentRecord:"Aktueller Rekord", close:"Schließen", timeout:"Zeit abgelaufen!", wrong:"Falsch!", question:(p1,s,p2)=>`Hat dein ${p1} mehr ${s} als ${p2}?` },
-      pt: { title:"Jogo Pokémon - Comparar Estatísticas", score:"Pontuação", record:"Recorde", time:"Tempo", yes:"Sim", no:"Não", gameOver:"Fim de jogo!", newRecord:"🎉 Novo recorde!", currentRecord:"Recorde atual", close:"Fechar", timeout:"Tempo esgotado!", wrong:"Errado!", question:(p1,s,p2)=>`O seu ${p1} tem mais ${s} do que ${p2}?` },
-      zh: { title:"宝可梦游戏 - 属性对比", score:"得分", record:"最高分", time:"时间", yes:"是", no:"否", gameOver:"游戏结束！", newRecord:"🎉 新纪录！", currentRecord:"当前纪录", close:"关闭", timeout:"时间到！", wrong:"错误！", question:(p1,s,p2)=>`你的${p1}的${s}比${p2}高吗？` },
-      ru: { title:"Игра Покемон - Сравнение характеристик", score:"Счёт", record:"Рекорд", time:"Время", yes:"Да", no:"Нет", gameOver:"Игра окончена!", newRecord:"🎉 Новый рекорд!", currentRecord:"Текущий рекорд", close:"Закрыть", timeout:"Время вышло!", wrong:"Неправильно!", question:(p1,s,p2)=>`У твоего ${p1} больше ${s}, чем у ${p2}?` },
-      ja: { title:"ポケモンゲーム - ステータス比較", score:"スコア", record:"ハイスコア", time:"時間", yes:"はい", no:"いいえ", gameOver:"ゲームオーバー！", newRecord:"🎉 新記録！", currentRecord:"現在の記録", close:"閉じる", timeout:"時間切れ！", wrong:"間違い！", question:(p1,s,p2)=>`あなたの${p1}は${p2}より${s}が高いですか？` },
-      ko: { title:"포켓몬 게임 - 능력치 비교", score:"점수", record:"최고 점수", time:"시간", yes:"예", no:"아니오", gameOver:"게임 오버!", newRecord:"🎉 새로운 기록!", currentRecord:"현재 기록", close:"닫기", timeout:"시간 초과!", wrong:"틀렸습니다!", question:(p1,s,p2)=>`당신의 ${p1}이(가) ${p2}보다 ${s}가 높습니까?` },
-      hi: { title:"पोकेमोन खेल - आँकड़ों की तुलना", score:"स्कोर", record:"उच्च स्कोर", time:"समय", yes:"हाँ", no:"नहीं", gameOver:"खेल समाप्त!", newRecord:"🎉 नया रिकॉर्ड!", currentRecord:"वर्तमान रिकॉर्ड", close:"बंद करें", timeout:"समय समाप्त!", wrong:"गलत!", question:(p1,s,p2)=>`क्या आपका ${p1} ${p2} से अधिक ${s} रखता है?` },
-      ar: { title:"لعبة بوكيمون - مقارنة الإحصائيات", score:"النقاط", record:"أعلى نتيجة", time:"الوقت", yes:"نعم", no:"لا", gameOver:"انتهت اللعبة!", newRecord:"🎉 رقم قياسي جديد!", currentRecord:"الرقم الحالي", close:"إغلاق", timeout:"انتهى الوقت!", wrong:"خطأ!", question:(p1,s,p2)=>`هل لدى ${p1} الخاص بك ${s} أكثر من ${p2}؟` }
+    const translations = {
+      it: {
+        title: "Gioco Pokémon - Confronto Statistiche",
+        score: "Punteggio",
+        record: "Record",
+        time: "Tempo",
+        yes: "Sì",
+        no: "No",
+        gameOver: "Game Over!",
+        newRecord: "🎉 Nuovo record!",
+        currentRecord: "Record attuale",
+        close: "Chiudi",
+        timeout: "Tempo scaduto!",
+        wrong: "Hai sbagliato!",
+        question: (p1, stat, p2) => `Il tuo ${p1} ha più ${stat} di ${p2}?`
+      },
+      en: {
+        title: "Pokémon Game - Stat Comparison",
+        score: "Score",
+        record: "High Score",
+        time: "Time",
+        yes: "Yes",
+        no: "No",
+        gameOver: "Game Over!",
+        newRecord: "🎉 New Record!",
+        currentRecord: "Current record",
+        close: "Close",
+        timeout: "Time’s up!",
+        wrong: "Wrong!",
+        question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?`
+      },
+      es: {
+        title: "Juego Pokémon - Comparar Stats",
+        score: "Puntuación",
+        record: "Récord",
+        time: "Tiempo",
+        yes: "Sí",
+        no: "No",
+        gameOver: "¡Fin del juego!",
+        newRecord: "🎉 ¡Nuevo récord!",
+        currentRecord: "Récord actual",
+        close: "Cerrar",
+        timeout: "¡Se acabó el tiempo!",
+        wrong: "¡Incorrecto!",
+        question: (p1, stat, p2) => `¿Tu ${p1} tiene más ${stat} que ${p2}?`
+      }
     };
 
     // stat name translations (fallback to English)
-    const translations = {
-      it: { title:"Gioco Pokémon - Confronto Statistiche", score:"Punteggio", record:"Record", time:"Tempo", yes:"Sì", no:"No", gameOver:"Game Over!", newRecord:"🎉 Nuovo record!", currentRecord:"Record attuale", close:"Chiudi", timeout:"Tempo scaduto!", wrong:"Hai sbagliato!", question:(p1,s,p2)=>`Il tuo ${p1} ha più ${s} di ${p2}?` },
-      en: { title:"Pokémon Game - Stat Comparison", score:"Score", record:"High Score", time:"Time", yes:"Yes", no:"No", gameOver:"Game Over!", newRecord:"🎉 New Record!", currentRecord:"Current record", close:"Close", timeout:"Time’s up!", wrong:"Wrong!", question:(p1,s,p2)=>`Does your ${p1} have more ${s} than ${p2}?` },
-      es: { title:"Juego Pokémon - Comparar Stats", score:"Puntuación", record:"Récord", time:"Tiempo", yes:"Sí", no:"No", gameOver:"¡Fin del juego!", newRecord:"🎉 ¡Nuevo récord!", currentRecord:"Récord actual", close:"Cerrar", timeout:"¡Se acabó el tiempo!", wrong:"¡Incorrecto!", question:(p1,s,p2)=>`¿Tu ${p1} tiene más ${s} que ${p2}?` },
-      de: { title:"Pokémon-Spiel - Wertevergleich", score:"Punkte", record:"Rekord", time:"Zeit", yes:"Ja", no:"Nein", gameOver:"Spiel vorbei!", newRecord:"🎉 Neuer Rekord!", currentRecord:"Aktueller Rekord", close:"Schließen", timeout:"Zeit abgelaufen!", wrong:"Falsch!", question:(p1,s,p2)=>`Hat dein ${p1} mehr ${s} als ${p2}?` },
-      pt: { title:"Jogo Pokémon - Comparar Estatísticas", score:"Pontuação", record:"Recorde", time:"Tempo", yes:"Sim", no:"Não", gameOver:"Fim de jogo!", newRecord:"🎉 Novo recorde!", currentRecord:"Recorde atual", close:"Fechar", timeout:"Tempo esgotado!", wrong:"Errado!", question:(p1,s,p2)=>`O seu ${p1} tem mais ${s} do que ${p2}?` },
-      zh: { title:"宝可梦游戏 - 属性对比", score:"得分", record:"最高分", time:"时间", yes:"是", no:"否", gameOver:"游戏结束！", newRecord:"🎉 新纪录！", currentRecord:"当前纪录", close:"关闭", timeout:"时间到！", wrong:"错误！", question:(p1,s,p2)=>`你的${p1}的${s}比${p2}高吗？` },
-      ru: { title:"Игра Покемон - Сравнение характеристик", score:"Счёт", record:"Рекорд", time:"Время", yes:"Да", no:"Нет", gameOver:"Игра окончена!", newRecord:"🎉 Новый рекорд!", currentRecord:"Текущий рекорд", close:"Закрыть", timeout:"Время вышло!", wrong:"Неправильно!", question:(p1,s,p2)=>`У твоего ${p1} больше ${s}, чем у ${p2}?` },
-      ja: { title:"ポケモンゲーム - ステータス比較", score:"スコア", record:"ハイスコア", time:"時間", yes:"はい", no:"いいえ", gameOver:"ゲームオーバー！", newRecord:"🎉 新記録！", currentRecord:"現在の記録", close:"閉じる", timeout:"時間切れ！", wrong:"間違い！", question:(p1,s,p2)=>`あなたの${p1}は${p2}より${s}が高いですか？` },
-      ko: { title:"포켓몬 게임 - 능력치 비교", score:"점수", record:"최고 점수", time:"시간", yes:"예", no:"아니오", gameOver:"게임 오버!", newRecord:"🎉 새로운 기록!", currentRecord:"현재 기록", close:"닫기", timeout:"시간 초과!", wrong:"틀렸습니다!", question:(p1,s,p2)=>`당신의 ${p1}이(가) ${p2}보다 ${s}가 높습니까?` },
-      hi: { title:"पोकेमोन खेल - आँकड़ों की तुलना", score:"स्कोर", record:"उच्च स्कोर", time:"समय", yes:"हाँ", no:"नहीं", gameOver:"खेल समाप्त!", newRecord:"🎉 नया रिकॉर्ड!", currentRecord:"वर्तमान रिकॉर्ड", close:"बंद करें", timeout:"समय समाप्त!", wrong:"गलत!", question:(p1,s,p2)=>`क्या आपका ${p1} ${p2} से अधिक ${s} रखता है?` },
-      ar: { title:"لعبة بوكيمون - مقارنة الإحصائيات", score:"النقاط", record:"أعلى نتيجة", time:"الوقت", yes:"نعم", no:"لا", gameOver:"انتهت اللعبة!", newRecord:"🎉 رقم قياسي جديد!", currentRecord:"الرقم الحالي", close:"إغلاق", timeout:"انتهى الوقت!", wrong:"خطأ!", question:(p1,s,p2)=>`هل لدى ${p1} الخاص بك ${s} أكثر من ${p2}؟` }
+    const statNames = {
+      it: { hp: "HP", attack: "Attacco", defense: "Difesa", spattack: "Attacco Speciale", spdefense: "Difesa Speciale", speed: "Velocità" },
+      en: { hp: "HP", attack: "Attack", defense: "Defense", spattack: "Sp. Attack", spdefense: "Sp. Defense", speed: "Speed" },
+      es: { hp: "HP", attack: "Ataque", defense: "Defensa", spattack: "Atq. Esp.", spdefense: "Def. Esp.", speed: "Velocidad" }
     };
 
     // choose translation set (fallback to English)
