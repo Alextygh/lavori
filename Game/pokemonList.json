@@ -58,5 +58,7 @@
   { "name": "Primeape", "id": 57, "stats": { "hp": 65, "attack": 105, "defense": 60, "spattack": 60, "spdefense": 70, "speed": 95 } },
   { "name": "Growlithe", "id": 58, "stats": { "hp": 55, "attack": 70, "defense": 45, "spattack": 70, "spdefense": 50, "speed": 60 } },
   { "name": "Arcanine", "id": 59, "stats": { "hp": 90, "attack": 110, "defense": 80, "spattack": 100, "spdefense": 80, "speed": 95 } },
-  { "name": "Poliwag", "id": 60, "stats": { "hp": 40, "attack": 50, "defense": 40, "spattack": 40, "spdefense": 40, "speed": 90 } }
+  { "name": "Poliwag", "id": 60, "stats": { "hp": 40, "attack": 50, "defense": 40, "spattack": 40, "spdefense": 40, "speed": 90 } },
+  { "name": "Poliwhirl", "id": 61, "stats": { "hp": 65, "attack": 65, "defense": 65, "spattack": 50, "spdefense": 50, "speed": 90 } },
+  { "name": "Poliwag", "id": 62, "stats": { "hp": 90, "attack": 95, "defense": 95, "spattack": 70, "spdefense": 90, "speed": 70 } }
 ]
