@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Subnet Mask da Prefix</title>
+</head>
+<body>
+<h2>Calcolo subnet mask da prefix</h2>
+<input type="number" id="prefix" placeholder="Inserisci prefix (0-32)">
+<button onclick="genera()">Genera</button>
+
+<p id="risultato"></p>
+
+<script>
+function genera() {
+  let prefix = Number(document.getElementById("prefix").value);
+
+  if (prefix < 0 || prefix > 32 || isNaN(prefix)) {
+    document.getElementById("risultato").innerHTML = "Prefix non valido";
+    return;
+  }
+
+  let ottettiPieni = Math.floor(prefix / 8);
+  let resto = prefix % 8;
+
+  let mask = [];
+
+  for (let i = 0; i < ottettiPieni; i++) {
+    mask.push("11111111");
+  }
+
+  if (resto > 0) {
+    let parziale = "";
+    for (let i = 0; i < 8; i++) {
+      if (i < resto) parziale += "1";
+      else parziale += "0";
+    }
+    mask.push(parziale);
+  }
+
+  while (mask.length < 4) {
+    mask.push("00000000");
+  }
+
+  document.getElementById("risultato").innerHTML =
+    "Subnet mask in binario: " + mask.join(".");
+}
+</script>
+</body>
+</html>
