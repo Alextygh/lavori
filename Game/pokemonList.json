@@ -28,7 +28,7 @@
   { "name": "Sandshrew", "id": 27, "stats": { "hp": 50, "attack": 75, "defense": 85, "spattack": 20, "spdefense": 30, "speed": 40 } },
   { "name": "Sandslash", "id": 28, "stats": { "hp": 75, "attack": 100, "defense": 110, "spattack": 45, "spdefense": 55, "speed": 65 } },
   { "name": "Nidoranf", "id": 29, "stats": { "hp": 55, "attack": 47, "defense": 52, "spattack": 40, "spdefense": 40, "speed": 41 } },
-  { "name": "Nidorina", "id": 30, "stats": { "hp": 70, "attack": 62, "defense": 67, "spattack": 55, "spdefense": 55, "speed": 56 } }
+  { "name": "Nidorina", "id": 30, "stats": { "hp": 70, "attack": 62, "defense": 67, "spattack": 55, "spdefense": 55, "speed": 56 } },
   { "name": "Nidoqueen", "id": 31, "stats": { "hp": 90, "attack": 92, "defense": 87, "spattack": 75, "spdefense": 85, "speed": 76 } },
   { "name": "Nidoranm", "id": 32, "stats": { "hp": 46, "attack": 57, "defense": 40, "spattack": 40, "spdefense": 40, "speed": 50 } },
   { "name": "Nidorino", "id": 33, "stats": { "hp": 61, "attack": 72, "defense": 57, "spattack": 55, "spdefense": 55, "speed": 65 } },
