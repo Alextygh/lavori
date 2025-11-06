@@ -38,9 +38,41 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #score {
+    #score, #highscore {
       font-size: 20px;
-      margin-top: 30px;
+      margin-top: 15px;
+    }
+
+    /* Popup Game Over */
+    #gameOverPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    #gameOverPopup .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 300px;
+    }
+    #gameOverPopup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #timer {
+      font-size: 22px;
+      color: #d32f2f;
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -48,6 +80,8 @@
 
   <h1>Gioco Pokémon - Confronto Statistiche</h1>
   <div id="score">Punteggio: 0</div>
+  <div id="highscore"></div>
+  <div id="timer">Tempo: 10s</div>
 
   <div class="container">
     <div id="player" class="pokemon">
@@ -68,20 +102,36 @@
     <button id="not-greater">No</button>
   </div>
 
-  <script>
-    let pokemonList = [];  // Lista Pokémon vuota che verrà riempita dal file JSON
+  <!-- POPUP GAME OVER -->
+  <div id="gameOverPopup">
+    <div class="popup-content">
+      <h2>Game Over!</h2>
+      <p id="finalScore"></p>
+      <p id="highScoreMessage"></p>
+      <button id="closePopup">Chiudi</button>
+    </div>
+  </div>
 
-    // Funzione per caricare i dati dal file JSON
+  <script>
+    let pokemonList = [];
+    let score = 0;
+    let gameOver = false;
+    let timer;
+    let timeLeft = 10;
+
+    // Carica high score da localStorage
+    let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
+    document.getElementById("highscore").innerText = `Record: ${highScore}`;
+
+    // Carica la lista Pokémon
     async function loadPokemonList() {
       try {
         const response = await fetch('pokemonList.json');
-        if (!response.ok) {
-          throw new Error('Errore nel caricare il file JSON');
-        }
+        if (!response.ok) throw new Error('Errore nel caricare il file JSON');
         pokemonList = await response.json();
-        startRound();  // Avvia il gioco una volta che i dati sono stati caricati
+        startRound();
       } catch (error) {
-        console.error('Errore nel caricare la lista dei Pokémon:', error);
+        console.error('Errore:', error);
         alert('Non è stato possibile caricare la lista dei Pokémon.');
       }
     }
@@ -95,12 +145,10 @@
       speed: "Velocità"
     };
 
-    // Ottieni Pokémon casuale
     function getRandomPokemon() {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    // Aggiorna la visualizzazione dei Pokémon
     function updatePokemonDisplay(player, opponent) {
       document.getElementById("player-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${player.name.toLowerCase()}.png`;
       document.getElementById("opponent-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${opponent.name.toLowerCase()}.png`;
@@ -108,58 +156,89 @@
       document.getElementById("opponent-name").innerText = opponent.name;
     }
 
-    // Scegli una statistica e confronta
     function getComparison(player, opponent) {
       const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
       const stat = stats[Math.floor(Math.random() * stats.length)];
-      const playerStat = player.stats[stat];
-      const opponentStat = opponent.stats[stat];
       return {
         stat,
-        playerStat,
-        opponentStat,
-        isGreater: playerStat > opponentStat
+        playerStat: player.stats[stat],
+        opponentStat: opponent.stats[stat],
+        isGreater: player.stats[stat] > opponent.stats[stat]
       };
     }
 
-    let score = 0;
-    let gameOver = false;
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 10;
+      document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
+
+      timer = setInterval(() => {
+        if (gameOver) {
+          clearInterval(timer);
+          return;
+        }
+        timeLeft--;
+        document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          triggerGameOver("Tempo scaduto!");
+        }
+      }, 1000);
+    }
 
     function handleAnswer(isGreater, comparison) {
       if (gameOver) return;
+
       const isCorrect = (isGreater && comparison.isGreater) || (!isGreater && !comparison.isGreater);
 
       if (isCorrect) {
         score++;
         document.getElementById("score").innerText = `Punteggio: ${score}`;
+        startRound();
       } else {
-        alert("Game Over! Hai sbagliato!");
-        gameOver = true;
+        triggerGameOver("Hai sbagliato!");
+      }
+    }
+
+    function triggerGameOver(reason) {
+      clearInterval(timer);
+      gameOver = true;
+
+      // Aggiorna high score
+      let newRecord = false;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        newRecord = true;
       }
 
-      if (!gameOver) startRound();
+      document.getElementById("finalScore").innerText = `Punteggio: ${score}`;
+      document.getElementById("highScoreMessage").innerText = newRecord ? "🎉 Nuovo record!" : `Record attuale: ${highScore}`;
+      document.getElementById("gameOverPopup").style.display = "flex";
     }
 
     function startRound() {
-      if (pokemonList.length === 0) {
-        console.error("Lista dei Pokémon non disponibile.");
-        return;
-      }
+      if (pokemonList.length === 0) return;
 
       const player = getRandomPokemon();
       const opponent = getRandomPokemon();
+      const comparison = getComparison(player, opponent);
 
       updatePokemonDisplay(player, opponent);
-
-      const comparison = getComparison(player, opponent);
       document.getElementById("comparison").innerText =
         `Il tuo ${player.name} ha più ${statNames[comparison.stat]} di ${opponent.name}?`;
 
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
+
+      startTimer();
     }
 
-    // Carica la lista dei Pokémon all'avvio della pagina
+    document.getElementById("closePopup").onclick = () => {
+      document.getElementById("gameOverPopup").style.display = "none";
+      location.reload(); // Ricarica la pagina
+    };
+
     loadPokemonList();
   </script>
 
