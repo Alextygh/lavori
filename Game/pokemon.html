@@ -121,7 +121,6 @@
     let lang = navigator.language.slice(0, 2); // rileva "it", "en", "fr", ecc.
 
     // Dizionario traduzioni
-    // 🌍 Traduzioni multilingua
 const translations = {
   it: {
     title: "Gioco Pokémon - Confronto Statistiche",
@@ -275,7 +274,7 @@ const translations = {
   }
 };
 
-    // Usa italiano come fallback
+    // Usa inglese come fallback
     const t = translations[lang] || translations.en;
 
     // Imposta testo in base alla lingua
@@ -389,18 +388,23 @@ const translations = {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    // Utility: normalizza il nome per la URL
-function normalizeName(name) {
-  return name
+    // Utility: normalizza solo per l'URL dell'immagine
+function getSpriteUrl(name) {
+  const normalized = name
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")  // remove punctuation
-    .replace(/\s+/g, "-");         // spaces to dash
+    .replace(/[^a-z0-9\s-]/g, "") // rimuove punteggiatura
+    .replace(/\s+/g, "-");        // spazi -> trattino
+  return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
 }
 
-
 function updatePokemonDisplay(player, opponent) {
-  const playerImg = `https://play.pokemonshowdown.com/sprites/gen5/${normalizeName(player.name)}.png`;
-  const opponentImg = `https://play.pokemonshowdown.com/sprites/gen5/${normalizeName(opponent.name)}.png`;
+  document.getElementById("player-sprite").src = getSpriteUrl(player.name);
+  document.getElementById("opponent-sprite").src = getSpriteUrl(opponent.name);
+
+  // Mantiene il nome originale leggibile
+  document.getElementById("player-name").innerText = player.name;
+  document.getElementById("opponent-name").innerText = opponent.name;
+}
 
   document.getElementById("player-sprite").src = playerImg;
   document.getElementById("opponent-sprite").src = opponentImg;
