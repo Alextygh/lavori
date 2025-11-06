@@ -152,7 +152,7 @@
   { "name": "Seaking", "id": 119, "stats": { "hp": 80, "attack": 92, "defense": 65, "spattack": 65, "spdefense": 80, "speed": 68 } },
   { "name": "Staryu", "id": 120, "stats": { "hp": 30, "attack": 45, "defense": 55, "spattack": 70, "spdefense": 55, "speed": 85 } },
   { "name": "Starmie", "id": 121, "stats": { "hp": 60, "attack": 75, "defense": 85, "spattack": 100, "spdefense": 85, "speed": 115 } },
-  { "name": "Mr-mime", "id": 122, "stats": { "hp": 40, "attack": 45, "defense": 65, "spattack": 100, "spdefense": 120, "speed": 90 } },
+  { "name": "Mrmime", "id": 122, "stats": { "hp": 40, "attack": 45, "defense": 65, "spattack": 100, "spdefense": 120, "speed": 90 } },
   { "name": "Scyther", "id": 123, "stats": { "hp": 70, "attack": 110, "defense": 80, "spattack": 55, "spdefense": 80, "speed": 105 } },
   { "name": "Jynx", "id": 124, "stats": { "hp": 65, "attack": 50, "defense": 35, "spattack": 115, "spdefense": 95, "speed": 95 } },
   { "name": "Electabuzz", "id": 125, "stats": { "hp": 65, "attack": 83, "defense": 57, "spattack": 95, "spdefense": 85, "speed": 105 } },
