@@ -69,12 +69,12 @@
   <script>
     // Lista Pokémon base (puoi ampliarla liberamente)
     const pokemonList = [
-      { name: "Bulbasaur", id: 1, stats: { hp: 45, attack: 49, defense: 49, speed: 45 } },
-      { name: "Charmander", id: 4, stats: { hp: 39, attack: 52, defense: 43, speed: 65 } },
-      { name: "Squirtle", id: 7, stats: { hp: 44, attack: 48, defense: 65, speed: 43 } },
-      { name: "Pikachu", id: 25, stats: { hp: 35, attack: 55, defense: 40, speed: 90 } },
-      { name: "Eevee", id: 133, stats: { hp: 55, attack: 55, defense: 50, speed: 55 } },
-      { name: "Jigglypuff", id: 39, stats: { hp: 115, attack: 45, defense: 20, speed: 20 } },
+      { name: "Bulbasaur", id: 1, stats: { hp: 45, attack: 49, defense: 49, spattack: 65, spdefense: 65, speed: 45 } },
+      { name: "Charmander", id: 4, stats: { hp: 39, attack: 52, defense: 43, spattack: 60, spdefense: 50, speed: 65 } },
+      { name: "Squirtle", id: 7, stats: { hp: 44, attack: 48, defense: 65, spattack: 50, spdefense: 64, speed: 43 } },
+      { name: "Pikachu", id: 25, stats: { hp: 35, attack: 55, defense: 40, spattack: 50, spdefense: 50, speed: 90 } },
+      { name: "Eevee", id: 133, stats: { hp: 55, attack: 55, defense: 50, spattack: 45, spdefense: 65, speed: 55 } },
+      { name: "Jigglypuff", id: 39, stats: { hp: 115, attack: 45, defense: 20, spattack: 45, spdefense: 25, speed: 20 } },
     ];
 
     const statNames = {
@@ -139,7 +139,7 @@
 
       const comparison = getComparison(player, opponent);
       document.getElementById("comparison").innerText =
-        `Il tuo ${player.name} ha lo stat ${statNames[comparison.stat]} maggiore di ${opponent.name}?`;
+        `Il tuo ${player.name} ha più ${statNames[comparison.stat]} di ${opponent.name}?`;
 
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
