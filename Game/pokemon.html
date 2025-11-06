@@ -78,7 +78,7 @@
 </head>
 <body>
 
-  <h1>Gioco Pokémon - Confronto Statistiche</h1>
+  <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
   <div id="score">Punteggio: 0</div>
   <div id="highscore"></div>
   <div id="timer">Tempo: 10s</div>
@@ -98,14 +98,14 @@
   <div id="comparison" class="stats" style="margin-top: 20px; font-size: 18px;"></div>
 
   <div class="options">
-    <button id="greater">Si</button>
+    <button id="greater">Sì</button>
     <button id="not-greater">No</button>
   </div>
 
   <!-- POPUP GAME OVER -->
   <div id="gameOverPopup">
     <div class="popup-content">
-      <h2>Game Over!</h2>
+      <h2 id="gameOverTitle">Game Over!</h2>
       <p id="finalScore"></p>
       <p id="highScoreMessage"></p>
       <button id="closePopup">Chiudi</button>
@@ -118,12 +118,261 @@
     let gameOver = false;
     let timer;
     let timeLeft = 10;
+    let lang = navigator.language.slice(0, 2); // rileva "it", "en", "fr", ecc.
+
+    // Dizionario traduzioni
+    // 🌍 Traduzioni multilingua
+const translations = {
+  it: {
+    title: "Gioco Pokémon - Confronto Statistiche",
+    score: "Punteggio",
+    record: "Record",
+    time: "Tempo",
+    yes: "Sì",
+    no: "No",
+    gameOver: "Game Over!",
+    newRecord: "🎉 Nuovo record!",
+    currentRecord: "Record attuale",
+    close: "Chiudi",
+    timeout: "Tempo scaduto!",
+    wrong: "Hai sbagliato!",
+    question: (p1, stat, p2) => `Il tuo ${p1} ha più ${stat} di ${p2}?`
+  },
+  en: {
+    title: "Pokémon Game - Stat Comparison",
+    score: "Score",
+    record: "High Score",
+    time: "Time",
+    yes: "Yes",
+    no: "No",
+    gameOver: "Game Over!",
+    newRecord: "🎉 New Record!",
+    currentRecord: "Current record",
+    close: "Close",
+    timeout: "Time’s up!",
+    wrong: "Wrong!",
+    question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?`
+  },
+  fr: {
+    title: "Jeu Pokémon - Comparaison de Statistiques",
+    score: "Score",
+    record: "Record",
+    time: "Temps",
+    yes: "Oui",
+    no: "Non",
+    gameOver: "Fin du jeu !",
+    newRecord: "🎉 Nouveau record !",
+    currentRecord: "Record actuel",
+    close: "Fermer",
+    timeout: "Temps écoulé !",
+    wrong: "Faux !",
+    question: (p1, stat, p2) => `Ton ${p1} a-t-il plus de ${stat} que ${p2} ?`
+  },
+  es: {
+    title: "Juego Pokémon - Comparación de Estadísticas",
+    score: "Puntuación",
+    record: "Récord",
+    time: "Tiempo",
+    yes: "Sí",
+    no: "No",
+    gameOver: "¡Fin del juego!",
+    newRecord: "🎉 ¡Nuevo récord!",
+    currentRecord: "Récord actual",
+    close: "Cerrar",
+    timeout: "¡Tiempo agotado!",
+    wrong: "¡Incorrecto!",
+    question: (p1, stat, p2) => `¿Tu ${p1} tiene más ${stat} que ${p2}?`
+  },
+  de: {
+    title: "Pokémon-Spiel – Statistikvergleich",
+    score: "Punkte",
+    record: "Rekord",
+    time: "Zeit",
+    yes: "Ja",
+    no: "Nein",
+    gameOver: "Spiel vorbei!",
+    newRecord: "🎉 Neuer Rekord!",
+    currentRecord: "Aktueller Rekord",
+    close: "Schließen",
+    timeout: "Zeit abgelaufen!",
+    wrong: "Falsch!",
+    question: (p1, stat, p2) => `Hat dein ${p1} mehr ${stat} als ${p2}?`
+  },
+  pt: {
+    title: "Jogo Pokémon - Comparação de Estatísticas",
+    score: "Pontuação",
+    record: "Recorde",
+    time: "Tempo",
+    yes: "Sim",
+    no: "Não",
+    gameOver: "Fim de jogo!",
+    newRecord: "🎉 Novo recorde!",
+    currentRecord: "Recorde atual",
+    close: "Fechar",
+    timeout: "Tempo esgotado!",
+    wrong: "Errado!",
+    question: (p1, stat, p2) => `Seu ${p1} tem mais ${stat} que ${p2}?`
+  },
+  ru: {
+    title: "Игра Покемон — Сравнение характеристик",
+    score: "Счёт",
+    record: "Рекорд",
+    time: "Время",
+    yes: "Да",
+    no: "Нет",
+    gameOver: "Игра окончена!",
+    newRecord: "🎉 Новый рекорд!",
+    currentRecord: "Текущий рекорд",
+    close: "Закрыть",
+    timeout: "Время вышло!",
+    wrong: "Неправильно!",
+    question: (p1, stat, p2) => `У твоего ${p1} больше ${stat}, чем у ${p2}?`
+  },
+  zh: {
+    title: "宝可梦游戏 - 属性对比",
+    score: "得分",
+    record: "最高分",
+    time: "时间",
+    yes: "是",
+    no: "否",
+    gameOver: "游戏结束！",
+    newRecord: "🎉 新纪录！",
+    currentRecord: "当前纪录",
+    close: "关闭",
+    timeout: "时间到！",
+    wrong: "错误！",
+    question: (p1, stat, p2) => `你的${p1}比${p2}的${stat}更高吗？`
+  },
+  ja: {
+    title: "ポケモンゲーム - ステータス比較",
+    score: "スコア",
+    record: "ハイスコア",
+    time: "時間",
+    yes: "はい",
+    no: "いいえ",
+    gameOver: "ゲームオーバー！",
+    newRecord: "🎉 新記録！",
+    currentRecord: "現在の記録",
+    close: "閉じる",
+    timeout: "時間切れ！",
+    wrong: "間違い！",
+    question: (p1, stat, p2) => `あなたの${p1}は${p2}より${stat}が高いですか？`
+  },
+  ko: {
+    title: "포켓몬 게임 - 능력치 비교",
+    score: "점수",
+    record: "기록",
+    time: "시간",
+    yes: "예",
+    no: "아니오",
+    gameOver: "게임 오버!",
+    newRecord: "🎉 새로운 기록!",
+    currentRecord: "현재 기록",
+    close: "닫기",
+    timeout: "시간 종료!",
+    wrong: "틀렸습니다!",
+    question: (p1, stat, p2) => `당신의 ${p1}가 ${p2}보다 ${stat}가 높습니까?`
+  }
+};
+
+    // Usa italiano come fallback
+    const t = translations[lang] || translations.en;
+
+    // Imposta testo in base alla lingua
+    document.getElementById("title").innerText = t.title;
+    document.getElementById("greater").innerText = t.yes;
+    document.getElementById("not-greater").innerText = t.no;
+    document.getElementById("gameOverTitle").innerText = t.gameOver;
+    document.getElementById("closePopup").innerText = t.close;
 
     // Carica high score da localStorage
     let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
-    document.getElementById("highscore").innerText = `Record: ${highScore}`;
+    document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
 
-    // Carica la lista Pokémon
+    // Stat names (multilingua)
+    const statNames = {
+  it: {
+    hp: "HP",
+    attack: "Attacco",
+    defense: "Difesa",
+    spattack: "Attacco Speciale",
+    spdefense: "Difesa Speciale",
+    speed: "Velocità"
+  },
+  en: {
+    hp: "HP",
+    attack: "Attack",
+    defense: "Defense",
+    spattack: "Sp. Attack",
+    spdefense: "Sp. Defense",
+    speed: "Speed"
+  },
+  fr: {
+    hp: "HP",
+    attack: "Attaque",
+    defense: "Défense",
+    spattack: "Attaque Spéciale",
+    spdefense: "Défense Spéciale",
+    speed: "Vitesse"
+  },
+  es: {
+    hp: "HP",
+    attack: "Ataque",
+    defense: "Defensa",
+    spattack: "At. Especial",
+    spdefense: "Def. Especial",
+    speed: "Velocidad"
+  },
+  de: {
+    hp: "HP",
+    attack: "Angriff",
+    defense: "Verteidigung",
+    spattack: "Spezial-Angriff",
+    spdefense: "Spezial-Verteidigung",
+    speed: "Initiative"
+  },
+  pt: {
+    hp: "HP",
+    attack: "Ataque",
+    defense: "Defesa",
+    spattack: "Ataque Especial",
+    spdefense: "Defesa Especial",
+    speed: "Velocidade"
+  },
+  ru: {
+    hp: "HP",
+    attack: "Атака",
+    defense: "Защита",
+    spattack: "Спец. Атака",
+    spdefense: "Спец. Защита",
+    speed: "Скорость"
+  },
+  zh: {
+    hp: "HP",
+    attack: "攻击",
+    defense: "防御",
+    spattack: "特攻",
+    spdefense: "特防",
+    speed: "速度"
+  },
+  ja: {
+    hp: "HP",
+    attack: "こうげき",
+    defense: "ぼうぎょ",
+    spattack: "とくこう",
+    spdefense: "とくぼう",
+    speed: "すばやさ"
+  },
+  ko: {
+    hp: "HP",
+    attack: "공격",
+    defense: "방어",
+    spattack: "특수공격",
+    spdefense: "특수방어",
+    speed: "스피드"
+  }
+  };
+
     async function loadPokemonList() {
       try {
         const response = await fetch('pokemonList.json');
@@ -135,15 +384,6 @@
         alert('Non è stato possibile caricare la lista dei Pokémon.');
       }
     }
-
-    const statNames = {
-      hp: "HP",
-      attack: "Attacco",
-      defense: "Difesa",
-      spattack: "Attacco Speciale",
-      spdefense: "Difesa Speciale",
-      speed: "Velocità"
-    };
 
     function getRandomPokemon() {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
@@ -170,7 +410,7 @@
     function startTimer() {
       clearInterval(timer);
       timeLeft = 10;
-      document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
+      document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
 
       timer = setInterval(() => {
         if (gameOver) {
@@ -178,25 +418,24 @@
           return;
         }
         timeLeft--;
-        document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
+        document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timer);
-          triggerGameOver("Tempo scaduto!");
+          triggerGameOver(t.timeout);
         }
       }, 1000);
     }
 
     function handleAnswer(isGreater, comparison) {
       if (gameOver) return;
-
       const isCorrect = (isGreater && comparison.isGreater) || (!isGreater && !comparison.isGreater);
 
       if (isCorrect) {
         score++;
-        document.getElementById("score").innerText = `Punteggio: ${score}`;
+        document.getElementById("score").innerText = `${t.score}: ${score}`;
         startRound();
       } else {
-        triggerGameOver("Hai sbagliato!");
+        triggerGameOver(t.wrong);
       }
     }
 
@@ -204,7 +443,6 @@
       clearInterval(timer);
       gameOver = true;
 
-      // Aggiorna high score
       let newRecord = false;
       if (score > highScore) {
         highScore = score;
@@ -212,8 +450,8 @@
         newRecord = true;
       }
 
-      document.getElementById("finalScore").innerText = `Punteggio: ${score}`;
-      document.getElementById("highScoreMessage").innerText = newRecord ? "🎉 Nuovo record!" : `Record attuale: ${highScore}`;
+      document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
+      document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${highScore}`;
       document.getElementById("gameOverPopup").style.display = "flex";
     }
 
@@ -225,8 +463,8 @@
       const comparison = getComparison(player, opponent);
 
       updatePokemonDisplay(player, opponent);
-      document.getElementById("comparison").innerText =
-        `Il tuo ${player.name} ha più ${statNames[comparison.stat]} di ${opponent.name}?`;
+      const statLabel = statNames[lang]?.[comparison.stat] || statNames.it[comparison.stat];
+      document.getElementById("comparison").innerText = t.question(player.name, statLabel, opponent.name);
 
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
@@ -236,7 +474,7 @@
 
     document.getElementById("closePopup").onclick = () => {
       document.getElementById("gameOverPopup").style.display = "none";
-      location.reload(); // Ricarica la pagina
+      location.reload();
     };
 
     loadPokemonList();
