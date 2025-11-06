@@ -6,6 +6,7 @@
 </head>
 <body>
 <h2>Calcolo subnet mask da prefix</h2>
+
 <input type="number" id="prefix" placeholder="Inserisci prefix (0-32)">
 <button onclick="genera()">Genera</button>
 
@@ -13,25 +14,25 @@
 
 <script>
 function genera() {
-  let prefix = Number(document.getElementById("prefix").value);
+  var prefix = Number(document.getElementById("prefix").value);
 
   if (prefix < 0 || prefix > 32 || isNaN(prefix)) {
     document.getElementById("risultato").innerHTML = "Prefix non valido";
     return;
   }
 
-  let ottettiPieni = Math.floor(prefix / 8);
-  let resto = prefix % 8;
+  // Calcolo subnet mask in binario
+  var ottettiPieni = Math.floor(prefix / 8);
+  var resto = prefix % 8;
+  var mask = [];
 
-  let mask = [];
-
-  for (let i = 0; i < ottettiPieni; i++) {
+  for (var i = 0; i < ottettiPieni; i++) {
     mask.push("11111111");
   }
 
   if (resto > 0) {
-    let parziale = "";
-    for (let i = 0; i < 8; i++) {
+    var parziale = "";
+    for (var i = 0; i < 8; i++) {
       if (i < resto) parziale += "1";
       else parziale += "0";
     }
@@ -42,8 +43,23 @@ function genera() {
     mask.push("00000000");
   }
 
-  document.getElementById("risultato").innerHTML =
-    "Subnet mask in binario: " + mask.join(".");
+  var suffix = 32 - prefix;
+  var numHost = suffix === 0 ? 1 : Math.pow(2, suffix) - 2;
+
+  var maskDecimale = "";
+  for (var j = 0; j < mask.length; j++) {
+    maskDecimale += parseInt(mask[j], 2);
+    if (j < mask.length - 1) maskDecimale += ".";
+  }
+
+  var output = "<b>Prefix:</b> /" + prefix + "<br>" +
+               "<b>Subnet mask (binario):</b> " + mask.join(".") + "<br>" +
+               "<b>Subnet mask (decimale):</b> " + maskDecimale + "<br>" +
+               "<b>Suffix:</b> " + suffix + "<br>" +
+               "<b>Numero di host:</b> 2<sup>" + suffix + "</sup> - 2 = " + numHost + "<br>" +
+               "<b>Espressione calcolo:</b> Math.pow(2, " + suffix + ") - 2 = " + numHost;
+
+  document.getElementById("risultato").innerHTML = output;
 }
 </script>
 </body>
