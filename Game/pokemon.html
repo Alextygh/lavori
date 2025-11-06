@@ -389,12 +389,25 @@ const translations = {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    function updatePokemonDisplay(player, opponent) {
-      document.getElementById("player-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${player.name.toLowerCase()}.png`;
-      document.getElementById("opponent-sprite").src = `https://play.pokemonshowdown.com/sprites/gen5/${opponent.name.toLowerCase()}.png`;
-      document.getElementById("player-name").innerText = player.name;
-      document.getElementById("opponent-name").innerText = opponent.name;
-    }
+    // Utility: normalizza il nome per la URL
+function normalizeName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")  // remove punctuation
+    .replace(/\s+/g, "-");         // spaces to dash
+}
+
+
+function updatePokemonDisplay(player, opponent) {
+  const playerImg = `https://play.pokemonshowdown.com/sprites/gen5/${normalizeName(player.name)}.png`;
+  const opponentImg = `https://play.pokemonshowdown.com/sprites/gen5/${normalizeName(opponent.name)}.png`;
+
+  document.getElementById("player-sprite").src = playerImg;
+  document.getElementById("opponent-sprite").src = opponentImg;
+  document.getElementById("player-name").innerText = player.name;
+  document.getElementById("opponent-name").innerText = opponent.name;
+}
+
 
     function getComparison(player, opponent) {
       const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
