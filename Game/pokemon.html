@@ -74,7 +74,6 @@
       font-weight: bold;
       white-space: pre-wrap;
     }
-    /* small responsive tweak */
     @media (max-width: 480px) {
       .container { flex-direction: column; gap: 10px; }
       #gameOverPopup .popup-content { width: 90%; max-width: none; }
@@ -107,7 +106,6 @@
     <button id="not-greater">No</button>
   </div>
 
-  <!-- POPUP GAME OVER -->
   <div id="gameOverPopup">
     <div class="popup-content">
       <h2 id="gameOverTitle">Game Over!</h2>
@@ -124,79 +122,37 @@
     let gameOver = false;
     let timer;
     let timeLeft = 10;
-    // detect first two letters of language (e.g. "it", "en")
-    let lang = navigator.language ? navigator.language.slice(0,2) : "en";
-
-    // TRANSLATIONS
-    const translations = {
-      it: {
-        title: "Gioco Pokémon - Confronto Statistiche",
-        score: "Punteggio",
-        record: "Record",
-        time: "Tempo",
-        yes: "Sì",
-        no: "No",
-        gameOver: "Game Over!",
-        newRecord: "🎉 Nuovo record!",
-        currentRecord: "Record attuale",
-        close: "Chiudi",
-        timeout: "Tempo scaduto!",
-        wrong: "Hai sbagliato!",
-        question: (p1, stat, p2) => `Il tuo ${p1} ha più ${stat} di ${p2}?`
-      },
-      en: {
-        title: "Pokémon Game - Stat Comparison",
-        score: "Score",
-        record: "High Score",
-        time: "Time",
-        yes: "Yes",
-        no: "No",
-        gameOver: "Game Over!",
-        newRecord: "🎉 New Record!",
-        currentRecord: "Current record",
-        close: "Close",
-        timeout: "Time’s up!",
-        wrong: "Wrong!",
-        question: (p1, stat, p2) => `Does your ${p1} have more ${stat} than ${p2}?`
-      },
-      es: {
-        title: "Juego Pokémon - Comparar Stats",
-        score: "Puntuación",
-        record: "Récord",
-        time: "Tiempo",
-        yes: "Sí",
-        no: "No",
-        gameOver: "¡Fin del juego!",
-        newRecord: "🎉 ¡Nuevo récord!",
-        currentRecord: "Récord actual",
-        close: "Cerrar",
-        timeout: "¡Se acabó el tiempo!",
-        wrong: "¡Incorrecto!",
-        question: (p1, stat, p2) => `¿Tu ${p1} tiene más ${stat} que ${p2}?`
-      }
-    };
-
-    // stat name translations (fallback to English)
-    const statNames = {
-      it: { hp: "HP", attack: "Attacco", defense: "Difesa", spattack: "Attacco Speciale", spdefense: "Difesa Speciale", speed: "Velocità" },
-      en: { hp: "HP", attack: "Attack", defense: "Defense", spattack: "Sp. Attack", spdefense: "Sp. Defense", speed: "Speed" },
-      es: { hp: "HP", attack: "Ataque", defense: "Defensa", spattack: "Atq. Esp.", spdefense: "Def. Esp.", speed: "Velocidad" }
-    };
-
-    // choose translation set (fallback to English)
-    const t = translations[lang] || translations.en;
-
-    // initialize UI text
-    document.getElementById("title").innerText = t.title;
-    document.getElementById("greater").innerText = t.yes;
-    document.getElementById("not-greater").innerText = t.no;
-    document.getElementById("gameOverTitle").innerText = t.gameOver;
-    document.getElementById("closePopup").innerText = t.close;
-
-    // high score
+    let translations = {};
+    let statNames = {};
+    let t = {};
+    let lang = navigator.language ? navigator.language.slice(0, 2) : "en";
     let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
-    document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
-    document.getElementById("score").innerText = `${t.score}: ${score}`;
+
+    async function loadTranslations() {
+      try {
+        const response = await fetch('translations.json');
+        if (!response.ok) throw new Error('Errore nel caricare le traduzioni');
+        const data = await response.json();
+        translations = data;
+        statNames = data.statNames || {};
+        t = translations[lang] || translations.en;
+        initUI();
+        loadPokemonList();
+      } catch (error) {
+        console.error('Errore nel caricamento delle traduzioni:', error);
+        alert('Impossibile caricare il file delle traduzioni.');
+      }
+    }
+
+    function initUI() {
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("greater").innerText = t.yes;
+      document.getElementById("not-greater").innerText = t.no;
+      document.getElementById("gameOverTitle").innerText = t.gameOver;
+      document.getElementById("closePopup").innerText = t.close;
+      document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
+      document.getElementById("score").innerText = `${t.score}: ${score}`;
+    }
 
     async function loadPokemonList() {
       try {
@@ -214,12 +170,8 @@
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
-    // builds sprite url; adjust normalization rules if needed
     function getSpriteUrl(name) {
-      const normalized = name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
+      const normalized = name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
       return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
     }
 
@@ -257,7 +209,6 @@
         document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timer);
-          // timeouts do not provide comparison (you could change this if you want)
           triggerGameOver(t.timeout, null);
         }
       }, 1000);
@@ -271,7 +222,6 @@
         document.getElementById("score").innerText = `${t.score}: ${score}`;
         startRound();
       } else {
-        // pass comparison so Game Over can show details
         triggerGameOver(t.wrong, comparison);
       }
     }
@@ -292,16 +242,12 @@
 
       const wrongEl = document.getElementById("wrongDetails");
       if (comparison) {
-        // prefer stat names for current language; fallback to English if missing
         const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
-        // Decide winner marker and delta
         const playerVal = comparison.playerStat;
         const oppVal = comparison.opponentStat;
         const diff = Math.abs(playerVal - oppVal);
         const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? comparison.playerName : comparison.opponentName);
 
-        // use translation for 'wrong' as heading and then list detailed lines.
-        // For neatness, each line on its own (pre-wrap CSS set above).
         const detailsLines = [
           reason,
           `${comparison.playerName}: ${playerVal} ${statLabel}`,
@@ -311,7 +257,6 @@
 
         wrongEl.innerText = detailsLines.join("\n");
       } else {
-        // no comparison (e.g. timeout without a chosen comparison)
         wrongEl.innerText = reason;
       }
 
@@ -320,12 +265,10 @@
 
     function startRound() {
       if (pokemonList.length === 0) return;
-      // reset possible gameOver flag in case of restart
       gameOver = false;
 
       const player = getRandomPokemon();
       let opponent = getRandomPokemon();
-      // ensure opponent is not the same object (if list has >1)
       if (pokemonList.length > 1) {
         while (opponent.name === player.name) {
           opponent = getRandomPokemon();
@@ -335,27 +278,26 @@
       const comparison = getComparison(player, opponent);
       updatePokemonDisplay(player, opponent);
 
-      // stat label resolution: prefer current language, then english
       const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
-      document.getElementById("comparison").innerText = t.question(player.name, statLabel, opponent.name);
+      const question = lang === "it"
+        ? `Il tuo ${player.name} ha più ${statLabel} di ${opponent.name}?`
+        : lang === "es"
+          ? `¿Tu ${player.name} tiene más ${statLabel} que ${opponent.name}?`
+          : `Does your ${player.name} have more ${statLabel} than ${opponent.name}?`;
 
-      // attach handlers with the current comparison object
+      document.getElementById("comparison").innerText = question;
+
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
-
-      // restart timer for this round
       startTimer();
     }
 
     document.getElementById("closePopup").onclick = () => {
       document.getElementById("gameOverPopup").style.display = "none";
-      // reload to start fresh (keeps high score in localStorage)
       location.reload();
     };
 
-    // start
-    loadPokemonList();
+    loadTranslations();
   </script>
-
 </body>
 </html>
