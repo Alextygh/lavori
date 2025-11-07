@@ -63,7 +63,7 @@
   { "name": "Venonat", "id": 48, "stats": { "hp": 60, "attack": 55, "defense": 50, "spattack": 40, "spdefense": 55, "speed": 45 } },
   { "name": "Venomoth", "id": 49, "stats": { "hp": 70, "attack": 65, "defense": 60, "spattack": 90, "spdefense": 75, "speed": 90 } },
   { "name": "Diglett", "id": 50, "stats": { "hp": 10, "attack": 55, "defense": 25, "spattack": 35, "spdefense": 45, "speed": 95 } },
-  { "name": "Diglett Alola", "id": 1039, "stats": { "hp": 10, "attack": 55, "defense": 30, "spattack": 35, "spdefense": 45, "speed": 90 } },
+  { "name": "Diglett Alola", "id": 50.1, "stats": { "hp": 10, "attack": 55, "defense": 30, "spattack": 35, "spdefense": 45, "speed": 90 } },
   { "name": "Dugtrio", "id": 51, "stats": { "hp": 35, "attack": 100, "defense": 50, "spattack": 50, "spdefense": 70, "speed": 100 } },
   { "name": "Dugtrio Alola", "id": 51.1, "stats": { "hp": 35, "attack": 100, "defense": 60, "spattack": 50, "spdefense": 70, "speed": 110 } },
   { "name": "Meowth", "id": 52, "stats": { "hp": 40, "attack": 45, "defense": 35, "spattack": 40, "spdefense": 40, "speed": 90 } },
