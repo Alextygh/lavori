@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Controllo Immagini Pokémon</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    #search {
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      justify-items: center;
+    }
+    .pokemon {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 110px;
+      transition: transform 0.2s;
+    }
+    .pokemon:hover {
+      transform: scale(1.05);
+    }
+    .pokemon img {
+      width: 80px;
+      height: 80px;
+      image-rendering: pixelated;
+    }
+    .broken {
+      border: 2px solid red;
+      background-color: #ffe5e5;
+    }
+    .pokemon-name {
+      margin-top: 8px;
+      font-size: 14px;
+      word-wrap: break-word;
+    }
+    #loading {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧩 Controllo Immagini Pokémon</h1>
+  <input type="text" id="search" placeholder="Cerca Pokémon...">
+  <div id="loading">Caricamento in corso...</div>
+  <div id="pokemonGrid" class="grid"></div>
+
+  <script>
+    const grid = document.getElementById('pokemonGrid');
+    const searchInput = document.getElementById('search');
+    const loadingText = document.getElementById('loading');
+    let pokemonList = [];
+
+    function getSpriteUrl(name) {
+      const normalized = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
+      return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
+    }
+
+    async function loadPokemonList() {
+      try {
+        const response = await fetch('pokemonList.json');
+        if (!response.ok) throw new Error('Errore nel caricare pokemonList.json');
+        pokemonList = await response.json();
+        displayPokemon(pokemonList);
+      } catch (err) {
+        loadingText.textContent = "Errore nel caricamento del file JSON.";
+        console.error(err);
+      }
+    }
+
+    function displayPokemon(list) {
+      grid.innerHTML = '';
+      loadingText.style.display = 'none';
+
+      list.forEach(pokemon => {
+        const div = document.createElement('div');
+        div.className = 'pokemon';
+        
+        const img = document.createElement('img');
+        img.src = getSpriteUrl(pokemon.name);
+        img.alt = pokemon.name;
+        
+        // if image fails to load
+        img.onerror = () => {
+          div.classList.add('broken');
+          img.src = 'https://via.placeholder.com/80x80?text=❌';
+        };
+
+        const name = document.createElement('div');
+        name.className = 'pokemon-name';
+        name.textContent = pokemon.name;
+
+        div.appendChild(img);
+        div.appendChild(name);
+        grid.appendChild(div);
+      });
+    }
+
+    // Filter Pokémon by search
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase();
+      const filtered = pokemonList.filter(p => p.name.toLowerCase().includes(term));
+      displayPokemon(filtered);
+    });
+
+    loadPokemonList();
+  </script>
+</body>
+</html>
