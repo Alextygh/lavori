@@ -1,0 +1,49 @@
+{
+  "it": {
+    "title": "Gioco Pokémon - Confronto Statistiche",
+    "score": "Punteggio",
+    "record": "Record",
+    "time": "Tempo",
+    "yes": "Sì",
+    "no": "No",
+    "gameOver": "Game Over!",
+    "newRecord": "🎉 Nuovo record!",
+    "currentRecord": "Record attuale",
+    "close": "Chiudi",
+    "timeout": "Tempo scaduto!",
+    "wrong": "Hai sbagliato!"
+  },
+  "en": {
+    "title": "Pokémon Game - Stat Comparison",
+    "score": "Score",
+    "record": "High Score",
+    "time": "Time",
+    "yes": "Yes",
+    "no": "No",
+    "gameOver": "Game Over!",
+    "newRecord": "🎉 New Record!",
+    "currentRecord": "Current record",
+    "close": "Close",
+    "timeout": "Time’s up!",
+    "wrong": "Wrong!"
+  },
+  "es": {
+    "title": "Juego Pokémon - Comparar Stats",
+    "score": "Puntuación",
+    "record": "Récord",
+    "time": "Tiempo",
+    "yes": "Sí",
+    "no": "No",
+    "gameOver": "¡Fin del juego!",
+    "newRecord": "🎉 ¡Nuevo récord!",
+    "currentRecord": "Récord actual",
+    "close": "Cerrar",
+    "timeout": "¡Se acabó el tiempo!",
+    "wrong": "¡Incorrecto!"
+  },
+  "statNames": {
+    "it": { "hp": "HP", "attack": "Attacco", "defense": "Difesa", "spattack": "Attacco Speciale", "spdefense": "Difesa Speciale", "speed": "Velocità" },
+    "en": { "hp": "HP", "attack": "Attack", "defense": "Defense", "spattack": "Sp. Attack", "spdefense": "Sp. Defense", "speed": "Speed" },
+    "es": { "hp": "HP", "attack": "Ataque", "defense": "Defensa", "spattack": "Atq. Esp.", "spdefense": "Def. Esp.", "speed": "Velocidad" }
+  }
+}
