@@ -76,8 +76,17 @@
     function getSpriteUrl(name) {
       const normalized = name
         .toLowerCase()
+        .normalize("NFD") // split accented characters (é → e +  ́)
+        .replace(/[\u0300-\u036f]/g, "") // remove accents
+        // remove special invisible Unicode control/format chars (LTR, RTL, NBSP, ZWSP, etc.)
+        .replace(/[\u200B-\u200F\uFEFF\u00A0]/g, "")
+        // remove everything except letters, digits, spaces, and dashes
         .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
+        // replace regular spaces (only real ASCII ones) with a dash
+        .replace(/ /g, "-")
+        .replace(/-+/g, "-") // collapse multiple dashes
+        .trim();
+
       return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
     }
 
