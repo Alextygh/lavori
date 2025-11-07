@@ -1,35 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lavori</title>
+
     <style>
-      body{background-color: #d5afe9};
+      /* Make sure body covers the full screen and scales properly */
+      body {
+        background-color: #d5afe9;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        text-align: center;
+      }
+
+      h1 {
+        margin-top: 40px;
+        font-size: 2rem;
+        color: #333;
+      }
+
+      a {
+        display: block;
+        margin: 10px 0;
+        font-size: 1.2rem;
+        color: #2a2a2a;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      a:hover {
+        color: #4b0082;
+      }
+
+      /* Make text scale nicely on smaller screens */
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        a {
+          font-size: 1rem;
+        }
+      }
     </style>
   </head>
+
   <body>
     <script>
-      if (Math.random() < 0.0006904) document.body.style.background = "#64ccf3";
+      if (Math.random() < 0.0006904) {
+        document.body.style.background = "#64ccf3";
+      }
     </script>
-    <h1> Lavori </h1> <br>
-  <a href="https://alextygh.github.io/lavori/anagrafica_1.0.html">
-    Anagrafica 1.0
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/anagrafica_1.1.html">
-    Anagrafica 1.1
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/index (1).html">
-    Convertitore Decimale
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/google.html">
-    Google
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/Game/pokemon.html">
-    Pokémon
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/subnet_binaria.html">
-    Subnet Binaria
-  </a><br>
-  <a href="https://alextygh.github.io/lavori/subnet_mask_host.html">
-    Subnet Binaria Host
-  </a><br>
-</body>
+
+    <h1>Lavori</h1>
+
+    <a href="https://alextygh.github.io/lavori/anagrafica_1.0.html">Anagrafica 1.0</a>
+    <a href="https://alextygh.github.io/lavori/anagrafica_1.1.html">Anagrafica 1.1</a>
+    <a href="https://alextygh.github.io/lavori/index (1).html">Convertitore Decimale</a>
+    <a href="https://alextygh.github.io/lavori/google.html">Google</a>
+    <a href="https://alextygh.github.io/lavori/Game/pokemon.html">Pokémon</a>
+    <a href="https://alextygh.github.io/lavori/subnet_binaria.html">Subnet Binaria</a>
+    <a href="https://alextygh.github.io/lavori/subnet_mask_host.html">Subnet Binaria Host</a>
+  </body>
 </html>
