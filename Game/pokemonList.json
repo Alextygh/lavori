@@ -535,7 +535,7 @@
   { "name": "Bronzor", "id": 436, "stats": { "hp": 57, "attack": 24, "defense": 86, "spattack": 24, "spdefense": 86, "speed": 23 } },
   { "name": "Bronzong", "id": 437, "stats": { "hp": 67, "attack": 89, "defense": 116, "spattack": 79, "spdefense": 116, "speed": 33 } },
   { "name": "Bonsly", "id": 438, "stats": { "hp": 50, "attack": 80, "defense": 95, "spattack": 10, "spdefense": 45, "speed": 10 } },
-  { "name": "MimeJr.", "id": 439, "stats": { "hp": 20, "attack": 25, "defense": 45, "spattack": 70, "spdefense": 90, "speed": 60 } },
+  { "name": "Mime‎ Jr.", "id": 439, "stats": { "hp": 20, "attack": 25, "defense": 45, "spattack": 70, "spdefense": 90, "speed": 60 } },
   { "name": "Happiny", "id": 440, "stats": { "hp": 100, "attack": 5, "defense": 5, "spattack": 15, "spdefense": 65, "speed": 30 } },
   { "name": "Chatot", "id": 441, "stats": { "hp": 76, "attack": 65, "defense": 45, "spattack": 92, "spdefense": 42, "speed": 91 } },
   { "name": "Spiritomb", "id": 442, "stats": { "hp": 50, "attack": 92, "defense": 108, "spattack": 92, "spdefense": 108, "speed": 35 } },
