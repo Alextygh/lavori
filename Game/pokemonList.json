@@ -6,7 +6,7 @@
   { "name": "Charmander", "id": 4, "stats": { "hp": 39, "attack": 52, "defense": 43, "spattack": 60, "spdefense": 50, "speed": 65 } },
   { "name": "Charmeleon", "id": 5, "stats": { "hp": 58, "attack": 64, "defense": 58, "spattack": 80, "spdefense": 65, "speed": 80 } },
   { "name": "Charizard", "id": 6, "stats": { "hp": 78, "attack": 84, "defense": 78, "spattack": 109, "spdefense": 85, "speed": 100 } },
-  { "name": "Charizard Mega‎‎ X", "id": 6.1, "stats": { "hp": 78, "attack": 130, "defense": 111, "spattack": 130, "spdefense": 85, "speed": 100 } },
+  { "name": "Charizard Mega‎‎X", "id": 6.1, "stats": { "hp": 78, "attack": 130, "defense": 111, "spattack": 130, "spdefense": 85, "speed": 100 } },
   { "name": "Charizard Mega‎‎ Y", "id": 6.2, "stats": { "hp": 78, "attack": 104, "defense": 78, "spattack": 159, "spdefense": 115, "speed": 100 } },
   { "name": "Squirtle", "id": 7, "stats": { "hp": 44, "attack": 48, "defense": 65, "spattack": 50, "spdefense": 64, "speed": 43 } },
   { "name": "Wartortle", "id": 8, "stats": { "hp": 59, "attack": 63, "defense": 80, "spattack": 65, "spdefense": 80, "speed": 58 } },
