@@ -1,40 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title id="settingsTitle">Settings</title>
   <style>
-    :root {
-      --bg: #f5f5f5;
-      --text: #000;
-    }
-
     body {
       font-family: Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: #f5f5f5;
+      color: #000;
       text-align: center;
       padding: 30px;
-      margin: 0;
-      transition: background 0.3s, color 0.3s;
     }
-
     body.dark {
-      --bg: #121212;
-      --text: #fff;
+      background-color: #121212;
+      color: #fff;
     }
-
     select, button {
       padding: 10px 20px;
       font-size: 16px;
       margin: 10px;
     }
-
     .section {
       margin-bottom: 30px;
     }
-
     #flag {
       width: 30px;
       height: 20px;
@@ -42,7 +31,6 @@
       margin-left: 10px;
       border: 1px solid #ccc;
     }
-
     #backBtn {
       margin-top: 40px;
       padding: 10px 25px;
@@ -90,16 +78,15 @@
   <button id="backBtn">Back to Game</button>
 
   <script>
-    // --- ELEMENTS ---
     const themeSelect = document.getElementById("themeSelect");
     const diffSelect = document.getElementById("difficultySelect");
     const langSelect = document.getElementById("languageSelect");
     const flag = document.getElementById("flag");
 
-    // --- LOAD SAVED SETTINGS ---
+    // load saved values or defaults
     const savedTheme = localStorage.getItem("theme") || "system";
     const savedDiff = localStorage.getItem("difficulty") || "easy";
-    const savedLang = localStorage.getItem("lang") || "en";
+    const savedLang = localStorage.getItem("lang") || (navigator.language ? navigator.language.slice(0,2) : "en");
 
     themeSelect.value = savedTheme;
     diffSelect.value = savedDiff;
@@ -107,7 +94,6 @@
     updateFlag(savedLang);
     applyTheme(savedTheme);
 
-    // --- EVENT LISTENERS ---
     themeSelect.addEventListener("change", () => {
       const val = themeSelect.value;
       localStorage.setItem("theme", val);
@@ -119,16 +105,16 @@
     });
 
     langSelect.addEventListener("change", () => {
-      const lang = langSelect.value;
-      localStorage.setItem("lang", lang);
-      updateFlag(lang);
+      const newLang = langSelect.value;
+      localStorage.setItem("lang", newLang);
+      updateFlag(newLang);
     });
 
     document.getElementById("backBtn").onclick = () => {
-      window.location.href = "beta.html";
+      // return to index (index will read stored settings)
+      window.location.href = "index.html";
     };
 
-    // --- HELPERS ---
     function updateFlag(lang) {
       const flags = {
         en: "https://flagcdn.com/gb.svg",
@@ -142,8 +128,17 @@
       if (theme === "dark") document.body.classList.add("dark");
       else if (theme === "light") document.body.classList.remove("dark");
       else if (theme === "system") {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         document.body.classList.toggle("dark", prefersDark);
+        if (window.matchMedia) {
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener
+            ? window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', e => {
+                document.body.classList.toggle("dark", e.matches);
+              })
+            : window.matchMedia("(prefers-color-scheme: dark)").addListener(e => {
+                document.body.classList.toggle("dark", e.matches);
+              });
+        }
       }
     }
   </script>
