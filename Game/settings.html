@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="settingsTitle">Settings</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --text: #000;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #fff;
+    }
+
+    select, button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    #flag {
+      width: 30px;
+      height: 20px;
+      vertical-align: middle;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+    }
+
+    #backBtn {
+      margin-top: 40px;
+      padding: 10px 25px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="settingsHeader">⚙️ Settings</h1>
+
+  <!-- Difficulty -->
+  <div class="section">
+    <h2 id="difficultyLabel">Difficulty</h2>
+    <select id="difficultySelect">
+      <option value="easy" id="diffEasy">Easy</option>
+      <option value="normal" id="diffNormal">Normal</option>
+      <option value="hard" id="diffHard">Hard</option>
+      <option value="extreme" id="diffExtreme">Extreme</option>
+    </select>
+  </div>
+
+  <!-- Theme -->
+  <div class="section">
+    <h2 id="themeLabel">Theme</h2>
+    <select id="themeSelect">
+      <option value="light" id="themeLight">Light Mode</option>
+      <option value="dark" id="themeDark">Dark Mode</option>
+      <option value="system" id="themeSystem">System Setting</option>
+    </select>
+  </div>
+
+  <!-- Language -->
+  <div class="section">
+    <h2 id="languageLabel">Language</h2>
+    <select id="languageSelect">
+      <option value="en" id="langEn">English</option>
+      <option value="it" id="langIt">Italiano</option>
+      <option value="es" id="langEs">Español</option>
+    </select>
+    <img id="flag" src="https://flagcdn.com/gb.svg" alt="Flag">
+  </div>
+
+  <button id="backBtn">Back to Game</button>
+
+  <script>
+    // --- ELEMENTS ---
+    const themeSelect = document.getElementById("themeSelect");
+    const diffSelect = document.getElementById("difficultySelect");
+    const langSelect = document.getElementById("languageSelect");
+    const flag = document.getElementById("flag");
+
+    // --- LOAD SAVED SETTINGS ---
+    const savedTheme = localStorage.getItem("theme") || "system";
+    const savedDiff = localStorage.getItem("difficulty") || "easy";
+    const savedLang = localStorage.getItem("lang") || "en";
+
+    themeSelect.value = savedTheme;
+    diffSelect.value = savedDiff;
+    langSelect.value = savedLang;
+    updateFlag(savedLang);
+    applyTheme(savedTheme);
+
+    // --- EVENT LISTENERS ---
+    themeSelect.addEventListener("change", () => {
+      const val = themeSelect.value;
+      localStorage.setItem("theme", val);
+      applyTheme(val);
+    });
+
+    diffSelect.addEventListener("change", () => {
+      localStorage.setItem("difficulty", diffSelect.value);
+    });
+
+    langSelect.addEventListener("change", () => {
+      const lang = langSelect.value;
+      localStorage.setItem("lang", lang);
+      updateFlag(lang);
+    });
+
+    document.getElementById("backBtn").onclick = () => {
+      window.location.href = "index.html";
+    };
+
+    // --- HELPERS ---
+    function updateFlag(lang) {
+      const flags = {
+        en: "https://flagcdn.com/gb.svg",
+        it: "https://flagcdn.com/it.svg",
+        es: "https://flagcdn.com/es.svg"
+      };
+      flag.src = flags[lang] || flags.en;
+    }
+
+    function applyTheme(theme) {
+      if (theme === "dark") document.body.classList.add("dark");
+      else if (theme === "light") document.body.classList.remove("dark");
+      else if (theme === "system") {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.body.classList.toggle("dark", prefersDark);
+      }
+    }
+  </script>
+</body>
+</html>
