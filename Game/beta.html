@@ -1,150 +1,377 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title id="title">Pokémon Game - Stat Comparison</title>
+  <title>Pokémon Game - Stat Comparison</title>
   <style>
-    :root {
-      --bg: #f5f5f5;
-      --text: #000;
-    }
-
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background-color: var(--bg);
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-      margin: 0;
-      padding: 0;
+      background-color: #f5f5f5;
     }
-
     body.dark {
-      --bg: #121212;
-      --text: #fff;
+      background-color: #121212;
+      color: #fff;
     }
-
-    #settingsBtn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: none;
-      border: none;
-      font-size: 26px;
-      cursor: pointer;
-      color: var(--text);
-    }
-
     h1 {
       color: #ffcc00;
-      margin-top: 50px;
     }
-
     .container {
       display: flex;
       justify-content: center;
       gap: 50px;
       margin-top: 30px;
     }
-
+    .pokemon {
+      text-align: center;
+    }
     .pokemon img {
       width: 100px;
       height: 100px;
       image-rendering: pixelated;
     }
-
+    .options {
+      margin-top: 20px;
+    }
     .options button {
       margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
     }
-
-    #score, #highscore, #timer {
+    #score, #highscore {
       font-size: 20px;
+      margin-top: 15px;
+    }
+    #gameOverPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    #gameOverPopup .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 360px;
+    }
+    #gameOverPopup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #timer {
+      font-size: 22px;
+      color: #d32f2f;
+      margin-top: 15px;
+    }
+    #wrongDetails {
       margin-top: 10px;
+      font-weight: bold;
+      white-space: pre-wrap;
+    }
+
+    /* settings button top-right */
+    #settingsBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
     }
 
     @media (max-width: 480px) {
       .container { flex-direction: column; gap: 10px; }
+      #gameOverPopup .popup-content { width: 90%; max-width: none; }
       .pokemon img { width: 80px; height: 80px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Settings button (opens settings page) -->
   <button id="settingsBtn" title="Settings">⚙️</button>
 
-  <h1 id="gameTitle">Pokémon Game - Stat Comparison</h1>
-  <div id="score">Score: 0</div>
-  <div id="highscore">High Score: 0</div>
-  <div id="timer">Time: 10s</div>
+  <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
+  <div id="score">Punteggio: 0</div>
+  <div id="highscore"></div>
+  <div id="timer">Tempo: 10s</div>
 
   <div class="container">
     <div id="player" class="pokemon">
-      <img id="player-sprite" src="https://play.pokemonshowdown.com/sprites/gen5/pikachu.png" alt="Pokémon">
-      <div id="player-name">Pikachu</div>
+      <img id="player-sprite" src="" alt="Pokémon">
+      <div id="player-name"></div>
     </div>
     <div id="opponent" class="pokemon">
-      <img id="opponent-sprite" src="https://play.pokemonshowdown.com/sprites/gen5/charizard.png" alt="Pokémon">
-      <div id="opponent-name">Charizard</div>
+      <img id="opponent-sprite" src="" alt="Pokémon">
+      <div id="opponent-name"></div>
     </div>
   </div>
 
+  <div id="comparison" class="stats" style="margin-top: 20px; font-size: 18px;"></div>
+
   <div class="options">
-    <button id="greater">Yes</button>
+    <button id="greater">Sì</button>
     <button id="not-greater">No</button>
   </div>
 
+  <div id="gameOverPopup">
+    <div class="popup-content">
+      <h2 id="gameOverTitle">Game Over!</h2>
+      <p id="finalScore"></p>
+      <p id="highScoreMessage"></p>
+      <div id="wrongDetails"></div>
+      <button id="closePopup">Chiudi</button>
+    </div>
+  </div>
+
   <script>
-    // --- SETTINGS BUTTON ---
-    document.getElementById("settingsBtn").onclick = () => {
-      window.location.href = "settings.html";
+    let pokemonList = [];
+    let score = 0;
+    let gameOver = false;
+    let timer;
+    let timeLeft = 10;
+    let defaultTime = 10; // used for startTimer based on difficulty
+    let translations = {};
+    let statNames = {};
+    let t = {};
+    // use stored language if present, otherwise navigator
+    let lang = localStorage.getItem("lang") || (navigator.language ? navigator.language.slice(0, 2) : "en");
+    let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
+
+    // --- SETTINGS (read from localStorage) ---
+    const difficultySetting = localStorage.getItem("difficulty") || "easy"; // easy | normal | hard | extreme
+    const themeSetting = localStorage.getItem("theme") || "system"; // light | dark | system
+
+    // map difficulties to seconds
+    const difficultyTimes = {
+      easy: 10,    // easy = "normal mode" as you requested
+      normal: 5,
+      hard: 3,
+      extreme: 3
     };
 
-    // --- LOAD SETTINGS ---
-    const difficulty = localStorage.getItem("difficulty") || "easy";
-    const theme = localStorage.getItem("theme") || "system";
-    const lang = localStorage.getItem("lang") || "en";
-
-    // --- APPLY THEME ---
-    applyTheme(theme);
+    // apply theme immediately
     function applyTheme(theme) {
-      if (theme === "dark") document.body.classList.add("dark");
-      else if (theme === "light") document.body.classList.remove("dark");
-      else if (theme === "system") {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else if (theme === "light") {
+        document.body.classList.remove("dark");
+      } else { // system
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         document.body.classList.toggle("dark", prefersDark);
+        // also respond to changes
+        if (window.matchMedia) {
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener
+            ? window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', e => {
+                document.body.classList.toggle("dark", e.matches);
+              })
+            : window.matchMedia("(prefers-color-scheme: dark)").addListener(e => {
+                document.body.classList.toggle("dark", e.matches);
+              });
+        }
       }
     }
 
-    // --- TIMER SETTINGS ---
-    const timeMap = { easy: 10, normal: 5, hard: 3, extreme: 3 };
-    let timeLeft = timeMap[difficulty];
-    let timer;
+    applyTheme(themeSetting);
+    defaultTime = difficultyTimes[difficultySetting] || 10;
+
+    // settings button behavior
+    document.getElementById("settingsBtn").addEventListener("click", () => {
+      // open settings page in same tab:
+      window.location.href = "settings.html";
+    });
+
+    async function loadTranslations() {
+      try {
+        const response = await fetch('translations.json');
+        if (!response.ok) throw new Error('Errore nel caricare le traduzioni');
+        const data = await response.json();
+        translations = data;
+        statNames = data.statNames || {};
+        t = translations[lang] || translations.en;
+        initUI();
+        loadPokemonList();
+      } catch (error) {
+        console.error('Errore nel caricamento delle traduzioni:', error);
+        alert('Impossibile caricare il file delle traduzioni.');
+      }
+    }
+
+    function initUI() {
+      // set all the text elements that exist in the original file; IDs kept
+      if (t.title) document.getElementById("title").innerText = t.title;
+      if (t.yes) document.getElementById("greater").innerText = t.yes;
+      if (t.no) document.getElementById("not-greater").innerText = t.no;
+      if (t.gameOver) document.getElementById("gameOverTitle").innerText = t.gameOver;
+      if (t.close) document.getElementById("closePopup").innerText = t.close;
+      if (t.record) document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
+      if (t.score) document.getElementById("score").innerText = `${t.score}: ${score}`;
+      // timer label will be updated in startTimer
+    }
+
+    async function loadPokemonList() {
+      try {
+        const response = await fetch('pokemonList.json');
+        if (!response.ok) throw new Error('Errore nel caricare il file JSON');
+        pokemonList = await response.json();
+        startRound();
+      } catch (error) {
+        console.error('Errore:', error);
+        alert('Non è stato possibile caricare la lista dei Pokémon.');
+      }
+    }
+
+    function getRandomPokemon() {
+      return pokemonList[Math.floor(Math.random() * pokemonList.length)];
+    }
+
+    function getSpriteUrl(name) {
+      const normalized = name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+      return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
+    }
+
+    function updatePokemonDisplay(player, opponent) {
+      document.getElementById("player-sprite").src = getSpriteUrl(player.name);
+      document.getElementById("opponent-sprite").src = getSpriteUrl(opponent.name);
+      document.getElementById("player-name").innerText = player.name;
+      document.getElementById("opponent-name").innerText = opponent.name;
+    }
+
+    function getComparison(player, opponent) {
+      const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
+      const stat = stats[Math.floor(Math.random() * stats.length)];
+      return {
+        stat,
+        playerStat: player.stats[stat],
+        opponentStat: opponent.stats[stat],
+        isGreater: player.stats[stat] > opponent.stats[stat],
+        playerName: player.name,
+        opponentName: opponent.name
+      };
+    }
 
     function startTimer() {
       clearInterval(timer);
-      document.getElementById("timer").innerText = `Time: ${timeLeft}s`;
+      // use defaultTime based on difficulty setting (no hardcoded 10)
+      timeLeft = defaultTime;
+      document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
+
       timer = setInterval(() => {
+        if (gameOver) {
+          clearInterval(timer);
+          return;
+        }
         timeLeft--;
-        document.getElementById("timer").innerText = `Time: ${timeLeft}s`;
+        document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timer);
-          alert("Time’s up!");
+          triggerGameOver(t.timeout, null);
         }
       }, 1000);
     }
 
-    // --- EXTREME MODE ---
-    if (difficulty === "extreme") {
-      document.getElementById("player-sprite").src = "https://play.pokemonshowdown.com/sprites/gen5/missingno.png";
-      document.getElementById("opponent-sprite").src = "https://play.pokemonshowdown.com/sprites/gen5/missingno.png";
+    function handleAnswer(isGreater, comparison) {
+      if (gameOver) return;
+      const isCorrect = (isGreater && comparison.isGreater) || (!isGreater && !comparison.isGreater);
+      if (isCorrect) {
+        score++;
+        document.getElementById("score").innerText = `${t.score}: ${score}`;
+        startRound();
+      } else {
+        triggerGameOver(t.wrong, comparison);
+      }
     }
 
-    // --- START GAME ---
-    startTimer();
+    function triggerGameOver(reason, comparison = null) {
+      clearInterval(timer);
+      gameOver = true;
+      let newRecord = false;
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        newRecord = true;
+      }
+
+      document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
+      document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${highScore}`;
+
+      const wrongEl = document.getElementById("wrongDetails");
+      if (comparison) {
+        const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
+        const playerVal = comparison.playerStat;
+        const oppVal = comparison.opponentStat;
+        const diff = Math.abs(playerVal - oppVal);
+        const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? comparison.playerName : comparison.opponentName);
+
+        const detailsLines = [
+          reason,
+          `${comparison.playerName}: ${playerVal} ${statLabel}`,
+          `${comparison.opponentName}: ${oppVal} ${statLabel}`,
+          `${winner === "Tie" ? "" : `Δ ${diff} — ${winner} ${lang === "it" ? "vince" : (lang === "es" ? "gana" : "wins")}`}`
+        ].filter(Boolean);
+
+        wrongEl.innerText = detailsLines.join("\n");
+      } else {
+        wrongEl.innerText = reason;
+      }
+
+      document.getElementById("gameOverPopup").style.display = "flex";
+    }
+
+    function startRound() {
+      if (pokemonList.length === 0) return;
+      gameOver = false;
+
+      const player = getRandomPokemon();
+      let opponent = getRandomPokemon();
+      if (pokemonList.length > 1) {
+        while (opponent.name === player.name) {
+          opponent = getRandomPokemon();
+        }
+      }
+
+      const comparison = getComparison(player, opponent);
+      updatePokemonDisplay(player, opponent);
+
+      // Extreme mode: replace sprites with MissingNo
+      if (difficultySetting === "extreme") {
+        const missing = "https://play.pokemonshowdown.com/sprites/gen5/missingno.png";
+        document.getElementById("player-sprite").src = missing;
+        document.getElementById("opponent-sprite").src = missing;
+      }
+
+      const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
+      const question = lang === "it"
+        ? `Il tuo ${player.name} ha più ${statLabel} di ${opponent.name}?`
+        : lang === "es"
+          ? `¿Tu ${player.name} tiene más ${statLabel} que ${opponent.name}?`
+          : `Does your ${player.name} have more ${statLabel} than ${opponent.name}?`;
+
+      document.getElementById("comparison").innerText = question;
+
+      document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
+      document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
+      startTimer();
+    }
+
+    document.getElementById("closePopup").onclick = () => {
+      document.getElementById("gameOverPopup").style.display = "none";
+      location.reload();
+    };
+
+    loadTranslations();
   </script>
 </body>
 </html>
