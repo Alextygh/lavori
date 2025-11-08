@@ -1,145 +1,130 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title id="settingsTitle">Settings</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #000;
       text-align: center;
-      padding: 30px;
+      background-color: #f5f5f5;
+      color: black;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
     }
+
     body.dark {
       background-color: #121212;
-      color: #fff;
+      color: white;
     }
+
+    .settings-container {
+      margin-top: 50px;
+    }
+
     select, button {
-      padding: 10px 20px;
       font-size: 16px;
+      padding: 10px;
       margin: 10px;
+      cursor: pointer;
     }
-    .section {
-      margin-bottom: 30px;
-    }
-    #flag {
-      width: 30px;
-      height: 20px;
+
+    .flag {
+      width: 32px;
+      height: 22px;
       vertical-align: middle;
       margin-left: 10px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-    }
-    #backBtn {
-      margin-top: 40px;
-      padding: 10px 25px;
-      cursor: pointer;
-      font-size: 16px;
     }
   </style>
 </head>
 <body>
+  <div class="settings-container">
+    <h1>Settings ⚙️</h1>
 
-  <h1 id="settingsHeader">⚙️ Settings</h1>
-
-  <!-- Difficulty -->
-  <div class="section">
-    <h2 id="difficultyLabel">Difficulty</h2>
-    <select id="difficultySelect">
-      <option value="easy" id="diffEasy">Easy</option>
-      <option value="normal" id="diffNormal">Normal</option>
-      <option value="hard" id="diffHard">Hard</option>
-      <option value="extreme" id="diffExtreme">Extreme</option>
+    <h2>Difficulty</h2>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="normal">Normal</option>
+      <option value="hard">Hard</option>
+      <option value="extreme">Extreme</option>
     </select>
-  </div>
 
-  <!-- Theme -->
-  <div class="section">
-    <h2 id="themeLabel">Theme</h2>
-    <select id="themeSelect">
-      <option value="light" id="themeLight">Light Mode</option>
-      <option value="dark" id="themeDark">Dark Mode</option>
-      <option value="system" id="themeSystem">System Setting</option>
+    <h2>Theme</h2>
+    <select id="theme">
+      <option value="light">Light mode</option>
+      <option value="dark">Dark mode</option>
+      <option value="system">System</option>
     </select>
-  </div>
 
-  <!-- Language -->
-  <div class="section">
-    <h2 id="languageLabel">Language</h2>
-    <select id="languageSelect">
-      <option value="en" id="langEn">English</option>
-      <option value="it" id="langIt">Italiano</option>
-      <option value="es" id="langEs">Español</option>
+    <h2>Language</h2>
+    <select id="language">
+      <option value="en" data-flag="🇬🇧">English</option>
+      <option value="it" data-flag="🇮🇹">Italiano</option>
+      <option value="es" data-flag="🇪🇸">Español</option>
+      <option value="fr" data-flag="🇫🇷">Français</option>
     </select>
-    <img id="flag" src="https://flagcdn.com/gb.svg" alt="Flag">
-  </div>
+    <img id="flag" class="flag" src="https://flagcdn.com/gb.svg" alt="Flag">
 
-  <button id="backBtn">Back to Game</button>
+    <br><br>
+
+    <!-- 🚨 MASSIVE COMMENT 🚨 -->
+    <!-- >>>>>> CHANGE WHERE THE "Return to game" BUTTON LEADS HERE <<<<<<
+         You can change the "beta.html" below to any page you want.
+         Example: if your game file is "index.html", change it like this:
+         onclick="window.location.href='index.html'"
+         Example: if it's in a subfolder, like /pokemon/game.html, use:
+         onclick="window.location.href='/pokemon/game.html'"
+    -->
+    <button id="backBtn" onclick="window.location.href='beta.html'">Return to game</button>
+  </div>
 
   <script>
-    const themeSelect = document.getElementById("themeSelect");
-    const diffSelect = document.getElementById("difficultySelect");
-    const langSelect = document.getElementById("languageSelect");
+    const themeSelect = document.getElementById("theme");
+    const difficultySelect = document.getElementById("difficulty");
+    const langSelect = document.getElementById("language");
     const flag = document.getElementById("flag");
 
-    // load saved values or defaults
-    const savedTheme = localStorage.getItem("theme") || "system";
-    const savedDiff = localStorage.getItem("difficulty") || "easy";
-    const savedLang = localStorage.getItem("lang") || (navigator.language ? navigator.language.slice(0,2) : "en");
+    themeSelect.value = localStorage.getItem("theme") || "light";
+    difficultySelect.value = localStorage.getItem("difficulty") || "easy";
+    langSelect.value = localStorage.getItem("lang") || "en";
 
-    themeSelect.value = savedTheme;
-    diffSelect.value = savedDiff;
-    langSelect.value = savedLang;
-    updateFlag(savedLang);
-    applyTheme(savedTheme);
+    updateFlag(langSelect.value);
 
     themeSelect.addEventListener("change", () => {
-      const val = themeSelect.value;
-      localStorage.setItem("theme", val);
-      applyTheme(val);
+      const value = themeSelect.value;
+      localStorage.setItem("theme", value);
+      if (value === "dark") {
+        document.body.classList.add("dark");
+      } else if (value === "light") {
+        document.body.classList.remove("dark");
+      } else {
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.body.classList.toggle("dark", systemPrefersDark);
+      }
     });
 
-    diffSelect.addEventListener("change", () => {
-      localStorage.setItem("difficulty", diffSelect.value);
+    difficultySelect.addEventListener("change", () => {
+      localStorage.setItem("difficulty", difficultySelect.value);
     });
 
     langSelect.addEventListener("change", () => {
-      const newLang = langSelect.value;
-      localStorage.setItem("lang", newLang);
-      updateFlag(newLang);
+      const value = langSelect.value;
+      localStorage.setItem("lang", value);
+      updateFlag(value);
     });
-
-    document.getElementById("backBtn").onclick = () => {
-      // return to index (index will read stored settings)
-      window.location.href = "beta.html";
-    };
 
     function updateFlag(lang) {
       const flags = {
         en: "https://flagcdn.com/gb.svg",
         it: "https://flagcdn.com/it.svg",
-        es: "https://flagcdn.com/es.svg"
+        es: "https://flagcdn.com/es.svg",
+        fr: "https://flagcdn.com/fr.svg"
       };
       flag.src = flags[lang] || flags.en;
-    }
-
-    function applyTheme(theme) {
-      if (theme === "dark") document.body.classList.add("dark");
-      else if (theme === "light") document.body.classList.remove("dark");
-      else if (theme === "system") {
-        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.body.classList.toggle("dark", prefersDark);
-        if (window.matchMedia) {
-          window.matchMedia("(prefers-color-scheme: dark)").addEventListener
-            ? window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', e => {
-                document.body.classList.toggle("dark", e.matches);
-              })
-            : window.matchMedia("(prefers-color-scheme: dark)").addListener(e => {
-                document.body.classList.toggle("dark", e.matches);
-              });
-        }
-      }
     }
   </script>
 </body>
