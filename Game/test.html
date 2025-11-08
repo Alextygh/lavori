@@ -151,6 +151,7 @@
   const normalized = name
     .toLowerCase()
     .replace(/-/g, "")            // remove all hyphens
+    .replace(/‎ /g, "")
     .replace(/[^a-z0-9 ]/g, "")   // allow only letters, digits, and normal spaces
     .replace(/ /g, "-");          // replace normal spaces with dashes
 
