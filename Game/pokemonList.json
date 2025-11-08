@@ -785,5 +785,5 @@
   { "name": "Meloetta", "id": 648, "stats": { "hp": 100, "attack": 77, "defense": 77, "spattack": 128, "spdefense": 128, "speed": 90 } },
   { "name": "Meloetta Pirouette", "id": 648, "stats": { "hp": 100, "attack": 128, "defense": 90, "spattack": 77, "spdefense": 77, "speed": 128 } },
   { "name": "Genesect", "id": 649, "stats": { "hp": 71, "attack": 120, "defense": 95, "spattack": 120, "spdefense": 95, "speed": 99 } },
-  { "name": "MissingNo.", "id": ???, "stats": { "hp": 33, "attack": 136, "defense": 0, "spattack": 6, "spdefense": 6, "speed": 29 } }
+  { "name": "MissingNo.", "id": 0, "stats": { "hp": 33, "attack": 136, "defense": 0, "spattack": 6, "spdefense": 6, "speed": 29 } }
 ]
