@@ -148,12 +148,15 @@
     let pokemonList = [];
 
     function getSpriteUrl(name) {
-      const normalized = name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
-      return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
-    }
+  const normalized = name
+    .toLowerCase()
+    .replace(/-/g, "")            // remove all hyphens
+    .replace(/[^a-z0-9 ]/g, "")   // allow only letters, digits, and normal spaces
+    .replace(/ /g, "-");          // replace normal spaces with dashes
+
+  return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
+}
+
 
     async function loadPokemonList() {
       try {
