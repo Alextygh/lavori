@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <!-- Librerie Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } 
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  // 🔥 INCOLLA QUI la tua configurazione Firebase
+  const firebaseConfig = {
+  apiKey: "AIzaSyAW3-RXK_Sr3ZX9RzL_Tk9kyAU0XBqNz4Q",
+  authDomain: "pokemon-8ce86.firebaseapp.com",
+  projectId: "pokemon-8ce86",
+  storageBucket: "pokemon-8ce86.firebasestorage.app",
+  messagingSenderId: "827401493995",
+  appId: "1:827401493995:web:52896d9886c0e83b9b0dae",
+  measurementId: "G-122Q38G8J6"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Rendo disponibili le funzioni a tutto lo script
+  window.firebaseStuff = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc };
+</script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pokémon Game - Stat Comparison</title>
@@ -82,6 +109,17 @@
   </style>
 </head>
 <body>
+
+  <div id="authBox" style="margin:20px;">
+  <h3>Accedi o registrati</h3>
+  <input id="emailInput" type="email" placeholder="Email"><br>
+  <input id="passwordInput" type="password" placeholder="Password"><br>
+  <button id="signupBtn">Registrati</button>
+  <button id="loginBtn">Accedi</button>
+  <button id="logoutBtn" style="display:none;">Esci</button>
+  <p id="authMessage"></p>
+</div>
+
 
   <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
   <div id="score">Punteggio: 0</div>
@@ -239,6 +277,8 @@
       clearInterval(timer);
       gameOver = true;
       let newRecord = false;
+      saveScoreToFirebase(score);
+
 
       if (score > highScore) {
         highScore = score;
@@ -307,6 +347,54 @@
     };
 
     loadTranslations();
+
+    const { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc } = window.firebaseStuff;
+
+// Funzione per salvare il punteggio su Firebase
+async function saveScoreToFirebase(score) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+  let best = 0;
+  if (snap.exists()) best = snap.data().highScore || 0;
+  if (score > best) {
+    await setDoc(userRef, { email: user.email, highScore: score });
+  }
+}
+
+// Registrazione
+document.getElementById("signupBtn").onclick = async () => {
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    document.getElementById("authMessage").innerText = "Registrazione completata!";
+  } catch (err) {
+    document.getElementById("authMessage").innerText = err.message;
+  }
+};
+
+// Login
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    document.getElementById("authMessage").innerText = "Accesso effettuato!";
+    document.getElementById("logoutBtn").style.display = "inline";
+  } catch (err) {
+    document.getElementById("authMessage").innerText = err.message;
+  }
+};
+
+// Logout
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+  document.getElementById("authMessage").innerText = "Disconnesso.";
+  document.getElementById("logoutBtn").style.display = "none";
+};
+
   </script>
 </body>
 </html>
