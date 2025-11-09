@@ -1,72 +1,37 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <!-- Librerie Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
-    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } 
-    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-  // 🔥 INCOLLA QUI la tua configurazione Firebase
-  const firebaseConfig = {
-  apiKey: "AIzaSyAW3-RXK_Sr3ZX9RzL_Tk9kyAU0XBqNz4Q",
-  authDomain: "pokemon-8ce86.firebaseapp.com",
-  projectId: "pokemon-8ce86",
-  storageBucket: "pokemon-8ce86.firebasestorage.app",
-  messagingSenderId: "827401493995",
-  appId: "1:827401493995:web:52896d9886c0e83b9b0dae",
-  measurementId: "G-122Q38G8J6"
-};
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Rendo disponibili le funzioni a tutto lo script
-  window.firebaseStuff = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc };
-</script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pokémon Game - Stat Comparison</title>
+  <title>Pokémon Game - Confronto Statistiche</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       background-color: #f5f5f5;
     }
-    h1 {
-      color: #ffcc00;
-    }
+    h1 { color: #ffcc00; }
     .container {
       display: flex;
       justify-content: center;
       gap: 50px;
       margin-top: 30px;
     }
-    .pokemon {
-      text-align: center;
-    }
+    .pokemon { text-align: center; }
     .pokemon img {
       width: 100px;
       height: 100px;
       image-rendering: pixelated;
     }
-    .options {
-      margin-top: 20px;
-    }
+    .options { margin-top: 20px; }
     .options button {
       margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
     }
-    #score, #highscore {
-      font-size: 20px;
-      margin-top: 15px;
-    }
+    #score, #highscore { font-size: 20px; margin-top: 15px; }
     #gameOverPopup {
       display: none;
       position: fixed;
@@ -85,42 +50,28 @@
       text-align: center;
       max-width: 360px;
     }
-    #gameOverPopup button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    #timer {
-      font-size: 22px;
-      color: #d32f2f;
-      margin-top: 15px;
-    }
+    #timer { font-size: 22px; color: #d32f2f; margin-top: 15px; }
     #wrongDetails {
       margin-top: 10px;
       font-weight: bold;
       white-space: pre-wrap;
     }
-    @media (max-width: 480px) {
-      .container { flex-direction: column; gap: 10px; }
-      #gameOverPopup .popup-content { width: 90%; max-width: none; }
-      .pokemon img { width: 80px; height: 80px; }
-    }
   </style>
 </head>
+
 <body>
-
+  <!-- 🔐 Login Firebase -->
   <div id="authBox" style="margin:20px;">
-  <h3>Accedi o registrati</h3>
-  <input id="emailInput" type="email" placeholder="Email"><br>
-  <input id="passwordInput" type="password" placeholder="Password"><br>
-  <button id="signupBtn">Registrati</button>
-  <button id="loginBtn">Accedi</button>
-  <button id="logoutBtn" style="display:none;">Esci</button>
-  <p id="authMessage"></p>
-</div>
+    <h3>Accedi o registrati</h3>
+    <input id="emailInput" type="email" placeholder="Email"><br>
+    <input id="passwordInput" type="password" placeholder="Password"><br>
+    <button id="signupBtn">Registrati</button>
+    <button id="loginBtn">Accedi</button>
+    <button id="logoutBtn" style="display:none;">Esci</button>
+    <p id="authMessage"></p>
+  </div>
 
-
+  <!-- 🎮 Gioco Pokémon -->
   <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
   <div id="score">Punteggio: 0</div>
   <div id="highscore"></div>
@@ -154,53 +105,44 @@
     </div>
   </div>
 
-  <script>
+  <!-- 🔥 Firebase + Gioco -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // 🔥 Configurazione Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAW3-RXK_Sr3ZX9RzL_Tk9kyAU0XBqNz4Q",
+      authDomain: "pokemon-8ce86.firebaseapp.com",
+      projectId: "pokemon-8ce86",
+      storageBucket: "pokemon-8ce86.appspot.com",
+      messagingSenderId: "827401493995",
+      appId: "1:827401493995:web:52896d9886c0e83b9b0dae",
+      measurementId: "G-122Q38G8J6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- Variabili del gioco ---
     let pokemonList = [];
     let score = 0;
     let gameOver = false;
     let timer;
     let timeLeft = 10;
-    let translations = {};
-    let statNames = {};
-    let t = {};
-    let lang = navigator.language ? navigator.language.slice(0, 2) : "en";
     let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
-
-    async function loadTranslations() {
-      try {
-        const response = await fetch('translations.json');
-        if (!response.ok) throw new Error('Errore nel caricare le traduzioni');
-        const data = await response.json();
-        translations = data;
-        statNames = data.statNames || {};
-        t = translations[lang] || translations.en;
-        initUI();
-        loadPokemonList();
-      } catch (error) {
-        console.error('Errore nel caricamento delle traduzioni:', error);
-        alert('Impossibile caricare il file delle traduzioni.');
-      }
-    }
-
-    function initUI() {
-      document.getElementById("title").innerText = t.title;
-      document.getElementById("greater").innerText = t.yes;
-      document.getElementById("not-greater").innerText = t.no;
-      document.getElementById("gameOverTitle").innerText = t.gameOver;
-      document.getElementById("closePopup").innerText = t.close;
-      document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
-      document.getElementById("score").innerText = `${t.score}: ${score}`;
-    }
 
     async function loadPokemonList() {
       try {
         const response = await fetch('pokemonList.json');
-        if (!response.ok) throw new Error('Errore nel caricare il file JSON');
         pokemonList = await response.json();
         startRound();
       } catch (error) {
-        console.error('Errore:', error);
-        alert('Non è stato possibile caricare la lista dei Pokémon.');
+        console.error('Errore nel caricare i Pokémon:', error);
       }
     }
 
@@ -209,18 +151,14 @@
     }
 
     function getSpriteUrl(name) {
-  const normalized = name
-    .toLowerCase()
-    .replace(/-/g, "")            // remove all hyphens
-    .replace(/‎ /g, "")
-    .replace(/♂/g, "m")
-    .replace(/♀/g, "f")
-    .replace(/[^a-z0-9 ]/g, "")   // allow only letters, digits, and normal spaces
-    .replace(/ /g, "-");          // replace normal spaces with dashes
-
-  return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
-}
-
+      const normalized = name.toLowerCase()
+        .replace(/-/g, "")
+        .replace(/♂/g, "m")
+        .replace(/♀/g, "f")
+        .replace(/[^a-z0-9 ]/g, "")
+        .replace(/ /g, "-");
+      return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
+    }
 
     function updatePokemonDisplay(player, opponent) {
       document.getElementById("player-sprite").src = getSpriteUrl(player.name);
@@ -245,19 +183,12 @@
     function startTimer() {
       clearInterval(timer);
       timeLeft = 10;
-      document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
-
+      document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
       timer = setInterval(() => {
-        if (gameOver) {
-          clearInterval(timer);
-          return;
-        }
+        if (gameOver) { clearInterval(timer); return; }
         timeLeft--;
-        document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          triggerGameOver(t.timeout, null);
-        }
+        document.getElementById("timer").innerText = `Tempo: ${timeLeft}s`;
+        if (timeLeft <= 0) { clearInterval(timer); triggerGameOver("Tempo scaduto!"); }
       }, 1000);
     }
 
@@ -266,76 +197,31 @@
       const isCorrect = (isGreater && comparison.isGreater) || (!isGreater && !comparison.isGreater);
       if (isCorrect) {
         score++;
-        document.getElementById("score").innerText = `${t.score}: ${score}`;
+        document.getElementById("score").innerText = `Punteggio: ${score}`;
         startRound();
       } else {
-        triggerGameOver(t.wrong, comparison);
+        triggerGameOver("Sbagliato!", comparison);
       }
     }
 
-    function triggerGameOver(reason, comparison = null) {
+    async function triggerGameOver(reason, comparison = null) {
       clearInterval(timer);
       gameOver = true;
-      let newRecord = false;
-      saveScoreToFirebase(score);
-
-
-      if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
-        newRecord = true;
-      }
-
-      document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
-      document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${highScore}`;
-
-      const wrongEl = document.getElementById("wrongDetails");
-      if (comparison) {
-        const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
-        const playerVal = comparison.playerStat;
-        const oppVal = comparison.opponentStat;
-        const diff = Math.abs(playerVal - oppVal);
-        const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? comparison.playerName : comparison.opponentName);
-
-        const detailsLines = [
-          reason,
-          `${comparison.playerName}: ${playerVal} ${statLabel}`,
-          `${comparison.opponentName}: ${oppVal} ${statLabel}`,
-          `${winner === "Tie" ? "" : `Δ ${diff} — ${winner} ${lang === "it" ? "vince" : (lang === "es" ? "gana" : "wins")}`}`
-        ].filter(Boolean);
-
-        wrongEl.innerText = detailsLines.join("\n");
-      } else {
-        wrongEl.innerText = reason;
-      }
-
+      await saveScoreToFirebase(score);
+      document.getElementById("finalScore").innerText = `Punteggio: ${score}`;
+      document.getElementById("highScoreMessage").innerText = `Record: ${highScore}`;
       document.getElementById("gameOverPopup").style.display = "flex";
     }
 
     function startRound() {
       if (pokemonList.length === 0) return;
       gameOver = false;
-
       const player = getRandomPokemon();
       let opponent = getRandomPokemon();
-      if (pokemonList.length > 1) {
-        while (opponent.name === player.name) {
-          opponent = getRandomPokemon();
-        }
-      }
-
+      while (opponent.name === player.name) opponent = getRandomPokemon();
       const comparison = getComparison(player, opponent);
       updatePokemonDisplay(player, opponent);
-
-      const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
-      const question = lang === "it"
-        ? `Il tuo ${player.name} ha più ${statLabel} di ${opponent.name}?`
-        : lang === "es"
-          ? `¿Tu ${player.name} tiene más ${statLabel} que ${opponent.name}?`
-          : `Does your ${player.name} have more ${statLabel} than ${opponent.name}?`;
-
-      document.getElementById("comparison").innerText = question;
-
+      document.getElementById("comparison").innerText = `Il tuo ${player.name} ha più ${comparison.stat} di ${opponent.name}?`;
       document.getElementById("greater").onclick = () => handleAnswer(true, comparison);
       document.getElementById("not-greater").onclick = () => handleAnswer(false, comparison);
       startTimer();
@@ -346,55 +232,48 @@
       location.reload();
     };
 
-    loadTranslations();
+    // --- Firebase Login & Punteggi ---
+    async function saveScoreToFirebase(score) {
+      const user = auth.currentUser;
+      if (!user) return;
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+      let best = 0;
+      if (snap.exists()) best = snap.data().highScore || 0;
+      if (score > best) await setDoc(userRef, { email: user.email, highScore: score });
+    }
 
-    const { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc } = window.firebaseStuff;
+    document.getElementById("signupBtn").onclick = async () => {
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        document.getElementById("authMessage").innerText = "Registrazione completata!";
+      } catch (err) {
+        document.getElementById("authMessage").innerText = err.message;
+      }
+    };
 
-// Funzione per salvare il punteggio su Firebase
-async function saveScoreToFirebase(score) {
-  const user = auth.currentUser;
-  if (!user) return;
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
-  let best = 0;
-  if (snap.exists()) best = snap.data().highScore || 0;
-  if (score > best) {
-    await setDoc(userRef, { email: user.email, highScore: score });
-  }
-}
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        document.getElementById("authMessage").innerText = "Accesso effettuato!";
+        document.getElementById("logoutBtn").style.display = "inline";
+      } catch (err) {
+        document.getElementById("authMessage").innerText = err.message;
+      }
+    };
 
-// Registrazione
-document.getElementById("signupBtn").onclick = async () => {
-  const email = document.getElementById("emailInput").value;
-  const password = document.getElementById("passwordInput").value;
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    document.getElementById("authMessage").innerText = "Registrazione completata!";
-  } catch (err) {
-    document.getElementById("authMessage").innerText = err.message;
-  }
-};
+    document.getElementById("logoutBtn").onclick = async () => {
+      await signOut(auth);
+      document.getElementById("authMessage").innerText = "Disconnesso.";
+      document.getElementById("logoutBtn").style.display = "none";
+    };
 
-// Login
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("emailInput").value;
-  const password = document.getElementById("passwordInput").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    document.getElementById("authMessage").innerText = "Accesso effettuato!";
-    document.getElementById("logoutBtn").style.display = "inline";
-  } catch (err) {
-    document.getElementById("authMessage").innerText = err.message;
-  }
-};
-
-// Logout
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  document.getElementById("authMessage").innerText = "Disconnesso.";
-  document.getElementById("logoutBtn").style.display = "none";
-};
-
+    // Avvia il gioco
+    loadPokemonList();
   </script>
 </body>
 </html>
