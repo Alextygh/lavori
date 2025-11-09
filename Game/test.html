@@ -152,6 +152,8 @@
     .toLowerCase()
     .replace(/-/g, "")            // remove all hyphens
     .replace(/‎ /g, "")
+    .replace(/♂/g, "m")
+    .replace(/♀/g, "f")
     .replace(/[^a-z0-9 ]/g, "")   // allow only letters, digits, and normal spaces
     .replace(/ /g, "-");          // replace normal spaces with dashes
 
