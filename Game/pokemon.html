@@ -156,6 +156,7 @@
         .replace(/♂/g, "m")
         .replace(/♀/g, "f")
         .replace(/[^a-z0-9 ]/g, "")
+        .replace(/‎ /g, "")
         .replace(/ /g, "-");
       return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
     }
