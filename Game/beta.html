@@ -2,26 +2,64 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pokémon Game - Stat Comparison</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokémon Game - Menu</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       background-color: #f5f5f5;
-      color: black;
-      transition: background-color 0.3s, color 0.3s;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* --- Stili del Menu --- */
+    #mainMenu {
+      display: flex; /* Usa flex per centrare facilmente */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Schermo intero */
+      text-align: center;
     }
 
-    body.dark {
-      background-color: #121212;
+    #mainMenu h1 {
+      font-size: 3.5rem; /* Titolo grande come richiesto */
+      color: #ffcc00; /* Colore giallo Pokémon */
+      text-shadow: 2px 2px 4px #333; /* Ombra per profondità */
+    }
+
+    .menu-options button {
+      display: block; /* Impila i bottoni verticalmente */
+      width: 250px;
+      margin: 15px auto; /* Spaziatura tra i bottoni */
+      padding: 20px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background-color: #3B4CCA; /* Blu Pokémon */
       color: white;
+      transition: background-color 0.3s;
     }
 
-    h1 {
+    .menu-options button:hover {
+      background-color: #5E6ABC;
+    }
+
+    /* --- Contenitore del Gioco --- */
+    #gameContainer {
+      display: none; /* Nascosto di default */
+      padding-top: 20px; /* Aggiunge un po' di spazio sopra */
+    }
+
+    /* --- Stili Originali del Gioco --- */
+    /* (Ho spostato il titolo #title dentro #gameContainer, quindi lo stile h1 ora si applica solo al menu) */
+    #title {
       color: #ffcc00;
+      font-size: 2rem; /* Leggermente ridotto per il titolo in-game */
     }
-
+    
     .container {
       display: flex;
       justify-content: center;
@@ -59,28 +97,14 @@
       background-color: rgba(0, 0, 0, 0.6);
       justify-content: center;
       align-items: center;
-      z-index: 9999;
     }
-
-    /* popup colors use variables so dark mode works */
-    :root {
-      --popup-bg: white;
-      --popup-text: black;
-    }
-    body.dark {
-      --popup-bg: #222;
-      --popup-text: #f5f5f5;
-    }
-
     #gameOverPopup .popup-content {
-      background: var(--popup-bg);
-      color: var(--popup-text);
+      background: white;
       padding: 30px;
       border-radius: 10px;
       text-align: center;
       max-width: 360px;
     }
-
     #gameOverPopup button {
       margin-top: 15px;
       padding: 10px 20px;
@@ -97,19 +121,9 @@
       font-weight: bold;
       white-space: pre-wrap;
     }
-
-    /* settings button top-right */
-    #settingsBtn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 22px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
     @media (max-width: 480px) {
+      #mainMenu h1 { font-size: 2.5rem; }
+      .menu-options button { width: 80%; }
       .container { flex-direction: column; gap: 10px; }
       #gameOverPopup .popup-content { width: 90%; max-width: none; }
       .pokemon img { width: 80px; height: 80px; }
@@ -118,39 +132,47 @@
 </head>
 <body>
 
-  <!-- Settings button (opens settings page) -->
-  <button id="settingsBtn" title="Settings">⚙️</button>
-
-  <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
-  <div id="score">Punteggio: 0</div>
-  <div id="highscore"></div>
-  <div id="timer">Tempo: 10s</div>
-
-  <div class="container">
-    <div id="player" class="pokemon">
-      <img id="player-sprite" src="" alt="Pokémon">
-      <div id="player-name"></div>
-    </div>
-    <div id="opponent" class="pokemon">
-      <img id="opponent-sprite" src="" alt="Pokémon">
-      <div id="opponent-name"></div>
+  <div id="mainMenu">
+    <h1>Pokémon Game</h1>
+    <div class="menu-options">
+      <button id="playButton">Game</button>
+      <button id="accountButton">Account</button>
+      <button id="settingsButton">Settings</button>
     </div>
   </div>
 
-  <div id="comparison" class="stats" style="margin-top: 20px; font-size: 18px;"></div>
+  <div id="gameContainer">
+    <h1 id="title">Gioco Pokémon - Confronto Statistiche</h1>
+    <div id="score">Punteggio: 0</div>
+    <div id="highscore"></div>
+    <div id="timer">Tempo: 10s</div>
 
-  <div class="options">
-    <button id="greater">Sì</button>
-    <button id="not-greater">No</button>
-  </div>
+    <div class="container">
+      <div id="player" class="pokemon">
+        <img id="player-sprite" src="" alt="Pokémon" />
+        <div id="player-name"></div>
+      </div>
+      <div id="opponent" class="pokemon">
+        <img id="opponent-sprite" src="" alt="Pokémon" />
+        <div id="opponent-name"></div>
+      </div>
+    </div>
 
-  <div id="gameOverPopup">
-    <div class="popup-content">
-      <h2 id="gameOverTitle">Game Over!</h2>
-      <p id="finalScore"></p>
-      <p id="highScoreMessage"></p>
-      <div id="wrongDetails"></div>
-      <button id="closePopup">Chiudi</button>
+    <div id="comparison" class="stats" style="margin-top: 20px; font-size: 18px;"></div>
+
+    <div class="options">
+      <button id="greater">Sì</button>
+      <button id="not-greater">No</button>
+    </div>
+
+    <div id="gameOverPopup">
+      <div class="popup-content">
+        <h2 id="gameOverTitle">Game Over!</h2>
+        <p id="finalScore"></p>
+        <p id="highScoreMessage"></p>
+        <div id="wrongDetails"></div>
+        <button id="closePopup">Chiudi</button>
+      </div>
     </div>
   </div>
 
@@ -163,94 +185,69 @@
     let translations = {};
     let statNames = {};
     let t = {};
-    // read language from localStorage if set, otherwise fallback to navigator
-    let lang = localStorage.getItem("lang") || (navigator.language ? navigator.language.slice(0, 2) : "en");
+    let lang = navigator.language ? navigator.language.slice(0, 2) : "en";
     let highScore = localStorage.getItem("highScore") ? parseInt(localStorage.getItem("highScore")) : 0;
-
-    // READ SETTINGS from localStorage (these are saved by settings.html)
-    const difficultySetting = localStorage.getItem("difficulty") || "easy"; // easy | normal | hard | extreme
-    const themeSetting = localStorage.getItem("theme") || "light"; // light | dark | system
-
-    // difficulty -> seconds
-    const difficultyTimes = {
-      easy: 10,
-      normal: 5,
-      hard: 3,
-      extreme: 3
-    };
-
-    // Apply theme (handles 'system' as well)
-    function applyTheme(theme) {
-      if (theme === "dark") {
-        document.body.classList.add("dark");
-      } else if (theme === "light") {
-        document.body.classList.remove("dark");
-      } else { // system
-        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.body.classList.toggle("dark", prefersDark);
-        // listen for changes
-        if (window.matchMedia) {
-          const mq = window.matchMedia("(prefers-color-scheme: dark)");
-          if (mq.addEventListener) {
-            mq.addEventListener('change', e => document.body.classList.toggle("dark", e.matches));
-          } else if (mq.addListener) {
-            mq.addListener(e => document.body.classList.toggle("dark", e.matches));
-          }
-        }
-      }
-    }
-
-    applyTheme(themeSetting);
-
-    // settings button behavior
-    document.getElementById("settingsBtn").addEventListener("click", () => {
-      window.location.href = "settings.html";
-    });
 
     async function loadTranslations() {
       try {
-        const response = await fetch('translations.json');
-        if (!response.ok) throw new Error('Errore nel caricare le traduzioni');
+        const response = await fetch("translations.json");
+        if (!response.ok) throw new Error("Errore nel caricare le traduzioni");
         const data = await response.json();
         translations = data;
         statNames = data.statNames || {};
         t = translations[lang] || translations.en;
         initUI();
-        loadPokemonList();
+        loadPokemonList(); // Carica i dati ma non avvia il gioco
       } catch (error) {
-        console.error('Errore nel caricamento delle traduzioni:', error);
-        alert('Impossibile caricare il file delle traduzioni.');
+        console.error("Errore nel caricamento delle traduzioni:", error);
+        alert("Impossibile caricare il file delle traduzioni.");
       }
     }
 
     function initUI() {
-      if (t.title) document.getElementById("title").innerText = t.title;
-      if (t.yes) document.getElementById("greater").innerText = t.yes;
-      if (t.no) document.getElementById("not-greater").innerText = t.no;
-      if (t.gameOver) document.getElementById("gameOverTitle").innerText = t.gameOver;
-      if (t.close) document.getElementById("closePopup").innerText = t.close;
-      if (t.record) document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
-      if (t.score) document.getElementById("score").innerText = `${t.score}: ${score}`;
+      // Traduce anche gli elementi del menu (sebbene siano in inglese)
+      // e gli elementi del gioco
+      document.getElementById("playButton").innerText = t.play || "Game"; // Aggiungi 'play' al tuo translations.json se vuoi tradurlo
+      document.getElementById("accountButton").innerText = t.account || "Account";
+      document.getElementById("settingsButton").innerText = t.settings || "Settings";
+
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("greater").innerText = t.yes;
+      document.getElementById("not-greater").innerText = t.no;
+      document.getElementById("gameOverTitle").innerText = t.gameOver;
+      document.getElementById("closePopup").innerText = t.close;
+      document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
+      document.getElementById("score").innerText = `${t.score}: ${score}`;
     }
 
     async function loadPokemonList() {
       try {
-        const response = await fetch('pokemonList.json');
-        if (!response.ok) throw new Error('Errore nel caricare il file JSON');
+        const response = await fetch("pokemonList.json");
+        if (!response.ok) throw new Error("Errore nel caricare il file JSON");
         pokemonList = await response.json();
-        startRound();
+        // NON AVVIARE IL GIOCO QUI!
+        // startRound(); // <-- RIGA RIMOSSA!
       } catch (error) {
-        console.error('Errore:', error);
-        alert('Non è stato possibile caricare la lista dei Pokémon.');
+        console.error("Errore:", error);
+        alert("Non è stato possibile caricare la lista dei Pokémon.");
       }
     }
+
+    // --- (Tutte le tue funzioni di gioco: getRandomPokemon, getSpriteUrl, updatePokemonDisplay, ecc. restano invariate) ---
 
     function getRandomPokemon() {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
 
     function getSpriteUrl(name) {
-      const normalized = name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+      const normalized = name
+        .toLowerCase()
+        .replace(/-/g, "") // remove all hyphens
+        .replace(/‎ /g, "")
+        .replace(/♂/g, "m")
+        .replace(/♀/g, "f")
+        .replace(/[^a-z0-9 ]/g, "") // allow only letters, digits, and normal spaces
+        .replace(/ /g, "-"); // replace normal spaces with dashes
       return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
     }
 
@@ -270,14 +267,13 @@
         opponentStat: opponent.stats[stat],
         isGreater: player.stats[stat] > opponent.stats[stat],
         playerName: player.name,
-        opponentName: opponent.name
+        opponentName: opponent.name,
       };
     }
 
     function startTimer() {
       clearInterval(timer);
-      // set time based on difficultySetting
-      timeLeft = difficultyTimes[difficultySetting] || 10;
+      timeLeft = 10;
       document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
 
       timer = setInterval(() => {
@@ -326,13 +322,13 @@
         const playerVal = comparison.playerStat;
         const oppVal = comparison.opponentStat;
         const diff = Math.abs(playerVal - oppVal);
-        const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? comparison.playerName : comparison.opponentName);
+        const winner = playerVal === oppVal ? "Tie" : playerVal > oppVal ? comparison.playerName : comparison.opponentName;
 
         const detailsLines = [
           reason,
           `${comparison.playerName}: ${playerVal} ${statLabel}`,
           `${comparison.opponentName}: ${oppVal} ${statLabel}`,
-          `${winner === "Tie" ? "" : `Δ ${diff} — ${winner} ${lang === "it" ? "vince" : (lang === "es" ? "gana" : "wins")}`}`
+          `${winner === "Tie" ? "" : `Δ ${diff} — ${winner} ${lang === "it" ? "vince" : lang === "es" ? "gana" : "wins"}`}`,
         ].filter(Boolean);
 
         wrongEl.innerText = detailsLines.join("\n");
@@ -344,7 +340,11 @@
     }
 
     function startRound() {
-      if (pokemonList.length === 0) return;
+      if (pokemonList.length === 0) {
+          console.error("Lista Pokémon non caricata o vuota!");
+          alert("Errore: lista Pokémon non trovata. Ricarica la pagina.");
+          return;
+      }
       gameOver = false;
 
       const player = getRandomPokemon();
@@ -356,21 +356,13 @@
       }
 
       const comparison = getComparison(player, opponent);
-
-      // update sprites normally...
       updatePokemonDisplay(player, opponent);
 
-      // ...but if extreme mode is active, overwrite both sprites with MissingNo
-      if (difficultySetting === "extreme") {
-        const missing = "https://play.pokemonshowdown.com/sprites/gen5/missingno.png";
-        document.getElementById("player-sprite").src = missing;
-        document.getElementById("opponent-sprite").src = missing;
-      }
-
       const statLabel = (statNames[lang] && statNames[lang][comparison.stat]) || statNames.en[comparison.stat] || comparison.stat;
-      const question = lang === "it"
-        ? `Il tuo ${player.name} ha più ${statLabel} di ${opponent.name}?`
-        : lang === "es"
+      const question =
+        lang === "it"
+          ? `Il tuo ${player.name} ha più ${statLabel} di ${opponent.name}?`
+          : lang === "es"
           ? `¿Tu ${player.name} tiene más ${statLabel} que ${opponent.name}?`
           : `Does your ${player.name} have more ${statLabel} than ${opponent.name}?`;
 
@@ -381,12 +373,40 @@
       startTimer();
     }
 
-    document.getElementById("closePopup").onclick = () => {
-      document.getElementById("gameOverPopup").style.display = "none";
-      location.reload();
-    };
+    // --- LOGICA DI GESTIONE DEL MENU ---
 
-    loadTranslations();
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainMenu = document.getElementById("mainMenu");
+      const gameContainer = document.getElementById("gameContainer");
+      const playButton = document.getElementById("playButton");
+      const accountButton = document.getElementById("accountButton");
+      const settingsButton = document.getElementById("settingsButton");
+
+      // 1. Avvia il caricamento delle traduzioni e dei dati
+      loadTranslations();
+
+      // 2. Gestore per il pulsante "Game"
+      playButton.addEventListener("click", () => {
+        mainMenu.style.display = "none";    // Nasconde il menu
+        gameContainer.style.display = "block"; // Mostra il gioco
+        startRound();                       // Avvia il primo round del gioco
+      });
+
+      // 3. Gestori per gli altri pulsanti (placeholder)
+      accountButton.addEventListener("click", () => {
+        alert("Funzione 'Account' non ancora implementata.");
+      });
+
+      settingsButton.addEventListener("click", () => {
+        alert("Funzione 'Impostazioni' non ancora implementata.");
+      });
+
+      // 4. Gestore per il popup di Game Over
+      document.getElementById("closePopup").onclick = () => {
+        document.getElementById("gameOverPopup").style.display = "none";
+        location.reload(); // Ricarica la pagina, che mostrerà di nuovo il menu principale
+      };
+    });
   </script>
 </body>
 </html>
