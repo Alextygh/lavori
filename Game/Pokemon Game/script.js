@@ -528,6 +528,7 @@ function setupNavigationListeners() {
         }
         // Aggiorna il record nel gioco SE è quello attivo
         if (document.getElementById("gameContainer").style.display === "block") {
+        }
       });
     }
 
@@ -675,7 +676,6 @@ function setupNavigationListeners() {
       document.getElementById("not-greater").innerText = t.no || "No";
       document.getElementById("gameOverTitle").innerText = t.gameOver || "Game Over!";
       document.getElementById("closePopup").innerText = t.close || "Close";
-      document.getElementById("highscore").innerText = `${t.record || "Record"}: ${highScore}`;
       document.getElementById("score").innerText = `${t.score || "Score"}: ${score}`;
       document.getElementById("pokedexSearch").placeholder = t.search || "Search Pokémon...";
 
@@ -1430,3 +1430,4 @@ async function loadLeaderboardPage() {
       displayPokedex(filtered);
 
     });
+
