@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokémon Game - Menu</title>
+  <link rel="stylesheet" href="style.css" />
+
+
+  </head>
+<body>
+
+  <div id="authStatus" data-translate="statusLoading">Caricamento...</div>
+
+  <div id="mainMenu">
+    <h1>Pokémon Game</h1>
+    <div class="menu-options">
+      <button id="playButton" data-translate="play">Game</button>
+      <button id="leaderboardButton" data-translate="leaderboard">Classifica</button>
+      <button id="accountButton" data-translate="account">Account</button>
+      <button id="settingsButton" data-translate="settings">Settings</button>
+    </div>
+  </div>
+
+  <div id="gameContainer" class="page-container">
+    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+    <h1 id="title"></h1>
+    <div id="score"></div>
+    <div id="highscore"></div>
+    <div id="timer"></div>
+
+    <div class="container">
+      <div id="player" class="pokemon">
+        <img id="player-sprite" src="" alt="Pokémon" />
+        <div id="player-name"></div>
+      </div>
+      <div id="opponent" class="pokemon">
+        <img id="opponent-sprite" src="" alt="Pokémon" />
+        <div id="opponent-name"></div>
+      </div>
+    </div>
+    <div id="comparison" style="margin-top: 20px; font-size: 18px;"></div>
+    <div class="options">
+      <button id="greater"></button>
+      <button id="not-greater"></button>
+    </div>
+  </div>
+
+  <div id="leaderboardContainer" class="page-container">
+    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+    <h2 data-translate="leaderboard">Classifica</h2>
+    <div class="leaderboard-list-container">
+      <ol id="leaderboardList">
+        </ol>
+    </div>
+  </div>
+
+  <div id="accountContainer" class="page-container">
+    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+    <h2 data-translate="account">Account</h2>
+
+    <div id="authBenefitsContainer" class="auth-benefits" style="display: none;">
+      <h3 data-translate="benefitsTitle">Perché creare un account?</h3>
+      <ul>
+        <li data-translate="benefitsItem1">Salva i tuoi record e progressi sul cloud.</li>
+        <li data-translate="benefitsItem2">Competi nella classifica globale.</li>
+        <li data-translate="benefitsItem3">Sincronizza il tuo Pokédex sbloccato su tutti i dispositivi.</li>
+      </ul>
+    </div>
+
+    <div id="authContainer">
+      <div class="auth-container" id="loginForm">
+        <h3 data-translate="login">Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+        <button id="loginButton" data-translate="loginButton">Login</button>
+        <div id="authErrorLogin" class="auth-error"></div>
+        <div class="auth-toggle">
+          <span data-translate="authToggleToRegister">Non hai un account?</span>
+          <button id="showRegister" data-translate="authToggleToRegisterBtn">Registrati</button>
+        </div>
+        <div class="auth-toggle">
+          <button id="showReset" data-translate="authToggleToResetBtn">Password dimenticata?</button>
+        </div>
+      </div>
+
+      <div class="auth-container" id="registerForm" style="display: none;">
+        <h3 data-translate="register">Registrati</h3>
+        <input type="email" id="registerEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="registerPassword" placeholder="Password" autocomplete="new-password">
+        <input type="text" id="registerDisplayName" placeholder="Nome visualizzato (unico)" autocomplete="username" maxlength="20">
+        <p class="data-privacy-notice" data-translate="privacyNotice">Creando un account, accetti che la tua email, nome utente e punteggi vengano salvati. Non condividiamo i tuoi dati.</p>
+        <button id="registerButton" data-translate="registerButton">Registrati</button>
+        <div id="authErrorRegister" class="auth-error"></div>
+        <div class="auth-toggle">
+          <span data-translate="authToggleToLogin">Hai già un account?</span>
+          <button id="showLogin" data-translate="authToggleToLoginBtn">Login</button>
+        </div>
+      </div>
+
+      <div class="auth-container" id="resetForm" style="display: none;">
+        <h3 data-translate="resetTitle">Recupera Password</h3>
+        <p data-translate="resetMessage">Inserisci la tua email e ti invieremo un link per resettare la password.</p>
+        <input type="email" id="resetEmail" placeholder="Email" autocomplete="email">
+        <button id="resetButton" data-translate="resetButton">Invia link</button>
+        <div id="authErrorReset" class="auth-error"></div> <div class="auth-toggle">
+          <span data-translate="authToggleToLogin">Tornare al login?</span>
+          <button id="showLoginFromReset" data-translate="authToggleToLoginBtn">Login</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="verificationContainer" class="auth-container" style="display: none;">
+      <h3 data-translate="verifyTitle">Verifica la tua Email</h3>
+      <p data-translate="verifyMessage">Ti abbiamo inviato un link di verifica. Controlla la tua casella di posta e clicca sul link per attivare il tuo account.</p>
+      <button id="resendVerificationButton" class="secondary" data-translate="verifyResend">Invia di nuovo</button>
+      <div id="authErrorVerify" class="auth-error"></div> </div>
+
+    <div id="userDataContainer">
+      <div id="statsSummary">
+        <div><span data-translate="highScore">Record</span>: <span id="accountHighScore">0</span></div>
+        <div><span data-translate="gamesPlayed">Partite Giocate</span>: <span id="accountGamesPlayed">0</span></div>
+        <div><span data-translate="memberSince">Membro dal</span>: <span id="accountCreatedAt">...</span></div>
+      </div>
+      
+      <h3 data-translate="pokedex">Pokédex</h3>
+      <input type="text" id="pokedexSearch" placeholder="Cerca Pokémon...">
+      <div id="pokedexGrid" class="pokedex-grid"></div>
+    </div>
+
+    <div id="pokemonModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modalName"></h2>
+        <img id="modalImage" src="" alt="">
+        <div id="modalStats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsContainer" class="page-container">
+    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+    <h2 data-translate="settings">Settings</h2>
+
+    <div class="settings-group">
+      <label for="difficultySetting" data-translate="difficulty">Difficoltà</label>
+      <select id="difficultySetting">
+        <option value="easy" data-translate="easy">Facile</option>
+        <option value="medium" data-translate="medium">Medio</option>
+        <option value="hard" data-translate="hard">Difficile</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label for="themeSetting" data-translate="theme">Tema</label>
+      <select id="themeSetting">
+        <option value="system" data-translate="system">Sistema</option>
+        <option value="light" data-translate="light">Chiaro</option>
+        <option value="dark" data-translate="dark">Scuro</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label data-translate="language">Lingua</label>
+      <div id="languageSelector" class="language-options">
+        </div>
+    </div>
+  </div>
+
+  <div id="gameOverPopup">
+    <div class="popup-content">
+      <h2 id="gameOverTitle">Game Over!</h2>
+      <p id="finalScore"></p>
+      <p id="highScoreMessage"></p>
+      <div id="wrongDetails"></div>
+      <button id="closePopup">Chiudi</button>
+    </div>
+  </div>
+
+  <div id="cookieConsentBanner">
+    <p id="cookieMessage" data-translate="cookieMessage">Questo sito usa cookie per salvare i tuoi record e preferenze. Accetti?</p>
+    <button id="cookieAcceptButton" data-translate="cookieButton">Accetta</button>
+  </div>
+
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

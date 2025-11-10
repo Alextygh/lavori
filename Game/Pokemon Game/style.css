@@ -1,0 +1,515 @@
+    :root {
+      --bg-color: #f5f5f5;
+      --text-color: #333;
+      --card-bg: #fff;
+      --border-color: #ccc;
+      --primary-blue: #3B4CCA;
+      --primary-yellow: #ffcc00;
+      --silhouette: #333;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* --- Modalità Scura --- */
+    body.dark-mode {
+      --bg-color: #333;
+      --text-color: #f0f0f0;
+      --card-bg: #444;
+      --border-color: #555;
+      --silhouette: #000;
+    }
+
+    /* --- Contenitori di Pagina --- */
+    .page-container {
+      display: none; /* Nascosto di default */
+      padding: 20px;
+      padding-top: 100px; 
+      position: relative;
+    }
+
+    .back-to-menu {
+      position: absolute;
+      top: 55px;
+      left: 15px;
+      padding: 8px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      z-index: 10; 
+    }
+
+    h1, h2, h3 {
+      color: var(--primary-yellow);
+    }
+    h3 {
+      text-align: center;
+    }
+
+    /* --- Menu Principale --- */
+    #mainMenu {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding-top: 50px;
+      box-sizing: border-box; 
+    }
+    #mainMenu h1 {
+      font-size: 3.5rem;
+      text-shadow: 2px 2px 4px #333;
+    }
+    .menu-options button {
+      display: block;
+      width: 250px;
+      margin: 15px auto;
+      padding: 20px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--primary-blue);
+      color: white;
+      transition: background-color 0.3s;
+    }
+    .menu-options button:hover {
+      background-color: #5E6ABC;
+    }
+
+    /* --- Gioco (Stili Originali) --- */
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 30px;
+    }
+    .pokemon { text-align: center; }
+    .pokemon img {
+      width: 100px;
+      height: 100px;
+      image-rendering: pixelated;
+    }
+    .options { margin-top: 20px; }
+    .options button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #score, #highscore {
+      font-size: 20px;
+      margin-top: 15px;
+    }
+    #gameOverPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #gameOverPopup .popup-content {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 360px;
+      color: var(--text-color); 
+    }
+    #timer { font-size: 22px; color: #d32f2f; }
+    #wrongDetails { white-space: pre-wrap; }
+    
+    /* --- Classifica --- */
+    .leaderboard-list-container {
+      max-width: 500px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    #leaderboardList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    #leaderboardList li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    #leaderboardList li:last-child {
+      border-bottom: none;
+    }
+    #leaderboardList li .rank {
+      font-weight: bold;
+      color: var(--primary-blue);
+      min-width: 40px;
+      text-align: left;
+    }
+    #leaderboardList li .name {
+      flex-grow: 1;
+      text-align: left;
+      margin-left: 15px;
+      word-break: break-all;
+    }
+    #leaderboardList li .score {
+      font-weight: bold;
+      color: var(--primary-yellow);
+    }
+    #leaderboardList .loading-msg {
+        justify-content: center;
+        text-align: center;
+        font-style: italic;
+        color: var(--text-color);
+    }
+
+    /* --- Account & Pokédex --- */
+
+    /* Stili per Moduli Auth */
+    .auth-container {
+      max-width: 400px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    .auth-container h3 {
+      text-align: center;
+      margin-top: 0;
+    }
+    .auth-container p {
+        text-align: center;
+        font-size: 0.95rem;
+        margin: 15px 0;
+    }
+    .auth-container input {
+      width: 95%;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .auth-container button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary-blue);
+      color: white;
+    }
+    .auth-toggle {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .auth-toggle button {
+      background: none;
+      color: var(--primary-blue);
+      text-decoration: underline;
+      padding: 5px;
+      width: auto;
+      font-size: 0.9rem;
+    }
+    /* Stile per pulsante secondario (es. Invia di nuovo) */
+    .auth-container button.secondary {
+        background-color: var(--primary-yellow);
+        color: #333;
+        margin-top: 10px;
+    }
+
+    .auth-error {
+      color: #d32f2f;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    /* Messaggio di successo (verde) */
+    .auth-success {
+      color: #388e3c;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    /* --- Benefici Account --- */
+    .auth-benefits {
+      max-width: 400px;
+      margin: 20px auto;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    .auth-benefits h3 {
+      text-align: center;
+      margin-top: 0;
+    }
+    .auth-benefits ul {
+      list-style-type: '✔';
+      padding-left: 25px;
+    }
+    .auth-benefits li {
+      padding-left: 10px;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    /* --- Nota Privacy --- */
+    .data-privacy-notice {
+      font-size: 0.8rem;
+      text-align: center;
+      margin: 15px 0 10px 0;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    /* Stato Auth Globale */
+    #authStatus {
+      padding: 10px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 0.9rem;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 998;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    body.dark-mode #authStatus {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    #authStatus button {
+      margin-left: 10px;
+      background: var(--primary-yellow);
+      color: #333;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Contenitori Dati Account */
+    #authContainer { display: none; }
+    #userDataContainer { display: none; }
+    #verificationContainer { display: none; }
+
+
+    #statsSummary {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+      font-size: 1.2rem;
+      text-align: left;
+    }
+    #statsSummary div { margin: 10px 0; }
+    #statsSummary div:last-child span:first-child { 
+        font-weight: bold; 
+    }
+
+    #pokedexSearch {
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+    .pokedex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      justify-items: center;
+    }
+    .pokedex-pokemon {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 110px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .pokedex-pokemon:hover { transform: scale(1.05); }
+    .pokedex-pokemon img {
+      width: 80px;
+      height: 80px;
+      image-rendering: pixelated;
+    }
+    .pokedex-pokemon-name {
+      margin-top: 8px;
+      font-size: 14px;
+      word-wrap: break-word;
+    }
+    /* Stile per Pokémon Bloccati */
+    .pokedex-pokemon.locked img {
+      filter: brightness(0);
+      opacity: 0.8;
+    }
+    .pokedex-pokemon.locked .pokedex-pokemon-name {
+      color: var(--silhouette);
+    }
+
+    /* Modal Pokédex */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      text-align: left;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal img {
+      display: block;
+      margin: 0 auto 10px auto;
+      width: 120px;
+      height: 120px;
+      image-rendering: pixelated;
+    }
+    .stat { margin: 5px 0; }
+    .stat-name { font-size: 14px; margin-bottom: 2px; }
+    .stat-bar { height: 10px; background-color: #eee; border-radius: 5px; overflow: hidden; }
+    .stat-bar-inner { height: 100%; background-color: #4caf50; width: 0%; }
+    /* Modal per Pokémon Bloccati */
+    .modal img.locked {
+      filter: brightness(0);
+    }
+
+    /* --- Impostazioni --- */
+    .settings-group {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: left;
+    }
+    .settings-group label {
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .settings-group select, .settings-group .language-options {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+    .language-options button {
+      font-size: 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+    .language-options button:hover {
+      background-color: rgba(0,0,0,0.1);
+    }
+    .language-options button.active {
+      background-color: var(--primary-blue);
+      color: white;
+    }
+
+    /* --- Cookie Banner --- */
+    #cookieConsentBanner {
+      display: none; /* Nascosto di default */
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: var(--card-bg);
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      padding: 15px;
+      box-sizing: border-box;
+      z-index: 2000;
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+    }
+    #cookieConsentBanner p {
+      margin: 0 0 10px 0;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 15px;
+    }
+    #cookieConsentBanner button {
+      padding: 8px 15px;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    
+    @media (max-width: 480px) {
+      #mainMenu h1 { font-size: 2.5rem; }
+      .menu-options button { width: 80%; }
+      .container { flex-direction: column; gap: 10px; }
+      #gameOverPopup .popup-content { width: 90%; }
+      #cookieConsentBanner p {
+        display: block;
+        margin-bottom: 10px;
+        margin-right: 0;
+      }
+    }
