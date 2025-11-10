@@ -13,7 +13,17 @@
   <div id="authStatus" data-translate="statusLoading">Caricamento...</div>
 
   <div id="mainMenu">
-    <h1>Pokémon Game</h1>
+    <h1>Pokéstats</h1>
+    <div id="gameModeModal" class="popup-container">
+  <div class="popup-content">
+    <h2 data-translate="chooseModeTitle">Scegli la Modalità</h2>
+    <div class="menu-options">
+      <button id="classicModeButton" data-translate="classicMode">Chi è più forte?</button>
+      <button id="sortModeButton" data-translate="sortMode">Metti in ordine!</button>
+    </div>
+    <button id="closeGameModeModal" class="secondary" data-translate="backToMenu">&larr; Menu</button>
+  </div>
+</div>
     <div class="menu-options">
       <button id="playButton" data-translate="play">Game</button>
       <button id="leaderboardButton" data-translate="leaderboard">Classifica</button>
@@ -23,11 +33,37 @@
   </div>
 
   <div id="gameContainer" class="page-container">
-    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
-    <h1 id="title"></h1>
-    <div id="score"></div>
-    <div id="highscore"></div>
-    <div id="timer"></div>
+  <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+  <h1 id="title"></h1>
+  <div id="score"></div>
+  <div id="highscore"></div>
+  <div id="timer"></div>
+
+  <div id="classicGameContainer">
+    <div class="container">
+      <div id="player" class="pokemon">
+        <img id="player-sprite" src="" alt="Pokémon" />
+        <div id="player-name"></div>
+      </div>
+      <div id="opponent" class="pokemon">
+        <img id="opponent-sprite" src="" alt="Pokémon" />
+        <div id="opponent-name"></div>
+      </div>
+    </div>
+    <div id="comparison" style="margin-top: 20px; font-size: 18px;"></div>
+    <div class="options">
+      <button id="greater"></button>
+      <button id="not-greater"></button>
+    </div>
+  </div>
+
+  <div id="sortGameContainer" style="display: none;">
+    <div id="sortQuestion" style="margin-top: 20px; font-size: 18px;"></div>
+    <ul id="sortableList">
+      </ul>
+    <button id="checkSortButton" data-translate="checkOrderButton" style="margin-top: 20px;"></button>
+  </div>
+</div>
 
     <div class="container">
       <div id="player" class="pokemon">
@@ -47,13 +83,29 @@
   </div>
 
   <div id="leaderboardContainer" class="page-container">
-    <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
-    <h2 data-translate="leaderboard">Classifica</h2>
-    <div class="leaderboard-list-container">
-      <ol id="leaderboardList">
-        </ol>
+  <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
+  <h2 data-translate="leaderboard">Classifica</h2>
+
+  <div class="leaderboard-controls">
+    <div class="tab-buttons-container">
+      <button id="leaderboardTabClassic" class="tab-button active" data-translate="classicMode">Chi è più forte?</button>
+      <button id="leaderboardTabSort" class="tab-button" data-translate="sortMode">Metti in ordine!</button>
+    </div>
+    <div class="settings-group" style="margin-top: 10px; padding: 10px; max-width: 300px;">
+      <label for="leaderboardDifficultySelect" data-translate="difficulty">Difficoltà</label>
+      <select id="leaderboardDifficultySelect">
+        <option value="easy" data-translate="easy">Facile</option>
+        <option value="medium" data-translate="medium">Medio</option>
+        <option value="hard" data-translate="hard">Difficile</option>
+      </select>
     </div>
   </div>
+
+  <div class="leaderboard-list-container">
+    <ol id="leaderboardList">
+      </ol>
+  </div>
+</div>
 
   <div id="accountContainer" class="page-container">
     <button class="back-to-menu" data-translate="backToMenu">&larr; Menu</button>
