@@ -39,31 +39,45 @@
     // ===================================
 
     // --- CHIAVI LOCALSTORAGE ---
-    const HIGHSCORE_KEY = "highScore";
-    const GAMES_PLAYED_KEY = "gamesPlayed";
-    const UNLOCKED_POKEMON_KEY = "unlockedPokemon";
-    const LANG_KEY = "lang";
-    const THEME_KEY = "theme";
-    const DIFFICULTY_KEY = "difficulty";
-    const COOKIE_KEY = "cookieConsent";
+    // --- CHIAVI LOCALSTORAGE ---
+// MODIFICATE per la nuova struttura dati
+const HIGHSCORES_KEY = "highScores"; // Era HIGHSCORE_KEY
+const GAMES_PLAYED_KEY = "gamesPlayed"; // Rimane, ma la struttura dati cambia
+const UNLOCKED_POKEMON_KEY = "unlockedPokemon";
+const LANG_KEY = "lang";
+const THEME_KEY = "theme";
+const DIFFICULTY_KEY = "difficulty";
+const COOKIE_KEY = "cookieConsent";
 
-    // --- VARIABILI GLOBALI ---
-    let pokemonList = [];
-    let unlockedPokemon = []; 
-    let score = 0;
-    let gamesPlayed = 0;      
-    let highScore = 0;        
-    let gameOver = false;
-    let timer;
-    let timeLeft = 10;
-    let t = {}; 
-    let lang = "it";
-    let difficulty = "easy";
-    let currentComparison = null; 
+// --- VARIABILI GLOBALI ---
+let pokemonList = [];
+let unlockedPokemon = []; 
+let score = 0;
+let gameOver = false;
+let timer;
+let timeLeft = 10;
+let t = {}; 
+let lang = "it";
+let difficulty = "easy";
+let currentComparison = null; 
 
-    // Variabili Firebase
-    let currentUser = null; 
-    let userData = null;    
+// NUOVE Variabili Globali
+let currentGameMode = null; // 'classic' o 'sort'
+let sortableStat = null; // Stat da ordinare
+let correctSortOrder = []; // Lista ID ordinati
+let highScores = { // NUOVA struttura per i punteggi
+  classic: { easy: 0, medium: 0, hard: 0 },
+  sort: { easy: 0, medium: 0, hard: 0 }
+};
+let gamesPlayed = { // NUOVA struttura per le partite
+  classic: 0,
+  sort: 0
+};
+
+
+// Variabili Firebase
+let currentUser = null; 
+let userData = null;
 
     // --- OGGETTO TRADUZIONI (INTEGRATO) ---
     const translations = {
@@ -261,61 +275,94 @@
       difficulty = localStorage.getItem(DIFFICULTY_KEY) || "easy";
     }
 
-    function loadGuestData() {
-      highScore = parseInt(localStorage.getItem(HIGHSCORE_KEY) || 0);
-      gamesPlayed = parseInt(localStorage.getItem(GAMES_PLAYED_KEY) || 0);
-      unlockedPokemon = JSON.parse(localStorage.getItem(UNLOCKED_POKEMON_KEY) || "[]");
-    }
+    // RIGA 389 (circa)
+function loadGuestData() {
+  // MODIFICATO per la nuova struttura
+  highScores = JSON.parse(localStorage.getItem(HIGHSCORES_KEY) || '{"classic": {"easy": 0, "medium": 0, "hard": 0}, "sort": {"easy": 0, "medium": 0, "hard": 0}}');
+  gamesPlayed = JSON.parse(localStorage.getItem(GAMES_PLAYED_KEY) || '{"classic": 0, "sort": 0}');
+  unlockedPokemon = JSON.parse(localStorage.getItem(UNLOCKED_POKEMON_KEY) || "[]");
+  
+  // Assicura che la struttura sia completa se il local storage è parziale
+  const defaultScores = { classic: { easy: 0, medium: 0, hard: 0 }, sort: { easy: 0, medium: 0, hard: 0 } };
+  const defaultGames = { classic: 0, sort: 0 };
+  highScores = { ...defaultScores, ...highScores };
+  highScores.classic = { ...defaultScores.classic, ...highScores.classic };
+  highScores.sort = { ...defaultScores.sort, ...highScores.sort };
+  gamesPlayed = { ...defaultGames, ...gamesPlayed };
+}
 
-    async function loadUserData(uid) {
-      try {
-        const userRef = doc(fb_db, "users", uid);
-        const userSnap = await getDoc(userRef);
+    // RIGA 398 (circa)
+async function loadUserData(uid) {
+  try {
+    const userRef = doc(fb_db, "users", uid);
+    const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          userData = userSnap.data();
-          highScore = userData.highScore;
-          gamesPlayed = userData.gamesPlayed;
-          unlockedPokemon = userData.unlockedPokemon;
-        } else {
-          console.warn("Dati utente non trovati, sto creando un profilo...");
-          await createUserData(uid, currentUser.email, "Giocatore"); // Fallback
-          loadGuestData(); 
-        }
-      } catch (error)
-      {
-        console.error("Errore nel caricare i dati utente:", error);
-        loadGuestData();
-      }
-    }
-
-    async function createUserData(uid, email, displayName) {
-      const newUserRef = doc(fb_db, "users", uid);
-      const newDisplayNameRef = doc(fb_db, "displayNames", displayName.toLowerCase());
-
-      const newUserData = {
-        uid: uid,
-        email: email,
-        displayName: displayName,
-        createdAt: serverTimestamp(), 
-        highScore: 0,
-        gamesPlayed: 0,
-        unlockedPokemon: []
-      };
+    if (userSnap.exists()) {
+      userData = userSnap.data();
       
-      try {
-        const batch = writeBatch(fb_db); 
-        batch.set(newUserRef, newUserData);
-        batch.set(newDisplayNameRef, { uid: uid });
-        
-        await batch.commit();
-        await loadUserData(uid); 
+      // MODIFICATO per la nuova struttura
+      const defaultScores = { classic: { easy: 0, medium: 0, hard: 0 }, sort: { easy: 0, medium: 0, hard: 0 } };
+      const defaultGames = { classic: 0, sort: 0 };
 
-      } catch (error) {
-        console.error("Errore creazione dati utente:", error);
-      }
+      highScores = userData.highScores ? 
+          { ...defaultScores, ...userData.highScores } : 
+          defaultScores;
+      // Assicura sub-oggetti
+      highScores.classic = { ...defaultScores.classic, ...highScores.classic };
+      highScores.sort = { ...defaultScores.sort, ...highScores.sort };
+
+      gamesPlayed = userData.gamesPlayed ? 
+          { ...defaultGames, ...userData.gamesPlayed } : 
+          defaultGames;
+
+      unlockedPokemon = userData.unlockedPokemon || [];
+
+    } else {
+      console.warn("Dati utente non trovati, sto creando un profilo...");
+      await createUserData(uid, currentUser.email, "Giocatore"); // Fallback
+      loadGuestData(); 
     }
+  } catch (error)
+  {
+    console.error("Errore nel caricare i dati utente:", error);
+    loadGuestData();
+  }
+}
 
+    // RIGA 421 (circa)
+async function createUserData(uid, email, displayName) {
+  const newUserRef = doc(fb_db, "users", uid);
+  const newDisplayNameRef = doc(fb_db, "displayNames", displayName.toLowerCase());
+
+  const newUserData = {
+    uid: uid,
+    email: email,
+    displayName: displayName,
+    createdAt: serverTimestamp(), 
+    // MODIFICATO per la nuova struttura
+    highScores: {
+      classic: { easy: 0, medium: 0, hard: 0 },
+      sort: { easy: 0, medium: 0, hard: 0 }
+    },
+    gamesPlayed: {
+      classic: 0,
+      sort: 0
+    },
+    unlockedPokemon: []
+  };
+  
+  try {
+    const batch = writeBatch(fb_db); 
+    batch.set(newUserRef, newUserData);
+    batch.set(newDisplayNameRef, { uid: uid });
+    
+    await batch.commit();
+    await loadUserData(uid); 
+
+  } catch (error) {
+    console.error("Errore creazione dati utente:", error);
+  }
+}
 
     async function loadGameData() {
       try {
@@ -333,41 +380,74 @@
       }
     }
 
-    function setupNavigationListeners() {
-      document.getElementById("playButton").addEventListener("click", () => {
-        score = 0; 
-        document.getElementById("score").innerText = `${t.score}: ${score}`;
-        
-        showPage("gameContainer");
-        startRound();
-      });
-      document.getElementById("leaderboardButton").addEventListener("click", () => {
-        loadLeaderboardPage();
-        showPage("leaderboardContainer");
-      });
-      document.getElementById("accountButton").addEventListener("click", () => {
-        loadAccountPage(); // Questa ora gestisce la logica di visualizzazione
-        showPage("accountContainer");
-      });
-      document.getElementById("settingsButton").addEventListener("click", () => {
-        loadSettingsPage();
-        showPage("settingsContainer");
-      });
+    // RIGA 451 (circa)
+function setupNavigationListeners() {
+  document.getElementById("playButton").addEventListener("click", () => {
+    // MODIFICATO: Mostra il modal invece di iniziare il gioco
+    document.getElementById("gameModeModal").style.display = "flex";
+  });
+  
+  // NUOVI LISTENER PER IL MODAL
+  document.getElementById("closeGameModeModal").addEventListener("click", () => {
+    document.getElementById("gameModeModal").style.display = "none";
+  });
+  
+  document.getElementById("classicModeButton").addEventListener("click", () => {
+    currentGameMode = "classic";
+    document.getElementById("gameModeModal").style.display = "none";
+    showPage("gameContainer");
+    startGame();
+  });
+  
+  document.getElementById("sortModeButton").addEventListener("click", () => {
+    currentGameMode = "sort";
+    document.getElementById("gameModeModal").style.display = "none";
+    showPage("gameContainer");
+    startGame();
+  });
 
-      document.querySelectorAll(".back-to-menu").forEach(button => {
-        button.addEventListener("click", () => {
-          clearInterval(timer); 
-          showPage("mainMenu");
-        });
-      });
+  document.getElementById("leaderboardButton").addEventListener("click", () => {
+    showPage("leaderboardContainer");
+    loadLeaderboardPage(); // Carica i dati (ora ha i listener)
+  });
+  
+  document.getElementById("accountButton").addEventListener("click", () => {
+    clearInterval(timer); // BUG FIX: Ferma il timer
+    loadAccountPage(); 
+    showPage("accountContainer");
+  });
+  
+  document.getElementById("settingsButton").addEventListener("click", () => {
+    loadSettingsPage();
+    showPage("settingsContainer");
+  });
 
-      document.getElementById("closePopup").onclick = () => {
-        document.getElementById("gameOverPopup").style.display = "none";
-        score = 0; 
-        document.getElementById("score").innerText = `${t.score}: ${score}`;
-        startRound();
-      };
-    }
+  document.querySelectorAll(".back-to-menu").forEach(button => {
+    button.addEventListener("click", () => {
+      clearInterval(timer); 
+      showPage("mainMenu");
+    });
+  });
+
+  document.getElementById("closePopup").onclick = () => {
+    document.getElementById("gameOverPopup").style.display = "none";
+    // MODIFICATO: Riavvia il gioco corretto
+    startGame();
+  };
+  
+  // NUOVI LISTENER PER I TAB DELLA CLASSIFICA
+  document.getElementById("leaderboardTabClassic").addEventListener("click", () => {
+    document.getElementById("leaderboardTabClassic").classList.add("active");
+    document.getElementById("leaderboardTabSort").classList.remove("active");
+    loadLeaderboardPage();
+  });
+  document.getElementById("leaderboardTabSort").addEventListener("click", () => {
+    document.getElementById("leaderboardTabClassic").classList.remove("active");
+    document.getElementById("leaderboardTabSort").classList.add("active");
+    loadLeaderboardPage();
+  });
+  document.getElementById("leaderboardDifficultySelect").addEventListener("change", loadLeaderboardPage);
+}
     
     function setupCookieBanner() {
       const banner = document.getElementById("cookieConsentBanner");
@@ -434,8 +514,9 @@
           currentUser = null;
           userData = null;
           loadGuestData(); 
-          authStatus.innerHTML = `${t.statusGuest || "You are playing as <strong>Guest</strong>."} <button id="loginShowButton">${t.statusBtnLogin || "Login/Register"}</button>`;
+          authStatus.innerHTML = `${t.statusGuest || "..."} <button id="loginShowButton">${t.statusBtnLogin || "..."}</button>`;
           document.getElementById("loginShowButton").addEventListener("click", () => {
+            clearInterval(timer); // BUG FIX: Ferma il timer
             loadAccountPage();
             showPage("accountContainer");
           });
@@ -447,8 +528,6 @@
         }
         // Aggiorna il record nel gioco SE è quello attivo
         if (document.getElementById("gameContainer").style.display === "block") {
-          document.getElementById("highscore").innerText = `${t.record}: ${highScore}`;
-        }
       });
     }
 
@@ -591,7 +670,7 @@
       document.title = t.title || "Pokémon Game";
       
       // Aggiorna testi che non usano data-translate (se ce ne sono)
-      document.getElementById("title").innerText = t.title || "Pokémon Game";
+      document.getElementById("title").innerText = t.title || "Pokéstats";
       document.getElementById("greater").innerText = t.yes || "Yes";
       document.getElementById("not-greater").innerText = t.no || "No";
       document.getElementById("gameOverTitle").innerText = t.gameOver || "Game Over!";
@@ -690,47 +769,72 @@
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
     
-    function getComparison(player, opponent) {
-      const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
-      let stat, playerStat, opponentStat;
+    // MODIFICATO: per cercare differenze di statistiche in base alla difficoltà
+function getComparison(player, opponent) {
+  const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
+  let stat, playerStat, opponentStat;
+  let attempts = 0;
 
-      // MODIFICA: Loop finché non troviamo uno stat con valori DIVERSI
-      do {
-        stat = stats[Math.floor(Math.random() * stats.length)];
-        playerStat = player.stats[stat];
-        opponentStat = opponent.stats[stat];
-        // Questo previene i pareggi, assicurando che il gioco continui
-      } while (playerStat === opponentStat && pokemonList.length > 1); 
+  // Cerca uno stat con una differenza appropriata
+  do {
+    stat = stats[Math.floor(Math.random() * stats.length)];
+    playerStat = player.stats[stat];
+    opponentStat = opponent.stats[stat];
+    
+    if (playerStat === opponentStat && pokemonList.length > 1) continue;
 
-      return {
-        stat,
-        playerStat: playerStat,
-        opponentStat: opponentStat,
-        isGreater: playerStat > opponentStat,
-        player: player,
-        opponent: opponent
-      };
-    }
+    const diff = Math.abs(playerStat - opponentStat);
 
-    function startTimer() {
+    if (difficulty === "hard" && diff > 25) continue;
+    if (difficulty === "medium" && diff > 50) continue;
+    
+    // Se 'easy', qualsiasi differenza (non zero) va bene
+    // Se 'medium' o 'hard', e la differenza è accettabile, esci
+    break;
+
+  } while (++attempts < 50); // Safety break
+
+  return {
+    stat,
+    playerStat: playerStat,
+    opponentStat: opponentStat,
+    isGreater: playerStat > opponentStat,
+    player: player,
+    opponent: opponent
+  };
+}
+
+    // MODIFICATO: per gestire tempi diversi per modalità
+function startTimer() {
+  clearInterval(timer);
+
+  if (currentGameMode === "classic") {
+    if (difficulty === "hard") timeLeft = 5;
+    else if (difficulty === "medium") timeLeft = 7;
+    else timeLeft = 10;
+  } else {
+    // Modalità Sort!
+    timeLeft = 20; // Tempo fisso
+  }
+  
+  document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
+  
+  timer = setInterval(() => {
+    if (gameOver) {
       clearInterval(timer);
-      if (difficulty === "hard") timeLeft = 5;
-      else if (difficulty === "medium") timeLeft = 7;
-      else timeLeft = 10;
-      document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
-      timer = setInterval(() => {
-        if (gameOver) {
-          clearInterval(timer);
-          return;
-        }
-        timeLeft--;
-        document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          triggerGameOver(t.timeout, currentComparison);
-        }
-      }, 1000);
+      return;
     }
+    timeLeft--;
+    document.getElementById("timer").innerText = `${t.time}: ${timeLeft}s`;
+    
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      // MODIFICATO: Dettagli per il timeout
+      let details = currentGameMode === 'classic' ? currentComparison : { stat: sortableStat, correctOrder: correctSortOrder };
+      triggerGameOver(t.timeout, details);
+    }
+  }, 1000);
+}
     
     function handleAnswer(isGreater) {
       if (gameOver) return;
@@ -763,102 +867,365 @@
       }
     }
     
-    async function triggerGameOver(reason, comparison) {
-      clearInterval(timer);
-      gameOver = true;
-      let newRecord = false;
+    // MODIFICATO: Logica di salvataggio e visualizzazione high score
+async function triggerGameOver(reason, details) {
+  clearInterval(timer);
+  gameOver = true;
+  let newRecord = false;
 
-      gamesPlayed++;
+  // Aggiorna la partita giocata per la modalità corrente
+  if (currentGameMode) {
+      gamesPlayed[currentGameMode]++;
+  }
 
-      if (score > highScore) {
-        highScore = score;
-        newRecord = true;
+  // Controlla e aggiorna l'high score per la modalità e difficoltà correnti
+  let currentHighScore = 0;
+  if (currentGameMode && difficulty) {
+      currentHighScore = highScores[currentGameMode][difficulty] || 0;
+      if (score > currentHighScore) {
+          highScores[currentGameMode][difficulty] = score;
+          currentHighScore = score;
+          newRecord = true;
       }
+  }
 
-      // Salva solo se l'utente è loggato E VERIFICATO
-      if (currentUser && currentUser.emailVerified && userData) {
-        userData.gamesPlayed = gamesPlayed;
-        userData.highScore = highScore;
-        
-        try {
-          const userRef = doc(fb_db, "users", currentUser.uid);
-          await updateDoc(userRef, {
-            gamesPlayed: gamesPlayed,
-            highScore: highScore
-          });
-        } catch (err) {
-          console.error("Errore aggiornamento dati fine partita:", err);
-        }
-      } else if (!currentUser) {
-        // Salva in local storage solo se è un ospite
-        localStorage.setItem(GAMES_PLAYED_KEY, gamesPlayed.toString());
-        if (newRecord) {
-          localStorage.setItem(HIGHSCORE_KEY, highScore.toString());
-        }
-      }
-
-      document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
-      document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${highScore}`;
-
-      const wrongEl = document.getElementById("wrongDetails");
-      if (comparison) {
-        const statLabel = (translations.statNames[lang] && translations.statNames[lang][comparison.stat]) || translations.statNames.en[comparison.stat] || comparison.stat;
-        const playerVal = comparison.playerStat;
-        const oppVal = comparison.opponentStat;
-        const diff = Math.abs(playerVal - oppVal);
-        const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? comparison.player.name : comparison.opponent.name);
-        
-        const detailsLines = [
-          reason,
-          `${comparison.player.name}: ${playerVal} ${statLabel}`,
-          `${comparison.opponent.name}: ${oppVal} ${statLabel}`,
-          `${winner === "Tie" ? "" : `Δ ${diff} — ${winner} ${t.wins || 'wins'}`}` // Tie non dovrebbe accadere
-        ].filter(Boolean);
-
-        wrongEl.innerText = detailsLines.join("\n");
-      } else {
-        wrongEl.innerText = reason;
-      }
-
-      document.getElementById("gameOverPopup").style.display = "flex";
+  // Salva i dati
+  if (currentUser && currentUser.emailVerified && userData) {
+    userData.gamesPlayed = gamesPlayed;
+    userData.highScores = highScores;
+    
+    try {
+      const userRef = doc(fb_db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        gamesPlayed: gamesPlayed,
+        highScores: highScores // Salva l'intero oggetto aggiornato
+      });
+    } catch (err) {
+      console.error("Errore aggiornamento dati fine partita:", err);
     }
+  } else if (!currentUser) {
+    // Salva in local storage solo se è un ospite
+    localStorage.setItem(GAMES_PLAYED_KEY, JSON.stringify(gamesPlayed));
+    if (newRecord) {
+      localStorage.setItem(HIGHSCORES_KEY, JSON.stringify(highScores));
+    }
+  }
 
-    function startRound() {
-      if (pokemonList.length === 0) return;
-      gameOver = false;
-      
-      document.getElementById("highscore").innerText = `${t.record}: ${highScore}`; 
+  // Mostra i messaggi nel popup
+  document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
+  document.getElementById("highScoreMessage").innerText = newRecord ? t.newRecord : `${t.currentRecord}: ${currentHighScore}`;
 
-      const player = getRandomPokemon();
-      let opponent = getRandomPokemon();
+  const wrongEl = document.getElementById("wrongDetails");
+  wrongEl.innerHTML = ""; // Pulisci
+  wrongEl.innerText = reason; // Mostra il motivo (es. "Tempo scaduto!")
+
+  // Dettagli specifici per la modalità
+  const statLabel = (translations.statNames[lang] && translations.statNames[lang][details?.stat]) || translations.statNames.en[details?.stat] || details?.stat;
+
+  if (currentGameMode === 'classic' && details) {
+    const playerVal = details.playerStat;
+    const oppVal = details.opponentStat;
+    const diff = Math.abs(playerVal - oppVal);
+    const winner = playerVal === oppVal ? "Tie" : (playerVal > oppVal ? details.player.name : details.opponent.name);
+    
+    wrongEl.innerText += `\n${details.player.name}: ${playerVal} ${statLabel}`
+                      + `\n${details.opponent.name}: ${oppVal} ${statLabel}`
+                      + `\nΔ ${diff} — ${winner} ${t.wins || 'wins'}`;
+                      
+  } else if (currentGameMode === 'sort' && details && details.correctOrder) {
+    // Mostra l'ordine corretto
+    wrongEl.innerText += `\n\n${t.sortCorrectOrder || 'Correct Order:'}`;
+    const ol = document.createElement('ol');
+    ol.style.textAlign = 'left';
+    ol.style.paddingLeft = '30px';
+    details.correctOrder.forEach((p, index) => {
+        const li = document.createElement('li');
+        li.innerText = `${p.name} (${p.stats[details.stat]} ${statLabel})`;
+        ol.appendChild(li);
+    });
+    wrongEl.appendChild(ol);
+  }
+
+  document.getElementById("gameOverPopup").style.display = "flex";
+}
+
+    // MODIFICATO: per la nuova logica di difficoltà
+function startRound() {
+  if (pokemonList.length === 0) return;
+  
+  // Mostra gli elementi giusti
+  document.getElementById("classicGameContainer").style.display = "block";
+  document.getElementById("sortGameContainer").style.display = "none";
+  
+  gameOver = false;
+  
+  // Aggiorna l'high score per la modalità/difficoltà correnti
+  document.getElementById("highscore").innerText = `${t.record}: ${highScores.classic[difficulty]}`; 
+  document.getElementById("score").innerText = `${t.score}: ${score}`;
+
+  const player = getRandomPokemon();
+  let opponent, comparison;
+  let attempts = 0;
+
+  // Cerca un avversario che soddisfi i criteri di difficoltà
+  do {
+      opponent = getRandomPokemon();
       if (pokemonList.length > 1) {
-        while (opponent.id === player.id) {
-          opponent = getRandomPokemon();
-        }
+          while (opponent.id === player.id) {
+              opponent = getRandomPokemon();
+          }
       }
-
-      currentComparison = getComparison(player, opponent); // Questa ora previene i pareggi
-
-      document.getElementById("player-sprite").src = getSpriteUrl(player.name);
-      document.getElementById("opponent-sprite").src = getSpriteUrl(opponent.name);
-      document.getElementById("player-name").innerText = player.name;
-      document.getElementById("opponent-name").innerText = opponent.name;
-
-      const statLabel = (translations.statNames[lang] && translations.statNames[lang][currentComparison.stat]) || translations.statNames.en[currentComparison.stat] || currentComparison.stat;
       
-      const questionFormat = t.question || "Does {pokemon1} have more {stat} than {pokemon2}?";
-      const question = questionFormat
-        .replace("{pokemon1}", player.name)
-        .replace("{stat}", statLabel)
-        .replace("{pokemon2}", opponent.name);
-        
-      document.getElementById("comparison").innerText = question;
+      // getComparison ora gestisce la logica della difficoltà internamente
+      comparison = getComparison(player, opponent); 
+      
+      if (pokemonList.length <= 1) break; // Evita loop
+      
+      // Se getComparison ha fallito (es.
+      if (comparison.playerStat === comparison.opponentStat) continue;
 
-      document.getElementById("greater").onclick = () => handleAnswer(true);
-      document.getElementById("not-greater").onclick = () => handleAnswer(false);
-      startTimer();
+      // Criterio trovato, esci
+      break;
+      
+  } while (++attempts < 50); // Safety break
+
+  currentComparison = comparison;
+
+  document.getElementById("player-sprite").src = getSpriteUrl(player.name);
+  document.getElementById("opponent-sprite").src = getSpriteUrl(opponent.name);
+  document.getElementById("player-name").innerText = player.name;
+  document.getElementById("opponent-name").innerText = opponent.name;
+
+  const statLabel = (translations.statNames[lang] && translations.statNames[lang][currentComparison.stat]) || translations.statNames.en[currentComparison.stat] || currentComparison.stat;
+  
+  const questionFormat = t.question || "Does {pokemon1} have more {stat} than {pokemon2}?";
+  const question = questionFormat
+    .replace("{pokemon1}", player.name)
+    .replace("{stat}", statLabel)
+    .replace("{pokemon2}", opponent.name);
+    
+  document.getElementById("comparison").innerText = question;
+
+  document.getElementById("greater").onclick = () => handleAnswer(true);
+  document.getElementById("not-greater").onclick = () => handleAnswer(false);
+  startTimer();
+}
+
+
+    // ===================================
+// NUOVE FUNZIONI DI GIOCO (Aggiunte)
+// ===================================
+
+function startGame() {
+  score = 0;
+  gameOver = false;
+  document.getElementById("score").innerText = `${t.score}: ${score}`;
+  
+  if (currentGameMode === "classic") {
+    startRound();
+  } else if (currentGameMode === "sort") {
+    startSortRound();
+  }
+}
+
+// --- Funzioni per la modalità "Metti in Ordine" ---
+
+function startSortRound() {
+  if (pokemonList.length === 0) return;
+
+  // Mostra gli elementi giusti
+  document.getElementById("classicGameContainer").style.display = "none";
+  document.getElementById("sortGameContainer").style.display = "block";
+
+  gameOver = false;
+
+  // Aggiorna l'high score per la modalità/difficoltà correnti
+  document.getElementById("highscore").innerText = `${t.record}: ${highScores.sort[difficulty]}`;
+  document.getElementById("score").innerText = `${t.score}: ${score}`;
+
+  const numPokemon = difficulty === 'easy' ? 3 : (difficulty === 'medium' ? 5 : 7);
+  
+  // Ottieni i Pokémon da ordinare
+  const [pokemonToSort, stat] = getPokemonForSorting(numPokemon);
+  sortableStat = stat; // Salva lo stat per il game over
+  
+  // Salva l'ordine corretto (decrescente)
+  correctSortOrder = [...pokemonToSort].sort((a, b) => b.stats[stat] - a.stats[stat]);
+
+  // Mostra la domanda
+  const statLabel = (translations.statNames[lang] && translations.statNames[lang][stat]) || translations.statNames.en[stat] || stat;
+  const question = (t.sortQuestion || "Sort by {stat}").replace("{stat}", statLabel);
+  document.getElementById("sortQuestion").innerText = question;
+
+  // Mostra la lista (mescolata)
+  displaySortableList(pokemonToSort);
+
+  // Imposta il bottone di controllo
+  document.getElementById("checkSortButton").onclick = checkSortOrder;
+
+  startTimer();
+}
+
+function getPokemonForSorting(num) {
+  const stats = ["hp", "attack", "defense", "spattack", "spdefense", "speed"];
+  let chosenPokemon = [];
+  let statToCompare;
+  let attempts = 0;
+
+  do {
+    chosenPokemon = [];
+    let statValues = new Set();
+    statToCompare = stats[Math.floor(Math.random() * stats.length)];
+    let innerAttempts = 0;
+
+    // 1. Trova 'num' Pokémon con valori DIVERSI per quello stat
+    while (chosenPokemon.length < num && innerAttempts < 100) {
+      const p = getRandomPokemon();
+      const pStat = p.stats[statToCompare];
+      
+      if (!statValues.has(pStat)) {
+        statValues.add(pStat);
+        chosenPokemon.push(p);
+      }
+      innerAttempts++;
     }
     
+    if (chosenPokemon.length < num) continue; // Non abbastanza Pokémon unici trovati
+
+    // 2. Controlla se la difficoltà (differenza minima) è rispettata
+    const statList = [...statValues].sort((a, b) => a - b);
+    let minDiff = Infinity;
+    for (let i = 1; i < statList.length; i++) {
+      minDiff = Math.min(minDiff, statList[i] - statList[i-1]);
+    }
+
+    if (difficulty === "hard" && minDiff > 15) continue;
+    if (difficulty === "medium" && minDiff > 30) continue;
+
+    // Se 'easy' o la differenza è ok, esci
+    break;
+
+  } while (++attempts < 50); // Safety break
+  
+  // Se non troviamo un set perfetto, restituiamo comunque qualcosa
+  if (chosenPokemon.length < num) {
+      // Fallback: riempi con Pokémon a caso (potrebbero avere stats uguali)
+      while(chosenPokemon.length < num) { chosenPokemon.push(getRandomPokemon()); }
+  }
+
+  return [chosenPokemon, statToCompare];
+}
+
+function displaySortableList(pokemonList) {
+  const listEl = document.getElementById("sortableList");
+  listEl.innerHTML = "";
+
+  // Mescola la lista per visualizzarla
+  const shuffledList = [...pokemonList].sort(() => Math.random() - 0.5);
+
+  shuffledList.forEach(p => {
+    const li = document.createElement("li");
+    li.className = "sortable-item";
+    li.draggable = true;
+    li.dataset.id = p.id; // Salva l'ID per il controllo
+    li.innerHTML = `<img src="${getSpriteUrl(p.name)}" alt="${p.name}"> ${p.name}`;
+    listEl.appendChild(li);
+  });
+
+  // Aggiungi listener per il drag-and-drop
+  addDragDropListeners();
+}
+
+function checkSortOrder() {
+  clearInterval(timer); // Ferma il timer
+
+  const listEl = document.getElementById("sortableList");
+  
+  // Ottieni l'ordine corrente dal DOM
+  const currentOrderIds = [...listEl.querySelectorAll("li")].map(li => li.dataset.id);
+  
+  // Ottieni l'ordine corretto (salvato)
+  const correctOrderIds = correctSortOrder.map(p => p.id.toString());
+
+  // Confronta
+  const isCorrect = JSON.stringify(currentOrderIds) === JSON.stringify(correctOrderIds);
+
+  if (isCorrect) {
+    score++;
+    startSortRound(); // Prossimo round
+  } else {
+    // Game Over
+    triggerGameOver(t.sortWrongOrder, { stat: sortableStat, correctOrder: correctSortOrder });
+  }
+}
+
+
+// --- Funzioni Helper per Drag-and-Drop ---
+let draggingElement = null;
+
+function addDragDropListeners() {
+  const items = document.querySelectorAll(".sortable-item");
+  const list = document.getElementById("sortableList");
+
+  items.forEach(item => {
+    item.addEventListener("dragstart", (e) => {
+      draggingElement = e.target;
+      e.target.classList.add("dragging");
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    item.addEventListener("dragend", (e) => {
+      e.target.classList.remove("dragging");
+      draggingElement = null;
+    });
+
+    item.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      const afterElement = getDragAfterElement(list, e.clientY);
+      // Rimuovi 'over' da tutti
+      items.forEach(i => i.classList.remove('over'));
+      
+      if (afterElement == null) {
+          if (list.lastChild !== item) item.classList.add('over'); // Evidenzia se è l'ultimo
+      } else {
+          if (afterElement !== item) item.classList.add('over'); // Evidenzia quello sopra
+      }
+    });
+    
+    item.addEventListener("dragleave", (e) => {
+        item.classList.remove('over');
+    });
+
+    item.addEventListener("drop", (e) => {
+      e.preventDefault();
+      item.classList.remove('over');
+      if (draggingElement && draggingElement !== e.target) {
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+          list.appendChild(draggingElement);
+        } else {
+          list.insertBefore(draggingElement, afterElement);
+        }
+      }
+    });
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
     // --- FUNZIONI ACCOUNT & POKÉDEX & CLASSIFICA ---
     
     const pokedexGrid = document.getElementById('pokedexGrid');
@@ -869,47 +1236,60 @@
     const modalStats = document.getElementById('modalStats');
     const closeBtn = document.querySelector('#pokemonModal .close-btn');
 
-    async function loadLeaderboardPage() {
-      const listEl = document.getElementById("leaderboardList");
-      listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardLoading">${t.leaderboardLoading || "Caricamento classifica..."}</li>`;
+    // MODIFICATO: per gestire tab e difficoltà
+async function loadLeaderboardPage() {
+  const listEl = document.getElementById("leaderboardList");
+  listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardLoading">${t.leaderboardLoading || "Caricamento classifica..."}</li>`;
 
-      try {
-        const usersRef = collection(fb_db, "users");
-        const q = query(usersRef, orderBy("highScore", "desc"), limit(10));
-        
-        const querySnapshot = await getDocs(q);
-        
-        listEl.innerHTML = ""; // Clear loading
-        
-        if (querySnapshot.empty) {
-          listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardEmpty">${t.leaderboardEmpty || "Nessun dato ancora."}</li>`;
-          return;
-        }
-        
-        let rank = 1;
-        querySnapshot.forEach((doc) => {
-          const user = doc.data();
-          if (user.highScore > 0) { 
-            const li = document.createElement("li");
-            li.innerHTML = `
-              <span class="rank">#${rank}</span>
-              <span class="name">${user.displayName}</span>
-              <span class="score">${user.highScore}</span>
-            `;
-            listEl.appendChild(li);
-            rank++;
-          }
-        });
+  // Leggi i controlli
+  const mode = document.getElementById("leaderboardTabSort").classList.contains("active") ? "sort" : "classic";
+  const difficulty = document.getElementById("leaderboardDifficultySelect").value;
+  
+  // Crea il percorso per il campo Firestore
+  const orderByField = `highScores.${mode}.${difficulty}`;
 
-        if (rank === 1) { // Se i top 10 hanno tutti 0
-            listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardEmpty">${t.leaderboardEmpty || "Nessun dato ancora."}</li>`;
-        }
-
-      } catch (error) {
-        console.error("Errore caricamento classifica:", error);
-        listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardError">${t.leaderboardError || "Errore nel caricamento."}</li>`;
-      }
+  try {
+    const usersRef = collection(fb_db, "users");
+    // Ordina in base al campo nidificato
+    const q = query(usersRef, orderBy(orderByField, "desc"), limit(10));
+    
+    const querySnapshot = await getDocs(q);
+    
+    listEl.innerHTML = ""; // Clear loading
+    
+    if (querySnapshot.empty) {
+      listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardEmpty">${t.leaderboardEmpty || "Nessun dato ancora."}</li>`;
+      return;
     }
+    
+    let rank = 1;
+    querySnapshot.forEach((doc) => {
+      const user = doc.data();
+      
+      // Accedi al punteggio corretto
+      const userScore = user.highScores?.[mode]?.[difficulty] || 0;
+
+      if (userScore > 0) { 
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span class="rank">#${rank}</span>
+          <span class="name">${user.displayName}</span>
+          <span class="score">${userScore}</span>
+        `;
+        listEl.appendChild(li);
+        rank++;
+      }
+    });
+
+    if (rank === 1) { // Se i top 10 hanno tutti 0
+        listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardEmpty">${t.leaderboardEmpty || "Nessun dato ancora."}</li>`;
+    }
+
+  } catch (error) {
+    console.error("Errore caricamento classifica:", error);
+    listEl.innerHTML = `<li class="loading-msg" data-translate="leaderboardError">${t.leaderboardError || "Errore nel caricamento."}</li>`;
+  }
+}
 
     function loadAccountPage() {
       const authCont = document.getElementById("authContainer");
@@ -926,19 +1306,24 @@
           dataCont.style.display = "block";
 
           if (userData) {
-            document.getElementById("accountHighScore").innerText = userData.highScore;
-            document.getElementById("accountGamesPlayed").innerText = userData.gamesPlayed;
-            
-            let creationDate = "...";
-            if (userData.createdAt && userData.createdAt.toDate) {
-                creationDate = userData.createdAt.toDate().toLocaleDateString(lang);
-            } else if (userData.createdAt) {
-                 creationDate = new Date(userData.createdAt.seconds * 1000).toLocaleDateString(lang);
-            }
-            document.getElementById("accountCreatedAt").innerText = creationDate;
-            
-            displayPokedex(pokemonList);
-          }
+        // MODIFICATO: Mostra un riepilogo (o il punteggio più alto)
+        // Calcola il punteggio più alto in assoluto per semplicità
+        const allScores = [
+            ...Object.values(highScores.classic),
+            ...Object.values(highScores.sort)
+        ];
+        const bestScore = Math.max(0, ...allScores);
+        const totalGames = (gamesPlayed.classic || 0) + (gamesPlayed.sort || 0);
+
+        document.getElementById("accountHighScore").innerText = bestScore; // Mostra il record assoluto
+        document.getElementById("accountGamesPlayed").innerText = totalGames; // Mostra partite totali
+        
+        let creationDate = "...";
+        // ... (logica della data di creazione)
+        document.getElementById("accountCreatedAt").innerText = creationDate;
+        
+        displayPokedex(pokemonList);
+      }
         } else {
           // UTENTE LOGGATO MA NON VERIFICATO
           authCont.style.display = "none";
@@ -1043,4 +1428,5 @@
       const term = searchInput.value.toLowerCase();
       const filtered = pokemonList.filter(p => p.name.toLowerCase().includes(term));
       displayPokedex(filtered);
+
     });
