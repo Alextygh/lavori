@@ -1232,7 +1232,6 @@ async function createUserData(uid, email, displayName) {
     email: email,
     displayName: displayName,
     createdAt: serverTimestamp(), 
-    // MODIFICATO per la nuova struttura
     highScores: {
       classic: { easy: 0, medium: 0, hard: 0 },
       sort: { easy: 0, medium: 0, hard: 0 }
@@ -1247,18 +1246,37 @@ async function createUserData(uid, email, displayName) {
   };
   
   try {
-    const batch = writeBatch(fb_db); 
-    batch.set(newUserRef, newUserData);
-    batch.set(newDisplayNameRef, { uid: uid });
-    
-    await batch.commit();
+    // USA UNA TRANSAZIONE per aggiornare il conteggio utenti E creare l'utente
+    await runTransaction(fb_db, async (transaction) => {
+      const statsRef = doc(fb_db, "achievementStats", "global");
+      const statsDoc = await transaction.get(statsRef);
+
+      let currentTotal = 0;
+      if (statsDoc.exists()) {
+        currentTotal = statsDoc.data().totalUsers || 0;
+      }
+      
+      // 1. Imposta i dati del nuovo utente
+      transaction.set(newUserRef, newUserData);
+      // 2. Imposta il nome visualizzato
+      transaction.set(newDisplayNameRef, { uid: uid });
+      
+      // 3. Aggiorna il conteggio globale
+      if (statsDoc.exists()) {
+        transaction.update(statsRef, { totalUsers: currentTotal + 1 });
+      } else {
+        // Questo è il primo utente in assoluto
+        transaction.set(statsRef, { totalUsers: 1 });
+      }
+    });
+
+    // Carica i dati appena creati
     await loadUserData(uid); 
 
   } catch (error) {
     console.error("Errore creazione dati utente:", error);
   }
 }
-
     async function loadGameData() {
       try {
         const response = await fetch("pokemonList.json");
@@ -2001,7 +2019,7 @@ async function checkAndUnlockAchievement(key) {
     runTransaction(fb_db, async (transaction) => {
       const statsDoc = await transaction.get(statsRef);
       if (!statsDoc.exists()) {
-        transaction.set(statsRef, { [key]: 1, totalUsers: 1 });
+        transaction.set(statsRef, { [key]: 1});
       } else {
         const newCount = (statsDoc.data()[key] || 0) + 1;
         transaction.update(statsRef, { [key]: newCount });
@@ -2240,6 +2258,7 @@ function showSortUnlockModal(pokemonList) {
 
 function handleSortUnlockClick(event) {
   const item = event.currentTarget;
+  const grid = document.getElementById("sortUnlockGrid");
   if (item.classList.contains("disabled")) return;
 
   if (item.classList.contains("selected")) {
@@ -2623,6 +2642,7 @@ shinyToggle.classList.remove("active");
     btn.classList.remove("active");
   }
 }
+
 
 
 
