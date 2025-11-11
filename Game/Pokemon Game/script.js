@@ -118,6 +118,54 @@ let userData = null;
         "cookieMessage": "Questo sito usa cookie per salvare i tuoi record e preferenze. Accetti?", "cookieButton": "Accetta",
         "benefitsTitle": "Perché creare un account?", "benefitsItem1": "Salva i tuoi record e progressi sul cloud.", "benefitsItem2": "Competi nella classifica globale.", "benefitsItem3": "Sincronizza il tuo Pokédex sbloccato su tutti i dispositivi.",
         "privacyNotice": "Creando un account, accetti che la tua email, nome utente e punteggi vengano salvati. Non condividiamo i tuoi dati."
+
+        // Filtri
+        "filterStatus": "Stato",
+        "filterRegion": "Regione",
+        "filterAll": "Tutti",
+        "filterUnlocked": "Sbloccati",
+        "filterLocked": "Bloccati",
+        "achievements": "Obiettivi",
+
+        // Achievements
+        "ach_kanto_master_title": "Maestro di Kanto",
+        "ach_kanto_master_desc": "Ottieni tutti i Pokémon di Gen 1",
+        "ach_johto_master_title": "Maestro di Johto",
+        "ach_johto_master_desc": "Ottieni tutti i Pokémon di Gen 2",
+        "ach_hoenn_master_title": "Maestro di Hoenn",
+        "ach_hoenn_master_desc": "Ottieni tutti i Pokémon di Gen 3",
+        "ach_sinnoh_master_title": "Maestro di Sinnoh",
+        "ach_sinnoh_master_desc": "Ottieni tutti i Pokémon di Gen 4",
+        "ach_unima_master_title": "Maestro di Unima",
+        "ach_unima_master_desc": "Ottieni tutti i Pokémon di Gen 5",
+        "ach_kalos_master_title": "Maestro di Kalos",
+        "ach_kalos_master_desc": "Ottieni tutti i Pokémon di Gen 6",
+        "ach_alola_master_title": "Maestro di Alola",
+        "ach_alola_master_desc": "Ottieni tutti i Pokémon di Gen 7",
+        "ach_galar_master_title": "Maestro di Galar",
+        "ach_galar_master_desc": "Ottieni tutti i Pokémon di Gen 8",
+        "ach_paldea_master_title": "Maestro di Paldea",
+        "ach_paldea_master_desc": "Ottieni tutti i Pokémon di Gen 9",
+        "ach_pokemon_master_title": "Maestro Pokémon",
+        "ach_pokemon_master_desc": "Ottieni tutti i Pokémon",
+        "ach_first_step_title": "Primo Passo",
+        "ach_first_step_desc": "Vinci un round",
+        "ach_newbie_title": "Principiante",
+        "ach_newbie_desc": "Ottieni un record di almeno 5",
+        "ach_good_enough_title": "Niente male",
+        "ach_good_enough_desc": "Ottieni un record di almeno 10",
+        "ach_impressive_title": "Notevole",
+        "ach_impressive_desc": "Ottieni un record di almeno 30",
+        "ach_mr_pokedex_title": "Mr. Pokédex",
+        "ach_mr_pokedex_desc": "Ottieni un record di almeno 100",
+        "ach_chromatic_title": "Cromatico",
+        "ach_chromatic_desc": "Ottieni uno shiny",
+        "ach_conga_title": "Conga!",
+        "ach_conga_desc": "Ottieni un Ditto",
+        "ach_missing_number_title": "Il Numero Mancante",
+        "ach_missing_number_desc": "Ottieni MissingNo.",
+        "ach_almighty_title": "L'Onnipotente",
+        "ach_almighty_desc": "Ottieni Arceus"
       },
       // RIGA 136 (circa)
   "en": {
@@ -1105,25 +1153,25 @@ let userData = null;
 };
 
 const achievementDefinitions = {
-  "kanto_master": { gen: 1, title: "Kanto's Master", desc: "Get all Gen 1 pokemon", hidden: true, icon: "🏆" },
-  "johto_master": { gen: 2, title: "Johto's Master", desc: "Get all Gen 2 pokemon", hidden: true, icon: "🏆" },
-  "hoenn_master": { gen: 3, title: "Hoenn's Master", desc: "Get all Gen 3 pokemon", hidden: true, icon: "🏆" },
-  "sinnoh_master": { gen: 4, title: "Sinnoh's Master", desc: "Get all Gen 4 pokemon", hidden: true, icon: "🏆" },
-  "unima_master": { gen: 5, title: "Unima's Master", desc: "Get all Gen 5 pokemon", hidden: true, icon: "🏆" },
-  "kalos_master": { gen: 6, title: "Kalos' Master", desc: "Get all Gen 6 pokemon", hidden: true, icon: "🏆" },
-  "alola_master": { gen: 7, title: "Alola's Master", desc: "Get all Gen 7 pokemon", hidden: true, icon: "🏆" },
-  "galar_master": { gen: 8, title: "Galars's Master", desc: "Get all Gen 8 pokemon", hidden: true, icon: "🏆" },
-  "paldea_master": { gen: 9, title: "Paldea's Master", desc: "Get all Gen 9 pokemon", hidden: true, icon: "🏆" },
-  "pokemon_master": { title: "Pokemon Master", desc: "Get every Pokemon", hidden: true, icon: "👑" },
-  "first_step": { title: "First Step", desc: "Win a round", hidden: false, icon: "👟" },
-  "newbie": { score: 5, title: "Newbie", desc: "Get a high score of at least 5", hidden: false, icon: "🥉" },
-  "good_enough": { score: 10, title: "Good enough", desc: "Get a high score of at least 10", hidden: false, icon: "🥈" },
-  "impressive": { score: 30, title: "That's impressive", desc: "Get a high score of at least 30", hidden: false, icon: "🥇" },
-  "mr_pokedex": { score: 100, title: "Mr. Pokedex", desc: "Get a high score of at least 100", hidden: false, icon: "🌟" },
-  "chromatic": { id: "chromatic", title: "Chromatic", desc: "Get a shiny", hidden: true, icon: "✨" },
-  "conga": { id: "conga", pokemonId: 132, title: "Conga!", desc: "Get a Ditto", hidden: true, icon: "🧬" },
-  "missing_number": { id: "missing_number", pokemonId: 0, title: "The Missing Number", hidden: true, icon: "#️" },
-  "almighty": { id: "almighty", pokemonId: 493, title: "The Almighty", desc: "Get Arceus", hidden: true, icon: "⚖️" }
+  "kanto_master": { gen: 1, titleKey: "ach_kanto_master_title", descKey: "ach_kanto_master_desc", hidden: true, icon: "🏆" },
+  "johto_master": { gen: 2, titleKey: "ach_johto_master_title", descKey: "ach_johto_master_desc", hidden: true, icon: "🏆" },
+  "hoenn_master": { gen: 3, titleKey: "ach_hoenn_master_title", descKey: "ach_hoenn_master_desc", hidden: true, icon: "🏆" },
+  "sinnoh_master": { gen: 4, titleKey: "ach_sinnoh_master_title", descKey: "ach_sinnoh_master_desc", hidden: true, icon: "🏆" },
+  "unima_master": { gen: 5, titleKey: "ach_unima_master_title", descKey: "ach_unima_master_desc", hidden: true, icon: "🏆" },
+  "kalos_master": { gen: 6, titleKey: "ach_kalos_master_title", descKey: "ach_kalos_master_desc", hidden: true, icon: "🏆" },
+  "alola_master": { gen: 7, titleKey: "ach_alola_master_title", descKey: "ach_alola_master_desc", hidden: true, icon: "🏆" },
+  "galar_master": { gen: 8, titleKey: "ach_galar_master_title", descKey: "ach_galar_master_desc", hidden: true, icon: "🏆" },
+  "paldea_master": { gen: 9, titleKey: "ach_paldea_master_title", descKey: "ach_paldea_master_desc", hidden: true, icon: "🏆" },
+  "pokemon_master": { titleKey: "ach_pokemon_master_title", descKey: "ach_pokemon_master_desc", hidden: true, icon: "👑" },
+  "first_step": { titleKey: "ach_first_step_title", descKey: "ach_first_step_desc", hidden: false, icon: "👟" },
+  "newbie": { score: 5, titleKey: "ach_newbie_title", descKey: "ach_newbie_desc", hidden: false, icon: "🥉" },
+  "good_enough": { score: 10, titleKey: "ach_good_enough_title", descKey: "ach_good_enough_desc", hidden: false, icon: "🥈" },
+  "impressive": { score: 30, titleKey: "ach_impressive_title", descKey: "ach_impressive_desc", hidden: false, icon: "🥇" },
+  "mr_pokedex": { score: 100, titleKey: "ach_mr_pokedex_title", descKey: "ach_mr_pokedex_desc", hidden: false, icon: "🌟" },
+  "chromatic": { id: "chromatic", titleKey: "ach_chromatic_title", descKey: "ach_chromatic_desc", hidden: true, icon: "✨" },
+  "conga": { id: "conga", pokemonId: 132, titleKey: "ach_conga_title", descKey: "ach_conga_desc", hidden: true, icon: "🧬" },
+  "missing_number": { id: "missing_number", pokemonId: 0, titleKey: "ach_missing_number_title", descKey: "ach_missing_number_desc", hidden: true, icon: "#️" },
+  "almighty": { id: "almighty", pokemonId: 493, titleKey: "ach_almighty_title", descKey: "ach_almighty_desc", hidden: true, icon: "⚖️" }
 };
 
     const flagEmojis = {
@@ -2451,10 +2499,14 @@ function displayAchievements() {
     const unlockCount = achievementPercentages[key] || 0;
     const percent = (unlockCount / totalUsers * 100).toFixed(1);
 
+    // USA LE CHIAVI DI TRADUZIONE
+    const title = t[def.titleKey] || def.titleKey || "???";
+    const desc = (isUnlocked || !def.hidden) ? (t[def.descKey] || def.descKey || "...") : "???";
+
     card.innerHTML = `
       <div class="achievement-icon">${def.icon}</div>
-      <div class="achievement-title">${def.title}</div>
-      <div class="achievement-desc">${(isUnlocked || !def.hidden) ? def.desc : "???"}</div>
+      <div class="achievement-title">${title}</div>
+      <div class="achievement-desc">${desc}</div>
       <div class="achievement-percent">${percent}%</div>
     `;
     grid.appendChild(card);
@@ -2501,7 +2553,12 @@ document.getElementById("accountCreatedAt").innerText = creationDate;
 // Mostra gli achievement
 displayAchievements();
         
-        displayPokedex(pokemonList);
+        if(document.getElementById('pokedexSearch')) {
+            document.getElementById('pokedexSearch').value = "";
+            document.getElementById('pokedexFilterStatus').value = "all";
+            document.getElementById('pokedexFilterRegion').value = "all";
+        }
+        updatePokedexView(); // Chiama la nuova funzione
       }
         } else {
           // UTENTE LOGGATO MA NON VERIFICATO
@@ -2617,13 +2674,41 @@ shinyToggle.classList.remove("active");
       if (e.target === modal) modal.style.display = 'none';
     });
 
-    // Listener Ricerca Pokédex
-    searchInput.addEventListener('input', () => {
-      const term = searchInput.value.toLowerCase();
-      const filtered = pokemonList.filter(p => p.name.toLowerCase().includes(term));
-      displayPokedex(filtered);
+    // Listener Ricerca Pokédex (e filtri)
+searchInput.addEventListener('input', updatePokedexView);
+document.getElementById('pokedexFilterStatus').addEventListener('change', updatePokedexView);
+document.getElementById('pokedexFilterRegion').addEventListener('change', updatePokedexView);
 
-    });
+// Funzione unica per aggiornare la vista del Pokédex
+function updatePokedexView() {
+  if (!pokedexGrid) return; // Non aggiornare se non siamo nella pagina
+  const term = searchInput.value.toLowerCase();
+  const status = document.getElementById('pokedexFilterStatus').value;
+  const region = document.getElementById('pokedexFilterRegion').value;
+
+  // 1. Filter by Search Term
+  let filtered = pokemonList.filter(p => p.name.toLowerCase().includes(term));
+
+  // 2. Filter by Status
+  if (status === 'unlocked') {
+    filtered = filtered.filter(p => unlockedPokemon.includes(p.id));
+  } else if (status === 'locked') {
+    filtered = filtered.filter(p => !unlockedPokemon.includes(p.id));
+  }
+  // 'all' does nothing
+
+  // 3. Filter by Region
+  if (region !== 'all') {
+    const gen = parseInt(region);
+    if (genRanges[gen]) {
+      const { start, end } = genRanges[gen];
+      filtered = filtered.filter(p => p.id >= start && p.id <= end);
+    }
+  }
+
+  // 4. Display the result
+  displayPokedex(filtered);
+}
 
     function toggleShinySprite(event) {
   const btn = event.currentTarget;
@@ -2642,6 +2727,7 @@ shinyToggle.classList.remove("active");
     btn.classList.remove("active");
   }
 }
+
 
 
 
