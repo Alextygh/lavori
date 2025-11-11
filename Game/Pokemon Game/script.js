@@ -2178,7 +2178,15 @@ function checkSortOrder() {
     score++;
     checkAndUnlockAchievement("first_step");
 
-    // NUOVO CONTROLLO: Verifica se c'è qualcosa da sbloccare
+    // NUOVO CONTROLLO (LA TUA CORREZIONE):
+    // Se l'utente è un ospite (non loggato), non mostrare il modal
+    // e passa direttamente al round successivo.
+    if (!currentUser) {
+      startSortRound();
+      return; // Esci dalla funzione
+    }
+
+    // CONTROLLO ESISTENTE: Verifica se c'è qualcosa da sbloccare
     const allUnlocked = correctSortOrder.every(p => unlockedPokemon.includes(p.id));
 
     if (allUnlocked) {
@@ -2615,6 +2623,7 @@ shinyToggle.classList.remove("active");
     btn.classList.remove("active");
   }
 }
+
 
 
 
