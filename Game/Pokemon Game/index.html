@@ -158,6 +158,12 @@
         <div><span data-translate="gamesPlayed">Partite Giocate</span>: <span id="accountGamesPlayed">0</span></div>
         <div><span data-translate="memberSince">Membro dal</span>: <span id="accountCreatedAt">...</span></div>
       </div>
+
+      <h3 data-translate="achievements">Achievements</h3>
+<div class="achievements-scroller-container">
+  <div id="achievementsGrid" class="achievements-grid">
+    </div>
+</div>
       
       <h3 data-translate="pokedex">Pokédex</h3>
       <input type="text" id="pokedexSearch" placeholder="Cerca Pokémon...">
@@ -167,6 +173,7 @@
     <div id="pokemonModal" class="modal">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
+        <button id="modalShinyToggle" class="shiny-toggle-btn">⭐</button>
         <h2 id="modalName"></h2>
         <img id="modalImage" src="" alt="">
         <div id="modalStats"></div>
@@ -218,6 +225,15 @@
     <button id="cookieAcceptButton" data-translate="cookieButton">Accetta</button>
   </div>
 
+  <div id="sortUnlockModal" class="popup-container">
+  <div class="popup-content">
+    <h2 data-translate="sortUnlockTitle">Scegli i Pokémon da aggiungere!</h2>
+    <p id="sortUnlockMessage" data-translate="sortUnlockMessage">Scegli {num} Pokémon da sbloccare:</p>
+    <div id="sortUnlockGrid" class="sort-unlock-grid">
+      </div>
+    <button id="confirmSortUnlock" data-translate="confirmButton">Conferma</button>
+  </div>
+</div>
 
   <script type="module" src="script.js"></script>
 </body>
