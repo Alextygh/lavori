@@ -1404,7 +1404,7 @@ function setupNavigationListeners() {
             document.getElementById("logoutButton").addEventListener("click", handleLogout);
             document.getElementById("resendVerificationStatusButton").addEventListener("click", handleResendVerification);
           }
-        updateAuthStatusText();
+
         } else {
           // Utente non loggato (Ospite)
           currentUser = null;
@@ -1417,6 +1417,7 @@ function setupNavigationListeners() {
             showPage("accountContainer");
           });
         }
+        updateAuthStatusText();
         
         // Aggiorna la pagina account SE è quella attiva
         if (document.getElementById("accountContainer").style.display === "block") {
@@ -1783,7 +1784,7 @@ function startTimer() {
         // Controlla achievement specifici
         if (pokemonId === 132) checkAndUnlockAchievement("conga");
         if (pokemonId === 493) checkAndUnlockAchievement("almighty");
-        if (pokemonId === 0) checkAndUnlockAchievement("hidden_number");
+        if (pokemonId === 0) checkAndUnlockAchievement("missing_number");
 
         // Controlla gli achievement di completamento Pokedex
         checkPokedexAchievements();
@@ -2176,7 +2177,18 @@ function checkSortOrder() {
   if (isCorrect) {
     score++;
     checkAndUnlockAchievement("first_step");
-    showSortUnlockModal(correctSortOrder); // Mostra il modal di sblocco
+
+    // NUOVO CONTROLLO: Verifica se c'è qualcosa da sbloccare
+    const allUnlocked = correctSortOrder.every(p => unlockedPokemon.includes(p.id));
+
+    if (allUnlocked) {
+      // Se sono tutti sbloccati, salta il modal e vai al prossimo round
+      startSortRound();
+    } else {
+      // Altrimenti, mostra il modal come al solito
+      showSortUnlockModal(correctSortOrder);
+    }
+
   } else {
     // Game Over
     triggerGameOver(t.sortWrongOrder, { stat: sortableStat, correctOrder: correctSortOrder });
@@ -2403,9 +2415,6 @@ function displayAchievements() {
   for (const key in achievementDefinitions) {
     const def = achievementDefinitions[key];
 
-    // Salta achievement generazionali se la lista non è completa
-    if (def.gen && def.gen > 5) continue; 
-
     const isUnlocked = unlockedAchievements.includes(key);
 
     const card = document.createElement("div");
@@ -2606,5 +2615,6 @@ shinyToggle.classList.remove("active");
     btn.classList.remove("active");
   }
 }
+
 
 
