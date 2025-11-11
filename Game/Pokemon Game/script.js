@@ -1404,6 +1404,7 @@ function setupNavigationListeners() {
             document.getElementById("logoutButton").addEventListener("click", handleLogout);
             document.getElementById("resendVerificationStatusButton").addEventListener("click", handleResendVerification);
           }
+        updateAuthStatusText();
         } else {
           // Utente non loggato (Ospite)
           currentUser = null;
@@ -1440,6 +1441,32 @@ function setupNavigationListeners() {
       document.getElementById("resetButton").addEventListener("click", handlePasswordReset);
       document.getElementById("resendVerificationButton").addEventListener("click", handleResendVerification);
     }
+
+    function updateAuthStatusText() {
+  const authStatus = document.getElementById("authStatus");
+  if (!authStatus || !t) return; // Controlla se 't' è definito
+
+  if (currentUser) {
+    if (currentUser.emailVerified) {
+      const name = userData?.displayName || currentUser.email;
+      const statusText = (t.statusLoggedInAs || "Logged in as <strong>{name}</strong>.").replace("{name}", name);
+      authStatus.innerHTML = `${statusText} <button id="logoutButton">${t.statusBtnLogout || "Logout"}</button>`;
+      if(document.getElementById("logoutButton")) document.getElementById("logoutButton").addEventListener("click", handleLogout);
+    } else {
+      const statusText = (t.statusNotVerified || "Email <strong>{email}</strong> not verified.").replace("{email}", currentUser.email);
+      authStatus.innerHTML = `${statusText} <button id="resendVerificationStatusButton">${t.statusNotVerifiedBtn || "Resend"}</button> <button id="logoutButton">${t.statusBtnLogout || "Logout"}</button>`;
+      if(document.getElementById("logoutButton")) document.getElementById("logoutButton").addEventListener("click", handleLogout);
+      if(document.getElementById("resendVerificationStatusButton")) document.getElementById("resendVerificationStatusButton").addEventListener("click", handleResendVerification);
+    }
+  } else {
+    authStatus.innerHTML = `${t.statusGuest || "..."} <button id="loginShowButton">${t.statusBtnLogin || "..."}</button>`;
+    if(document.getElementById("loginShowButton")) document.getElementById("loginShowButton").addEventListener("click", () => {
+      clearInterval(timer);
+      loadAccountPage();
+      showPage("accountContainer");
+    });
+  }
+}
 
     async function handleLogin() {
       const email = document.getElementById("loginEmail").value;
@@ -1585,6 +1612,7 @@ function setupNavigationListeners() {
       } catch (e) {}
       
       loadSettingsPage();
+      updateAuthStatusText(); // Aggiorna il testo dell'auth con la nuova lingua
     }
     
     function applyTheme(theme) {
@@ -1648,18 +1676,18 @@ function setupNavigationListeners() {
 
     // --- FUNZIONI DI GIOCO ---
 
-    function getSpriteUrl(name) {
-      const normalized = name
-        .toLowerCase()
-        .replace(/-/g, "")
-        .replace(/‎ /g, "")
-        .replace(/♂/g, "m")
-        .replace(/♀/g, "f")
-        .replace(/[^a-z0-9 ]/g, "")
-        .replace(/ /g, "-");
-      return `https://play.pokemonshowdown.com/sprites/gen5/${normalized}.png`;
-    }
-
+    function getSpriteUrl(name, isShiny = false) {
+  const normalized = name
+    .toLowerCase()
+    .replace(/-/g, "")
+    .replace(/‎ /g, "")
+    .replace(/♂/g, "m")
+    .replace(/♀/g, "f")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/ /g, "-");
+  const shinyPart = isShiny ? "-shiny" : "";
+  return `https://play.pokemonshowdown.com/sprites/gen5${shinyPart}/${normalized}.png`;
+}
     function getRandomPokemon() {
       return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
@@ -1740,6 +1768,8 @@ function startTimer() {
         score++;
         document.getElementById("score").innerText = `${t.score}: ${score}`;
         unlockPokemon(comparison.player.id);
+        checkAndUnlockAchievement("first_step");
+        checkShinyUnlock(comparison.player); // Controlla lo shiny
         startRound();
       } else {
         triggerGameOver(t.wrong, comparison);
@@ -1750,6 +1780,13 @@ function startTimer() {
       if (!unlockedPokemon.includes(pokemonId)) {
         unlockedPokemon.push(pokemonId);
 
+        // Controlla achievement specifici
+        if (pokemonId === 132) checkAndUnlockAchievement("conga");
+        if (pokemonId === 493) checkAndUnlockAchievement("almighty");
+        if (pokemonId === 0) checkAndUnlockAchievement("hidden_number");
+
+        // Controlla gli achievement di completamento Pokedex
+        checkPokedexAchievements();
         // Salva solo se l'utente è loggato E VERIFICATO
         if (currentUser && currentUser.emailVerified) {
           const userRef = doc(fb_db, "users", currentUser.uid);
@@ -1805,6 +1842,14 @@ async function triggerGameOver(reason, details) {
       localStorage.setItem(HIGHSCORES_KEY, JSON.stringify(highScores));
     }
   }
+
+  // Controlla gli achievement basati sul punteggio
+for (const key in achievementDefinitions) {
+  const def = achievementDefinitions[key];
+  if (def.score && score >= def.score) {
+    checkAndUnlockAchievement(key);
+  }
+}
 
   // Mostra i messaggi nel popup
   document.getElementById("finalScore").innerText = `${t.score}: ${score}`;
@@ -1923,6 +1968,85 @@ function startGame() {
   }
 }
 
+async function saveShinyData() {
+  if (currentUser && currentUser.emailVerified) {
+    const userRef = doc(fb_db, "users", currentUser.uid);
+    await updateDoc(userRef, { unlockedShiny: unlockedShiny });
+  } else if (!currentUser) {
+    localStorage.setItem(UNLOCKED_SHINY_KEY, JSON.stringify(unlockedShiny));
+  }
+}
+
+async function saveAchievements() {
+  if (currentUser && currentUser.emailVerified) {
+    const userRef = doc(fb_db, "users", currentUser.uid);
+    await updateDoc(userRef, { unlockedAchievements: unlockedAchievements });
+  } else if (!currentUser) {
+    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(unlockedAchievements));
+  }
+}
+
+async function checkAndUnlockAchievement(key) {
+  if (unlockedAchievements.includes(key)) return;
+  if (!achievementDefinitions[key]) return; // Definizione non trovata
+
+  console.log("Achievement Unlocked:", key);
+  unlockedAchievements.push(key);
+  await saveAchievements();
+
+  // Aggiorna le statistiche globali (senza bloccare)
+  if (currentUser) {
+    const statsRef = doc(fb_db, "achievementStats", "global");
+    runTransaction(fb_db, async (transaction) => {
+      const statsDoc = await transaction.get(statsRef);
+      if (!statsDoc.exists()) {
+        transaction.set(statsRef, { [key]: 1, totalUsers: 1 });
+      } else {
+        const newCount = (statsDoc.data()[key] || 0) + 1;
+        transaction.update(statsRef, { [key]: newCount });
+      }
+    }).catch(err => console.error("Errore aggiornamento statistiche achievement:", err));
+  }
+
+  // TODO: Mostra una notifica all'utente
+}
+
+function checkPokedexAchievements() {
+  // Controlla gli achievement generazionali
+  for (const key in achievementDefinitions) {
+    const def = achievementDefinitions[key];
+    if (def.gen && genRanges[def.gen]) {
+      const { start, end } = genRanges[def.gen];
+      const genPokemon = pokemonList.filter(p => p.id >= start && p.id <= end);
+      const unlockedGen = genPokemon.filter(p => unlockedPokemon.includes(p.id));
+
+      if (unlockedGen.length === genPokemon.length) {
+        checkAndUnlockAchievement(key);
+      }
+    }
+  }
+
+  // Controlla il "Pokemon Master" (fino a Gen 5)
+  const totalInList = pokemonList.length; // La lista si ferma a Gen 5
+  if (unlockedPokemon.length === totalInList) {
+    checkAndUnlockAchievement("pokemon_master");
+  }
+}
+
+function checkShinyUnlock(pokemon) {
+  if (!pokemon) return;
+  const roll = Math.floor(Math.random() * 250); // 0-249
+  if (roll === 0) { // 1/250 di probabilità
+    if (!unlockedShiny.includes(pokemon.id)) {
+      console.log("SHINY UNLOCKED:", pokemon.name);
+      unlockedShiny.push(pokemon.id);
+      saveShinyData();
+      checkAndUnlockAchievement("chromatic");
+      // TODO: Mostra notifica "Shiny sbloccato!"
+    }
+  }
+}
+
 // --- Funzioni per la modalità "Metti in Ordine" ---
 
 function startSortRound() {
@@ -2021,17 +2145,21 @@ function displaySortableList(pokemonList) {
   shuffledList.forEach(p => {
     const li = document.createElement("li");
     li.className = "sortable-item";
-    li.draggable = true;
     li.dataset.id = p.id; // Salva l'ID per il controllo
     li.innerHTML = `<img src="${getSpriteUrl(p.name)}" alt="${p.name}"> ${p.name}`;
     listEl.appendChild(li);
   });
 
   // Aggiungi listener per il drag-and-drop
-  addDragDropListeners();
+  addClickSwapListeners();
 }
 
 function checkSortOrder() {
+  if (selectedSortItem) {
+  selectedSortItem.classList.remove("selected");
+  selectedSortItem = null;
+}
+
   clearInterval(timer); // Ferma il timer
 
   const listEl = document.getElementById("sortableList");
@@ -2047,79 +2175,146 @@ function checkSortOrder() {
 
   if (isCorrect) {
     score++;
-    startSortRound(); // Prossimo round
+    checkAndUnlockAchievement("first_step");
+    showSortUnlockModal(correctSortOrder); // Mostra il modal di sblocco
   } else {
     // Game Over
     triggerGameOver(t.sortWrongOrder, { stat: sortableStat, correctOrder: correctSortOrder });
   }
 }
 
+function showSortUnlockModal(pokemonList) {
+  currentSortChoices = pokemonList;
+  selectionsMade = 0;
 
+  if (difficulty === 'easy') maxSelections = 1;
+  else if (difficulty === 'medium') maxSelections = 2;
+  else maxSelections = 3;
+
+  const modal = document.getElementById("sortUnlockModal");
+  const grid = document.getElementById("sortUnlockGrid");
+  const confirmBtn = document.getElementById("confirmSortUnlock");
+  const messageEl = document.getElementById("sortUnlockMessage");
+
+  grid.innerHTML = "";
+  messageEl.innerText = (t.sortUnlockMessage || "Scegli {num} Pokémon:").replace("{num}", maxSelections);
+
+  pokemonList.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "sort-unlock-item";
+    item.dataset.pokemonId = p.id;
+    item.innerHTML = `<img src="${getSpriteUrl(p.name)}" alt="${p.name}"> ${p.name}`;
+
+    if (unlockedPokemon.includes(p.id)) {
+      item.classList.add("disabled");
+    } else {
+      item.addEventListener('click', handleSortUnlockClick);
+    }
+    grid.appendChild(item);
+  });
+
+  confirmBtn.disabled = true;
+  confirmBtn.onclick = confirmSortUnlock;
+  modal.style.display = "flex";
+}
+
+function handleSortUnlockClick(event) {
+  const item = event.currentTarget;
+  if (item.classList.contains("disabled")) return;
+
+  if (item.classList.contains("selected")) {
+    item.classList.remove("selected");
+    selectionsMade--;
+  } else {
+    if (selectionsMade < maxSelections) {
+      item.classList.add("selected");
+      selectionsMade++;
+    }
+  }
+
+  // Disabilita altri se il max è raggiunto
+  if (selectionsMade >= maxSelections) {
+      grid.querySelectorAll(".sort-unlock-item:not(.selected):not(.disabled)").forEach(i => i.classList.add("disabled"));
+  } else {
+      grid.querySelectorAll(".sort-unlock-item.disabled").forEach(i => {
+          // Ri-abilita solo se non è già sbloccato
+          if (!unlockedPokemon.includes(parseInt(i.dataset.pokemonId))) {
+              i.classList.remove("disabled");
+          }
+      });
+  }
+
+  document.getElementById("confirmSortUnlock").disabled = (selectionsMade === 0);
+}
+
+function confirmSortUnlock() {
+  const selectedItems = document.getElementById("sortUnlockGrid").querySelectorAll(".selected");
+
+  selectedItems.forEach(item => {
+    const id = parseInt(item.dataset.pokemonId);
+    if (!isNaN(id)) {
+      unlockPokemon(id); // Sblocca il Pokémon
+
+      // Controlla anche lo shiny per questo Pokémon
+      const pokemon = pokemonList.find(p => p.id === id);
+      checkShinyUnlock(pokemon);
+    }
+  });
+
+  document.getElementById("sortUnlockModal").style.display = "none";
+  startSortRound(); // Ora avvia il prossimo round
+}
 // --- Funzioni Helper per Drag-and-Drop ---
-let draggingElement = null;
+// RIMUOVI addDragDropListeners e getDragAfterElement
 
-function addDragDropListeners() {
+// NUOVA FUNZIONE per il click-to-swap
+function addClickSwapListeners() {
   const items = document.querySelectorAll(".sortable-item");
-  const list = document.getElementById("sortableList");
 
+  // Rimuovi vecchi listener per sicurezza
   items.forEach(item => {
-    item.addEventListener("dragstart", (e) => {
-      draggingElement = e.target;
-      e.target.classList.add("dragging");
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    
-    item.addEventListener("dragend", (e) => {
-      e.target.classList.remove("dragging");
-      draggingElement = null;
-    });
+    const newItem = item.cloneNode(true);
+    item.parentNode.replaceChild(newItem, item);
+  });
 
-    item.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      
-      const afterElement = getDragAfterElement(list, e.clientY);
-      // Rimuovi 'over' da tutti
-      items.forEach(i => i.classList.remove('over'));
-      
-      if (afterElement == null) {
-          if (list.lastChild !== item) item.classList.add('over'); // Evidenzia se è l'ultimo
+  // Aggiungi nuovi listener
+  document.querySelectorAll(".sortable-item").forEach(item => {
+    item.addEventListener("click", () => {
+      if (gameOver) return;
+
+      if (!selectedSortItem) {
+        // Primo click: seleziona
+        selectedSortItem = item;
+        item.classList.add("selected");
+      } else if (selectedSortItem === item) {
+        // Secondo click sullo stesso: deseleziona
+        selectedSortItem = null;
+        item.classList.remove("selected");
       } else {
-          if (afterElement !== item) item.classList.add('over'); // Evidenzia quello sopra
-      }
-    });
-    
-    item.addEventListener("dragleave", (e) => {
-        item.classList.remove('over');
-    });
+        // Secondo click su un altro: scambia
+        const list = document.getElementById("sortableList");
 
-    item.addEventListener("drop", (e) => {
-      e.preventDefault();
-      item.classList.remove('over');
-      if (draggingElement && draggingElement !== e.target) {
-        const afterElement = getDragAfterElement(list, e.clientY);
-        if (afterElement == null) {
-          list.appendChild(draggingElement);
+        // Scambia nel DOM
+        const parent = selectedSortItem.parentNode;
+        const nextOfSelected = selectedSortItem.nextSibling;
+        const nextOfTarget = item.nextSibling;
+
+        if (nextOfSelected === item) {
+            parent.insertBefore(selectedSortItem, nextOfTarget);
+        } else if (nextOfTarget === selectedSortItem) {
+            parent.insertBefore(item, nextOfSelected);
         } else {
-          list.insertBefore(draggingElement, afterElement);
+            parent.insertBefore(selectedSortItem, nextOfTarget);
+            parent.insertBefore(item, nextOfSelected);
         }
+
+        // Resetta la selezione
+        selectedSortItem.classList.remove("selected");
+        item.classList.remove("selected");
+        selectedSortItem = null;
       }
     });
   });
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
-
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
     // --- FUNZIONI ACCOUNT & POKÉDEX & CLASSIFICA ---
     
@@ -2186,6 +2381,50 @@ async function loadLeaderboardPage() {
   }
 }
 
+async function loadAchievementStats() {
+  try {
+    const statsRef = doc(fb_db, "achievementStats", "global");
+    const statsDoc = await getDoc(statsRef);
+    if (statsDoc.exists()) {
+      achievementPercentages = statsDoc.data();
+    }
+  } catch (err) {
+    console.error("Errore caricamento statistiche achievement:", err);
+  }
+}
+
+function displayAchievements() {
+  const grid = document.getElementById("achievementsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const totalUsers = achievementPercentages.totalUsers || 1; // Evita divisione per zero
+
+  for (const key in achievementDefinitions) {
+    const def = achievementDefinitions[key];
+
+    // Salta achievement generazionali se la lista non è completa
+    if (def.gen && def.gen > 5) continue; 
+
+    const isUnlocked = unlockedAchievements.includes(key);
+
+    const card = document.createElement("div");
+    card.className = "achievement-card";
+    if (!isUnlocked) card.classList.add("locked");
+
+    const unlockCount = achievementPercentages[key] || 0;
+    const percent = (unlockCount / totalUsers * 100).toFixed(1);
+
+    card.innerHTML = `
+      <div class="achievement-icon">${def.icon}</div>
+      <div class="achievement-title">${def.title}</div>
+      <div class="achievement-desc">${(isUnlocked || !def.hidden) ? def.desc : "???"}</div>
+      <div class="achievement-percent">${percent}%</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
     function loadAccountPage() {
       const authCont = document.getElementById("authContainer");
       const dataCont = document.getElementById("userDataContainer");
@@ -2214,8 +2453,17 @@ async function loadLeaderboardPage() {
         document.getElementById("accountGamesPlayed").innerText = totalGames; // Mostra partite totali
         
         let creationDate = "...";
-        // ... (logica della data di creazione)
-        document.getElementById("accountCreatedAt").innerText = creationDate;
+        if (userData.createdAt && typeof userData.createdAt.toDate === 'function') {
+        creationDate = userData.createdAt.toDate().toLocaleDateString(lang, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+        });
+        }
+document.getElementById("accountCreatedAt").innerText = creationDate;
+
+// Mostra gli achievement
+displayAchievements();
         
         displayPokedex(pokemonList);
       }
@@ -2244,6 +2492,7 @@ async function loadLeaderboardPage() {
 
       list.forEach(pokemon => {
         const isUnlocked = unlockedPokemon.includes(pokemon.id);
+        const isShinyUnlocked = unlockedShiny.includes(pokemon.id);
         
         const div = document.createElement('div');
         div.className = 'pokedex-pokemon';
@@ -2257,11 +2506,11 @@ async function loadLeaderboardPage() {
 
         if (isUnlocked) {
           name.textContent = pokemon.name;
-          div.addEventListener('click', () => showPokemonModal(pokemon, true));
+          div.addEventListener('click', () => showPokemonModal(pokemon, true, isShinyUnlocked));
         } else {
           div.classList.add('locked');
           name.textContent = "???";
-          div.addEventListener('click', () => showPokemonModal(pokemon, false));
+          div.addEventListener('click', () => showPokemonModal(pokemon, false, false));
         }
 
         div.appendChild(img);
@@ -2270,12 +2519,16 @@ async function loadLeaderboardPage() {
       });
     }
 
-    function showPokemonModal(pokemon, isUnlocked) {
+    function showPokemonModal(pokemon, isUnlocked, isShinyUnlocked) {
+      const shinyToggle = document.getElementById("modalShinyToggle");
+shinyToggle.dataset.pokemonName = pokemon.name;
+shinyToggle.dataset.isShiny = "false"; // Resetta sempre
+shinyToggle.classList.remove("active");
       const statLabels = (translations.statNames[lang] || translations.statNames.en);
 
       if (isUnlocked) {
         modalName.textContent = `#${pokemon.id} ${pokemon.name}`;
-        modalImage.src = getSpriteUrl(pokemon.name);
+        modalImage.src = getSpriteUrl(pokemon.name, false); // Mostra sempre il normale all'inizio
         modalImage.classList.remove('locked');
         modalStats.innerHTML = '';
 
@@ -2290,10 +2543,18 @@ async function loadLeaderboardPage() {
             </div>
           `;
           modalStats.appendChild(statDiv);
+
+        if (isShinyUnlocked) {
+  shinyToggle.classList.add("unlocked");
+  shinyToggle.onclick = toggleShinySprite;
+} else {
+  shinyToggle.classList.remove("unlocked");
+  shinyToggle.onclick = null;
+}
         }
       } else {
         modalName.textContent = `???`;
-        modalImage.src = getSpriteUrl(pokemon.name);
+        modalImage.src = getSpriteUrl(pokemon.name, false);
         modalImage.classList.add('locked');
         modalStats.innerHTML = '';
         ['hp', 'attack', 'defense', 'spattack', 'spdefense', 'speed'].forEach(stat => {
@@ -2308,6 +2569,8 @@ async function loadLeaderboardPage() {
           `;
           modalStats.appendChild(statDiv);
         });
+          shinyToggle.classList.remove("unlocked", "active");
+          shinyToggle.onclick = null;
       }
       modal.style.display = 'flex';
     }
@@ -2326,5 +2589,22 @@ async function loadLeaderboardPage() {
 
     });
 
+    function toggleShinySprite(event) {
+  const btn = event.currentTarget;
+  const name = btn.dataset.pokemonName;
+  if (!name) return;
+
+  const isCurrentlyShiny = btn.dataset.isShiny === "true";
+  const newIsShiny = !isCurrentlyShiny;
+
+  document.getElementById("modalImage").src = getSpriteUrl(name, newIsShiny);
+  btn.dataset.isShiny = newIsShiny;
+
+  if (newIsShiny) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+}
 
 
