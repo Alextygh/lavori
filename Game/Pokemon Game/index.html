@@ -164,6 +164,36 @@
   <div id="achievementsGrid" class="achievements-grid">
     </div>
 </div>
+      <h3 data-translate="pokedex">Pokédex</h3>
+      
+      <div class="pokedex-filters">
+        <div class="filter-group">
+          <label for="pokedexFilterStatus" data-translate="filterStatus">Stato</label>
+          <select id="pokedexFilterStatus">
+            <option value="all" data-translate="filterAll">Tutti</option>
+            <option value="unlocked" data-translate="filterUnlocked">Sbloccati</option>
+            <option value="locked" data-translate="filterLocked">Bloccati</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="pokedexFilterRegion" data-translate="filterRegion">Regione</label>
+          <select id="pokedexFilterRegion">
+            <option value="all" data-translate="filterAll">Tutte</option>
+            <option value="1">Kanto (Gen 1)</option>
+            <option value="2">Johto (Gen 2)</option>
+            <option value="3">Hoenn (Gen 3)</option>
+            <option value="4">Sinnoh (Gen 4)</option>
+            <option value="5">Unima (Gen 5)</option>
+            <option value="6">Kalos (Gen 6)</option>
+            <option value="7">Alola (Gen 7)</option>
+            <option value="8">Galar (Gen 8)</option>
+            <option value="9">Paldea (Gen 9)</option>
+          </select>
+        </div>
+      </div>
+      <input type="text" id="pokedexSearch" placeholder="Cerca Pokémon...">
+      <div id="pokedexGrid" class="pokedex-grid"></div>
+    </div>
       
       <h3 data-translate="pokedex">Pokédex</h3>
       <input type="text" id="pokedexSearch" placeholder="Cerca Pokémon...">
