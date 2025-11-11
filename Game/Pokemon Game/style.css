@@ -542,8 +542,8 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 10px;
-  cursor: grab;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 .sortable-item img {
   width: 50px;
@@ -552,17 +552,147 @@
   margin-right: 15px;
 }
 .sortable-item:active {
-  cursor: grabbing;
+  cursor: pointer;
 }
-/* Classe per l'elemento trascinato */
-.sortable-item.dragging {
+.sortable-item.selected {
+  background-color: var(--primary-blue);
+  color: white;
+  border-color: var(--primary-yellow);
+}
+
+/* --- Stili per Achievements --- */
+.achievements-scroller-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 25px;
+  -webkit-overflow-scrolling: touch; /* Per scorrimento fluido su iOS */
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  padding: 5px 0;
+}
+body.dark-mode .achievements-scroller-container {
+  background: rgba(0,0,0,0.2);
+}
+
+.achievements-grid {
+  display: inline-flex; /* Permette lo scorrimento orizzontale */
+  gap: 15px;
+  padding: 10px;
+}
+
+.achievement-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 15px;
+  width: 160px;
+  height: 180px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  white-space: normal; /* Permette al testo di andare a capo */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  vertical-align: top;
+}
+
+.achievement-card.locked {
+  opacity: 0.6;
+}
+
+.achievement-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.achievement-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.achievement-desc {
+  font-size: 0.85rem;
+  flex-grow: 1;
+  margin: 10px 0;
+}
+
+.achievement-percent {
+  font-size: 0.8rem;
+  color: var(--primary-blue);
+  font-weight: bold;
+}
+
+/* --- Stili per Pulsante Shiny Modal --- */
+.shiny-toggle-btn {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
   opacity: 0.5;
-  background: #5E6ABC;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 5px;
 }
-/* Classe per evidenziare dove atterrerà l'elemento */
-.sortable-item.over {
-  background-color: rgba(0,0,0,0.1);
-  border-style: dashed;
+
+.shiny-toggle-btn:not(.unlocked) {
+  cursor: default;
+  color: #888;
+}
+
+.shiny-toggle-btn.unlocked:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.shiny-toggle-btn.unlocked.active {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px var(--primary-yellow));
+}
+
+/* --- Stili per Modal Sblocco "Sort" --- */
+.sort-unlock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.sort-unlock-item {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.sort-unlock-item img {
+  width: 60px;
+  height: 60px;
+  image-rendering: pixelated;
+  display: block;
+  margin: 0 auto 5px auto;
+}
+
+.sort-unlock-item.selected {
+  background-color: rgba(59, 76, 202, 0.3); /* Colore primario con opacità */
+  border-color: var(--primary-blue);
+}
+
+.sort-unlock-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: rgba(100, 100, 100, 0.1);
+}
+
+#confirmSortUnlock:disabled {
+  background-color: #888;
+  cursor: not-allowed;
 }
 
 #checkSortButton {
