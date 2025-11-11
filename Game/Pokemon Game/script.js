@@ -48,10 +48,15 @@ const LANG_KEY = "lang";
 const THEME_KEY = "theme";
 const DIFFICULTY_KEY = "difficulty";
 const COOKIE_KEY = "cookieConsent";
+const UNLOCKED_SHINY_KEY = "unlockedShiny";
+const ACHIEVEMENTS_KEY = "unlockedAchievements";
 
 // --- VARIABILI GLOBALI ---
 let pokemonList = [];
 let unlockedPokemon = []; 
+let unlockedShiny = [];
+let unlockedAchievements = [];
+let achievementPercentages = {}; // Verrà caricato da Firestore
 let score = 0;
 let gameOver = false;
 let timer;
@@ -60,6 +65,11 @@ let t = {};
 let lang = "it";
 let difficulty = "easy";
 let currentComparison = null; 
+// (sotto le altre variabili globali)
+let selectedSortItem = null; // Per il click-to-swap
+let currentSortChoices = []; // Per il modal di sblocco
+let selectionsMade = 0;
+let maxSelections = 1;
 
 // NUOVE Variabili Globali
 let currentGameMode = null; // 'classic' o 'sort'
