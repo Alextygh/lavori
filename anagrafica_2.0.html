@@ -120,7 +120,8 @@
                 <strong>CAP:</strong> ${cap}<br>
                 <strong>Data di nascita:</strong> ${dataNascita}<br>
                 <strong>Età:</strong> ${eta} anni<br>
-                <strong>Generazione:</strong> ${generazione}
+                <strong>Generazione:</strong> ${generazione} <br>
+                <strong>Sesso:</strong> ${sesso} <br>
             `;
         }
     </script>
@@ -146,11 +147,10 @@
             <h3>Data di nascita</h3>
             <input type="date" id="nascita">
 
-            <input type="radio" name="colori" value="rosso">Rosso<br>
+            <h3> Sesso </h3>
+            <input type="radio" name="sesso" value="uomo">Uomo<br>
 
-            <input type="radio" name="colori" value="verde">Verde<br>
-
-            <input type="radio" name="colori" value="bianco">Bianco<br>
+            <input type="radio" name="sesso" value="donna">Donna<br>
  
             <input type="button" value="Mostra dati" onclick="stampa()">
         
