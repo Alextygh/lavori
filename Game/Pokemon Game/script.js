@@ -4,16 +4,19 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
     import { 
-      getAuth, onAuthStateChanged, 
+        getAuth, onAuthStateChanged, 
       createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-      signOut, sendEmailVerification, sendPasswordResetEmail
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { 
-      getFirestore, doc, getDoc, setDoc, 
-      updateDoc, Timestamp, runTransaction,
-      writeBatch, serverTimestamp, collection, 
-      query, orderBy, limit, getDocs
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  signOut, sendEmailVerification, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { 
+  getFirestore, doc, getDoc, setDoc, 
+  updateDoc, Timestamp, runTransaction,
+  writeBatch, serverTimestamp, collection, 
+  query, orderBy, limit, getDocs
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// MODIFICA (Task 7): Importa dal nuovo file
+import { translations, flagEmojis, genRanges, achievementDefinitions } from './translations.js';
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -89,1046 +92,6 @@ let gamesPlayed = { // NUOVA struttura per le partite
 let currentUser = null; 
 let userData = null;
 
-    // --- OGGETTO TRADUZIONI (INTEGRATO) ---
-    const translations = {
-      // RIGA 109 (circa)
-      "it": {
-        "title": "Pokéstats - Confronto Statistiche", // MODIFICATO
-        "score": "Punteggio", "record": "Record", "time": "Tempo", "yes": "Sì", "no": "No", "gameOver": "Game Over!", "newRecord": "🎉 Nuovo record!", "currentRecord": "Record attuale", "close": "Chiudi", "timeout": "Tempo scaduto!", "wrong": "Hai sbagliato!", "play": "Gioca", "account": "Account", "settings": "Impostazioni", "backToMenu": "Menu", "gamesPlayed": "Partite Giocate", "pokedex": "Pokédex", "difficulty": "Difficoltà", "easy": "Facile", "medium": "Medio", "hard": "Difficile", "theme": "Tema", "system": "Sistema", "light": "Chiaro", "dark": "Scuro", "language": "Lingua", "search": "Cerca Pokémon...", "wins": "vince",
-        "question": "{pokemon1} ha più {stat} di {pokemon2}?",
-
-        // NUOVE TRADUZIONI (AGGIUNTE)
-        "chooseModeTitle": "Scegli la Modalità",
-        "classicMode": "Chi è più forte?",
-        "sortMode": "Metti in ordine!",
-        "sortQuestion": "Ordina i Pokémon per {stat} (dal più alto al più basso)",
-        "checkOrderButton": "Controlla",
-        "sortWrongOrder": "Ordine errato!",
-        "sortCorrectOrder": "Ordine Corretto:",
-        "classic": "Classica",
-        "sort": "Ordina",
-        // FINE NUOVE TRADUZIONI
-
-        "login": "Login", "register": "Registrati", "emailPlaceholder": "Email", "passwordPlaceholder": "Password", "displayNamePlaceholder": "Nome visualizzato (unico)", "loginButton": "Accedi", "registerButton": "Registrati", "authToggleToRegister": "Non hai un account?", "authToggleToRegisterBtn": "Registrati", "authToggleToLogin": "Hai già un account?", "authToggleToLoginBtn": "Accedi",
-        "errorFieldRequired": "Compila tutti i campi.", "errorNameLength": "Il nome deve essere tra 3 e 20 caratteri.", "errorNameInUse": "Nome utente già utilizzato.", "errorEmailInUse": "Email già registrata.", "errorWeakPassword": "La password deve essere di almeno 6 caratteri.", "errorRegisterGeneral": "Errore durante la registrazione.", "errorLoginInvalid": "Email o password errati.", "errorLoginGeneral": "Errore during il login.", "errorLoginRequired": "Inserisci email e password.", "errorEmailInvalid": "Inserisci un'email valida.",
-        "statusLoading": "Caricamento...", "statusRegistering": "Verifica e creazione account...", "statusLoggingIn": "Accesso in corso...", "statusLoadingUser": "Caricamento dati di {email}...", "statusLoggedInAs": "Loggato come <strong>{name}</strong>.", "statusGuest": "Stai giocando come <strong>Ospite</strong>.", "statusBtnLogout": "Logout", "statusBtnLogin": "Login/Registrati", "memberSince": "Membro dal", "statusNotVerified": "Email <strong>{email}</strong> non verificata.", "statusNotVerifiedBtn": "Invia di nuovo",
-        "leaderboard": "Classifica", "leaderboardLoading": "Caricamento classifica...", "leaderboardEmpty": "Nessun dato ancora.", "leaderboardError": "Errore nel caricamento.",
-        "verifyTitle": "Verifica la tua Email", "verifyMessage": "Ti abbiamo inviato un link di verifica. Controlla la tua casella di posta (e spam) e clicca sul link per attivare il tuo account.", "verifyResend": "Invia di nuovo", "verifySent": "Link di verifica inviato!", "verifyError": "Errore durante l'invio. Riprova più tardi.",
-        "authToggleToResetBtn": "Password dimenticata?", "resetTitle": "Recupera Password", "resetMessage": "Inserisci la tua email e ti invieremo un link per resettare la password.", "resetButton": "Invia link", "resetSent": "Email inviata! Controlla la tua casella.", "resetError": "Errore. L'email è corretta?",
-        "cookieMessage": "Questo sito usa cookie per salvare i tuoi record e preferenze. Accetti?", "cookieButton": "Accetta",
-        "benefitsTitle": "Perché creare un account?", "benefitsItem1": "Salva i tuoi record e progressi sul cloud.", "benefitsItem2": "Competi nella classifica globale.", "benefitsItem3": "Sincronizza il tuo Pokédex sbloccato su tutti i dispositivi.",
-        "privacyNotice": "Creando un account, accetti che la tua email, nome utente e punteggi vengano salvati. Non condividiamo i tuoi dati."
-      },
-      // RIGA 136 (circa)
-  "en": {
-    "title": "Pokéstats - Stats Comparison",
-    "score": "Score",
-    "record": "Record",
-    "time": "Time",
-    "yes": "Yes",
-    "no": "No",
-    "gameOver": "Game Over!",
-    "newRecord": "🎉 New Record!",
-    "currentRecord": "Current Record",
-    "close": "Close",
-    "timeout": "Time out!",
-    "wrong": "Wrong!",
-    "play": "Play",
-    "account": "Account",
-    "settings": "Settings",
-    "backToMenu": "Menu",
-    "gamesPlayed": "Games Played",
-    "pokedex": "Pokédex",
-    "difficulty": "Difficulty",
-    "easy": "Easy",
-    "medium": "Medium",
-    "hard": "Hard",
-    "theme": "Theme",
-    "system": "System",
-    "light": "Light",
-    "dark": "Dark",
-    "language": "Language",
-    "search": "Search Pokémon...",
-    "wins": "wins",
-    "question": "Does {pokemon1} have higher {stat} than {pokemon2}?",
-    "chooseModeTitle": "Choose Mode",
-    "classicMode": "Who is stronger?",
-    "sortMode": "Sort them!",
-    "sortQuestion": "Sort the Pokémon by {stat} (from highest to lowest)",
-    "checkOrderButton": "Check",
-    "sortWrongOrder": "Wrong order!",
-    "sortCorrectOrder": "Correct Order:",
-    "classic": "Classic",
-    "sort": "Sort",
-    "login": "Login",
-    "register": "Register",
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Password",
-    "displayNamePlaceholder": "Display Name (unique)",
-    "loginButton": "Login",
-    "registerButton": "Register",
-    "authToggleToRegister": "Don't have an account?",
-    "authToggleToRegisterBtn": "Register",
-    "authToggleToLogin": "Already have an account?",
-    "authToggleToLoginBtn": "Login",
-    "errorFieldRequired": "Please fill all fields.",
-    "errorNameLength": "Name must be between 3 and 20 characters.",
-    "errorNameInUse": "Username already in use.",
-    "errorEmailInUse": "Email already registered.",
-    "errorWeakPassword": "Password must be at least 6 characters.",
-    "errorRegisterGeneral": "Error during registration.",
-    "errorLoginInvalid": "Incorrect email or password.",
-    "errorLoginGeneral": "Error during login.",
-    "errorLoginRequired": "Enter email and password.",
-    "errorEmailInvalid": "Enter a valid email.",
-    "statusLoading": "Loading...",
-    "statusRegistering": "Verifying and creating account...",
-    "statusLoggingIn": "Logging in...",
-    "statusLoadingUser": "Loading data for {email}...",
-    "statusLoggedInAs": "Logged in as <strong>{name}</strong>.",
-    "statusGuest": "You are playing as <strong>Guest</strong>.",
-    "statusBtnLogout": "Logout",
-    "statusBtnLogin": "Login/Register",
-    "memberSince": "Member since",
-    "statusNotVerified": "Email <strong>{email}</strong> not verified.",
-    "statusNotVerifiedBtn": "Resend",
-    "leaderboard": "Leaderboard",
-    "leaderboardLoading": "Loading leaderboard...",
-    "leaderboardEmpty": "No data yet.",
-    "leaderboardError": "Error loading leaderboard.",
-    "verifyTitle": "Verify your Email",
-    "verifyMessage": "We sent you a verification link. Check your inbox (and spam) and click the link to activate your account.",
-    "verifyResend": "Resend",
-    "verifySent": "Verification link sent!",
-    "verifyError": "Error sending. Please try again later.",
-    "authToggleToResetBtn": "Forgot password?",
-    "resetTitle": "Reset Password",
-    "resetMessage": "Enter your email and we'll send you a link to reset your password.",
-    "resetButton": "Send link",
-    "resetSent": "Email sent! Check your inbox.",
-    "resetError": "Error. Is the email correct?",
-    "cookieMessage": "This site uses cookies to save your records and preferences. Do you accept?",
-    "cookieButton": "Accept",
-    "benefitsTitle": "Why create an account?",
-    "benefitsItem1": "Save your records and progress to the cloud.",
-    "benefitsItem2": "Compete on the global leaderboard.",
-    "benefitsItem3": "Sync your unlocked Pokédex across all devices.",
-    "privacyNotice": "By creating an account, you agree that your email, username, and scores will be saved. We do not share your data."
-  },
-  "es": {
-    "title": "Pokéstats - Comparación de Estadísticas",
-    "score": "Puntuación",
-    "record": "Récord",
-    "time": "Tiempo",
-    "yes": "Sí",
-    "no": "No",
-    "gameOver": "¡Fin del juego!",
-    "newRecord": "🎉 ¡Nuevo récord!",
-    "currentRecord": "Récord actual",
-    "close": "Cerrar",
-    "timeout": "¡Tiempo agotado!",
-    "wrong": "¡Incorrecto!",
-    "play": "Jugar",
-    "account": "Cuenta",
-    "settings": "Ajustes",
-    "backToMenu": "Menú",
-    "gamesPlayed": "Partidas Jugadas",
-    "pokedex": "Pokédex",
-    "difficulty": "Dificultad",
-    "easy": "Fácil",
-    "medium": "Medio",
-    "hard": "Difícil",
-    "theme": "Tema",
-    "system": "Sistema",
-    "light": "Claro",
-    "dark": "Oscuro",
-    "language": "Idioma",
-    "search": "Buscar Pokémon...",
-    "wins": "gana",
-    "question": "¿{pokemon1} tiene más {stat} que {pokemon2}?",
-    "chooseModeTitle": "Elige Modo",
-    "classicMode": "¿Quién es más fuerte?",
-    "sortMode": "¡Ordénalos!",
-    "sortQuestion": "Ordena los Pokémon por {stat} (de mayor a menor)",
-    "checkOrderButton": "Comprobar",
-    "sortWrongOrder": "¡Orden incorrecto!",
-    "sortCorrectOrder": "Orden Correcto:",
-    "classic": "Clásico",
-    "sort": "Ordenar",
-    "login": "Iniciar sesión",
-    "register": "Registrarse",
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Contraseña",
-    "displayNamePlaceholder": "Nombre de usuario (único)",
-    "loginButton": "Acceder",
-    "registerButton": "Registrarse",
-    "authToggleToRegister": "¿No tienes cuenta?",
-    "authToggleToRegisterBtn": "Regístrate",
-    "authToggleToLogin": "¿Ya tienes cuenta?",
-    "authToggleToLoginBtn": "Acceder",
-    "errorFieldRequired": "Por favor, rellena todos los campos.",
-    "errorNameLength": "El nombre debe tener entre 3 y 20 caracteres.",
-    "errorNameInUse": "Nombre de usuario ya en uso.",
-    "errorEmailInUse": "Email ya registrado.",
-    "errorWeakPassword": "La contraseña debe tener al menos 6 caracteres.",
-    "errorRegisterGeneral": "Error durante el registro.",
-    "errorLoginInvalid": "Email o contraseña incorrectos.",
-    "errorLoginGeneral": "Error al iniciar sesión.",
-    "errorLoginRequired": "Introduce email y contraseña.",
-    "errorEmailInvalid": "Introduce un email válido.",
-    "statusLoading": "Cargando...",
-    "statusRegistering": "Verificando y creando cuenta...",
-    "statusLoggingIn": "Iniciando sesión...",
-    "statusLoadingUser": "Cargando datos de {email}...",
-    "statusLoggedInAs": "Conectado como <strong>{name}</strong>.",
-    "statusGuest": "Estás jugando como <strong>Invitado</strong>.",
-    "statusBtnLogout": "Cerrar sesión",
-    "statusBtnLogin": "Login/Registro",
-    "memberSince": "Miembro desde",
-    "statusNotVerified": "Email <strong>{email}</strong> no verificado.",
-    "statusNotVerifiedBtn": "Reenviar",
-    "leaderboard": "Clasificación",
-    "leaderboardLoading": "Cargando clasificación...",
-    "leaderboardEmpty": "Aún no hay datos.",
-    "leaderboardError": "Error al cargar la clasificación.",
-    "verifyTitle": "Verifica tu Email",
-    "verifyMessage": "Te hemos enviado un enlace de verificación. Revisa tu bandeja de entrada (y spam) y haz clic para activar tu cuenta.",
-    "verifyResend": "Reenviar",
-    "verifySent": "¡Enlace de verificación enviado!",
-    "verifyError": "Error al enviar. Inténtalo más tarde.",
-    "authToggleToResetBtn": "¿Contraseña olvidada?",
-    "resetTitle": "Restablecer Contraseña",
-    "resetMessage": "Introduce tu email y te enviaremos un enlace para restablecer la contraseña.",
-    "resetButton": "Enviar enlace",
-    "resetSent": "¡Email enviado! Revisa tu bandeja.",
-    "resetError": "Error. ¿El email es correcto?",
-    "cookieMessage": "Este sitio usa cookies para guardar tus récords y preferencias. ¿Aceptas?",
-    "cookieButton": "Aceptar",
-    "benefitsTitle": "¿Por qué crear una cuenta?",
-    "benefitsItem1": "Guarda tus récords y progreso en la nube.",
-    "benefitsItem2": "Compite en la clasificación global.",
-    "benefitsItem3": "Sincroniza tu Pokédex desbloqueada en todos los dispositivos.",
-    "privacyNotice": "Al crear una cuenta, aceptas que tu email, nombre de usuario y puntuaciones se guarden. No compartimos tus datos."
-  },
-  "de": {
-    "title": "Pokéstats - Statistik-Vergleich",
-    "score": "Punktzahl",
-    "record": "Rekord",
-    "time": "Zeit",
-    "yes": "Ja",
-    "no": "Nein",
-    "gameOver": "Spiel vorbei!",
-    "newRecord": "🎉 Neuer Rekord!",
-    "currentRecord": "Aktueller Rekord",
-    "close": "Schließen",
-    "timeout": "Zeit abgelaufen!",
-    "wrong": "Falsch!",
-    "play": "Spielen",
-    "account": "Konto",
-    "settings": "Einstellungen",
-    "backToMenu": "Menü",
-    "gamesPlayed": "Gespielte Spiele",
-    "pokedex": "Pokédex",
-    "difficulty": "Schwierigkeit",
-    "easy": "Leicht",
-    "medium": "Mittel",
-    "hard": "Schwer",
-    "theme": "Thema",
-    "system": "System",
-    "light": "Hell",
-    "dark": "Dunkel",
-    "language": "Sprache",
-    "search": "Suche Pokémon...",
-    "wins": "gewinnt",
-    "question": "Hat {pokemon1} mehr {stat} als {pokemon2}?",
-    "chooseModeTitle": "Modus wählen",
-    "classicMode": "Wer ist stärker?",
-    "sortMode": "Sortiere sie!",
-    "sortQuestion": "Sortiere die Pokémon nach {stat} (von hoch nach niedrig)",
-    "checkOrderButton": "Prüfen",
-    "sortWrongOrder": "Falsche Reihenfolge!",
-    "sortCorrectOrder": "Richtige Reihenfolge:",
-    "classic": "Klassisch",
-    "sort": "Sortieren",
-    "login": "Anmelden",
-    "register": "Registrieren",
-    "emailPlaceholder": "E-Mail",
-    "passwordPlaceholder": "Passwort",
-    "displayNamePlaceholder": "Anzeigename (einzigartig)",
-    "loginButton": "Anmelden",
-    "registerButton": "Registrieren",
-    "authToggleToRegister": "Noch kein Konto?",
-    "authToggleToRegisterBtn": "Registrieren",
-    "authToggleToLogin": "Bereits ein Konto?",
-    "authToggleToLoginBtn": "Anmelden",
-    "errorFieldRequired": "Bitte fülle alle Felder aus.",
-    "errorNameLength": "Name muss zwischen 3 und 20 Zeichen lang sein.",
-    "errorNameInUse": "Benutzername bereits vergeben.",
-    "errorEmailInUse": "E-Mail bereits registriert.",
-    "errorWeakPassword": "Passwort muss mindestens 6 Zeichen lang sein.",
-    "errorRegisterGeneral": "Fehler bei der Registrierung.",
-    "errorLoginInvalid": "Falsche E-Mail oder falsches Passwort.",
-    "errorLoginGeneral": "Fehler bei der Anmeldung.",
-    "errorLoginRequired": "E-Mail und Passwort eingeben.",
-    "errorEmailInvalid": "Gültige E-Mail eingeben.",
-    "statusLoading": "Wird geladen...",
-    "statusRegistering": "Konto wird verifiziert und erstellt...",
-    "statusLoggingIn": "Anmeldung läuft...",
-    "statusLoadingUser": "Lade Daten für {email}...",
-    "statusLoggedInAs": "Angemeldet als <strong>{name}</strong>.",
-    "statusGuest": "Du spielst als <strong>Gast</strong>.",
-    "statusBtnLogout": "Abmelden",
-    "statusBtnLogin": "Anmelden/Registrieren",
-    "memberSince": "Mitglied seit",
-    "statusNotVerified": "E-Mail <strong>{email}</strong> nicht verifiziert.",
-    "statusNotVerifiedBtn": "Erneut senden",
-    "leaderboard": "Bestenliste",
-    "leaderboardLoading": "Bestenliste wird geladen...",
-    "leaderboardEmpty": "Noch keine Daten.",
-    "leaderboardError": "Fehler beim Laden der Bestenliste.",
-    "verifyTitle": "Bestätige deine E-Mail",
-    "verifyMessage": "Wir haben dir einen Bestätigungslink gesendet. Prüfe dein Postfach (und Spam) und klicke auf den Link, um dein Konto zu aktivieren.",
-    "verifyResend": "Erneut senden",
-    "verifySent": "Bestätigungslink gesendet!",
-    "verifyError": "Fehler beim Senden. Bitte später erneut versuchen.",
-    "authToggleToResetBtn": "Passwort vergessen?",
-    "resetTitle": "Passwort zurücksetzen",
-    "resetMessage": "Gib deine E-Mail ein und wir senden dir einen Link zum Zurücksetzen des Passworts.",
-    "resetButton": "Link senden",
-    "resetSent": "E-Mail gesendet! Prüfe dein Postfach.",
-    "resetError": "Fehler. Ist die E-Mail korrekt?",
-    "cookieMessage": "Diese Seite verwendet Cookies, um deine Rekorde und Einstellungen zu speichern. Akzeptierst du?",
-    "cookieButton": "Akzeptieren",
-    "benefitsTitle": "Warum ein Konto erstellen?",
-    "benefitsItem1": "Speichere deine Rekorde und Fortschritte in der Cloud.",
-    "benefitsItem2": "Tritt in der globalen Bestenliste an.",
-    "benefitsItem3": "Synchronisiere deinen freigeschalteten Pokédex auf allen Geräten.",
-    "privacyNotice": "Indem du ein Konto erstellst, stimmst du zu, dass deine E-Mail, dein Benutzername und deine Punktzahlen gespeichert werden. Wir geben deine Daten nicht weiter."
-  },
-  "pt": {
-    "title": "Pokéstats - Comparação de Stats",
-    "score": "Pontuação",
-    "record": "Recorde",
-    "time": "Tempo",
-    "yes": "Sim",
-    "no": "Não",
-    "gameOver": "Fim de Jogo!",
-    "newRecord": "🎉 Novo Recorde!",
-    "currentRecord": "Recorde Atual",
-    "close": "Fechar",
-    "timeout": "Tempo Esgotado!",
-    "wrong": "Errado!",
-    "play": "Jogar",
-    "account": "Conta",
-    "settings": "Configurações",
-    "backToMenu": "Menu",
-    "gamesPlayed": "Partidas Jogadas",
-    "pokedex": "Pokédex",
-    "difficulty": "Dificuldade",
-    "easy": "Fácil",
-    "medium": "Médio",
-    "hard": "Difícil",
-    "theme": "Tema",
-    "system": "Sistema",
-    "light": "Claro",
-    "dark": "Escuro",
-    "language": "Idioma",
-    "search": "Procurar Pokémon...",
-    "wins": "vence",
-    "question": "{pokemon1} tem mais {stat} do que {pokemon2}?",
-    "chooseModeTitle": "Escolha o Modo",
-    "classicMode": "Quem é mais forte?",
-    "sortMode": "Coloque em ordem!",
-    "sortQuestion": "Ordene os Pokémon por {stat} (do maior para o menor)",
-    "checkOrderButton": "Verificar",
-    "sortWrongOrder": "Ordem errada!",
-    "sortCorrectOrder": "Ordem Correta:",
-    "classic": "Clássico",
-    "sort": "Ordenar",
-    "login": "Login",
-    "register": "Registrar",
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Senha",
-    "displayNamePlaceholder": "Nome de exibição (único)",
-    "loginButton": "Entrar",
-    "registerButton": "Registrar",
-    "authToggleToRegister": "Não tem uma conta?",
-    "authToggleToRegisterBtn": "Registre-se",
-    "authToggleToLogin": "Já tem uma conta?",
-    "authToggleToLoginBtn": "Entrar",
-    "errorFieldRequired": "Por favor, preencha todos os campos.",
-    "errorNameLength": "O nome deve ter entre 3 e 20 caracteres.",
-    "errorNameInUse": "Nome de usuário já em uso.",
-    "errorEmailInUse": "Email já registrado.",
-    "errorWeakPassword": "A senha deve ter pelo menos 6 caracteres.",
-    "errorRegisterGeneral": "Erro durante o registro.",
-    "errorLoginInvalid": "Email ou senha incorretos.",
-    "errorLoginGeneral": "Erro durante o login.",
-    "errorLoginRequired": "Digite email e senha.",
-    "errorEmailInvalid": "Digite um email válido.",
-    "statusLoading": "Carregando...",
-    "statusRegistering": "Verificando e criando conta...",
-    "statusLoggingIn": "Entrando...",
-    "statusLoadingUser": "Carregando dados de {email}...",
-    "statusLoggedInAs": "Logado como <strong>{name}</strong>.",
-    "statusGuest": "Você está jogando como <strong>Visitante</strong>.",
-    "statusBtnLogout": "Sair",
-    "statusBtnLogin": "Login/Registro",
-    "memberSince": "Membro desde",
-    "statusNotVerified": "Email <strong>{email}</strong> não verificado.",
-    "statusNotVerifiedBtn": "Reenviar",
-    "leaderboard": "Placar",
-    "leaderboardLoading": "Carregando placar...",
-    "leaderboardEmpty": "Nenhum dado ainda.",
-    "leaderboardError": "Erro ao carregar o placar.",
-    "verifyTitle": "Verifique seu Email",
-    "verifyMessage": "Enviamos um link de verificação. Verifique sua caixa de entrada (e spam) e clique no link para ativar sua conta.",
-    "verifyResend": "Reenviar",
-    "verifySent": "Link de verificação enviado!",
-    "verifyError": "Erro ao enviar. Tente novamente mais tarde.",
-    "authToggleToResetBtn": "Esqueceu a senha?",
-    "resetTitle": "Redefinir Senha",
-    "resetMessage": "Digite seu email e enviaremos um link para redefinir sua senha.",
-    "resetButton": "Enviar link",
-    "resetSent": "Email enviado! Verifique sua caixa.",
-    "resetError": "Erro. O email está correto?",
-    "cookieMessage": "Este site usa cookies para salvar seus recordes e preferências. Você aceita?",
-    "cookieButton": "Aceitar",
-    "benefitsTitle": "Por que criar uma conta?",
-    "benefitsItem1": "Salve seus recordes e progresso na nuvem.",
-    "benefitsItem2": "Compita no placar global.",
-    "benefitsItem3": "Sincronize sua Pokédex desbloqueada em todos os dispositivos.",
-    "privacyNotice": "Ao criar uma conta, você concorda que seu email, nome de usuário e pontuações sejam salvos. Nós não compartilhamos seus dados."
-  },
-  "fr": {
-    "title": "Pokéstats - Comparaison de Stats",
-    "score": "Score",
-    "record": "Record",
-    "time": "Temps",
-    "yes": "Oui",
-    "no": "Non",
-    "gameOver": "Partie terminée !",
-    "newRecord": "🎉 Nouveau record !",
-    "currentRecord": "Record actuel",
-    "close": "Fermer",
-    "timeout": "Temps écoulé !",
-    "wrong": "Faux !",
-    "play": "Jouer",
-    "account": "Compte",
-    "settings": "Paramètres",
-    "backToMenu": "Menu",
-    "gamesPlayed": "Parties Jouées",
-    "pokedex": "Pokédex",
-    "difficulty": "Difficulté",
-    "easy": "Facile",
-    "medium": "Moyen",
-    "hard": "Difficile",
-    "theme": "Thème",
-    "system": "Système",
-    "light": "Clair",
-    "dark": "Sombre",
-    "language": "Langue",
-    "search": "Chercher Pokémon...",
-    "wins": "gagne",
-    "question": "{pokemon1} a-t-il plus de {stat} que {pokemon2} ?",
-    "chooseModeTitle": "Choisir le Mode",
-    "classicMode": "Qui est le plus fort ?",
-    "sortMode": "Mettez en ordre !",
-    "sortQuestion": "Triez les Pokémon par {stat} (du plus élevé au plus bas)",
-    "checkOrderButton": "Vérifier",
-    "sortWrongOrder": "Ordre incorrect !",
-    "sortCorrectOrder": "Ordre Correct :",
-    "classic": "Classique",
-    "sort": "Trier",
-    "login": "Connexion",
-    "register": "S'inscrire",
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Mot de passe",
-    "displayNamePlaceholder": "Nom affiché (unique)",
-    "loginButton": "Connexion",
-    "registerButton": "S'inscrire",
-    "authToggleToRegister": "Pas de compte ?",
-    "authToggleToRegisterBtn": "S'inscrire",
-    "authToggleToLogin": "Déjà un compte ?",
-    "authToggleToLoginBtn": "Connexion",
-    "errorFieldRequired": "Veuillez remplir tous les champs.",
-    "errorNameLength": "Le nom doit contenir entre 3 et 20 caractères.",
-    "errorNameInUse": "Nom d'utilisateur déjà pris.",
-    "errorEmailInUse": "Email déjà enregistré.",
-    "errorWeakPassword": "Le mot de passe doit contenir au moins 6 caractères.",
-    "errorRegisterGeneral": "Erreur lors de l'inscription.",
-    "errorLoginInvalid": "Email ou mot de passe incorrect.",
-    "errorLoginGeneral": "Erreur lors de la connexion.",
-    "errorLoginRequired": "Entrez email et mot de passe.",
-    "errorEmailInvalid": "Entrez un email valide.",
-    "statusLoading": "Chargement...",
-    "statusRegistering": "Vérification et création du compte...",
-    "statusLoggingIn": "Connexion en cours...",
-    "statusLoadingUser": "Chargement des données de {email}...",
-    "statusLoggedInAs": "Connecté en tant que <strong>{name}</strong>.",
-    "statusGuest": "Vous jouez en tant qu'<strong>Invité</strong>.",
-    "statusBtnLogout": "Déconnexion",
-    "statusBtnLogin": "Connexion/S'inscrire",
-    "memberSince": "Membre depuis",
-    "statusNotVerified": "Email <strong>{email}</strong> non vérifié.",
-    "statusNotVerifiedBtn": "Renvoyer",
-    "leaderboard": "Classement",
-    "leaderboardLoading": "Chargement du classement...",
-    "leaderboardEmpty": "Pas encore de données.",
-    "leaderboardError": "Erreur de chargement du classement.",
-    "verifyTitle": "Vérifiez votre Email",
-    "verifyMessage": "Nous vous avons envoyé un lien de vérification. Vérifiez votre boîte de réception (et spam) et cliquez sur le lien pour activer votre compte.",
-    "verifyResend": "Renvoyer",
-    "verifySent": "Lien de vérification envoyé !",
-    "verifyError": "Erreur d'envoi. Veuillez réessayer plus tard.",
-    "authToggleToResetBtn": "Mot de passe oublié ?",
-    "resetTitle": "Réinitialiser le Mot de Passe",
-    "resetMessage": "Entrez votre email et nous enverrons un lien pour réinitialiser le mot de passe.",
-    "resetButton": "Envoyer le lien",
-    "resetSent": "Email envoyé ! Vérifiez votre boîte.",
-    "resetError": "Erreur. L'email est-il correct ?",
-    "cookieMessage": "Ce site utilise des cookies pour sauvegarder vos records et préférences. Acceptez-vous ?",
-    "cookieButton": "Accepter",
-    "benefitsTitle": "Pourquoi créer un compte ?",
-    "benefitsItem1": "Sauvegardez vos records et progrès sur le cloud.",
-    "benefitsItem2": "Participez au classement mondial.",
-    "benefitsItem3": "Synchronisez votre Pokédex débloqué sur tous vos appareils.",
-    "privacyNotice": "En créant un compte, vous acceptez que votre e-mail, nom d'utilisateur et scores soient enregistrés. Nous ne partageons pas vos données."
-  },
-  "ru": {
-    "title": "Pokéstats - Сравнение Статистики",
-    "score": "Счёт",
-    "record": "Рекорд",
-    "time": "Время",
-    "yes": "Да",
-    "no": "Нет",
-    "gameOver": "Игра окончена!",
-    "newRecord": "🎉 Новый рекорд!",
-    "currentRecord": "Текущий рекорд",
-    "close": "Закрыть",
-    "timeout": "Время вышло!",
-    "wrong": "Неверно!",
-    "play": "Играть",
-    "account": "Аккаунт",
-    "settings": "Настройки",
-    "backToMenu": "Меню",
-    "gamesPlayed": "Сыграно игр",
-    "pokedex": "Покедекс",
-    "difficulty": "Сложность",
-    "easy": "Легко",
-    "medium": "Средне",
-    "hard": "Сложно",
-    "theme": "Тема",
-    "system": "Система",
-    "light": "Светлая",
-    "dark": "Тёмная",
-    "language": "Язык",
-    "search": "Поиск покемона...",
-    "wins": "побеждает",
-    "question": "У {pokemon1} {stat} выше, чем у {pokemon2}?",
-    "chooseModeTitle": "Выберите режим",
-    "classicMode": "Кто сильнее?",
-    "sortMode": "Отсортируй!",
-    "sortQuestion": "Отсортируйте покемонов по {stat} (от высшего к низшему)",
-    "checkOrderButton": "Проверить",
-    "sortWrongOrder": "Неверный порядок!",
-    "sortCorrectOrder": "Верный порядок:",
-    "classic": "Классика",
-    "sort": "Сортировка",
-    "login": "Вход",
-    "register": "Регистрация",
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Пароль",
-    "displayNamePlaceholder": "Отображаемое имя (уникальное)",
-    "loginButton": "Войти",
-    "registerButton": "Зарегистрироваться",
-    "authToggleToRegister": "Нет аккаунта?",
-    "authToggleToRegisterBtn": "Регистрация",
-    "authToggleToLogin": "Уже есть аккаунт?",
-    "authToggleToLoginBtn": "Войти",
-    "errorFieldRequired": "Пожалуйста, заполните все поля.",
-    "errorNameLength": "Имя должно быть от 3 до 20 символов.",
-    "errorNameInUse": "Имя пользователя уже занято.",
-    "errorEmailInUse": "Email уже зарегистрирован.",
-    "errorWeakPassword": "Пароль должен быть не менее 6 символов.",
-    "errorRegisterGeneral": "Ошибка при регистрации.",
-    "errorLoginInvalid": "Неверный email или пароль.",
-    "errorLoginGeneral": "Ошибка при входе.",
-    "errorLoginRequired": "Введите email и пароль.",
-    "errorEmailInvalid": "Введите корректный email.",
-    "statusLoading": "Загрузка...",
-    "statusRegistering": "Проверка и создание аккаунта...",
-    "statusLoggingIn": "Вход в систему...",
-    "statusLoadingUser": "Загрузка данных для {email}...",
-    "statusLoggedInAs": "Вы вошли как <strong>{name}</strong>.",
-    "statusGuest": "Вы играете как <strong>Гость</strong>.",
-    "statusBtnLogout": "Выйти",
-    "statusBtnLogin": "Вход/Регистрация",
-    "memberSince": "Участник с",
-    "statusNotVerified": "Email <strong>{email}</strong> не подтверждён.",
-    "statusNotVerifiedBtn": "Отправить снова",
-    "leaderboard": "Таблица лидеров",
-    "leaderboardLoading": "Загрузка таблицы...",
-    "leaderboardEmpty": "Пока нет данных.",
-    "leaderboardError": "Ошибка загрузки таблицы.",
-    "verifyTitle": "Подтвердите ваш Email",
-    "verifyMessage": "Мы отправили вам ссылку для подтверждения. Проверьте почту (и спам) и нажмите на ссылку для активации.",
-    "verifyResend": "Отправить снова",
-    "verifySent": "Ссылка отправлена!",
-    "verifyError": "Ошибка отправки. Попробуйте позже.",
-    "authToggleToResetBtn": "Забыли пароль?",
-    "resetTitle": "Сброс пароля",
-    "resetMessage": "Введите ваш email, и мы отправим ссылку для сброса пароля.",
-    "resetButton": "Отправить ссылку",
-    "resetSent": "Email отправлен! Проверьте почту.",
-    "resetError": "Ошибка. Email корректен?",
-    "cookieMessage": "Этот сайт использует cookies для сохранения рекордов и настроек. Вы согласны?",
-    "cookieButton": "Принять",
-    "benefitsTitle": "Зачем создавать аккаунт?",
-    "benefitsItem1": "Сохраняйте рекорды и прогресс в облаке.",
-    "benefitsItem2": "Соревнуйтесь в глобальной таблице лидеров.",
-    "benefitsItem3": "Синхронизируйте открытый Покедекс на всех устройствах.",
-    "privacyNotice": "Создавая аккаунт, вы соглашаетесь на сохранение вашей почты, имени пользователя и очков. Мы не передаём ваши данные."
-  },
-  "zh": {
-    "title": "Pokéstats - 统计数据比较",
-    "score": "分数",
-    "record": "纪录",
-    "time": "时间",
-    "yes": "是",
-    "no": "否",
-    "gameOver": "游戏结束!",
-    "newRecord": "🎉 新纪录!",
-    "currentRecord": "当前纪录",
-    "close": "关闭",
-    "timeout": "时间到!",
-    "wrong": "错了!",
-    "play": "开始游戏",
-    "account": "帐户",
-    "settings": "设置",
-    "backToMenu": "菜单",
-    "gamesPlayed": "已玩游戏",
-    "pokedex": "宝可梦图鉴",
-    "difficulty": "难度",
-    "easy": "简单",
-    "medium": "中等",
-    "hard": "困难",
-    "theme": "主题",
-    "system": "系统",
-    "light": "浅色",
-    "dark": "深色",
-    "language": "语言",
-    "search": "搜索宝可梦...",
-    "wins": "获胜",
-    "question": "{pokemon1} 的 {stat} 比 {pokemon2} 高吗？",
-    "chooseModeTitle": "选择模式",
-    "classicMode": "谁更强？",
-    "sortMode": "排序！",
-    "sortQuestion": "按 {stat} 排序宝可梦（从高到低）",
-    "checkOrderButton": "检查",
-    "sortWrongOrder": "顺序错误!",
-    "sortCorrectOrder": "正确顺序:",
-    "classic": "经典",
-    "sort": "排序",
-    "login": "登录",
-    "register": "注册",
-    "emailPlaceholder": "电子邮件",
-    "passwordPlaceholder": "密码",
-    "displayNamePlaceholder": "显示名称 (唯一)",
-    "loginButton": "登录",
-    "registerButton": "注册",
-    "authToggleToRegister": "没有帐户？",
-    "authToggleToRegisterBtn": "注册",
-    "authToggleToLogin": "已有帐户？",
-    "authToggleToLoginBtn": "登录",
-    "errorFieldRequired": "请填写所有字段。",
-    "errorNameLength": "名称必须在 3 到 20 个字符之间。",
-    "errorNameInUse": "用户名已被使用。",
-    "errorEmailInUse": "电子邮件已被注册。",
-    "errorWeakPassword": "密码必须至少为 6 个字符。",
-    "errorRegisterGeneral": "注册时出错。",
-    "errorLoginInvalid": "电子邮件或密码不正确。",
-    "errorLoginGeneral": "登录时出错。",
-    "errorLoginRequired": "请输入电子邮件和密码。",
-    "errorEmailInvalid": "请输入有效的电子邮件。",
-    "statusLoading": "加载中...",
-    "statusRegistering": "正在验证和创建帐户...",
-    "statusLoggingIn": "登录中...",
-    "statusLoadingUser": "正在加载 {email} 的数据...",
-    "statusLoggedInAs": "已登录为 <strong>{name}</strong>。",
-    "statusGuest": "您正以 <strong>访客</strong> 身份游玩。",
-    "statusBtnLogout": "登出",
-    "statusBtnLogin": "登录/注册",
-    "memberSince": "会员始于",
-    "statusNotVerified": "电子邮件 <strong>{email}</strong> 未验证。",
-    "statusNotVerifiedBtn": "重新发送",
-    "leaderboard": "排行榜",
-    "leaderboardLoading": "正在加载排行榜...",
-    "leaderboardEmpty": "暂无数据。",
-    "leaderboardError": "加载排行榜时出错。",
-    "verifyTitle": "验证您的电子邮件",
-    "verifyMessage": "我们已向您发送了验证链接。请检查您的收件箱 (和垃圾邮件) 并单击链接以激活您的帐户。",
-    "verifyResend": "重新发送",
-    "verifySent": "验证链接已发送！",
-    "verifyError": "发送时出错。请稍后再试。",
-    "authToggleToResetBtn": "忘记密码？",
-    "resetTitle": "重设密码",
-    "resetMessage": "请输入您的电子邮件，我们将向您发送一个重设密码的链接。",
-    "resetButton": "发送链接",
-    "resetSent": "电子邮件已发送！请检查您的收件箱。",
-    "resetError": "错误。电子邮件是否正确？",
-    "cookieMessage": "本网站使用 cookie 来保存您的纪录和偏好。您接受吗？",
-    "cookieButton": "接受",
-    "benefitsTitle": "为什么要创建帐户？",
-    "benefitsItem1": "将您的纪录和进度保存到云端。",
-    "benefitsItem2": "在全球排行榜上竞争。",
-    "benefitsItem3": "在所有设备上同步您解锁的宝可梦图鉴。",
-    "privacyNotice": "创建帐户即表示您同意我们保存您的电子邮件、用户名和分数。我们不会分享您的数据。"
-  },
-  "ja": {
-    "title": "ポケスタッツ - 統計比較",
-    "score": "スコア",
-    "record": "記録",
-    "time": "時間",
-    "yes": "はい",
-    "no": "いいえ",
-    "gameOver": "ゲームオーバー！",
-    "newRecord": "🎉 新記録！",
-    "currentRecord": "現在の記録",
-    "close": "閉じる",
-    "timeout": "時間切れ！",
-    "wrong": "間違い！",
-    "play": "プレイ",
-    "account": "アカウント",
-    "settings": "設定",
-    "backToMenu": "メニュー",
-    "gamesPlayed": "プレイ回数",
-    "pokedex": "ポケモン図鑑",
-    "difficulty": "難易度",
-    "easy": "かんたん",
-    "medium": "ふつう",
-    "hard": "むずかしい",
-    "theme": "テーマ",
-    "system": "システム",
-    "light": "ライト",
-    "dark": "ダーク",
-    "language": "言語",
-    "search": "ポケモンを検索...",
-    "wins": "の勝ち",
-    "question": "{pokemon1} は {pokemon2} より {stat} が高いですか？",
-    "chooseModeTitle": "モードを選択",
-    "classicMode": "どっちが強い？",
-    "sortMode": "並べ替え！",
-    "sortQuestion": "ポケモンを {stat} 順に並べ替えてください（高い順）",
-    "checkOrderButton": "確認",
-    "sortWrongOrder": "順序が違います！",
-    "sortCorrectOrder": "正しい順序:",
-    "classic": "クラシック",
-    "sort": "並べ替え",
-    "login": "ログイン",
-    "register": "登録",
-    "emailPlaceholder": "メールアドレス",
-    "passwordPlaceholder": "パスワード",
-    "displayNamePlaceholder": "表示名 (ユニーク)",
-    "loginButton": "ログイン",
-    "registerButton": "登録",
-    "authToggleToRegister": "アカウントをお持ちでないですか？",
-    "authToggleToRegisterBtn": "登録",
-    "authToggleToLogin": "すでにアカウントをお持ちですか？",
-    "authToggleToLoginBtn": "ログイン",
-    "errorFieldRequired": "すべてのフィールドを入力してください。",
-    "errorNameLength": "名前は3文字から20文字の間である必要があります。",
-    "errorNameInUse": "このユーザー名は既に使用されています。",
-    "errorEmailInUse": "このメールアドレスは既に登録されています。",
-    "errorWeakPassword": "パスワードは6文字以上である必要があります。",
-    "errorRegisterGeneral": "登録中にエラーが発生しました。",
-    "errorLoginInvalid": "メールアドレスまたはパスワードが間違っています。",
-    "errorLoginGeneral": "ログイン中にエラーが発生しました。",
-    "errorLoginRequired": "メールアドレスとパスワードを入力してください。",
-    "errorEmailInvalid": "有効なメールアドレスを入力してください。",
-    "statusLoading": "読み込み中...",
-    "statusRegistering": "確認とアカウント作成中...",
-    "statusLoggingIn": "ログイン中...",
-    "statusLoadingUser": "{email} のデータを読み込み中...",
-    "statusLoggedInAs": "<strong>{name}</strong> としてログイン中。",
-    "statusGuest": "<strong>ゲスト</strong> としてプレイ中。",
-    "statusBtnLogout": "ログアウト",
-    "statusBtnLogin": "ログイン/登録",
-    "memberSince": "登録日",
-    "statusNotVerified": "メールアドレス <strong>{email}</strong> は未認証です。",
-    "statusNotVerifiedBtn": "再送信",
-    "leaderboard": "ランキング",
-    "leaderboardLoading": "ランキングを読み込み中...",
-    "leaderboardEmpty": "まだデータがありません。",
-    "leaderboardError": "ランキングの読み込みエラー。",
-    "verifyTitle": "メールアドレスの確認",
-    "verifyMessage": "確認リンクを送信しました。受信トレイ（と迷惑メール）を確認し、リンクをクリックしてアカウントを有効化してください。",
-    "verifyResend": "再送信",
-    "verifySent": "確認リンクを送信しました！",
-    "verifyError": "送信中にエラーが発生しました。後でもう一度お試しください。",
-    "authToggleToResetBtn": "パスワードをお忘れですか？",
-    "resetTitle": "パスワードのリセット",
-    "resetMessage": "メールアドレスを入力してください。パスワードリセット用のリンクを送信します。",
-    "resetButton": "リンクを送信",
-    "resetSent": "メールを送信しました！受信トレイを確認してください。",
-    "resetError": "エラー。メールアドレスは正しいですか？",
-    "cookieMessage": "このサイトは、記録と設定を保存するためにCookieを使用します。同意しますか？",
-    "cookieButton": "同意する",
-    "benefitsTitle": "アカウントを作成する理由",
-    "benefitsItem1": "記録と進捗をクラウドに保存します。",
-    "benefitsItem2": "グローバルランキングで競います。",
-    "benefitsItem3": "ロック解除したポケモン図鑑をすべてのデバイスで同期します。",
-    "privacyNotice": "アカウントを作成することにより、あなたのメールアドレス、ユーザー名、スコアが保存されることに同意したことになります。あなたのデータを共有することはありません。"
-  },
-  "ko": {
-    "title": "Pokéstats - 스탯 비교",
-    "score": "점수",
-    "record": "기록",
-    "time": "시간",
-    "yes": "예",
-    "no": "아니오",
-    "gameOver": "게임 종료!",
-    "newRecord": "🎉 신기록!",
-    "currentRecord": "현재 기록",
-    "close": "닫기",
-    "timeout": "시간 초과!",
-    "wrong": "틀렸습니다!",
-    "play": "플레이",
-    "account": "계정",
-    "settings": "설정",
-    "backToMenu": "메뉴",
-    "gamesPlayed": "플레이한 게임",
-    "pokedex": "포켓몬 도감",
-    "difficulty": "난이도",
-    "easy": "쉬움",
-    "medium": "보통",
-    "hard": "어려움",
-    "theme": "테마",
-    "system": "시스템",
-    "light": "라이트",
-    "dark": "다크",
-    "language": "언어",
-    "search": "포켓몬 검색...",
-    "wins": "승리",
-    "question": "{pokemon1}의 {stat}이(가) {pokemon2}보다 높습니까?",
-    "chooseModeTitle": "모드 선택",
-    "classicMode": "누가 더 강할까요?",
-    "sortMode": "정렬하세요!",
-    "sortQuestion": "포켓몬을 {stat} 순서로 정렬하세요 (높은 순에서 낮은 순으로)",
-    "checkOrderButton": "확인",
-    "sortWrongOrder": "순서가 틀렸습니다!",
-    "sortCorrectOrder": "올바른 순서:",
-    "classic": "클래식",
-    "sort": "정렬",
-    "login": "로그인",
-    "register": "회원가입",
-    "emailPlaceholder": "이메일",
-    "passwordPlaceholder": "비밀번호",
-    "displayNamePlaceholder": "표시 이름 (고유)",
-    "loginButton": "로그인",
-    "registerButton": "회원가입",
-    "authToggleToRegister": "계정이 없으신가요?",
-    "authToggleToRegisterBtn": "회원가입",
-    "authToggleToLogin": "이미 계정이 있으신가요?",
-    "authToggleToLoginBtn": "로그인",
-    "errorFieldRequired": "모든 칸을 채워주세요.",
-    "errorNameLength": "이름은 3자에서 20자 사이여야 합니다.",
-    "errorNameInUse": "이미 사용 중인 사용자 이름입니다.",
-    "errorEmailInUse": "이미 등록된 이메일입니다.",
-    "errorWeakPassword": "비밀번호는 6자 이상이어야 합니다.",
-    "errorRegisterGeneral": "회원가입 중 오류가 발생했습니다.",
-    "errorLoginInvalid": "이메일 또는 비밀번호가 잘못되었습니다.",
-    "errorLoginGeneral": "로그인 중 오류가 발생했습니다.",
-    "errorLoginRequired": "이메일과 비밀번호를 입력하세요.",
-    "errorEmailInvalid": "유효한 이메일을 입력하세요.",
-    "statusLoading": "로드 중...",
-    "statusRegistering": "확인 및 계정 생성 중...",
-    "statusLoggingIn": "로그인 중...",
-    "statusLoadingUser": "{email}의 데이터를 불러오는 중...",
-    "statusLoggedInAs": "<strong>{name}</strong>님으로 로그인되었습니다.",
-    "statusGuest": "<strong>게스트</strong>로 플레이 중입니다.",
-    "statusBtnLogout": "로그아웃",
-    "statusBtnLogin": "로그인/회원가입",
-    "memberSince": "가입일",
-    "statusNotVerified": "이메일 <strong>{email}</strong>이(가) 확인되지 않았습니다.",
-    "statusNotVerifiedBtn": "재전송",
-    "leaderboard": "리더보드",
-    "leaderboardLoading": "리더보드 로드 중...",
-    "leaderboardEmpty": "아직 데이터가 없습니다.",
-    "leaderboardError": "리더보드 로드 오류.",
-    "verifyTitle": "이메일 인증",
-    "verifyMessage": "인증 링크를 보냈습니다. 받은 편지함(및 스팸함)을 확인하고 링크를 클릭하여 계정을 활성화하세요.",
-    "verifyResend": "재전송",
-    "verifySent": "인증 링크가 전송되었습니다!",
-    "verifyError": "전송 중 오류가 발생했습니다. 나중에 다시 시도하세요.",
-    "authToggleToResetBtn": "비밀번호를 잊으셨나요?",
-    "resetTitle": "비밀번호 재설정",
-    "resetMessage": "이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.",
-    "resetButton": "링크 전송",
-    "resetSent": "이메일이 전송되었습니다! 받은 편지함을 확인하세요.",
-    "resetError": "오류. 이메일이 정확한가요?",
-    "cookieMessage": "이 사이트는 귀하의 기록과 환경 설정을 저장하기 위해 쿠키를 사용합니다. 동의하십니까?",
-    "cookieButton": "동의",
-    "benefitsTitle": "계정을 만드는 이유",
-    "benefitsItem1": "기록과 진행 상황을 클라우드에 저장하세요.",
-    "benefitsItem2": "글로벌 리더보드에서 경쟁하세요.",
-    "benefitsItem3": "모든 기기에서 잠금 해제된 포켓몬 도감을 동기화하세요.",
-    "privacyNotice": "계정을 생성함으로써 귀하의 이메일, 사용자 이름, 점수가 저장되는 데 동의하는 것입니다. 저희는 귀하의 데이터를 공유하지 않습니다."
-  },
-  "fi": {
-    "title": "Pokéstats - Tilastojen Vertailu",
-    "score": "Pisteet",
-    "record": "Ennätys",
-    "time": "Aika",
-    "yes": "Kyllä",
-    "no": "Ei",
-    "gameOver": "Peli ohi!",
-    "newRecord": "🎉 Uusi ennätys!",
-    "currentRecord": "Nykyinen ennätys",
-    "close": "Sulje",
-    "timeout": "Aika loppui!",
-    "wrong": "Väärin!",
-    "play": "Pelaa",
-    "account": "Tili",
-    "settings": "Asetukset",
-    "backToMenu": "Valikko",
-    "gamesPlayed": "Pelatut pelit",
-    "pokedex": "Pokédex",
-    "difficulty": "Vaikeustaso",
-    "easy": "Helppo",
-    "medium": "Keskivaikea",
-    "hard": "Vaikea",
-    "theme": "Teema",
-    "system": "Järjestelmä",
-    "light": "Vaalea",
-    "dark": "Tumma",
-    "language": "Kieli",
-    "search": "Etsi Pokémonia...",
-    "wins": "voittaa",
-    "question": "Onko {pokemon1}:lla korkeampi {stat} kuin {pokemon2}:lla?",
-    "chooseModeTitle": "Valitse Tila",
-    "classicMode": "Kuka on vahvempi?",
-    "sortMode": "Järjestä!",
-    "sortQuestion": "Järjestä Pokémonit {stat}-arvon mukaan (suurimmasta pienimpään)",
-    "checkOrderButton": "Tarkista",
-    "sortWrongOrder": "Väärä järjestys!",
-    "sortCorrectOrder": "Oikea Järjestys:",
-    "classic": "Klassinen",
-    "sort": "Järjestä",
-    "login": "Kirjaudu sisään",
-    "register": "Rekisteröidy",
-    "emailPlaceholder": "Sähköposti",
-    "passwordPlaceholder": "Salasana",
-    "displayNamePlaceholder": "Näyttönimi (ainutlaatuinen)",
-    "loginButton": "Kirjaudu",
-    "registerButton": "Rekisteröidy",
-    "authToggleToRegister": "Eikö sinulla ole tiliä?",
-    "authToggleToRegisterBtn": "Rekisteröidy",
-    "authToggleToLogin": "Onko sinulla jo tili?",
-    "authToggleToLoginBtn": "Kirjaudu",
-    "errorFieldRequired": "Täytä kaikki kentät.",
-    "errorNameLength": "Nimen on oltava 3-20 merkkiä pitkä.",
-    "errorNameInUse": "Käyttäjänimi on jo käytössä.",
-    "errorEmailInUse": "Sähköposti on jo rekisteröity.",
-    "errorWeakPassword": "Salasanan on oltava vähintään 6 merkkiä pitkä.",
-    "errorRegisterGeneral": "Virhe rekisteröinnissä.",
-    "errorLoginInvalid": "Väärä sähköposti tai salasana.",
-    "errorLoginGeneral": "Virhe kirjautumisessa.",
-    "errorLoginRequired": "Anna sähköposti ja salasana.",
-    "errorEmailInvalid": "Anna kelvollinen sähköpostiosoite.",
-    "statusLoading": "Ladataan...",
-    "statusRegistering": "Vahvistetaan ja luodaan tiliä...",
-    "statusLoggingIn": "Kirjaudutaan sisään...",
-    "statusLoadingUser": "Ladataan käyttäjän {email} tietoja...",
-    "statusLoggedInAs": "Kirjautuneena käyttäjänä <strong>{name}</strong>.",
-    "statusGuest": "Pelaat <strong>Vieraana</strong>.",
-    "statusBtnLogout": "Kirjaudu ulos",
-    "statusBtnLogin": "Kirjaudu/Rekisteröidy",
-    "memberSince": "Jäsen",
-    "statusNotVerified": "Sähköpostia <strong>{email}</strong> ei ole vahvistettu.",
-    "statusNotVerifiedBtn": "Lähetä uudelleen",
-    "leaderboard": "Tulostaulu",
-    "leaderboardLoading": "Ladataan tulostaulua...",
-    "leaderboardEmpty": "Ei vielä tietoja.",
-    "leaderboardError": "Virhe ladattaessa tulostaulua.",
-    "verifyTitle": "Vahvista sähköpostisi",
-    "verifyMessage": "Lähetimme sinulle vahvistuslinkin. Tarkista sähköpostisi (ja roskaposti) ja napsauta linkkiä aktivoidaksesi tilisi.",
-    "verifyResend": "Lähetä uudelleen",
-    "verifySent": "Vahvistuslinkki lähetetty!",
-    "verifyError": "Virhe lähetyksessä. Yritä myöhemmin uudelleen.",
-    "authToggleToResetBtn": "Unohditko salasanan?",
-    "resetTitle": "Nollaa salasana",
-    "resetMessage": "Anna sähköpostisi, niin lähetämme linkin salasanan nollaamiseksi.",
-    "resetButton": "Lähetä linkki",
-    "resetSent": "Sähköposti lähetetty! Tarkista postilaatikkosi.",
-    "resetError": "Virhe. Onko sähköposti oikein?",
-    "cookieMessage": "Tämä sivusto käyttää evästeitä ennätystesi ja asetustesi tallentamiseen. Hyväksytkö?",
-    "cookieButton": "Hyväksy",
-    "benefitsTitle": "Miksi luoda tili?",
-    "benefitsItem1": "Tallenna ennätyksesi ja edistymisesi pilveen.",
-    "benefitsItem2": "Kilpaile maailmanlaajuisessa tulostaulussa.",
-    "benefitsItem3": "Synkronoi avaamasi Pokédex kaikkiin laitteisiisi.",
-    "privacyNotice": "Luomalla tilin hyväksyt, että sähköpostiosoitteesi, käyttäjänimesi ja pisteesi tallennetaan. Emme jaa tietojasi."
-  },
-    "ar": { "title": "Pokéstats - مقارنة الإحصائيات", "score": "النتيجة", "record": "الرقم القياسي", "time": "الوقت", "yes": "نعم", "no": "لا", "gameOver": "انتهت اللعبة!", "newRecord": "🎉 رقم قياسي جديد!", "currentRecord": "الرقم القياسي الحالي", "close": "إغلاق", "timeout": "انتهى الوقت!", "wrong": "خطأ!", "play": "العب", "account": "الحساب", "settings": "الإعدادات", "backToMenu": "القائمة", "gamesPlayed": "الألعاب الملعوبة", "pokedex": "بوكيدكس", "difficulty": "الصعوبة", "easy": "سهل", "medium": "متوسط", "hard": "صعب", "theme": "المظهر", "system": "النظام", "light": "فاتح", "dark": "داكن", "language": "اللغة", "search": "ابحث عن بوكيمون...", "wins": "يفوز", "question": "هل {pokemon1} لديه {stat} أعلى من {pokemon2}؟", "chooseModeTitle": "اختر الوضع", "classicMode": "من الأقوى؟", "sortMode": "رتبهم!", "sortQuestion": "رتب البوكيمون حسب {stat} (من الأعلى إلى الأدنى)", "checkOrderButton": "تحقق", "sortWrongOrder": "ترتيب خاطئ!", "sortCorrectOrder": "الترتيب الصحيح:", "classic": "كلاسيكي", "sort": "ترتيب", "login": "تسجيل الدخول", "register": "التسجيل", "emailPlaceholder": "البريد الإلكتروني", "passwordPlaceholder": "كلمة المرور", "displayNamePlaceholder": "اسم العرض (فريد)", "loginButton": "دخول", "registerButton": "تسجيل", "authToggleToRegister": "ليس لديك حساب؟", "authToggleToRegisterBtn": "سجل الآن", "authToggleToLogin": "هل لديك حساب بالفعل؟", "authToggleToLoginBtn": "تسجيل الدخول", "errorFieldRequired": "يرجى ملء جميع الحقول.", "errorNameLength": "يجب أن يكون الاسم بين 3 و 20 حرفًا.", "errorNameInUse": "اسم المستخدم مستخدم بالفعل.", "errorEmailInUse": "البريد الإلكتروني مسجل بالفعل.", "errorWeakPassword": "يجب أن تكون كلمة المرور 6 أحرف على الأقل.", "errorRegisterGeneral": "خطأ أثناء التسجيل.", "errorLoginInvalid": "بريد إلكتروني أو كلمة مرور غير صحيحة.", "errorLoginGeneral": "خطأ أثناء تسجيل الدخول.", "errorLoginRequired": "أدخل البريد الإلكتروني وكلمة المرور.", "errorEmailInvalid": "أدخل بريد إلكتروني صالح.", "statusLoading": "جاري التحميل...", "statusRegistering": "التحقق وإنشاء الحساب...", "statusLoggingIn": "جاري تسجيل الدخول...", "statusLoadingUser": "جاري تحميل بيانات {email}...", "statusLoggedInAs": "مسجل الدخول كـ <strong>{name}</strong>.", "statusGuest": "أنت تلعب كـ <strong>ضيف</strong>.", "statusBtnLogout": "تسجيل الخروج", "statusBtnLogin": "تسجيل الدخول/التسجيل", "memberSince": "عضو منذ", "statusNotVerified": "البريد الإلكتروني <strong>{email}</strong> غير مُحقق.", "statusNotVerifiedBtn": "إعادة الإرسال", "leaderboard": "لوحة الصدارة", "leaderboardLoading": "جاري تحميل لوحة الصدارة...", "leaderboardEmpty": "لا توجد بيانات بعد.", "leaderboardError": "خطأ في تحميل لوحة الصدارة.", "verifyTitle": "تحقق من بريدك الإلكتروني", "verifyMessage": "أرسلنا لك رابط تحقق. تحقق من بريدك الوارد (والبريد العشوائي) وانقر على الرابط لتفعيل حسابك.", "verifyResend": "إعادة الإرسال", "verifySent": "تم إرسال رابط التحقق!", "verifyError": "خطأ في الإرسال. يرجى المحاولة لاحقًا.", "authToggleToResetBtn": "هل نسيت كلمة المرور؟", "resetTitle": "إعادة تعيين كلمة المرور", "resetMessage": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.", "resetButton": "إرسال الرابط", "resetSent": "تم إرسال البريد الإلكتروني! تحقق من بريدك.", "resetError": "خطأ. هل البريد الإلكتروني صحيح؟", "cookieMessage": "يستخدم هذا الموقع ملفات تعريف الارتباط لحفظ سجلاتك وتفضيلاتك. هل تقبل؟", "cookieButton": "قبول", "benefitsTitle": "لماذا تنشئ حسابًا؟", "benefitsItem1": "احفظ سجلاتك وتقدمك على السحابة.", "benefitsItem2": "نافس في لوحة الصدارة العالمية.", "benefitsItem3": "زامن بوكيدكس المفتوح عبر جميع الأجهزة.", "privacyNotice": "بإنشاء حساب، فإنك توافق على حفظ بريدك الإلكتروني واسم المستخدم والنقاط. نحن لا نشارك بياناتك.", "achievements": "الإنجازات", "sortUnlockTitle": "اختر البوكيمون!", "sortUnlockMessage": "اختر {num} بوكيمون لإضافته إلى بوكيدكس:", "confirmButton": "تأكيد" },
-    "hi": { "title": "पोकेस्टैट्स - स्टैट्स तुलना", "score": "स्कोर", "record": "रिकॉर्ड", "time": "समय", "yes": "हाँ", "no": "नहीं", "gameOver": "खेल समाप्त!", "newRecord": "🎉 नया रिकॉर्ड!", "currentRecord": "वर्तमान रिकॉर्ड", "close": "बंद करें", "timeout": "समय समाप्त!", "wrong": "गलत!", "play": "खेलें", "account": "खाता", "settings": "सेटिंग्स", "backToMenu": "मेनू", "gamesPlayed": "खेले गए खेल", "pokedex": "पोकेडेक्स", "difficulty": "कठिनाई", "easy": "सरल", "medium": "मध्यम", "hard": "कठिन", "theme": "थीम", "system": "सिस्टम", "light": "लाइट", "dark": "डार्क", "language": "भाषा", "search": "पोकेमोन खोजें...", "wins": "जीतता है", "question": "क्या {pokemon1} के पास {pokemon2} से ज़्यादा {stat} है?", "chooseModeTitle": "मोड चुनें", "classicMode": "कौन ज़्यादा ताकतवर है?", "sortMode": "उन्हें क्रम में लगाओ!", "sortQuestion": "{stat} के हिसाब से पोकेमोन को क्रमबद्ध करें (उच्च से निम्न)", "checkOrderButton": "जाँचें", "sortWrongOrder": "गलत क्रम!", "sortCorrectOrder": "सही क्रम:", "classic": "क्लासिक", "sort": "क्रमबद्ध करें", "login": "लॉग इन", "register": "रजिस्टर", "emailPlaceholder": "ईमेल", "passwordPlaceholder": "पासवर्ड", "displayNamePlaceholder": "प्रदर्शन नाम (अद्वितीय)", "loginButton": "लॉग इन", "registerButton": "रजिस्टर", "authToggleToRegister": "खाता नहीं है?", "authToggleToRegisterBtn": "रजिस्टर करें", "authToggleToLogin": "पहले से ही खाता है?", "authToggleToLoginBtn": "लॉग इन करें", "errorFieldRequired": "कृपया सभी फ़ील्ड भरें।", "errorNameLength": "नाम 3 से 20 अक्षरों के बीच होना चाहिए।", "errorNameInUse": "उपयोगकर्ता नाम पहले से ही उपयोग में है।", "errorEmailInUse": "ईमेल पहले से ही पंजीकृत है।", "errorWeakPassword": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।", "errorRegisterGeneral": "पंजीकरण के दौरान त्रुटि।", "errorLoginInvalid": "गलत ईमेल या पासवर्ड।", "errorLoginGeneral": "लॉग इन के दौरान त्रुटि।", "errorLoginRequired": "ईमेल और पासवर्ड दर्ज करें।", "errorEmailInvalid": "मान्य ईमेल दर्ज करें।", "statusLoading": "लोड हो रहा है...", "statusRegistering": "सत्यापन और खाता बनाया जा रहा है...", "statusLoggingIn": "लॉग इन हो रहा है...", "statusLoadingUser": "{email} के लिए डेटा लोड हो रहा है...", "statusLoggedInAs": "<strong>{name}</strong> के रूप में लॉग इन हैं।", "statusGuest": "आप <strong>अतिथि</strong> के रूप में खेल रहे हैं।", "statusBtnLogout": "लॉग आउट", "statusBtnLogin": "लॉग इन/रजिस्टर", "memberSince": "से सदस्य", "statusNotVerified": "ईमेल <strong>{email}</strong> सत्यापित नहीं है।", "statusNotVerifiedBtn": "पुनः भेजें", "leaderboard": "लीडरबोर्ड", "leaderboardLoading": "लीडरबोर्ड लोड हो रहा है...", "leaderboardEmpty": "अभी तक कोई डेटा नहीं।", "leaderboardError": "लीडरबोर्ड लोड करने में त्रुटि।", "verifyTitle": "अपना ईमेल सत्यापित करें", "verifyMessage": "हमने आपको एक सत्यापन लिंक भेजा है। अपना इनबॉक्स (और स्पैम) जांचें और अपना खाता सक्रिय करने के लिए लिंक पर क्लिक करें।", "verifyResend": "पुनः भेजें", "verifySent": "सत्यापन लिंक भेजा गया!", "verifyError": "भेजने में त्रुटि। कृपया बाद में पुनः प्रयास करें।", "authToggleToResetBtn": "पासवर्ड भूल गए?", "resetTitle": "पासवर्ड रीसेट करें", "resetMessage": "अपना ईमेल दर्ज करें और हम आपको पासवर्ड रीसेट करने के लिए एक लिंक भेजेंगे।", "resetButton": "लिंक भेजें", "resetSent": "ईमेल भेजा गया! अपना इनबॉक्स जांचें।", "resetError": "त्रुटि। क्या ईमेल सही है?", "cookieMessage": "यह साइट आपके रिकॉर्ड और वरीयताओं को सहेजने के लिए कुकीज़ का उपयोग करती है। क्या आप स्वीकार करते हैं?", "cookieButton": "स्वीकार करें", "benefitsTitle": "खाता क्यों बनाएं?", "benefitsItem1": "अपने रिकॉर्ड और प्रगति को क्लाउड पर सहेजें।", "benefitsItem2": "वैश्विक लीडरबोर्ड पर प्रतिस्पर्धा करें।", "benefitsItem3": "अपने अनलॉक किए गए पोकेडेक्स को सभी डिवाइसों पर सिंक करें।", "privacyNotice": "खाता बनाकर, आप सहमत हैं कि आपका ईमेल, उपयोगकर्ता नाम और स्कोर सहेजे जाएंगे। हम आपका डेटा साझा नहीं करते हैं।", "achievements": "उपलब्धियां", "sortUnlockTitle": "पोकेमोन चुनें!", "sortUnlockMessage": "अपने पोकेडेक्स में जोड़ने के लिए {num} पोकेमोन चुनें:", "confirmButton": "पुष्टि करें" },
-    "bn": { "title": "পোকেস্ট্যাটস - স্ট্যাট তুলনা", "score": "স্কোর", "record": "রেকর্ড", "time": "সময়", "yes": "হ্যাঁ", "no": "না", "gameOver": "খেলা শেষ!", "newRecord": "🎉 নতুন রেকর্ড!", "currentRecord": "বর্তমান রেকর্ড", "close": "বন্ধ করুন", "timeout": "সময় শেষ!", "wrong": "ভুল!", "play": "খেলুন", "account": "অ্যাকাউন্ট", "settings": "সেটিংস", "backToMenu": "মেনু", "gamesPlayed": "খেলানো হয়েছে", "pokedex": "পোকেডেক্স", "difficulty": "কঠিনতা", "easy": "সহজ", "medium": "মাঝারি", "hard": "কঠিন", "theme": "থিম", "system": "সিস্টেম", "light": "হালকা", "dark": "গাঢ়", "language": "ভাষা", "search": "পোকেমন খুঁজুন...", "wins": "জয়ী", "question": "{pokemon1}-এর কি {pokemon2}-এর চেয়ে বেশি {stat} আছে?", "chooseModeTitle": "মোড নির্বাচন করুন", "classicMode": "কে বেশি শক্তিশালী?", "sortMode": "সাজাও!", "sortQuestion": "{stat} অনুযায়ী পোকেমন সাজান (বেশি থেকে কম)", "checkOrderButton": "চেক করুন", "sortWrongOrder": "ভুল ক্রম!", "sortCorrectOrder": "সঠিক ক্রম:", "classic": "ক্লাসিক", "sort": "সাজান", "login": "লগইন", "register": "নিবন্ধন", "emailPlaceholder": "ইমেইল", "passwordPlaceholder": "পাসওয়ার্ড", "displayNamePlaceholder": "প্রদর্শিত নাম (অনন্য)", "loginButton": "লগইন", "registerButton": "নিবন্ধন", "authToggleToRegister": "অ্যাকাউন্ট নেই?", "authToggleToRegisterBtn": "নিবন্ধন করুন", "authToggleToLogin": "ইতিমধ্যে অ্যাকাউন্ট আছে?", "authToggleToLoginBtn": "লগইন করুন", "errorFieldRequired": "অনুগ্রহ করে সমস্ত ক্ষেত্র পূরণ করুন।", "errorNameLength": "নাম ৩ থেকে ২০ অক্ষরের মধ্যে হতে হবে।", "errorNameInUse": "ব্যবহারকারীর নাম ইতিমধ্যে ব্যবহৃত।", "errorEmailInUse": "ইমেইল ইতিমধ্যে নিবন্ধিত।", "errorWeakPassword": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।", "errorRegisterGeneral": "নিবন্ধনের সময় ত্রুটি।", "errorLoginInvalid": "ভুল ইমেইল বা পাসওয়ার্ড।", "errorLoginGeneral": "লগইন করার সময় ত্রুটি।", "errorLoginRequired": "ইমেইল এবং পাসওয়ার্ড লিখুন।", "errorEmailInvalid": "একটি বৈধ ইমেইল লিখুন।", "statusLoading": "লোড হচ্ছে...", "statusRegistering": "যাচাই এবং অ্যাকাউন্ট তৈরি করা হচ্ছে...", "statusLoggingIn": "লগইন করা হচ্ছে...", "statusLoadingUser": "{email}-এর জন্য ডেটা লোড হচ্ছে...", "statusLoggedInAs": "<strong>{name}</strong> হিসাবে লগইন করা হয়েছে।", "statusGuest": "আপনি <strong>অতিথি</strong> হিসাবে খেলছেন।", "statusBtnLogout": "লগআউট", "statusBtnLogin": "লগইন/নিবন্ধন", "memberSince": "থেকে সদস্য", "statusNotVerified": "ইমেইল <strong>{email}</strong> যাচাই করা হয়নি।", "statusNotVerifiedBtn": "পুনরায় পাঠান", "leaderboard": "লিডারবোর্ড", "leaderboardLoading": "লিডারবোর্ড লোড হচ্ছে...", "leaderboardEmpty": "এখনও কোনও ডেটা নেই।", "leaderboardError": "লিডারবোর্ড লোড করতে ত্রুটি।", "verifyTitle": "আপনার ইমেইল যাচাই করুন", "verifyMessage": "আমরা আপনাকে একটি যাচাইকরণ লিঙ্ক পাঠিয়েছি। আপনার ইনবক্স (এবং স্প্যাম) পরীক্ষা করুন এবং আপনার অ্যাকাউন্ট সক্রিয় করতে লিঙ্কে ক্লিক করুন।", "verifyResend": "পুনরায় পাঠান", "verifySent": "যাচাইকরণ লিঙ্ক পাঠানো হয়েছে!", "verifyError": "পাঠাতে ত্রুটি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।", "authToggleToResetBtn": "পাসওয়ার্ড ভুলে গেছেন?", "resetTitle": "পাসওয়ার্ড রিসেট করুন", "resetMessage": "আপনার ইমেইল লিখুন এবং আমরা আপনাকে পাসওয়ার্ড রিসেট করার জন্য একটি লিঙ্ক পাঠাব।", "resetButton": "লিঙ্ক পাঠান", "resetSent": "ইমেইল পাঠানো হয়েছে! আপনার ইনবক্স পরীক্ষা করুন।", "resetError": "ত্রুটি। ইমেইলটি কি সঠিক?", "cookieMessage": "এই সাইটটি আপনার রেকর্ড এবং পছন্দগুলি সংরক্ষণ করতে কুকি ব্যবহার করে। আপনি কি গ্রহণ করেন?", "cookieButton": "গ্রহণ করুন", "benefitsTitle": "কেন একটি অ্যাকাউন্ট তৈরি করবেন?", "benefitsItem1": "আপনার রেকর্ড এবং অগ্রগতি ক্লাউডে সংরক্ষণ করুন।", "benefitsItem2": "বিশ্বব্যাপী লিডারবোর্ডে প্রতিযোগিতা করুন।", "benefitsItem3": "আপনার আনলক করা পোকেডেক্স সমস্ত ডিভাইসে সিঙ্ক করুন।", "privacyNotice": "একটি অ্যাকাউন্ট তৈরি করে, আপনি সম্মত হচ্ছেন যে আপনার ইমেইল, ব্যবহারকারীর নাম এবং স্কোর সংরক্ষিত হবে। আমরা আপনার ডেটা শেয়ার করি না।", "achievements": "অর্জন", "sortUnlockTitle": "পোকেমন নির্বাচন করুন!", "sortUnlockMessage": "আপনার পোকেডেক্সে যোগ করার জন্য {num} পোকেমন নির্বাচন করুন:", "confirmButton": "নিশ্চিত করুন" },
-    "id": { "title": "Pokéstats - Perbandingan Statistik", "score": "Skor", "record": "Rekor", "time": "Waktu", "yes": "Ya", "no": "Tidak", "gameOver": "Permainan Selesai!", "newRecord": "🎉 Rekor Baru!", "currentRecord": "Rekor Saat Ini", "close": "Tutup", "timeout": "Waktu Habis!", "wrong": "Salah!", "play": "Main", "account": "Akun", "settings": "Pengaturan", "backToMenu": "Menu", "gamesPlayed": "Permainan Dimainkan", "pokedex": "Pokédex", "difficulty": "Kesulitan", "easy": "Mudah", "medium": "Sedang", "hard": "Sulit", "theme": "Tema", "system": "Sistem", "light": "Terang", "dark": "Gelap", "language": "Bahasa", "search": "Cari Pokémon...", "wins": "menang", "question": "Apakah {pokemon1} memiliki {stat} lebih tinggi dari {pokemon2}?", "chooseModeTitle": "Pilih Mode", "classicMode": "Siapa yang lebih kuat?", "sortMode": "Urutkan!", "sortQuestion": "Urutkan Pokémon berdasarkan {stat} (dari tertinggi ke terendah)", "checkOrderButton": "Periksa", "sortWrongOrder": "Urutan salah!", "sortCorrectOrder": "Urutan Benar:", "classic": "Klasik", "sort": "Urutkan", "login": "Masuk", "register": "Daftar", "emailPlaceholder": "Email", "passwordPlaceholder": "Kata Sandi", "displayNamePlaceholder": "Nama Tampilan (unik)", "loginButton": "Masuk", "registerButton": "Daftar", "authToggleToRegister": "Belum punya akun?", "authToggleToRegisterBtn": "Daftar", "authToggleToLogin": "Sudah punya akun?", "authToggleToLoginBtn": "Masuk", "errorFieldRequired": "Harap isi semua bidang.", "errorNameLength": "Nama harus antara 3 dan 20 karakter.", "errorNameInUse": "Nama pengguna sudah digunakan.", "errorEmailInUse": "Email sudah terdaftar.", "errorWeakPassword": "Kata sandi harus minimal 6 karakter.", "errorRegisterGeneral": "Error saat registrasi.", "errorLoginInvalid": "Email atau kata sandi salah.", "errorLoginGeneral": "Error saat masuk.", "errorLoginRequired": "Masukkan email dan kata sandi.", "errorEmailInvalid": "Masukkan email yang valid.", "statusLoading": "Memuat...", "statusRegistering": "Memverifikasi dan membuat akun...", "statusLoggingIn": "Masuk...", "statusLoadingUser": "Memuat data untuk {email}...", "statusLoggedInAs": "Masuk sebagai <strong>{name}</strong>.", "statusGuest": "Anda bermain sebagai <strong>Tamu</strong>.", "statusBtnLogout": "Keluar", "statusBtnLogin": "Masuk/Daftar", "memberSince": "Anggota sejak", "statusNotVerified": "Email <strong>{email}</strong> belum diverifikasi.", "statusNotVerifiedBtn": "Kirim Ulang", "leaderboard": "Papan Peringkat", "leaderboardLoading": "Memuat papan peringkat...", "leaderboardEmpty": "Belum ada data.", "leaderboardError": "Error memuat papan peringkat.", "verifyTitle": "Verifikasi Email Anda", "verifyMessage": "Kami telah mengirimkan link verifikasi. Periksa kotak masuk (dan spam) Anda dan klik link tersebut untuk mengaktifkan akun Anda.", "verifyResend": "Kirim Ulang", "verifySent": "Link verifikasi terkirim!", "verifyError": "Error mengirim. Silakan coba lagi nanti.", "authToggleToResetBtn": "Lupa kata sandi?", "resetTitle": "Atur Ulang Kata Sandi", "resetMessage": "Masukkan email Anda dan kami akan mengirimkan link untuk mengatur ulang kata sandi Anda.", "resetButton": "Kirim Link", "resetSent": "Email terkirim! Periksa kotak masuk Anda.", "resetError": "Error. Apakah emailnya benar?", "cookieMessage": "Situs ini menggunakan cookie untuk menyimpan rekor dan preferensi Anda. Apakah Anda setuju?", "cookieButton": "Setuju", "benefitsTitle": "Mengapa membuat akun?", "benefitsItem1": "Simpan rekor dan kemajuan Anda ke cloud.", "benefitsItem2": "Bersaing di papan peringkat global.", "benefitsItem3": "Sinkronkan Pokédex yang telah Anda buka di semua perangkat.", "privacyNotice": "Dengan membuat akun, Anda setuju bahwa email, nama pengguna, dan skor Anda akan disimpan. Kami tidak membagikan data Anda.", "achievements": "Pencapaian", "sortUnlockTitle": "Pilih Pokémon!", "sortUnlockMessage": "Pilih {num} Pokémon untuk ditambahkan ke Pokédex Anda:", "confirmButton": "Konfirmasi" },
-    // ... (statNames)
-      // Nomi delle Statistiche per tutte le lingue
-      "statNames": {
-        "it": { "hp": "HP", "attack": "Attacco", "defense": "Difesa", "spattack": "Attacco Speciale", "spdefense": "Difesa Speciale", "speed": "Velocità" },
-        "en": { "hp": "HP", "attack": "Attack", "defense": "Defense", "spattack": "Sp. Attack", "spdefense": "Sp. Defense", "speed": "Speed" },
-        "es": { "hp": "HP", "attack": "Ataque", "defense": "Defensa", "spattack": "Atq. Esp.", "spdefense": "Def. Esp.", "speed": "Velocidad" },
-        "de": { "hp": "KP", "attack": "Angriff", "defense": "Verteidigung", "spattack": "Spezial-Angriff", "spdefense": "Spezial-Verteidigung", "speed": "Initiative" },
-        "pt": { "hp": "HP", "attack": "Ataque", "defense": "Defesa", "spattack": "Ataque Esp.", "spdefense": "Defesa Esp.", "speed": "Velocidade" },
-        "fr": { "hp": "PV", "attack": "Attaque", "defense": "Défense", "spattack": "Attaque Spé.", "spdefense": "Défense Spé.", "speed": "Vitesse" },
-        "ru": { "hp": "ОЗ", "attack": "Атака", "defense": "Защита", "spattack": "Спец. Атака", "spdefense": "Спец. Защита", "speed": "Скорость" },
-        "zh": { "hp": "HP", "attack": "攻击", "defense": "防御", "spattack": "特攻", "spdefense": "特防", "speed": "速度" },
-        "ja": { "hp": "HP", "attack": "こうげき", "defense": "ぼうぎょ", "spattack": "とくこう", "spdefense": "とくぼう", "speed": "すばやさ" },
-        "ko": { "hp": "HP", "attack": "공격", "defense": "방어", "spattack": "특수공격", "spdefense": "특수방어", "speed": "스피드" },
-        "fi": { "hp": "HP", "attack": "Hyökkäys", "defense": "Puolustus", "spattack": "Erikoishyökkäys", "spdefense": "Erikoispuolustus", "speed": "Nopeus" },
-        "ar": { "hp": "HP", "attack": "هجوم", "defense": "دفاع", "spattack": "هجوم خاص", "spdefense": "دفاع خاص", "speed": "سرعة" },
-        "hi": { "hp": "HP", "attack": "हमला", "defense": "रक्षा", "spattack": "विशेष हमला", "spdefense": "विशेष रक्षा", "speed": "गति" },
-        "bn": { "hp": "HP", "attack": "আক্রমণ", "defense": "প্রতিরক্ষা", "spattack": "বিশেষ আক্রমণ", "spdefense": "বিশেষ প্রতিরক্ষা", "speed": "গতি" },
-        "id": { "hp": "HP", "attack": "Serangan", "defense": "Pertahanan", "spattack": "Serangan Khusus", "spdefense": "Pertahanan Khusus", "speed": "Kecepatan" }
-          
-      }
-    };
-
-    const genRanges = {
-  1: { start: 1, end: 151 }, 2: { start: 152, end: 251 },
-  3: { start: 252, end: 386 }, 4: { start: 387, end: 493 },
-  5: { start: 494, end: 649 }, 
-  6: { start: 650, end: 721 }, 7: { start: 722, end: 809 },
-  8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
-};
-
-const achievementDefinitions = {
-  "kanto_master": { gen: 1, title: "Kanto's Master", desc: "Get all Gen 1 pokemon", hidden: true, icon: "🏆" },
-  "johto_master": { gen: 2, title: "Johto's Master", desc: "Get all Gen 2 pokemon", hidden: true, icon: "🏆" },
-  "hoenn_master": { gen: 3, title: "Hoenn's Master", desc: "Get all Gen 3 pokemon", hidden: true, icon: "🏆" },
-  "sinnoh_master": { gen: 4, title: "Sinnoh's Master", desc: "Get all Gen 4 pokemon", hidden: true, icon: "🏆" },
-  "unima_master": { gen: 5, title: "Unima's Master", desc: "Get all Gen 5 pokemon", hidden: true, icon: "🏆" },
-  "kalos_master": { gen: 6, title: "Kalos' Master", desc: "Get all Gen 6 pokemon", hidden: true, icon: "🏆" },
-  "alola_master": { gen: 7, title: "Alola's Master", desc: "Get all Gen 7 pokemon", hidden: true, icon: "🏆" },
-  "galar_master": { gen: 8, title: "Galars's Master", desc: "Get all Gen 8 pokemon", hidden: true, icon: "🏆" },
-  "paldea_master": { gen: 9, title: "Paldea's Master", desc: "Get all Gen 9 pokemon", hidden: true, icon: "🏆" },
-  "pokemon_master": { title: "Pokemon Master", desc: "Get every Pokemon", hidden: true, icon: "👑" },
-  "first_step": { title: "First Step", desc: "Win a round", hidden: false, icon: "👟" },
-  "newbie": { score: 5, title: "Newbie", desc: "Get a high score of at least 5", hidden: false, icon: "🥉" },
-  "good_enough": { score: 10, title: "Good enough", desc: "Get a high score of at least 10", hidden: false, icon: "🥈" },
-  "impressive": { score: 30, title: "That's impressive", desc: "Get a high score of at least 30", hidden: false, icon: "🥇" },
-  "mr_pokedex": { score: 100, title: "Mr. Pokedex", desc: "Get a high score of at least 100", hidden: false, icon: "🌟" },
-  "chromatic": { id: "chromatic", title: "Chromatic", desc: "Get a shiny", hidden: true, icon: "✨" },
-  "conga": { id: "conga", pokemonId: 132, title: "Conga!", desc: "Get a Ditto", hidden: true, icon: "🧬" },
-  "missing_number": { id: "missing_number", pokemonId: 0, title: "The Missing Number", hidden: true, icon: "#️" },
-  "almighty": { id: "almighty", pokemonId: 493, title: "The Almighty", desc: "Get Arceus", hidden: true, icon: "⚖️" }
-};
-
-    const flagEmojis = {
-      "it": "🇮🇹", "en": "🇬🇧", "es": "🇪🇸", "de": "🇩🇪", "pt": "🇵🇹", "fr": "🇫🇷", "ru": "🇷🇺", "zh": "🇨🇳", "ja": "🇯🇵", "ko": "🇰🇷", "fi": "🇫🇮", "ar": "🇦🇪", "hi": "🇮🇳", "bn": "🇧🇩", "id": "🇮🇩"
-    };
 
     // --- FUNZIONI DI NAVIGAZIONE ---
     function showPage(pageId) {
@@ -1243,6 +206,11 @@ async function createUserData(uid, email, displayName) {
     unlockedPokemon: [],
     unlockedShiny: [],
     unlockedAchievements: []
+    settings: {
+        lang: localStorage.getItem(LANG_KEY) || 'it',
+        theme: localStorage.getItem(THEME_KEY) || 'system',
+        difficulty: localStorage.getItem(DIFFICULTY_KEY) || 'easy'
+    }
   };
   
   try {
@@ -1282,9 +250,10 @@ async function createUserData(uid, email, displayName) {
         const response = await fetch("pokemonList.json");
         if (!response.ok) throw new Error("Errore nel caricare pokemonList.json");
         pokemonList = await response.json();
+          populateRegionFilter();
         
         if (document.getElementById("accountContainer").style.display === "block") {
-          displayPokedex(pokemonList);
+          applyPokedexFilters();
         }
 
       } catch (error) {
@@ -1632,6 +601,7 @@ function setupNavigationListeners() {
       
       loadSettingsPage();
       updateAuthStatusText(); // Aggiorna il testo dell'auth con la nuova lingua
+        saveSettingsToFirebase();
     }
     
     function applyTheme(theme) {
@@ -1655,12 +625,14 @@ function setupNavigationListeners() {
       difficultySelect.addEventListener("change", (e) => {
         difficulty = e.target.value;
         localStorage.setItem(DIFFICULTY_KEY, difficulty);
+        saveSettingsToFirebase();
       });
 
       themeSelect.addEventListener("change", (e) => {
         const newTheme = e.target.value;
         localStorage.setItem(THEME_KEY, newTheme);
         applyTheme(newTheme);
+          saveSettingsToFirebase();
       });
       
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -1677,6 +649,31 @@ function setupNavigationListeners() {
         }
       });
     }
+
+    async function saveSettingsToFirebase() {
+  // Salva solo se l'utente è loggato, verificato e i dati utente sono caricati
+  if (!currentUser || !currentUser.emailVerified || !userData) return;
+
+  const currentSettings = {
+    lang: localStorage.getItem(LANG_KEY) || 'it',
+    theme: localStorage.getItem(THEME_KEY) || 'system',
+    difficulty: localStorage.getItem(DIFFICULTY_KEY) || 'easy'
+  };
+  
+  // Evita scritture inutili se le impostazioni sono già sincronizzate
+  if (JSON.stringify(userData.settings) === JSON.stringify(currentSettings)) {
+      return;
+  }
+
+  try {
+    const userRef = doc(fb_db, "users", currentUser.uid);
+    await updateDoc(userRef, { settings: currentSettings });
+    // Aggiorna anche i dati locali
+    userData.settings = currentSettings;
+  } catch (err) { 
+    console.error("Failed to save settings to Firebase:", err); 
+  }
+}
 
     function loadSettingsPage() {
       document.getElementById("difficultySetting").value = difficulty;
@@ -1976,7 +973,29 @@ function startRound() {
 // ===================================
 
 function startGame() {
-  score = 0;
+  // MODIFICA (Task 4): Logica Anti-Cheat
+  const now = Date.now();
+  const timeSinceLast = now - lastRoundStartTime;
+  lastRoundStartTime = now;
+
+  // Se l'ultimo round è stato avviato meno di 1.5s fa
+  if (timeSinceLast < 1500) { 
+    rapidRoundCount++;
+  } else {
+    rapidRoundCount = 0; // Resetta se il tempo è normale
+  }
+
+  // Se l'utente ha avviato 5 round troppo velocemente
+  if (rapidRoundCount > 5) {
+    clearInterval(timer); 
+    gameOver = true;
+    alert(t.antiCheatWarning || "Stai giocando troppo velocemente! Ritorno al menu.");
+    showPage("mainMenu");
+    rapidRoundCount = 0;
+    return; // Interrompi l'avvio del gioco
+  }
+    
+    score = 0;
   gameOver = false;
   document.getElementById("score").innerText = `${t.score}: ${score}`;
   
@@ -2359,6 +1378,10 @@ function addClickSwapListeners() {
     
     const pokedexGrid = document.getElementById('pokedexGrid');
     const searchInput = document.getElementById('pokedexSearch');
+    const filterUnlocked = document.getElementById('filterUnlocked');
+    const filterLocked = document.getElementById('filterLocked');
+    const filterShiny = document.getElementById('filterShiny');
+    const filterRegion = document.getElementById('filterRegion');
     const modal = document.getElementById('pokemonModal');
     const modalName = document.getElementById('modalName');
     const modalImage = document.getElementById('modalImage');
@@ -2450,6 +1473,8 @@ function displayAchievements() {
 
     const unlockCount = achievementPercentages[key] || 0;
     const percent = (unlockCount / totalUsers * 100).toFixed(1);
+    const title = t[def.titleKey] || (def.title || key); // Fallback
+    const desc = (isUnlocked || !def.hidden) ? (t[def.descKey] || (def.desc || "???")) : "???";
 
     card.innerHTML = `
       <div class="achievement-icon">${def.icon}</div>
@@ -2476,8 +1501,26 @@ function displayAchievements() {
           dataCont.style.display = "block";
 
           if (userData) {
-        // MODIFICATO: Mostra un riepilogo (o il punteggio più alto)
-        // Calcola il punteggio più alto in assoluto per semplicità
+       // Mostra gli achievement
+            displayAchievements();
+            
+            // MODIFICA (Task 1): Aggiungi listener e applica filtri
+            // Rimuovi vecchi listener se esistono (buona pratica)
+            searchInput.removeEventListener('input', applyPokedexFilters);
+            filterUnlocked.removeEventListener('change', applyPokedexFilters);
+            filterLocked.removeEventListener('change', applyPokedexFilters);
+            filterShiny.removeEventListener('change', applyPokedexFilters);
+            filterRegion.removeEventListener('change', applyPokedexFilters);
+            
+            // Aggiungi nuovi listener
+            searchInput.addEventListener('input', applyPokedexFilters);
+            filterUnlocked.addEventListener('change', applyPokedexFilters);
+            filterLocked.addEventListener('change', applyPokedexFilters);
+            filterShiny.addEventListener('change', applyPokedexFilters);
+            filterRegion.addEventListener('change', applyPokedexFilters);
+            
+            // Carica la griglia
+            applyPokedexFilters();
         const allScores = [
             ...Object.values(highScores.classic),
             ...Object.values(highScores.sort)
@@ -2617,13 +1660,6 @@ shinyToggle.classList.remove("active");
       if (e.target === modal) modal.style.display = 'none';
     });
 
-    // Listener Ricerca Pokédex
-    searchInput.addEventListener('input', () => {
-      const term = searchInput.value.toLowerCase();
-      const filtered = pokemonList.filter(p => p.name.toLowerCase().includes(term));
-      displayPokedex(filtered);
-
-    });
 
     function toggleShinySprite(event) {
   const btn = event.currentTarget;
@@ -2643,6 +1679,64 @@ shinyToggle.classList.remove("active");
   }
 }
 
+function populateRegionFilter() {
+  const select = document.getElementById("filterRegion");
+  if (!select) return;
+  
+  // Pulisci (tranne "Tutte le Regioni")
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
+  for (const gen in genRanges) {
+    const option = document.createElement("option");
+    option.value = gen;
+    option.text = genRanges[gen].name;
+    select.appendChild(option);
+  }
+}
+
+function applyPokedexFilters() {
+  if (pokemonList.length === 0) return; // Dati non ancora caricati
+
+  const searchTerm = searchInput.value.toLowerCase();
+  const showUnlocked = filterUnlocked.checked;
+  const showLocked = filterLocked.checked;
+  const showShiny = filterShiny.checked;
+  const region = filterRegion.value;
+
+  // 1. Filtra per regione
+  let regionFiltered = [];
+  if (region === "all") {
+    regionFiltered = [...pokemonList];
+  } else {
+    const { start, end } = genRanges[region];
+    regionFiltered = pokemonList.filter(p => p.id >= start && p.id <= end);
+  }
+
+  // 2. Applica gli altri filtri
+  const filtered = regionFiltered.filter(p => {
+    const nameMatch = p.name.toLowerCase().includes(searchTerm);
+    const isUnlocked = unlockedPokemon.includes(p.id);
+    const isShinyUnlocked = unlockedShiny.includes(p.id);
+
+    if (!nameMatch) return false;
+
+    // Logica filtri
+    if (showShiny) {
+      // Se "Shiny" è spuntato, mostra SOLO gli shiny sbloccati
+      return isShinyUnlocked;
+    } else {
+      // Altrimenti, usa i filtri "Sbloccati" / "Non Sbloccati"
+      if (showUnlocked && showLocked) return true; // Mostra entrambi
+      if (showUnlocked) return isUnlocked;
+      if (showLocked) return !isUnlocked;
+      return false; // Non mostra nulla se entrambi deselezionati
+    }
+  });
+
+  displayPokedex(filtered); // Chiama la funzione di rendering con la lista filtrata
+}
 
 
 
