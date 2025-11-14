@@ -1302,33 +1302,37 @@
     };
 
   export const genRanges = {
-  1: { start: 1, end: 151 }, 2: { start: 152, end: 251 },
-  3: { start: 252, end: 386 }, 4: { start: 387, end: 493 },
-  5: { start: 494, end: 649 }, 
-  6: { start: 650, end: 721 }, 7: { start: 722, end: 809 },
-  8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
+  1: { start: 1, end: 151, name: "Kanto (Gen 1)" },
+  2: { start: 152, end: 251, name: "Johto (Gen 2)" },
+  3: { start: 252, end: 386, name: "Hoenn (Gen 3)" },
+  4: { start: 387, end: 493, name: "Sinnoh (Gen 4)" },
+  5: { start: 494, end: 649, name: "Unima (Gen 5)" }, 
+  6: { start: 650, end: 721, name: "Kalos (Gen 6)" },
+  7: { start: 722, end: 809, name: "Alola (Gen 7)" },
+  8: { start: 810, end: 905, name: "Galar (Gen 8)" },
+  9: { start: 906, end: 1025, name: "Paldea (Gen 9)" }
 };
 
 export const achievementDefinitions = {
-  "kanto_master": { gen: 1, title: "Kanto's Master", desc: "Get all Gen 1 pokemon", hidden: true, icon: "🏆" },
-  "johto_master": { gen: 2, title: "Johto's Master", desc: "Get all Gen 2 pokemon", hidden: true, icon: "🏆" },
-  "hoenn_master": { gen: 3, title: "Hoenn's Master", desc: "Get all Gen 3 pokemon", hidden: true, icon: "🏆" },
-  "sinnoh_master": { gen: 4, title: "Sinnoh's Master", desc: "Get all Gen 4 pokemon", hidden: true, icon: "🏆" },
-  "unima_master": { gen: 5, title: "Unima's Master", desc: "Get all Gen 5 pokemon", hidden: true, icon: "🏆" },
-  "kalos_master": { gen: 6, title: "Kalos' Master", desc: "Get all Gen 6 pokemon", hidden: true, icon: "🏆" },
-  "alola_master": { gen: 7, title: "Alola's Master", desc: "Get all Gen 7 pokemon", hidden: true, icon: "🏆" },
-  "galar_master": { gen: 8, title: "Galars's Master", desc: "Get all Gen 8 pokemon", hidden: true, icon: "🏆" },
-  "paldea_master": { gen: 9, title: "Paldea's Master", desc: "Get all Gen 9 pokemon", hidden: true, icon: "🏆" },
-  "pokemon_master": { title: "Pokemon Master", desc: "Get every Pokemon", hidden: true, icon: "👑" },
-  "first_step": { title: "First Step", desc: "Win a round", hidden: false, icon: "👟" },
-  "newbie": { score: 5, title: "Newbie", desc: "Get a high score of at least 5", hidden: false, icon: "🥉" },
-  "good_enough": { score: 10, title: "Good enough", desc: "Get a high score of at least 10", hidden: false, icon: "🥈" },
-  "impressive": { score: 30, title: "That's impressive", desc: "Get a high score of at least 30", hidden: false, icon: "🥇" },
-  "mr_pokedex": { score: 100, title: "Mr. Pokedex", desc: "Get a high score of at least 100", hidden: false, icon: "🌟" },
-  "chromatic": { id: "chromatic", title: "Chromatic", desc: "Get a shiny", hidden: true, icon: "✨" },
-  "conga": { id: "conga", pokemonId: 132, title: "Conga!", desc: "Get a Ditto", hidden: true, icon: "🧬" },
-  "missing_number": { id: "missing_number", pokemonId: 0, title: "The Missing Number", hidden: true, icon: "#️" },
-  "almighty": { id: "almighty", pokemonId: 493, title: "The Almighty", desc: "Get Arceus", hidden: true, icon: "⚖️" }
+  "kanto_master": { gen: 1, titleKey: "ach_kanto_master_title", descKey: "ach_kanto_master_desc", hidden: true, icon: "🏆" },
+  "johto_master": { gen: 2, titleKey: "ach_johto_master_title", descKey: "ach_johto_master_desc", hidden: true, icon: "🏆" },
+  "hoenn_master": { gen: 3, titleKey: "ach_hoenn_master_title", descKey: "ach_hoenn_master_desc", hidden: true, icon: "🏆" },
+  "sinnoh_master": { gen: 4, titleKey: "ach_sinnoh_master_title", descKey: "ach_sinnoh_master_desc", hidden: true, icon: "🏆" },
+  "unima_master": { gen: 5, titleKey: "ach_unima_master_title", descKey: "ach_unima_master_desc", hidden: true, icon: "🏆" },
+  "kalos_master": { gen: 6, titleKey: "ach_kalos_master_title", descKey: "ach_kalos_master_desc", hidden: true, icon: "🏆" },
+  "alola_master": { gen: 7, titleKey: "ach_alola_master_title", descKey: "ach_alola_master_desc", hidden: true, icon: "🏆" },
+  "galar_master": { gen: 8, titleKey: "ach_galar_master_title", descKey: "ach_galar_master_desc", hidden: true, icon: "🏆" },
+  "paldea_master": { gen: 9, titleKey: "ach_paldea_master_title", descKey: "ach_paldea_master_desc", hidden: true, icon: "🏆" },
+  "pokemon_master": { titleKey: "ach_pokemon_master_title", descKey: "ach_pokemon_master_desc", hidden: true, icon: "👑" },
+  "first_step": { titleKey: "ach_first_step_title", descKey: "ach_first_step_desc", hidden: false, icon: "👟" },
+  "newbie": { score: 5, titleKey: "ach_newbie_title", descKey: "ach_newbie_desc", hidden: false, icon: "🥉" },
+  "good_enough": { score: 10, titleKey: "ach_good_enough_title", descKey: "ach_good_enough_desc", hidden: false, icon: "🥈" },
+  "impressive": { score: 30, titleKey: "ach_impressive_title", descKey: "ach_impressive_desc", hidden: false, icon: "🥇" },
+  "mr_pokedex": { score: 100, titleKey: "ach_mr_pokedex_title", descKey: "ach_mr_pokedex_desc", hidden: false, icon: "🌟" },
+  "chromatic": { id: "chromatic", titleKey: "ach_chromatic_title", descKey: "ach_chromatic_desc", hidden: true, icon: "✨" },
+  "conga": { id: "conga", pokemonId: 132, titleKey: "ach_conga_title", descKey: "ach_conga_desc", hidden: true, icon: "🧬" },
+  "missing_number": { id: "missing_number", pokemonId: 0, titleKey: "ach_missing_number_title", descKey: "ach_missing_number_desc", hidden: true, icon: "#️" },
+  "almighty": { id: "almighty", pokemonId: 493, titleKey: "ach_almighty_title", descKey: "ach_almighty_desc", hidden: true, icon: "⚖️" }
 };
 
     export const flagEmojis = {
