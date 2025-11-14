@@ -205,7 +205,7 @@ async function createUserData(uid, email, displayName) {
     },
     unlockedPokemon: [],
     unlockedShiny: [],
-    unlockedAchievements: []
+    unlockedAchievements: [],
     settings: {
         lang: localStorage.getItem(LANG_KEY) || 'it',
         theme: localStorage.getItem(THEME_KEY) || 'system',
@@ -1737,6 +1737,7 @@ function applyPokedexFilters() {
 
   displayPokedex(filtered); // Chiama la funzione di rendering con la lista filtrata
 }
+
 
 
 
