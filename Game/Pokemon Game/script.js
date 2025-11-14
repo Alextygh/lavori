@@ -1478,8 +1478,8 @@ function displayAchievements() {
 
     card.innerHTML = `
       <div class="achievement-icon">${def.icon}</div>
-      <div class="achievement-title">${def.title}</div>
-      <div class="achievement-desc">${(isUnlocked || !def.hidden) ? def.desc : "???"}</div>
+      <div class="achievement-title">${title}</div> 
+      <div class="achievement-desc">${desc}</div>
       <div class="achievement-percent">${percent}%</div>
     `;
     grid.appendChild(card);
@@ -1544,7 +1544,6 @@ document.getElementById("accountCreatedAt").innerText = creationDate;
 // Mostra gli achievement
 displayAchievements();
         
-        displayPokedex(pokemonList);
       }
         } else {
           // UTENTE LOGGATO MA NON VERIFICATO
@@ -1737,6 +1736,7 @@ function applyPokedexFilters() {
 
   displayPokedex(filtered); // Chiama la funzione di rendering con la lista filtrata
 }
+
 
 
 
