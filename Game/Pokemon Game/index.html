@@ -99,6 +99,7 @@
         <li data-translate="benefitsItem1">Salva i tuoi record e progressi sul cloud.</li>
         <li data-translate="benefitsItem2">Competi nella classifica globale.</li>
         <li data-translate="benefitsItem3">Sincronizza il tuo Pokédex sbloccato su tutti i dispositivi.</li>
+        <li data-translate="benefitsItem4">Salva le tue impostazioni (tema, lingua) e usale su tutti i dispositivi.</li>
       </ul>
     </div>
 
@@ -167,6 +168,21 @@
 
       <h3 data-translate="pokedex">Pokédex</h3>
       <input type="text" id="pokedexSearch" placeholder="Cerca Pokémon...">
+
+      <div class="pokedex-filters">
+        <div class="filter-group">
+          <label>Stato:</label>
+          <input type="checkbox" id="filterUnlocked" checked> <label for="filterUnlocked">Sbloccati</label>
+          <input type="checkbox" id="filterLocked" checked> <label for="filterLocked">Non Sbloccati</label>
+          <input type="checkbox" id="filterShiny"> <label for="filterShiny">Shiny Sbloccati</label>
+        </div>
+        <div class="filter-group">
+          <label for="filterRegion">Regione:</label>
+          <select id="filterRegion">
+            <option value="all">Tutte le Regioni</option>
+            </select>
+        </div>
+      </div>
       <div id="pokedexGrid" class="pokedex-grid"></div>
     </div>
 
