@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anagrafica Utente con Generazione</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    <title>Lavoro del 13/11/25 - Anagrafica 2.0</title>
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=oCJ21C5YaVT9GfC-G-6CAWQ6bsL1bU71pn1We4f4tfAkSn8UYKGxHlqyZxt3ciw6kskhn7Q7u1S716K2Wu7oaJYFccNMbfhbtJ_gZ_6U1-BB7m7z43bb6REC3uu3_T2U" charset="UTF-8"></script><style>
+        body { font-family: Arial, sans-serif; }
         .container {
             display: flex;
             gap: 24px;
@@ -21,16 +19,13 @@
             box-sizing: border-box;
         }
         .output {
-            min-width: 300px;
+            min-width: 260px;
             padding: 15px;
             border: 1px solid #ccc;
             background: #f9f9f9;
             box-sizing: border-box;
         }
-        input[type="text"],
-        input[type="email"],
-        input[type="date"],
-        input[type="radio] {
+        input[type="text"], input[type="email"], select {
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 8px;
@@ -41,123 +36,105 @@
             padding: 6px 10px;
         }
         h3 {
-            margin: 10px 0 5px;
+            margin-bottom: 5px;
+            margin-top: 10px;
         }
     </style>
+
     <script>
-        function calcolaEta(dataNascita) {
-            const oggi = new Date();
-            const nascita = new Date(dataNascita);
-            let eta = oggi.getFullYear() - nascita.getFullYear();
-            const mese = oggi.getMonth() - nascita.getMonth();
-            if (mese < 0 || (mese === 0 && oggi.getDate() < nascita.getDate())) {
-                eta--;
-            }
-            return eta;
-        }
- 
-        function calcolaGenerazione(anno) {
-            switch (true) {
-                case (anno >= 2026):
-                    return "Bro non sei manco nato";
-                case (anno >= 2013):
-                    return "Generazione Alpha";
-                case (anno >= 1997):
-                    return "Generazione Z";
-                case (anno >= 1981):
-                    return "Millennials";
-                case (anno >= 1965):
-                    return "Generazione X";
-                case (anno >= 1946):
-                    return "Baby Boomers";
-                case (anno >= 1928):
-                    return "Generazione Silenziosa";
-                case (anno >= 1901):
-                    return "Greatest Generation";
-                default:
-                    return "Non classificata";
-            }
-        }
-
-      function controlla() {     
-
-        for(i=0;i<document.getElementsByName("sesso").length;i++) {
-
-          if(document.getElementsByName("sesso")[i].checked){
-
-           document.getElementById("risp").innerHTML = document.getElementsByName("sesso")[i].value
-           
-          }
-
-        }
-
-    }
-
-
-      
         function stampa() {
             const nome = document.getElementById("demo").value;
             const cognome = document.getElementById("demi").value;
             const indirizzo = document.getElementById("demu").value;
-            const citta = document.getElementById("citta").value;
-            const cap = document.getElementById("cap").value;
-            const dataNascita = document.getElementById("nascita").value;
-            const sesso = document.getElementById("sesso").value;
- 
-            let eta = "Non disponibile";
-            let generazione = "Non classificata";
- 
-            if (dataNascita) {
-                const anno = new Date(dataNascita).getFullYear();
-                eta = calcolaEta(dataNascita);
-                generazione = calcolaGenerazione(anno);
+
+            let sesso = "";
+            const sessoElementi = document.getElementsByName("sesso");
+            for (let i = 0; i < sessoElementi.length; i++) {
+                if (sessoElementi[i].checked) {
+                    sesso = sessoElementi[i].value;
+                    break;
+                }
             }
- 
-            document.getElementById("output").innerHTML = `
-                <strong>Nome:</strong> ${nome}<br>
-                <strong>Cognome:</strong> ${cognome}<br>
-                <strong>Indirizzo:</strong> ${indirizzo}<br>
-                <strong>Città:</strong> ${citta}<br>
-                <strong>CAP:</strong> ${cap}<br>
-                <strong>Data di nascita:</strong> ${dataNascita}<br>
-                <strong>Età:</strong> ${eta} anni<br>
-                <strong>Generazione:</strong> ${generazione} <br>
-                <strong>Sesso:</strong> ${sesso} <br>
-            `;
+
+            const veicoliSelezionati = [];
+            const veicoli = document.getElementsByName("veicolo");
+            for (let i = 0; i < veicoli.length; i++) {
+                if (veicoli[i].checked) {
+                    veicoliSelezionati.push(veicoli[i].value);
+                }
+            }
+
+            const provincia = document.getElementById("provincia").value;
+
+            const sportSelezionati = [];
+            const sport = document.getElementsByName("sport");
+            for (let i = 0; i < sport.length; i++) {
+                if (sport[i].checked) {
+                    sportSelezionati.push(sport[i].value);
+                }
+            }
+
+            document.getElementById("bo").innerText = "Nome: " + nome;
+            document.getElementById("boo").innerText = "Cognome: " + cognome;
+            document.getElementById("booo").innerText = "Indirizzo: " + indirizzo;
+            document.getElementById("bo4").innerText = "Sesso: " + (sesso || "Non specificato");
+            document.getElementById("bo5").innerText = "Veicoli posseduti: " + (veicoliSelezionati.join(", ") || "Nessuno");
+            document.getElementById("bo6").innerText = "Provincia: " + provincia;
+            document.getElementById("bo7").innerText = "Sport praticati: " + (sportSelezionati.join(", ") || "Nessuno");
         }
     </script>
 </head>
+
 <body>
     <div class="container">
         <div class="box">
-            <h3>Nome</h3>
+            <h3>Scrivi il tuo nome</h3>
             <input type="text" id="demo">
- 
-            <h3>Cognome</h3>
+
+            <h3>Scrivi il tuo cognome</h3>
             <input type="text" id="demi">
- 
-            <h3>Indirizzo</h3>
-            <input type="text" id="demu">
- 
-            <h3>Città</h3>
-            <input type="text" id="citta">
- 
-            <h3>CAP</h3>
-            <input type="text" id="cap">
- 
-            <h3>Data di nascita</h3>
-            <input type="date" id="nascita">
 
-            <h3> Sesso </h3>
-            <input type="radio" name="sesso" value="uomo">Uomo<br>
+            <h3>Scrivi il tuo indirizzo</h3>
+            <input type="email" id="demu">
 
-            <input type="radio" name="sesso" value="donna">Donna<br>
- 
-            <input type="button" value="Mostra dati" onclick="stampa()">
-        
+            <h3>Sesso</h3>
+            <label><input type="radio" name="sesso" value="Maschio"> Maschio</label><br>
+            <label><input type="radio" name="sesso" value="Femmina"> Femmina</label><br>
+            <label><input type="radio" name="sesso" value="Altro"> Altro</label>
+
+            <h3>Veicoli posseduti</h3>
+            <label><input type="checkbox" name="veicolo" value="Auto"> Auto</label><br>
+            <label><input type="checkbox" name="veicolo" value="Moto"> Moto</label><br>
+            <label><input type="checkbox" name="veicolo" value="Bicicletta"> Bicicletta</label><br>
+            <label><input type="checkbox" name="veicolo" value="Monopattino"> Monopattino</label>
+
+            <h3>Provincia</h3>
+            <select id="provincia">
+                <option value="-- Seleziona --">-- Seleziona --</option>
+                <option value="Milano">Milano</option>
+                <option value="Roma">Roma</option>
+                <option value="Napoli">Napoli</option>
+                <option value="Torino">Torino</option>
+                <option value="Bologna">Bologna</option>
+            </select>
+
+            <h3>Sport praticati</h3>
+            <label><input type="checkbox" name="sport" value="Calcio"> Calcio</label><br>
+            <label><input type="checkbox" name="sport" value="Basket"> Basket</label><br>
+            <label><input type="checkbox" name="sport" value="Pallavolo"> Pallavolo</label><br>
+            <label><input type="checkbox" name="sport" value="Tennis"> Tennis</label><br>
+            <label><input type="checkbox" name="sport" value="Biliardo"> Biliardo</label><br>
+            <input type="button" value="Cliccami" onclick="stampa()">
         </div>
- 
-        <div class="output" id="output">
+
+        <div class="output">
+            <p id="bo"></p>
+            <p id="boo"></p>
+            <p id="booo"></p>
+            <p id="bo4"></p>
+            <p id="bo5"></p>
+            <p id="bo6"></p>
+            <p id="bo7"></p>
         </div>
     </div>
 </body>
