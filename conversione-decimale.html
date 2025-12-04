@@ -107,10 +107,9 @@
         binari.push(n.toString(2).padStart(8, "0"));
       }
 
-      document.getElementById('risultato').innerHTML = `
-        <strong>Indirizzo decimale:</strong> ${numeri.join('.')}<br>
-        <strong>Indirizzo binario:</strong> ${binari.join('.')}
-      `;
+      document.getElementById('risultato').innerHTML = 
+        '<strong>Indirizzo decimale:</strong> ' + numeri.join('.') + '<br>' + 
+        '<strong>Indirizzo binario:</strong> ' + binari.join('.');
     }
   </script>
 </body>
