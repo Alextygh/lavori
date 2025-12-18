@@ -1,0 +1,76 @@
+html, body{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+b{
+    height: 85px;
+    font-size: xx-large;
+    font-style: italic;
+    color: rgb(90, 60, 140);
+}
+
+#calcolatrice{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 50vw;
+    padding: 8px;
+    justify-items: center;
+    background-color: rgb(140, 110, 190);
+    border-radius: 12px;
+}
+
+#schermo{
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 60px;
+    text-align: right;
+    background-color: rgb(220, 210, 245);
+    border: none;
+    font-size: xx-large;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    color: rgb(70, 40, 120);
+}
+
+.pulsante{
+    display: flex;
+    width: 10vw;
+    height: 10vh;
+    border-radius: 50%;
+    background-color: rgb(190, 170, 220);
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: xx-large;
+    color: rgb(60, 30, 110);
+}
+
+.pulsante:hover{
+    background-color: rgb(165, 140, 210);
+    cursor: pointer;
+}
+
+.pulsante:active{
+    background-color: rgb(140, 120, 190);
+}
+
+.operatore{
+    background-color: rgb(155, 120, 210);
+    cursor: pointer;
+}
+
+.operatore:hover{
+    background-color: rgb(130, 95, 190);
+}
+
+.operatore:active{
+    background-color: rgb(110, 80, 170);
+}
+
+/*zallu*/
