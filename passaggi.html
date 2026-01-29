@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lettura Parametri URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f0e6ff;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+	    border: 2px solid #8a2be2;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"], button {
+            background-color: #8a2be2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #f0e6ff;
+        }
+        .hidden {
+            display: none;
+        }
+        .result-box {
+            background-color: #f0e6ff;
+            padding: 15px;
+            border-left: 5px solid #8a2be2;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div id="sezioneForm">
+        <h2>Inserisci Dati (Pagina 1)</h2>
+        <p>Inserisci due parametri e premi Invia.</p>
+        
+        <form action="" method="GET">
+            <label for="parametro1">Parametro 1 (es. Nome):</label>
+            <input type="text" id="parametro1" name="nome" required placeholder="Inserisci nome...">
+
+            <label for="parametro2">Parametro 2 (es. Città):</label>
+            <input type="text" id="parametro2" name="citta" required placeholder="Inserisci città...">
+
+            <input type="submit" value="Spedisci Dati">
+        </form>
+    </div>
+
+    <div id="sezioneRisultati" class="hidden">
+        <h2>Dati Ricevuti (Pagina 2)</h2>
+        <p>Lettura effettuata tramite <code>location.search</code>:</p>
+        
+        <div id="output" class="result-box">
+        </div>
+
+        <br>
+        <button onclick="window.location.href = window.location.pathname;">Torna Indietro</button>
+    </div>
+
+</div>
+
+<script>
+    if (window.location.search.length > 0) {
+        
+        document.getElementById('sezioneForm').classList.add('hidden');
+        document.getElementById('sezioneRisultati').classList.remove('hidden');
+
+        var queryString = window.location.search; 
+
+        var stringaPulita = queryString.substring(1);
+
+        var coppie = stringaPulita.split("&");
+
+        var htmlOutput = "";
+
+        for (var i = 0; i < coppie.length; i++) {
+            var elemento = coppie[i].split("=");
+            
+            var chiave = elemento[0];
+            var valore = decodeURIComponent(elemento[1]); 
+
+            htmlOutput += "<p><strong>" + chiave + ":</strong> " + valore + "</p>";
+        }
+
+        document.getElementById('output').innerHTML = htmlOutput;
+
+    } else {
+
+    }
+</script>
+
+</body>
+</html>
