@@ -1,0 +1,481 @@
+/* ══════════════════════════════════════════════════════
+   LOUIE'S INTERGALACTIC COOKBOOK — style.css
+   Shared across all pages
+   ══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* ── TOKENS ── */
+:root {
+  --cream:       #f5f0e8;
+  --warm-white:  #faf8f3;
+  --ink:         #1a1208;
+  --brown:       #5c3d1e;
+  --amber:       #c97c2a;
+  --gold:        #d4a017;
+  --gold-bright: #f0c040;
+  --moss:        #4a6741;
+  --rust:        #b84c2a;
+  --parchment:   #ede3ce;
+  --border:      #c8b89a;
+  --shadow:      rgba(26,18,8,0.12);
+
+  /* meat-type tag colours */
+  --meat-bulborb:    #c0392b;
+  --meat-invertebrate: #8e44ad;
+  --meat-aquatic:    #2980b9;
+  --meat-avian:      #27ae60;
+  --meat-arachnid:   #a88627;
+  --meat-aerial:     #16a085;
+  --meat-fungus:     #7f8c8d;
+  --meat-gelatinous: #2c3e50;
+  --meat-mechanical: #95a5a6;
+  --meat-unknown:    #6b5a3e;
+  --meat-blowhog:    #e8eaeb;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* noise grain */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.6;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  background: var(--ink);
+  border-bottom: 3px solid var(--gold);
+  display:flex; align-items:center;
+  padding:0 2rem; height:56px;
+}
+.nav-brand {
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem; font-weight:900;
+  color:var(--gold-bright);
+  text-decoration:none; margin-right:auto;
+  white-space:nowrap;
+}
+.nav-links { display:flex; list-style:none; }
+.nav-links li a {
+  display:block; padding:0 1.1rem;
+  height:56px; line-height:56px;
+  color:var(--parchment); text-decoration:none;
+  font-family:'DM Mono',monospace;
+  font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase;
+  transition:all 0.2s;
+  border-bottom:3px solid transparent; margin-bottom:-3px;
+}
+.nav-links li a:hover,
+.nav-links li a.active {
+  color:var(--gold-bright);
+  border-bottom-color:var(--gold-bright);
+}
+
+/* ── PAGE WRAPPER ── */
+.page-wrap { padding-top:56px; min-height:100vh; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding:0.85rem 2.2rem;
+  font-family:'DM Mono',monospace; font-size:0.78rem;
+  letter-spacing:0.1em; text-transform:uppercase;
+  cursor:pointer; border:none; text-decoration:none;
+  display:inline-block; transition:all 0.2s;
+}
+.btn-primary { background:var(--gold); color:var(--ink); font-weight:500; }
+.btn-primary:hover { background:var(--gold-bright); transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,160,23,.35); }
+.btn-outline { background:transparent; color:var(--cream); border:1.5px solid var(--border); }
+.btn-outline:hover { border-color:var(--gold); color:var(--gold-bright); transform:translateY(-2px); }
+
+/* ── FOOTER ── */
+footer {
+  background:var(--ink); border-top:3px solid var(--gold);
+  padding:3rem 2rem; text-align:center;
+}
+footer p {
+  font-family:'DM Mono',monospace; font-size:0.7rem;
+  letter-spacing:0.1em; color:var(--border); line-height:1.9;
+}
+footer em { color:var(--gold); font-style:normal; }
+
+/* ── UTILITY ── */
+.hidden { display:none !important; }
+.fade-in { opacity:0; transform:translateY(20px); transition:opacity 0.5s ease, transform 0.5s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+.section-label {
+  font-family:'DM Mono',monospace; font-size:0.7rem;
+  letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--amber); margin-bottom:1rem; display:block;
+}
+.section-heading {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700;
+  line-height:1.1; margin-bottom:1.5rem;
+}
+.breadcrumb {
+  font-family:'DM Mono',monospace; font-size:0.68rem;
+  letter-spacing:0.08em; color:var(--border);
+  padding:0.8rem 2rem;
+  background:var(--parchment); border-bottom:1px solid var(--border);
+}
+.breadcrumb span { color:var(--amber); }
+
+/* ══════════════════════════════════════════════════════
+   HOME PAGE
+   ══════════════════════════════════════════════════════ */
+.home-hero {
+  position:relative; min-height:calc(100vh - 56px);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:var(--ink); padding:4rem 2rem; overflow:hidden;
+}
+.home-hero::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, #3d2a0a 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, #1a3a10 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 80% 20%, #3a1a08 0%, transparent 60%);
+  pointer-events:none;
+}
+.hero-content { position:relative; z-index:2; text-align:center; max-width:800px; }
+.hero-eyebrow {
+  font-family:'DM Mono',monospace; font-size:0.72rem;
+  letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:1.5rem;
+}
+.hero-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(3rem,8vw,6.5rem); font-weight:900;
+  line-height:0.92; color:var(--cream); margin-bottom:0.3em;
+}
+.hero-title em { color:var(--gold-bright); font-style:italic; }
+.hero-subtitle {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1rem,2.5vw,1.5rem); font-style:italic;
+  color:var(--border); margin-bottom:2.5rem; line-height:1.5;
+}
+.hero-louie-img {
+  width:140px; height:140px; border-radius:50%;
+  border:4px solid var(--gold); object-fit:cover;
+  margin-bottom:2rem; box-shadow:0 0 40px rgba(212,160,23,.3);
+}
+.hero-quote {
+  font-style:italic; color:var(--parchment); font-size:1rem;
+  max-width:500px; margin:0 auto 3rem;
+  padding:1.5rem 2rem; border-left:3px solid var(--gold);
+  text-align:left; background:rgba(255,255,255,.03);
+}
+.hero-cta { display:inline-flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+
+.home-features { background:var(--parchment); padding:5rem 2rem; }
+.features-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:2rem; max-width:1100px; margin:0 auto;
+}
+.feature-card {
+  background:var(--warm-white); border:1px solid var(--border);
+  padding:2rem; position:relative;
+}
+.feature-card::before {
+  content:''; position:absolute; top:0; left:0;
+  width:4px; height:100%; background:var(--moss);
+}
+.feature-num {
+  font-family:'Playfair Display',serif; font-size:3rem;
+  font-weight:900; color:var(--border); line-height:1; margin-bottom:0.5rem;
+}
+.feature-title { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:0.5rem; color:var(--brown); }
+.feature-desc { font-size:0.9rem; color:#6b5a3e; line-height:1.7; }
+
+/* ══════════════════════════════════════════════════════
+   RECIPES PAGE
+   ══════════════════════════════════════════════════════ */
+.recipes-header {
+  background:var(--ink); padding:5rem 2rem 4rem;
+  text-align:center; border-bottom:3px solid var(--gold);
+}
+.recipes-header h1 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,5vw,3.5rem); font-weight:900; color:var(--cream);
+}
+.recipes-header p { color:var(--border); font-style:italic; font-size:1rem; margin-top:0.5rem; }
+
+/* search + filter bar */
+.filter-bar {
+  background:var(--parchment); padding:1.2rem 0;
+  border-bottom:1px solid var(--border); position:sticky; top:56px; z-index:100;
+}
+.filter-bar-inner {
+  max-width:1200px; margin:0 auto;
+  padding:0 2rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;
+}
+.search-input {
+  flex:1; min-width:180px; padding:0.65rem 1rem;
+  font-family:'DM Mono',monospace; font-size:0.82rem;
+  border:1.5px solid var(--border); background:var(--warm-white);
+  color:var(--ink); outline:none; transition:border-color 0.2s;
+}
+.search-input:focus { border-color:var(--amber); }
+.filter-btn {
+  padding:0.6rem 1rem;
+  font-family:'DM Mono',monospace; font-size:0.68rem;
+  letter-spacing:0.07em; text-transform:uppercase;
+  cursor:pointer; border:1.5px solid var(--border);
+  background:var(--warm-white); color:var(--brown); transition:all 0.2s;
+  white-space:nowrap;
+}
+.filter-btn:hover,
+.filter-btn.active { background:var(--ink); color:var(--gold-bright); border-color:var(--ink); }
+
+/* meat-type filter colours when active */
+.filter-btn[data-meat="bulborb"].active      { background:var(--meat-bulborb);     border-color:var(--meat-bulborb); }
+.filter-btn[data-meat="invertebrate"].active { background:var(--meat-invertebrate);border-color:var(--meat-invertebrate); }
+.filter-btn[data-meat="aquatic"].active      { background:var(--meat-aquatic);      border-color:var(--meat-aquatic); }
+.filter-btn[data-meat="avian"].active        { background:var(--meat-avian);        border-color:var(--meat-avian); }
+.filter-btn[data-meat="arachnid"].active     { background:var(--meat-arachnid);     border-color:var(--meat-arachnid); }
+.filter-btn[data-meat="aerial"].active       { background:var(--meat-aerial);       border-color:var(--meat-aerial); }
+.filter-btn[data-meat="fungus"].active       { background:var(--meat-fungus);       border-color:var(--meat-fungus); }
+.filter-btn[data-meat="gelatinous"].active   { background:var(--meat-gelatinous);   border-color:var(--meat-gelatinous); }
+.filter-btn[data-meat="mechanical"].active   { background:var(--meat-mechanical);   border-color:var(--meat-mechanical); color:var(--ink); }
+.filter-btn[data-meat="unknown"].active      { background:var(--meat-unknown);      border-color:var(--meat-unknown); }
+.filter-btn[data-meat="blowhog"].active   { background:var(--meat-blowhog);   border-color:var(--meat-blowhog); color:var(--ink); }
+
+
+.filter-divider {
+  width:1px; height:28px; background:var(--border); flex-shrink:0;
+}
+
+/* game sections */
+.game-section {
+  max-width:1200px; margin:0 auto;
+  padding:4rem 2rem; border-bottom:1px solid var(--border);
+}
+.game-section:last-child { border-bottom:none; }
+.game-header {
+  display:flex; align-items:center; gap:1.5rem;
+  margin-bottom:3rem; padding-bottom:1.5rem;
+  border-bottom:2px solid var(--parchment);
+}
+.game-icon { width:48px; height:48px; object-fit:contain; image-rendering:pixelated; }
+.game-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.4rem,3vw,2rem); font-weight:700; color:var(--brown);
+}
+.game-count { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--amber); letter-spacing:0.1em; margin-top:0.2rem; }
+
+/* enemy cards */
+.enemy-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:1.2rem;
+}
+.enemy-card {
+  background:var(--warm-white); border:1.5px solid var(--border);
+  padding:1rem 1.2rem; cursor:pointer; transition:all 0.2s;
+  position:relative; display:flex; flex-direction:column; gap:0.6rem;
+}
+.enemy-card:hover { border-color:var(--amber); transform:translateY(-2px); box-shadow:0 6px 20px var(--shadow); }
+
+.enemy-card.boss {
+  border-color:var(--gold);
+  background:linear-gradient(135deg,#fffbf0 0%,var(--warm-white) 100%);
+  box-shadow:0 0 0 1px var(--gold),0 2px 8px rgba(212,160,23,.15);
+}
+.enemy-card.boss:hover { box-shadow:0 0 0 2px var(--gold-bright),0 8px 24px rgba(212,160,23,.25); }
+.enemy-card.boss::after {
+  content:'★ BOSS'; position:absolute; top:-1px; right:8px;
+  font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.12em;
+  color:var(--ink); background:var(--gold); padding:2px 6px; font-weight:500;
+}
+
+.card-top { display:flex; align-items:center; gap:0.8rem; }
+.enemy-icon { width:36px; height:36px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+.enemy-name { font-size:0.82rem; line-height:1.3; font-weight:700; color:var(--brown); }
+
+/* meat type tag on the card */
+.meat-tag {
+  display:inline-block; align-self:flex-start;
+  font-family:'DM Mono',monospace; font-size:0.58rem;
+  letter-spacing:0.1em; text-transform:uppercase;
+  padding:2px 7px; border-radius:2px; color:#fff; font-weight:500;
+}
+.meat-tag.bulborb      { background:var(--meat-bulborb); }
+.meat-tag.invertebrate { background:var(--meat-invertebrate); }
+.meat-tag.aquatic      { background:var(--meat-aquatic); }
+.meat-tag.avian        { background:var(--meat-avian); }
+.meat-tag.arachnid     { background:var(--meat-arachnid); }
+.meat-tag.aerial       { background:var(--meat-aerial); }
+.meat-tag.fungus       { background:var(--meat-fungus); }
+.meat-tag.gelatinous   { background:var(--meat-gelatinous); }
+.meat-tag.mechanical   { background:var(--meat-mechanical); color:var(--ink); }
+.meat-tag.unknown      { background:var(--meat-unknown); }
+.meat-tag.blowhog      { background: var(--meat-blowhog); color:var(--ink); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(26,18,8,.85); z-index:2000;
+  align-items:center; justify-content:center;
+  padding:2rem; backdrop-filter:blur(4px);
+}
+.modal-overlay.open { display:flex; }
+
+.modal {
+  background:var(--warm-white); max-width:680px; width:100%;
+  max-height:90vh; overflow-y:auto; position:relative;
+  border:1px solid var(--border);
+}
+.modal.boss-modal { border:2px solid var(--gold); box-shadow:0 0 40px rgba(212,160,23,.2); }
+
+.modal-header {
+  background:var(--ink); padding:2rem 2.5rem;
+  display:flex; align-items:center; gap:1.5rem;
+  position:sticky; top:0; z-index:10;
+}
+.modal.boss-modal .modal-header {
+  background:linear-gradient(135deg,#1a1208 0%,#2a1e08 100%);
+  border-bottom:2px solid var(--gold);
+}
+.modal-header-icon { width:64px; height:64px; object-fit:contain; image-rendering:pixelated; flex-shrink:0; }
+.modal-header-text h2 { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:900; color:var(--cream); }
+
+.modal-boss-badge {
+  font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.15em;
+  color:var(--ink); background:var(--gold); padding:3px 10px;
+  text-transform:uppercase; display:inline-block; margin-top:0.4rem;
+}
+.modal-game-badge {
+  font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.1em;
+  color:var(--amber); background:rgba(255,255,255,.06);
+  padding:3px 10px; text-transform:uppercase; display:inline-block;
+  margin-top:0.4rem; border:1px solid rgba(201,124,42,.3);
+}
+.modal-close {
+  position:absolute; top:1rem; right:1rem;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  color:var(--cream); width:32px; height:32px;
+  cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.modal-close:hover { background:var(--rust); border-color:var(--rust); }
+
+.modal-body { padding:2.5rem; }
+
+.recipe-meta { display:flex; gap:1rem; margin-bottom:2rem; flex-wrap:wrap; align-items:center; }
+.meta-tag {
+  font-family:'DM Mono',monospace; font-size:0.68rem;
+  letter-spacing:0.08em; padding:0.4rem 0.9rem;
+  border:1px solid var(--border); color:var(--brown);
+  background:var(--parchment);
+}
+
+.recipe-coming-soon {
+  padding:3rem 2rem; text-align:center;
+  border:2px dashed var(--border); background:var(--parchment);
+}
+.recipe-coming-soon .cs-icon { font-size:2.5rem; margin-bottom:1rem; }
+.recipe-coming-soon h3 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--brown); margin-bottom:0.5rem; }
+.recipe-coming-soon p { font-style:italic; color:#8a7560; font-size:0.9rem; line-height:1.6; }
+
+/* recipe content (from data file) */
+.recipe-content { margin-bottom:2rem; }
+.recipe-content h3 {
+  font-family:'Playfair Display',serif; font-size:1.15rem;
+  color:var(--brown); margin:1.5rem 0 0.6rem;
+  padding-bottom:0.4rem; border-bottom:1px solid var(--parchment);
+}
+.recipe-content p { font-size:0.9rem; line-height:1.8; color:#4a3820; margin-bottom:0.5rem; }
+.recipe-content ol, .recipe-content ul { padding-left:1.4rem; }
+.recipe-content li { font-size:0.9rem; line-height:1.8; color:#4a3820; margin-bottom:0.3rem; }
+
+.louie-note {
+  margin-top:2rem; padding:1.2rem 1.5rem;
+  background:var(--ink); color:var(--cream);
+  font-style:italic; font-size:0.88rem; line-height:1.7; position:relative;
+}
+.louie-note::before {
+  content:'"'; font-family:'Playfair Display',serif;
+  font-size:4rem; color:var(--gold);
+  position:absolute; top:-0.5rem; left:0.8rem; line-height:1;
+}
+.louie-note p { padding-left:1.5rem; }
+.louie-note cite {
+  display:block; font-family:'DM Mono',monospace;
+  font-size:0.65rem; letter-spacing:0.1em; color:var(--gold);
+  text-transform:uppercase; margin-top:0.5rem; padding-left:1.5rem; font-style:normal;
+}
+
+/* ══════════════════════════════════════════════════════
+   ABOUT PAGE
+   ══════════════════════════════════════════════════════ */
+.about-hero {
+  background:var(--ink); padding:6rem 2rem;
+  text-align:center; border-bottom:3px solid var(--gold);
+  position:relative; overflow:hidden;
+}
+.about-hero::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 100%, #2a1e08 0%, transparent 70%);
+}
+.about-hero-content { position:relative; z-index:2; max-width:700px; margin:0 auto; }
+.about-louie-portrait {
+  width:180px; height:180px; border-radius:50%;
+  border:5px solid var(--gold); object-fit:cover;
+  margin:0 auto 2rem; display:block;
+  box-shadow:0 0 60px rgba(212,160,23,.25);
+}
+.about-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,5vw,3.5rem); font-weight:900; color:var(--cream); margin-bottom:0.5rem;
+}
+.about-hero .subtitle { color:var(--border); font-style:italic; font-size:1.1rem; }
+
+.about-content { max-width:800px; margin:0 auto; padding:5rem 2rem; }
+.about-section { margin-bottom:4rem; }
+.about-section h2 {
+  font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700;
+  color:var(--brown); margin-bottom:1.2rem;
+  padding-bottom:0.8rem; border-bottom:2px solid var(--parchment);
+}
+.about-section p { line-height:1.9; color:#4a3820; margin-bottom:1rem; font-size:0.97rem; }
+.about-philosophy {
+  background:var(--parchment); padding:2.5rem; border-left:4px solid var(--gold);
+  font-style:italic; font-size:1.05rem; line-height:1.8; color:var(--brown); margin:2rem 0;
+}
+.timeline { position:relative; padding-left:2rem; }
+.timeline::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--border); }
+.timeline-item { position:relative; padding-bottom:2rem; }
+.timeline-item::before {
+  content:''; position:absolute; left:-2.45rem; top:0.4rem;
+  width:12px; height:12px; border-radius:50%;
+  background:var(--gold); border:2px solid var(--ink);
+}
+.timeline-item h3 { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--brown); margin-bottom:0.3rem; }
+.timeline-item p { font-size:0.88rem; color:#6b5a3e; line-height:1.6; }
+.timeline-game { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.1em; color:var(--amber); text-transform:uppercase; margin-bottom:0.3rem; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:2rem 0; }
+.stat-box { background:var(--ink); padding:1.5rem; text-align:center; }
+.stat-num { font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:900; color:var(--gold-bright); line-height:1; }
+.stat-label { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.12em; color:var(--border); text-transform:uppercase; margin-top:0.4rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:700px) {
+  .enemy-grid { grid-template-columns:1fr 1fr; }
+  nav { padding:0 1rem; }
+  .nav-links li a { padding:0 0.6rem; font-size:0.62rem; }
+  .game-section { padding:3rem 1rem; }
+  .modal-body { padding:1.5rem; }
+  .filter-bar-inner { padding:0 1rem; }
+}

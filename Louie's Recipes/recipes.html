@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipes — Louie's Intergalactic Cookbook</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.ico">
+</head>
+<body data-page="recipes">
+
+<nav>
+  <a class="nav-brand" href="index.html">🍳 Louie's Cookbook</a>
+  <ul class="nav-links">
+    <li><a href="index.html"   id="nav-home">Home</a></li>
+    <li><a href="recipes.html" id="nav-recipes">Recipes</a></li>
+    <li><a href="about.html"   id="nav-about">About Louie</a></li>
+  </ul>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="recipes-header">
+    <h1>The Recipes</h1>
+    <p>All entries organised alphabetically within each game section · bosses marked in gold</p>
+  </div>
+
+  <div class="breadcrumb">
+    <span>Louie's Cookbook</span> / Recipes
+  </div>
+
+  <!-- ── FILTER BAR ── -->
+  <div class="filter-bar">
+    <div class="filter-bar-inner">
+      <input class="search-input" type="text" id="searchInput" placeholder="Search creatures…" oninput="filterCards()">
+
+      <div class="filter-divider"></div>
+
+      <!-- boss/all toggle -->
+      <button class="filter-btn active" id="filter-all"     onclick="setBossFilter('all')">All</button>
+      <button class="filter-btn"        id="filter-boss"    onclick="setBossFilter('boss')">⭐ Bosses</button>
+      <button class="filter-btn"        id="filter-regular" onclick="setBossFilter('regular')">Regular</button>
+
+      <div class="filter-divider"></div>
+
+      <!-- meat-type filters -->
+      <button class="filter-btn" data-meat="bulborb"      onclick="setMeatFilter('bulborb')">Bulborb</button>
+      <button class="filter-btn" data-meat="blowhog"	  onclick="setMeatFilter('blowhog')">Blowhog</button>
+      <button class="filter-btn" data-meat="invertebrate" onclick="setMeatFilter('invertebrate')">Invertebrate</button>
+      <button class="filter-btn" data-meat="aquatic"      onclick="setMeatFilter('aquatic')">Aquatic</button>
+      <button class="filter-btn" data-meat="avian"        onclick="setMeatFilter('avian')">Avian</button>
+      <button class="filter-btn" data-meat="arachnid"     onclick="setMeatFilter('arachnid')">Arachnid</button>
+      <button class="filter-btn" data-meat="aerial"       onclick="setMeatFilter('aerial')">Aerial</button>
+      <button class="filter-btn" data-meat="fungus"       onclick="setMeatFilter('fungus')">Fungus</button>
+      <button class="filter-btn" data-meat="gelatinous"   onclick="setMeatFilter('gelatinous')">Gelatinous</button>
+      <button class="filter-btn" data-meat="mechanical"   onclick="setMeatFilter('mechanical')">Mechanical</button>
+      <button class="filter-btn" data-meat="unknown"      onclick="setMeatFilter('unknown')">Unknown</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       PIKMIN 1
+  ════════════════════════════════════════ -->
+  <div class="game-section" id="section-p1">
+    <div class="game-header">
+      <img class="game-icon"
+           src="https://pikmin.wiki.gallery/images/thumb/2/2a/Pikmin_%28game%29_icon.png/48px-Pikmin_%28game%29_icon.png"
+           alt="Pikmin" onerror="this.style.display='none'">
+      <div>
+        <div class="game-title">Pikmin</div>
+        <div class="game-count" id="count-p1"></div>
+      </div>
+    </div>
+    <div class="enemy-grid" id="grid-p1"></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       PIKMIN 2
+  ════════════════════════════════════════ -->
+  <div class="game-section" id="section-p2">
+    <div class="game-header">
+      <img class="game-icon"
+           src="https://pikmin.wiki.gallery/images/thumb/a/ad/Pikmin_2_icon.png/48px-Pikmin_2_icon.png"
+           alt="Pikmin 2" onerror="this.style.display='none'">
+      <div>
+        <div class="game-title">Pikmin 2</div>
+        <div class="game-count" id="count-p2"></div>
+      </div>
+    </div>
+    <div class="enemy-grid" id="grid-p2"></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       PIKMIN 3
+  ════════════════════════════════════════ -->
+  <div class="game-section" id="section-p3">
+    <div class="game-header">
+      <img class="game-icon"
+           src="https://pikmin.wiki.gallery/images/thumb/5/54/Pikmin_3_icon.png/48px-Pikmin_3_icon.png"
+           alt="Pikmin 3" onerror="this.style.display='none'">
+      <div>
+        <div class="game-title">Pikmin 3</div>
+        <div class="game-count" id="count-p3"></div>
+      </div>
+    </div>
+    <div class="enemy-grid" id="grid-p3"></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       PIKMIN 4
+  ════════════════════════════════════════ -->
+  <div class="game-section" id="section-p4">
+    <div class="game-header">
+      <img class="game-icon"
+           src="https://pikmin.wiki.gallery/images/thumb/1/1e/Pikmin_4_icon.png/48px-Pikmin_4_icon.png"
+           alt="Pikmin 4" onerror="this.style.display='none'">
+      <div>
+        <div class="game-title">Pikmin 4</div>
+        <div class="game-count" id="count-p4"></div>
+      </div>
+    </div>
+    <div class="enemy-grid" id="grid-p4"></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       HEY! PIKMIN
+  ════════════════════════════════════════ -->
+  <div class="game-section" id="section-hp">
+    <div class="game-header">
+      <img class="game-icon"
+           src="https://pikmin.wiki.gallery/images/thumb/a/a8/Hey%21_Pikmin_icon.png/48px-Hey%21_Pikmin_icon.png"
+           alt="Hey! Pikmin" onerror="this.style.display='none'">
+      <div>
+        <div class="game-title">Hey! Pikmin</div>
+        <div class="game-count" id="count-hp"></div>
+      </div>
+    </div>
+    <div class="enemy-grid" id="grid-hp"></div>
+  </div>
+
+  <footer>
+    <p>© Louie — <em>Hocotate Freight</em>, Culinary Division &nbsp;·&nbsp; All creatures consumed in the line of duty<br>
+    Fan project. Not affiliated with Nintendo. Pikmin characters belong to their respective creators.</p>
+  </footer>
+
+</div><!-- /page-wrap -->
+
+<!-- ══════════════════════════════════════════
+     MODAL
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header" id="modalHeader">
+      <img class="modal-header-icon" id="modalIcon" src="" alt="">
+      <div class="modal-header-text">
+        <h2 id="modalName"></h2>
+        <div id="modalBadges"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="recipe-meta" id="modalMeta"></div>
+
+      <!-- Recipe content injected from recipes-XX.js -->
+      <div id="modalRecipe" class="recipe-content" style="display:none;"></div>
+
+      <!-- Shown when no recipe data exists yet -->
+      <div id="modalComingSoon" class="recipe-coming-soon">
+        <div class="cs-icon">🍽️</div>
+        <h3>Recipe Coming Soon</h3>
+        <p>Louie is still perfecting the preparation method for this creature.<br>
+        Check back after the next expedition for the full recipe, serving suggestions, and tasting notes.</p>
+      </div>
+
+      <div class="louie-note" id="modalNote">
+        <p id="modalNoteText"></p>
+        <cite>— Louie's Field Notes, PNF-404</cite>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS — main.js first, then recipe data
+════════════════════════════════════════════ -->
+<script src="main.js"></script>
+
+<!-- Recipe data files — one per game.
+     Each file does: Object.assign(window.recipeData, { 'Name': '<html>…</html>', … })
+     Add entries inside to fill in recipes; leave values as `` to show "coming soon". -->
+<script src="recipes-p1.js"></script>
+<script src="recipes-p2.js"></script>
+<script src="recipes-p3.js"></script>
+<script src="recipes-p4.js"></script>
+<script src="recipes-hp.js"></script>
+
+<script>
+// ─────────────────────────────────────────────────────
+//  ENEMY LISTS
+// ─────────────────────────────────────────────────────
+const p1Enemies = [
+  'Armored Cannon Beetle','Beady Long Legs','Breadbug','Bulborb',
+  'Burrowing Snagret','Dwarf Bulbear','Dwarf Bulborb','Emperor Bulblax',
+  'Female Sheargrub','Fiery Blowhog','Goolix','Honeywisp',
+  'Iridescent Flint Beetle','Male Sheargrub','Mamuta','Mushroom Pikmin',
+  'Pearly Clamclamp','Puffstool','Puffy Blowhog','Shearwig',
+  'Smoky Progg','Spotty Bulbear','Swooping Snitchbug','Water Dumple',
+  'Wolpole','Wollyhop','Yellow Wollyhop'
+];
+
+const p2EnemiesAll = [
+  'Anode Beetle','Anode Dweevil','Antenna Beetle','Armored Cannon Larva',
+  'Bulbmin','Bulborb Larva','Bumbling Snitchbug','Careening Dirigibug',
+  'Cloaking Burrow-nit','Creeping Chrysanthemum','Decorated Cannon Beetle',
+  'Doodlebug','Dwarf Orange Bulborb','Empress Bulblax','Fiery Bulblax',
+  'Fiery Dweevil','Gatling Groink','Giant Breadbug','Greater Spotted Jellyfloat',
+  'Hairy Bulborb','Hermit Crawmad','Hydro Dweevil','Iridescent Glint Beetle',
+  'Lesser Spotted Jellyfloat','Man-at-Legs','Mitite','Munge Dweevil',
+  'Orange Bulborb','Pileated Snagret','Raging Long Legs','Ranging Bloyster',
+  'Ravenous Whiskerpillar','Segmented Crawbster','Skitter Leaf','Snow Bulborb',
+  'Titan Dweevil','Toady Bloyster','Ujadani','Unmarked Spectralids',
+  'Volatile Dweevil','Waterwraith','Watery Blowhog','Withering Blowhog'
+];
+
+const p3EnemiesAll = [
+  'Arachnode','Arctic Cannon Larva','Armored Cannon Larva','Armored Mawdad',
+  'Baldy Long Legs','Bearded Amprat','Bug-Eyed Crawmad','Bulborb',
+  'Burrowing Snagret','Calcified Crushblat','Desiccated Skitter Leaf',
+  'Dwarf Bulbear','Dwarf Bulborb','Dwarf Orange Bulborb','Female Sheargrub',
+  'Fiery Blowhog','Flighty Joustmite','Hermit Crawmad','Iridescent Flint Beetle',
+  'Joustmite','Male Sheargrub','Medusal Slurker','Mysterious Life-Form',
+  'Nectarous Dandelfly','Orange Bulborb','Peckish Aristocrab','Phosbat',
+  'Phosbat Pod','Plasm Wraith','Puckering Blinnow','Puffy Blowhog',
+  'Pyroclasmic Slooch','Quaggled Mireclops','Red Spectralids','Sandbelching Meerslug',
+  'Scornet','Scornet Maestro','Shaggy Long Legs','Shearwig','Skeeterskate',
+  'Skitter Leaf','Skutterchuck','Spotty Bulbear','Sputtlefish',
+  'Swarming Sheargrub','Swooping Snitchbug','Toady Bloyster','Vehemoth Phosbat',
+  'Waddlepus','Water Dumple','Watery Blowhog','Whiptongue Bulborb',
+  'White Spectralids','Wolpole','Yellow Spectralids','Yellow Wollyhop'
+];
+
+const p4EnemiesAll = [
+  'Albino Dwarf Bulborb','Ancient Sirehound','Anode Beetle','Anode Dweevil',
+  'Arachnode','Arctic Cannon Beetle','Arctic Cannon Larva','Aristocrab Offspring',
+  'Armored Cannon Larva','Baldy Long Legs','Bearded Amprat','Blizzarding Blowhog',
+  'Bloomcap Bloyster','Bogswallow','Breadbug','Bug-Eyed Crawmad','Bulborb',
+  'Bulborb Larva','Burrowing Snagret','Chillyhop','Creeping Chrysanthemum',
+  'Crusted Rumpup','Desiccated Skitter Leaf','Doodlebug','Downy Snagret',
+  'Dwarf Bulbear','Dwarf Bulborb','Dwarf Frosty Bulborb','Dwarf Orange Bulborb',
+  'Emperor Bulblax','Empress Bulblax','Female Sheargrub','Fiery Blowhog',
+  'Fiery Bulblax','Fiery Dweevil','Flighty Joustmite','Foolix','Freezecake',
+  'Frosty Bulborb','Giant Breadbug','Gildemander','Gildemandwee',
+  'Greater Spotted Jellyfloat','Groovy Long Legs','Grubchucker','Hermit Crawmad',
+  'Honeywisp','Horned Cannon Beetle','Hydro Dweevil','Iceblown Dweevil',
+  'Icy Blowhog','Iridescent Flint Beetle','Iridescent Glint Beetle','Joustmite',
+  'Jumbo Bulborb','Lesser Spotted Jellyfloat','Male Sheargrub','Mama Sheargrub',
+  'Mammoth Snootwhacker','Mamuta','Man-at-Legs','Masterhop','Miniature Snootwhacker',
+  'Mitite','Moldy Dwarf Bulborb','Moldy Slooch','Moss','Muckerskate',
+  'Orange Bulborb','Pearly Clamclamp','Peckish Aristocrab','Porquillion',
+  'Pricklepuff','Puckering Blinnow','Puffstool','Puffy Blowhog',
+  'Pyroclasmic Slooch','Red Spectralids','Scorchcake','Shearflea','Shearwig',
+  'Shockcake','Skeeterskate','Skitter Leaf','Skutterchuck','Smoky Progg',
+  'Snowfake Fluttertail','Snowy Blowhog','Sovereign Bulblax','Spotty Bulbear',
+  'Startle Spore','Sunsquish','Swooping Snitchbug','Titan Blowhog',
+  'Toady Bloyster','Toxstool','Tusked Blowhog','Venom Dweevil','Waddlepus',
+  'Waddlequaff','Water Dumple','Waterwraith','Watery Blowhog',
+  'Whiptongue Bulborb','White Spectralids','Withering Blowhog','Wollyhop',
+  'Wolpole','Yellow Spectralids','Yellow Wollyhop'
+];
+
+const hpEnemiesAll = [
+  'Adult Centipare','Armurk','Berserk Leech Hydroe','Blubbug','Bulborb',
+  'Centipare','Clicking Slurker','Coppeller','Crammed Wraith','Crested Mockiwi',
+  'Crumbug','Crystalline Crushblat','Electric Cottonade','Electric Spectralid',
+  'Electripede','Elongated Crushblat','Emperor Bulblax','Eye-Stalker Bulbeel',
+  'Fiery Blowhog','Fiery Blowlet','Fiery Dwarf Bulblax','Fiery Young Yellow Wollywog',
+  'Fireflap Bulborb','Fireflinger Groink','Firesnout Beetle','Flatterchuck',
+  'Flying Spotted Jellyfloat','Grabbit','Large Splurchin','Leech Hydroe',
+  'Long Water Dumple','Luring Slurker','Male Sheargrub','Mockiwi','Muggonfly',
+  'Puckering Blinnow','Puffstalk','Puffy Blubbug','Queen Shearwig',
+  'Red Bubblimp','Seedbagger','Shearblug','Shearwig',
+  'Shooting Spiner (Female)','Shooting Spiner (Male)','Skutterchuck','Sparrowhead',
+  'Speargrub','Spiny Coppeller','Sporegrub','Spornet','Starnacle',
+  'Stony Flint Beetle','Stuffed Bellbloom','Swooping Snitchbug',
+  'Widemouthed Anode Beetle','Yellow Wollyhop','Young Yellow Wollywog'
+];
+
+// Deduplicate — each enemy only appears in its first game
+const p1Set = new Set(p1Enemies);
+const p2Enemies = p2EnemiesAll.filter(e => !p1Set.has(e));
+const p2Set = new Set(p2EnemiesAll);
+const p3Enemies = p3EnemiesAll.filter(e => !p1Set.has(e) && !p2Set.has(e));
+const p3Set = new Set(p3EnemiesAll);
+const p4Enemies = p4EnemiesAll.filter(e => !p1Set.has(e) && !p2Set.has(e) && !p3Set.has(e));
+const p4Set = new Set(p4EnemiesAll);
+const hpEnemies = hpEnemiesAll.filter(e => !p1Set.has(e) && !p2Set.has(e) && !p3Set.has(e) && !p4Set.has(e));
+
+// ─────────────────────────────────────────────────────
+//  BUILD ENEMY GRIDS
+// ─────────────────────────────────────────────────────
+function buildGrid(containerId, enemies, bossSet, game) {
+  const sorted = [...enemies].sort((a, b) => a.localeCompare(b));
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  sorted.forEach(name => {
+    const isBoss = bossSet.has(name);
+    const meats  = getMeat(name);
+    const icon   = getIcon(name);
+
+    const card = document.createElement('div');
+    card.className   = 'enemy-card' + (isBoss ? ' boss' : '');
+    card.dataset.name = name.toLowerCase();
+    card.dataset.boss = isBoss ? 'true' : 'false';
+    card.dataset.meat = meats.join(',');
+
+    card.innerHTML = `
+      <div class="card-top">
+        ${icon ? `<img class="enemy-icon" src="${icon}" alt="${name}" onerror="this.style.display='none'">` : ''}
+        <span class="enemy-name">${name}</span>
+      </div>
+      ${meats.map(m => `<span class="meat-tag ${m}">${MEAT_LABELS[m]}</span>`).join('')}
+    `;
+    card.addEventListener('click', () => openModal(name, isBoss, game, icon));
+    container.appendChild(card);
+  });
+
+  const countEl = document.getElementById('count-' + containerId.replace('grid-', ''));
+  if (countEl) countEl.textContent = `${sorted.length} unique entries`;
+}
+
+function buildAllGrids() {
+  buildGrid('grid-p1', p1Enemies, p1Bosses, 'Pikmin');
+  buildGrid('grid-p2', p2Enemies, p2Bosses, 'Pikmin 2');
+  buildGrid('grid-p3', p3Enemies, p3Bosses, 'Pikmin 3');
+  buildGrid('grid-p4', p4Enemies, p4Bosses, 'Pikmin 4');
+  buildGrid('grid-hp', hpEnemies, hpBosses, 'Hey! Pikmin');
+}
+
+// ─────────────────────────────────────────────────────
+//  FILTERING
+// ─────────────────────────────────────────────────────
+let activeBossFilter = 'all';
+let activeMeatFilter = '';
+
+function setBossFilter(type) {
+  activeBossFilter = type;
+  document.querySelectorAll('#filter-all, #filter-boss, #filter-regular')
+    .forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + type).classList.add('active');
+  filterCards();
+}
+
+function setMeatFilter(type) {
+  // Toggle off if already active
+  if (activeMeatFilter === type) {
+    activeMeatFilter = '';
+    document.querySelectorAll('.filter-btn[data-meat]').forEach(b => b.classList.remove('active'));
+  } else {
+    activeMeatFilter = type;
+    document.querySelectorAll('.filter-btn[data-meat]').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.filter-btn[data-meat="${type}"]`).classList.add('active');
+  }
+  filterCards();
+}
+
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('.enemy-card').forEach(card => {
+    const nameMatch = !q || card.dataset.name.includes(q);
+    const bossMatch = activeBossFilter === 'all'
+      || (activeBossFilter === 'boss'    && card.dataset.boss === 'true')
+      || (activeBossFilter === 'regular' && card.dataset.boss === 'false');
+    const meatMatch = !activeMeatFilter || card.dataset.meat.split(',').includes(activeMeatFilter);
+    card.classList.toggle('hidden', !(nameMatch && bossMatch && meatMatch));
+  });
+}
+
+// ─────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────
+buildAllGrids();
+</script>
+</body>
+</html>
