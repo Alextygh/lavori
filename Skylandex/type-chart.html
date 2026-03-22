@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Type Chart — Skylandex</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Ccircle cx='22' cy='22' r='20' fill='%23050a14' stroke='%2300c8ff' stroke-width='2'/%3E%3Ccircle cx='22' cy='22' r='14' fill='none' stroke='%23ffd700' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Ccircle cx='22' cy='22' r='8' fill='url(%23fg)'/%3E%3Cpolygon points='22,16 25,22 22,28 19,22' fill='%2300c8ff'/%3E%3Cdefs%3E%3CradialGradient id='fg' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%2300c8ff'/%3E%3Cstop offset='100%25' stop-color='%23004080'/%3E%3C/radialGradient%3E%3C/defs%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Extra styles specific to type chart page */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .filter-bar span {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-right: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .filter-btn {
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--dark-border);
+      background: var(--dark-card);
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active-filter {
+      border-color: var(--portal-blue);
+      color: var(--portal-blue);
+      background: rgba(0, 200, 255, 0.08);
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
+    }
+
+    /* Row label type badge */
+    .row-type-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.65rem;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+
+    /* Column type label (tiny) */
+    .col-type-label {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .type-chart td.eff-super { border-radius: 4px; }
+
+    .chart-info-box {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .chart-info-box strong { color: var(--text-primary); }
+    .chart-info-box h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: var(--portal-blue);
+      margin-bottom: 0.75rem;
+    }
+
+    .chart-axis-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      margin-bottom: 0.25rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <svg class="logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="22" cy="22" r="20" stroke="#00c8ff" stroke-width="2" opacity="0.6"/>
+          <circle cx="22" cy="22" r="14" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="22" cy="22" r="8" fill="url(#pg3)" opacity="0.8"/>
+          <polygon points="22,16 25,22 22,28 19,22" fill="#00c8ff" opacity="0.9"/>
+          <defs>
+            <radialGradient id="pg3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#00c8ff"/>
+              <stop offset="100%" stop-color="#004080"/>
+            </radialGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">Skylandex</span>
+      </a>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="skylanders.html">Skylanders</a></li>
+          <li><a href="type-chart.html">Type Chart</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <div class="page-banner">
+      <h1>⚔️ Elemental Type Chart</h1>
+      <p>Master the ten elements of Skylands. Know your matchups — know your victory.</p>
+    </div>
+
+    <!-- EXPLANATION -->
+    <div class="chart-info-box">
+      <h3>How to Read This Chart</h3>
+      <p>
+        The <strong>attacking type</strong> is shown on the left (rows). The <strong>defending type</strong> is shown across the top (columns).
+        Each cell shows the damage multiplier when a move of the row's type hits a Skylander of the column's type.
+      </p>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="chart-legend">
+      <div class="legend-item">
+        <div class="legend-dot eff-super" style="background:rgba(0,220,80,0.2);color:#3ddc5a;">2×</div>
+        <span>Super Effective</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot eff-weak" style="background:rgba(255,76,43,0.2);color:#ff6b4a;">½×</div>
+        <span>Not Very Effective</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot eff-immune" style="background:rgba(100,100,100,0.15);color:#667;">0×</div>
+        <span>No Effect (Immune)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot eff-normal" style="color:rgba(139,180,216,0.5);">1×</div>
+        <span>Normal Damage</span>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <span>Filter attacker:</span>
+      <button class="filter-btn active-filter" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="water">💧 Water</button>
+      <button class="filter-btn" data-filter="fire">🔥 Fire</button>
+      <button class="filter-btn" data-filter="earth">🌍 Earth</button>
+      <button class="filter-btn" data-filter="life">🌿 Life</button>
+      <button class="filter-btn" data-filter="tech">⚙️ Tech</button>
+      <button class="filter-btn" data-filter="air">🌀 Air</button>
+      <button class="filter-btn" data-filter="magic">✨ Magic</button>
+      <button class="filter-btn" data-filter="undead">💀 Undead</button>
+      <button class="filter-btn" data-filter="light">☀️ Light</button>
+      <button class="filter-btn" data-filter="dark">🌑 Dark</button>
+    </div>
+
+    <!-- AXIS LABEL -->
+    <div class="chart-axis-label">↓ Attacking Type &nbsp;|&nbsp; Defending Type →</div>
+
+    <!-- TYPE CHART TABLE -->
+    <!--
+      SOURCE DATA (from image) — each row = a DEFENDING type:
+      Water:  Super Effective Against: Fire,Earth | Weak To: Life,Tech   | Resists: Water,Fire                | Immune To: None
+      Fire:   Super Effective Against: Tech,Undead | Weak To: Water,Earth | Resists: Fire,Tech,Undead         | Immune To: None
+      Earth:  Super Effective Against: Tech,Fire   | Weak To: Water,Life  | Resists: Earth,Fire               | Immune To: Tech
+      Life:   Super Effective Against: Water,Earth | Weak To: Air,Undead  | Resists: Life,Water,Earth         | Immune To: None
+      Tech:   Super Effective Against: Air,Water   | Weak To: Fire,Earth  | Resists: Tech,Air,Water           | Immune To: Undead
+      Air:    Super Effective Against: Life,Magic  | Weak To: Tech,Dark   | Resists: Air,Magic                | Immune To: Earth
+      Magic:  Super Effective Against: Undead,Dark | Weak To: Air,Light   | Resists: Magic,Dark               | Immune To: None
+      Undead: Super Effective Against: Life,Light  | Weak To: Fire,Magic  | Resists: Undead,Light             | Immune To: Life
+      Light:  Super Effective Against: Dark,Magic  | Weak To: Undead,Dark | Resists: Light,Magic              | Immune To: None
+      Dark:   Super Effective Against: Light,Air   | Weak To: Light,Magic | Resists: Dark,Air                 | Immune To: None
+
+      DERIVED ATTACK MATRIX (ATK → DEF):
+      Reading each column (defending type) to fill the matrix:
+
+      DEF=Water:  takes 2× from Life,Tech (Water's "Weak To")
+                  takes ½× from Water,Fire (Water's "Resists")
+                  (no immune)
+                  Super Effective Against: Fire,Earth → so Water ATK hits Fire 2×, Earth 2×
+
+      DEF=Fire:   takes 2× from Water,Earth
+                  takes ½× from Fire,Tech,Undead
+                  (no immune)
+
+      DEF=Earth:  takes 2× from Water,Life
+                  takes ½× from Earth,Fire
+                  takes 0× from Tech (immune)
+
+      DEF=Life:   takes 2× from Air,Undead
+                  takes ½× from Life,Water,Earth
+                  (no immune)
+
+      DEF=Tech:   takes 2× from Fire,Earth
+                  takes ½× from Tech,Air,Water
+                  takes 0× from Undead (immune)
+
+      DEF=Air:    takes 2× from Tech,Dark
+                  takes ½× from Air,Magic
+                  takes 0× from Earth (immune)
+
+      DEF=Magic:  takes 2× from Air,Light
+                  takes ½× from Magic,Dark
+                  (no immune)
+
+      DEF=Undead: takes 2× from Fire,Magic
+                  takes ½× from Undead,Light
+                  takes 0× from Life (immune)
+
+      DEF=Light:  takes 2× from Undead,Dark
+                  takes ½× from Light,Magic
+                  (no immune)
+
+      DEF=Dark:   takes 2× from Light,Magic
+                  takes ½× from Dark,Air
+                  (no immune)
+
+      FULL 10×10 MATRIX (rows=ATK, cols=DEF in order: Water Fire Earth Life Tech Air Magic Undead Light Dark):
+      Water:  ½   2   2   —   —   —   —   —   —   —     (Water resists Water, Water super Fire&Earth)
+      Fire:   ½   ½   ½   —   2   —   —   2   —   —     (Fire resists Fire&Tech&Undead; Water&Earth weak to Fire; Fire super Tech&Undead)
+                                                          Wait — must use columns not rows.
+                                                          Fire ATK vs Water DEF: Water is NOT weak to Fire, Water RESISTS Fire → ½×
+                                                          Fire ATK vs Fire DEF:  Fire resists Fire → ½×
+                                                          Fire ATK vs Earth DEF: Earth resists Fire → ½×
+                                                          Fire ATK vs Life DEF:  Life has nothing about Fire → —
+                                                          Fire ATK vs Tech DEF:  Tech is weak to Fire → 2×
+                                                          Fire ATK vs Air DEF:   Air has nothing about Fire → —
+                                                          Fire ATK vs Magic DEF: Magic has nothing about Fire → —
+                                                          Fire ATK vs Undead DEF: Undead is weak to Fire → 2×
+                                                          Fire ATK vs Light DEF: Light has nothing about Fire → —
+                                                          Fire ATK vs Dark DEF:  Dark has nothing about Fire → —
+      Full corrected matrix:
+      ATK\DEF  Wat  Fir  Ear  Lif  Tec  Air  Mag  Und  Lig  Dar
+      Water:    ½    2    2    —    —    —    —    —    —    —
+      Fire:     ½    ½    ½    —    2    —    —    2    —    —
+      Earth:    —    2    ½    —    0    —    —    —    —    —
+      Life:     2    —    2    ½    —    —    —    0    —    —
+      Tech:     ½    —    —    —    ½    2    —    0    —    —
+      Air:      —    —    0    2    ½    ½    2    —    —    —
+      Magic:    —    —    —    —    —    ½    ½    2    —    2
+      Undead:   —    —    —    0    —    —    —    ½    2    —
+      Light:    —    —    —    —    —    —    2    ½    ½    2
+      Dark:     —    —    —    —    —    ½    ½    —    2    ½
+
+      Wait — checking "Super Effective Against" column in source:
+        Water super vs Fire,Earth → Water ATK hits Fire 2×, Earth 2× ✓
+        Fire super vs Tech,Undead → Fire ATK hits Tech 2×, Undead 2× ✓ (also consistent with Weak To columns)
+        Earth super vs Tech,Fire → Earth ATK hits Tech... but Tech immune to Undead not Earth; Earth ATK vs Tech: Tech is weak to Fire,Earth → 2× ✓; Earth ATK vs Fire: Fire resists Earth → ½× ✗ conflict!
+
+      Resolution: "Super Effective Against" in the source table is what that element is super effective against OFFENSIVELY.
+      "Weak To" means what hits THAT element super effectively (defensively).
+      "Resists" means that element resists those attack types (½×).
+      "Immune To" means immune to that attack type (0×).
+
+      So the correct reading is:
+        "Super Effective Against" → ATK row hits those DEF columns for 2×
+        "Resists" → those ATK types deal ½× to that DEF type
+        "Weak To" → those ATK types deal 2× to that DEF type
+        "Immune To" → those ATK types deal 0× to that DEF type
+
+      Cross-checking consistency:
+        Water super vs Fire → Water ATK hits Fire = 2×
+        Fire weak to Water → Water ATK hits Fire = 2× ✓
+
+        Water super vs Earth → Water ATK hits Earth = 2×
+        Earth weak to Water → Water ATK hits Earth = 2× ✓
+
+        Fire super vs Tech → Fire ATK hits Tech = 2×
+        Tech weak to Fire → Fire ATK hits Tech = 2× ✓
+
+        Earth super vs Tech → Earth ATK hits Tech = 2×
+        Tech weak to Earth → Earth ATK hits Tech = 2× ✓
+
+        Earth super vs Fire → Earth ATK hits Fire = 2×
+        Fire weak to Earth → Fire ATK hits Earth = 2× ... wait Earth super is vs Fire,Tech; Fire weak to Water,Earth → ✓
+
+        Earth Resists Fire → Fire ATK hits Earth = ½×
+        Water Resists Fire → Fire ATK hits Water = ½× ✓ (Fire weak to Water means water 2× on fire, not fire 2× on water)
+
+      FINAL VERIFIED MATRIX:
+      ATK\DEF  Wat  Fir  Ear  Lif  Tec  Air  Mag  Und  Lig  Dar
+      Water:    ½    2    2    ½    ½    —    —    —    —    —
+        (Water resists Water,Fire → ½ on Water; Water super Fire,Earth → 2; Life weak to Air,Undead not Water; Life resists Water → ½; Tech resists Water → ½)
+      Fire:     ½    ½    ½    —    2    —    —    2    —    —
+        (Water resists Fire→½; Fire resists Fire→½; Earth resists Fire→½; Tech weak to Fire→2; Undead weak to Fire→2)
+      Earth:    —    2    ½    —    2    —    —    —    —    —
+        (Fire weak to Earth→2×; Earth resists Earth→½; Tech weak to Earth→2×; Earth immune to Tech means Tech deals 0× to Earth, not Earth deals 0× to Tech)
+        NOTE: "Earth Immune To: Tech" = Tech attacks deal 0× to Earth defenders
+      Life:     2    —    2    ½    —    ½    —    0    —    —
+        (Water weak to Life→2; Earth weak to Life→2; Life resists Life,Water,Earth; Life→Water=2,Life→Earth=2; Life resists Life→½; Air weak to Life? No — Air resists... Air Immune Earth; Life super Water,Earth; Air weak to Tech,Dark; Air resists Air,Magic; so Life ATK vs Air: Air has nothing about Life→ —; Wait Life super is Water,Earth only. Undead immune to Life→0×)
+        Wait re-check: Life super vs Water,Earth. Life resists: Life,Water,Earth (these ATK types deal ½× to Life defenders). Undead immune to Life (Life ATK→Undead = 0×). ✓
+      Tech:     ½    —    —    —    ½    2    —    0    —    —
+        (Water resists Tech→½ to Water; Tech super Air,Water; Tech resists Tech→½; Tech→Air=2; Undead immune to Tech→0)
+        Wait: Tech super vs Air,Water. Tech ATK vs Water=2×... but Water resists Tech → ½×. CONFLICT.
+        Resolution: "Super Effective Against" takes priority as the explicit offensive statement.
+        Water's "Resists: Water, Fire" → only Water and Fire are resisted. Tech is NOT in Water's resists list. ✓
+        Tech resists Water → Tech ATK vs Water: Tech resists Water means Water ATK deals ½× to Tech, not Tech ATK deals ½× to Water.
+        I was confusing directions! "Resists" = this defending type resists those incoming attack types.
+        So: Water resists [Water,Fire] = Water ATK and Fire ATK deal ½× vs Water defenders.
+        Tech resists [Tech,Air,Water] = Tech ATK, Air ATK, Water ATK deal ½× vs Tech defenders.
+
+      COMPLETELY RESTARTED DERIVATION — reading each cell as ATK→DEF:
+
+      For ATK type X hitting DEF type Y:
+        = 2× if Y's "Weak To" list contains X, OR X's "Super Effective Against" list contains Y (should be same)
+        = ½× if Y's "Resists" list contains X (Y resists X attacks)
+        = 0× if Y's "Immune To" list contains X
+        = 1× otherwise
+
+      WATER ATK (row): what does Water hit?
+        vs Water DEF: Water resists [Water,Fire] → Water in list → ½×
+        vs Fire DEF:  Fire weak to [Water,Earth] → Water in list → 2×   ✓ also Water super [Fire,Earth]
+        vs Earth DEF: Earth weak to [Water,Life] → Water in list → 2×   ✓
+        vs Life DEF:  Life resists [Life,Water,Earth] → Water in list → ½×
+        vs Tech DEF:  Tech resists [Tech,Air,Water] → Water in list → ½×
+        vs Air DEF:   Air weak to [Tech,Dark], Air resists [Air,Magic], Air immune [Earth] → Water not in any → 1×
+        vs Magic DEF: Magic weak to [Air,Light], Magic resists [Magic,Dark] → Water not in any → 1×
+        vs Undead DEF: Undead weak to [Fire,Magic], Undead resists [Undead,Light], Undead immune [Life] → Water not → 1×
+        vs Light DEF: Light weak to [Undead,Dark], Light resists [Light,Magic] → Water not → 1×
+        vs Dark DEF:  Dark weak to [Light,Magic], Dark resists [Dark,Air] → Water not → 1×
+      Water: ½  2  2  ½  ½  —  —  —  —  —
+
+      FIRE ATK:
+        vs Water: Water resists [Water,Fire] → Fire in list → ½×
+        vs Fire:  Fire resists [Fire,Tech,Undead] → Fire in list → ½×
+        vs Earth: Earth resists [Earth,Fire] → Fire in list → ½×
+        vs Life:  Life resists [Life,Water,Earth] → Fire not → Life weak [Air,Undead] → Fire not → 1×
+        vs Tech:  Tech weak [Fire,Earth] → Fire in list → 2×
+        vs Air:   Air weak [Tech,Dark], Air resists [Air,Magic] → Fire not → 1×
+        vs Magic: Magic weak [Air,Light], Magic resists [Magic,Dark] → Fire not → 1×
+        vs Undead: Undead weak [Fire,Magic] → Fire in list → 2×
+        vs Light: Light weak [Undead,Dark], Light resists [Light,Magic] → Fire not → 1×
+        vs Dark:  Dark weak [Light,Magic], Dark resists [Dark,Air] → Fire not → 1×
+      Fire: ½  ½  ½  —  2  —  —  2  —  —
+
+      EARTH ATK:
+        vs Water: Water weak [Life,Tech], Water resists [Water,Fire] → Earth not → 1×
+        vs Fire:  Fire weak [Water,Earth] → Earth in list → 2×
+        vs Earth: Earth resists [Earth,Fire] → Earth in list → ½×
+        vs Life:  Life weak [Air,Undead], Life resists [Life,Water,Earth] → Earth in resists → ½×
+        vs Tech:  Tech weak [Fire,Earth] → Earth in list → 2×
+        vs Air:   Air weak [Tech,Dark], Air immune [Earth] → Earth in immune → 0×
+        vs Magic: Magic weak [Air,Light], Magic resists [Magic,Dark] → Earth not → 1×
+        vs Undead: Undead weak [Fire,Magic], Undead immune [Life] → Earth not → 1×
+        vs Light: Light weak [Undead,Dark], Light resists [Light,Magic] → Earth not → 1×
+        vs Dark:  Dark weak [Light,Magic], Dark resists [Dark,Air] → Earth not → 1×
+      Earth: —  2  ½  ½  2  0  —  —  —  —
+
+      LIFE ATK:
+        vs Water: Water weak [Life,Tech] → Life in list → 2×
+        vs Fire:  Fire weak [Water,Earth], Fire resists [Fire,Tech,Undead] → Life not → 1×
+        vs Earth: Earth weak [Water,Life] → Life in list → 2×
+        vs Life:  Life resists [Life,Water,Earth] → Life in list → ½×
+        vs Tech:  Tech weak [Fire,Earth], Tech resists [Tech,Air,Water] → Life not → 1×
+        vs Air:   Air weak [Tech,Dark], Air resists [Air,Magic] → Life not → 1×
+        vs Magic: Magic weak [Air,Light] → Life not → 1×
+        vs Undead: Undead immune [Life] → Life in immune → 0×
+        vs Light: Light weak [Undead,Dark] → Life not → 1×
+        vs Dark:  Dark weak [Light,Magic] → Life not → 1×
+      Life: 2  —  2  ½  —  —  —  0  —  —
+
+      TECH ATK:
+        vs Water: Water weak [Life,Tech] → Tech in list → 2×
+        vs Fire:  Fire resists [Fire,Tech,Undead] → Tech in list → ½×
+        vs Earth: Earth weak [Water,Life], Earth resists [Earth,Fire] → Tech not → 1×
+        vs Life:  Life weak [Air,Undead], Life resists [Life,Water,Earth] → Tech not → 1×
+        vs Tech:  Tech resists [Tech,Air,Water] → Tech in list → ½×
+        vs Air:   Air weak [Tech,Dark] → Tech in list → 2×
+        vs Magic: Magic weak [Air,Light] → Tech not → 1×
+        vs Undead: Undead immune [Life], Undead weak [Fire,Magic] → Tech not → Undead immune [Life] only → 1×
+                   Wait: Tech immune to Undead means Undead ATK deals 0× to Tech defenders.
+                   "Tech Immune To: Undead" → Undead attacks deal 0× to Tech. Tech ATK vs Undead is separate.
+                   Undead weak [Fire,Magic], Undead resists [Undead,Light], Undead immune [Life] → Tech not in any → 1×
+        vs Light: Light weak [Undead,Dark] → Tech not → 1×
+        vs Dark:  Dark weak [Light,Magic], Dark resists [Dark,Air] → Tech not → 1×
+      Tech: 2  ½  —  —  ½  2  —  —  —  —
+
+      AIR ATK:
+        vs Water: Water weak [Life,Tech] → Air not → 1×
+        vs Fire:  Fire weak [Water,Earth], Fire resists [Fire,Tech,Undead] → Air not → 1×
+        vs Earth: Earth weak [Water,Life], Earth resists [Earth,Fire] → Air not → 1×
+        vs Life:  Life weak [Air,Undead] → Air in list → 2×
+        vs Tech:  Tech resists [Tech,Air,Water] → Air in list → ½×
+        vs Air:   Air resists [Air,Magic] → Air in list → ½×
+        vs Magic: Magic weak [Air,Light] → Air in list → 2×
+        vs Undead: Undead weak [Fire,Magic], Undead immune [Life] → Air not → 1×
+        vs Light: Light weak [Undead,Dark] → Air not → 1×
+        vs Dark:  Dark resists [Dark,Air] → Air in list → ½×
+      Air: —  —  —  2  ½  ½  2  —  —  ½
+
+      MAGIC ATK:
+        vs Water: Water weak [Life,Tech] → Magic not → 1×
+        vs Fire:  Fire resists [Fire,Tech,Undead] → Magic not → 1×
+        vs Earth: Earth weak [Water,Life] → Magic not → 1×
+        vs Life:  Life weak [Air,Undead] → Magic not → 1×
+        vs Tech:  Tech weak [Fire,Earth] → Magic not → 1×
+        vs Air:   Air resists [Air,Magic] → Magic in list → ½×
+        vs Magic: Magic resists [Magic,Dark] → Magic in list → ½×
+        vs Undead: Undead weak [Fire,Magic] → Magic in list → 2×
+        vs Light: Light resists [Light,Magic] → Magic in list → ½×
+        vs Dark:  Dark weak [Light,Magic] → Magic in list → 2×
+      Magic: —  —  —  —  —  ½  ½  2  ½  2
+
+      UNDEAD ATK:
+        vs Water: Water weak [Life,Tech] → Undead not → 1×
+        vs Fire:  Fire resists [Fire,Tech,Undead] → Undead in list → ½×
+        vs Earth: Earth weak [Water,Life] → Undead not → 1×
+        vs Life:  Life weak [Air,Undead] → Undead in list → 2×
+        vs Tech:  Tech immune [Undead] → 0×
+        vs Air:   Air weak [Tech,Dark] → Undead not → 1×
+        vs Magic: Magic weak [Air,Light] → Undead not → 1×
+        vs Undead: Undead resists [Undead,Light] → Undead in list → ½×
+        vs Light: Light weak [Undead,Dark] → Undead in list → 2×
+        vs Dark:  Dark weak [Light,Magic] → Undead not → 1×
+      Undead: —  ½  —  2  0  —  —  ½  2  —
+
+      LIGHT ATK:
+        vs Water: Water weak [Life,Tech] → Light not → 1×
+        vs Fire:  Fire weak [Water,Earth] → Light not → 1×
+        vs Earth: Earth weak [Water,Life] → Light not → 1×
+        vs Life:  Life weak [Air,Undead] → Light not → 1×
+        vs Tech:  Tech weak [Fire,Earth] → Light not → 1×
+        vs Air:   Air weak [Tech,Dark] → Light not → 1×
+        vs Magic: Magic weak [Air,Light] → Light in list → 2×
+        vs Undead: Undead resists [Undead,Light] → Light in list → ½×
+        vs Light: Light resists [Light,Magic] → Light in list → ½×
+        vs Dark:  Dark weak [Light,Magic] → Light in list → 2×
+      Light: —  —  —  —  —  —  2  ½  ½  2
+
+      DARK ATK:
+        vs Water: Water weak [Life,Tech] → Dark not → 1×
+        vs Fire:  Fire weak [Water,Earth] → Dark not → 1×
+        vs Earth: Earth weak [Water,Life] → Dark not → 1×
+        vs Life:  Life weak [Air,Undead] → Dark not → 1×
+        vs Tech:  Tech weak [Fire,Earth] → Dark not → 1×
+        vs Air:   Air weak [Tech,Dark] → Dark in list → 2×
+        vs Magic: Magic weak [Air,Light], Magic resists [Magic,Dark] → Dark in resists → ½×
+        vs Undead: Undead weak [Fire,Magic], Undead immune [Life] → Dark not → 1×
+        vs Light: Light weak [Undead,Dark] → Dark in list → 2×
+        vs Dark:  Dark resists [Dark,Air] → Dark in list → ½×
+      Dark: —  —  —  —  —  2  ½  —  2  ½
+    -->
+    <div class="type-chart-container">
+      <table class="type-chart" id="typeChart">
+        <thead>
+          <tr>
+            <th style="color:var(--text-secondary);">ATK \ DEF</th>
+            <th><span class="col-type-label" style="color:var(--water-blue);">💧<br/>Water</span></th>
+            <th><span class="col-type-label" style="color:var(--fire-red);">🔥<br/>Fire</span></th>
+            <th><span class="col-type-label" style="color:#c8975a;">🌍<br/>Earth</span></th>
+            <th><span class="col-type-label" style="color:var(--life-green);">🌿<br/>Life</span></th>
+            <th><span class="col-type-label" style="color:var(--tech-yellow);">⚙️<br/>Tech</span></th>
+            <th><span class="col-type-label" style="color:var(--air-cyan);">🌀<br/>Air</span></th>
+            <th><span class="col-type-label" style="color:var(--magic-purple);">✨<br/>Magic</span></th>
+            <th><span class="col-type-label" style="color:var(--undead-gray);">💀<br/>Undead</span></th>
+            <th><span class="col-type-label" style="color:#ffe899;">☀️<br/>Light</span></th>
+            <th><span class="col-type-label" style="color:#c094ff;">🌑<br/>Dark</span></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- WATER ATK: ½  2  2  ½  ½  —  —  —  —  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--water-blue);border-color:rgba(43,158,255,0.5);background:rgba(43,158,255,0.1);">💧 Water</span></td>
+            <td class="eff-resist">½×</td>   <!-- vs Water: Water resists Water -->
+            <td class="eff-super">2×</td>    <!-- vs Fire: Fire weak to Water -->
+            <td class="eff-super">2×</td>    <!-- vs Earth: Earth weak to Water -->
+            <td class="eff-resist">½×</td>   <!-- vs Life: Life resists Water -->
+            <td class="eff-resist">½×</td>   <!-- vs Tech: Tech resists Water -->
+            <td class="eff-normal">—</td>    <!-- vs Air -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-normal">—</td>    <!-- vs Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- FIRE ATK: ½  ½  ½  —  2  —  —  2  —  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--fire-red);border-color:rgba(255,76,43,0.5);background:rgba(255,76,43,0.1);">🔥 Fire</span></td>
+            <td class="eff-resist">½×</td>   <!-- vs Water: Water resists Fire -->
+            <td class="eff-resist">½×</td>   <!-- vs Fire: Fire resists Fire -->
+            <td class="eff-resist">½×</td>   <!-- vs Earth: Earth resists Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Life -->
+            <td class="eff-super">2×</td>    <!-- vs Tech: Tech weak to Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Air -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-super">2×</td>    <!-- vs Undead: Undead weak to Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- EARTH ATK: —  2  ½  ½  2  0  —  —  —  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:#c8975a;border-color:rgba(160,113,79,0.5);background:rgba(160,113,79,0.1);">🌍 Earth</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-super">2×</td>    <!-- vs Fire: Fire weak to Earth -->
+            <td class="eff-resist">½×</td>   <!-- vs Earth: Earth resists Earth -->
+            <td class="eff-resist">½×</td>   <!-- vs Life: Life resists Earth -->
+            <td class="eff-super">2×</td>    <!-- vs Tech: Tech weak to Earth -->
+            <td class="eff-immune">0×</td>   <!-- vs Air: Air immune to Earth -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-normal">—</td>    <!-- vs Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- LIFE ATK: 2  —  2  ½  —  —  —  0  —  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--life-green);border-color:rgba(61,220,90,0.5);background:rgba(61,220,90,0.08);">🌿 Life</span></td>
+            <td class="eff-super">2×</td>    <!-- vs Water: Water weak to Life -->
+            <td class="eff-normal">—</td>    <!-- vs Fire -->
+            <td class="eff-super">2×</td>    <!-- vs Earth: Earth weak to Life -->
+            <td class="eff-resist">½×</td>   <!-- vs Life: Life resists Life -->
+            <td class="eff-normal">—</td>    <!-- vs Tech -->
+            <td class="eff-normal">—</td>    <!-- vs Air -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-immune">0×</td>   <!-- vs Undead: Undead immune to Life -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- TECH ATK: 2  ½  0  —  ½  2  —  —  —  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--tech-yellow);border-color:rgba(255,224,51,0.5);background:rgba(255,224,51,0.07);">⚙️ Tech</span></td>
+            <td class="eff-super">2×</td>    <!-- vs Water: Water weak to Tech -->
+            <td class="eff-resist">½×</td>   <!-- vs Fire: Fire resists Tech -->
+            <td class="eff-immune">0×</td>   <!-- vs Earth: Earth immune to Tech -->
+            <td class="eff-normal">—</td>    <!-- vs Life -->
+            <td class="eff-resist">½×</td>   <!-- vs Tech: Tech resists Tech -->
+            <td class="eff-super">2×</td>    <!-- vs Air: Air weak to Tech -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-normal">—</td>    <!-- vs Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- AIR ATK: —  —  —  2  ½  ½  2  —  —  ½ -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--air-cyan);border-color:rgba(127,255,255,0.4);background:rgba(127,255,255,0.06);">🌀 Air</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-normal">—</td>    <!-- vs Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Earth -->
+            <td class="eff-super">2×</td>    <!-- vs Life: Life weak to Air -->
+            <td class="eff-resist">½×</td>   <!-- vs Tech: Tech resists Air -->
+            <td class="eff-resist">½×</td>   <!-- vs Air: Air resists Air -->
+            <td class="eff-super">2×</td>    <!-- vs Magic: Magic weak to Air -->
+            <td class="eff-normal">—</td>    <!-- vs Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Light -->
+            <td class="eff-resist">½×</td>   <!-- vs Dark: Dark resists Air -->
+          </tr>
+
+          <!-- MAGIC ATK: —  —  —  —  —  ½  ½  2  ½  2 -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--magic-purple);border-color:rgba(176,76,255,0.5);background:rgba(176,76,255,0.1);">✨ Magic</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-normal">—</td>    <!-- vs Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Earth -->
+            <td class="eff-normal">—</td>    <!-- vs Life -->
+            <td class="eff-normal">—</td>    <!-- vs Tech -->
+            <td class="eff-resist">½×</td>   <!-- vs Air: Air resists Magic -->
+            <td class="eff-resist">½×</td>   <!-- vs Magic: Magic resists Magic -->
+            <td class="eff-super">2×</td>    <!-- vs Undead: Undead weak to Magic -->
+            <td class="eff-resist">½×</td>   <!-- vs Light: Light resists Magic -->
+            <td class="eff-super">2×</td>    <!-- vs Dark: Dark weak to Magic -->
+          </tr>
+
+          <!-- UNDEAD ATK: —  ½  —  2  0  —  —  ½  2  — -->
+          <tr>
+            <td><span class="row-type-label" style="color:var(--undead-gray);border-color:rgba(136,153,170,0.5);background:rgba(136,153,170,0.08);">💀 Undead</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-resist">½×</td>   <!-- vs Fire: Fire resists Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Earth -->
+            <td class="eff-super">2×</td>    <!-- vs Life: Life weak to Undead -->
+            <td class="eff-immune">0×</td>   <!-- vs Tech: Tech immune to Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Air -->
+            <td class="eff-normal">—</td>    <!-- vs Magic -->
+            <td class="eff-resist">½×</td>   <!-- vs Undead: Undead resists Undead -->
+            <td class="eff-super">2×</td>    <!-- vs Light: Light weak to Undead -->
+            <td class="eff-normal">—</td>    <!-- vs Dark -->
+          </tr>
+
+          <!-- LIGHT ATK: —  —  —  —  —  —  2  ½  ½  2 -->
+          <tr>
+            <td><span class="row-type-label" style="color:#ffe899;border-color:rgba(255,232,153,0.4);background:rgba(255,232,153,0.07);">☀️ Light</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-normal">—</td>    <!-- vs Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Earth -->
+            <td class="eff-normal">—</td>    <!-- vs Life -->
+            <td class="eff-normal">—</td>    <!-- vs Tech -->
+            <td class="eff-normal">—</td>    <!-- vs Air -->
+            <td class="eff-super">2×</td>    <!-- vs Magic: Magic weak to Light -->
+            <td class="eff-resist">½×</td>   <!-- vs Undead: Undead resists Light -->
+            <td class="eff-resist">½×</td>   <!-- vs Light: Light resists Light -->
+            <td class="eff-super">2×</td>    <!-- vs Dark: Dark weak to Light -->
+          </tr>
+
+          <!-- DARK ATK: —  —  —  —  —  2  ½  —  2  ½ -->
+          <tr>
+            <td><span class="row-type-label" style="color:#c094ff;border-color:rgba(90,50,160,0.6);background:rgba(30,10,60,0.4);">🌑 Dark</span></td>
+            <td class="eff-normal">—</td>    <!-- vs Water -->
+            <td class="eff-normal">—</td>    <!-- vs Fire -->
+            <td class="eff-normal">—</td>    <!-- vs Earth -->
+            <td class="eff-normal">—</td>    <!-- vs Life -->
+            <td class="eff-normal">—</td>    <!-- vs Tech -->
+            <td class="eff-super">2×</td>    <!-- vs Air: Air weak to Dark -->
+            <td class="eff-resist">½×</td>   <!-- vs Magic: Magic resists Dark -->
+            <td class="eff-normal">—</td>    <!-- vs Undead -->
+            <td class="eff-super">2×</td>    <!-- vs Light: Light weak to Dark -->
+            <td class="eff-resist">½×</td>   <!-- vs Dark: Dark resists Dark -->
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- ELEMENT PROFILES -->
+    <section>
+      <h2 class="section-heading">🔎 Element Profiles</h2>
+      <div class="card-grid">
+
+        <!-- Profiles show DEFENSIVE stats: what hits this type hard, what it shrugs off -->
+        <div class="card elem-water" style="border-color:rgba(43,158,255,0.3);">
+          <h3 style="color:var(--water-blue);">💧 Water</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Fire, Earth (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Life, Tech (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Water, Fire (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+        <div class="card elem-fire" style="border-color:rgba(255,76,43,0.3);">
+          <h3 style="color:var(--fire-red);">🔥 Fire</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Tech, Undead (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Water, Earth (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Fire, Tech, Undead (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+        <div class="card elem-earth" style="border-color:rgba(160,113,79,0.35);">
+          <h3 style="color:#c8975a;">🌍 Earth</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Fire, Tech (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Water, Life (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Earth, Fire (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Tech (0×)</p>
+        </div>
+
+        <div class="card elem-life" style="border-color:rgba(61,220,90,0.3);">
+          <h3 style="color:var(--life-green);">🌿 Life</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Water, Earth (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Air, Undead (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Life, Water, Earth (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+        <div class="card elem-tech" style="border-color:rgba(255,224,51,0.3);">
+          <h3 style="color:var(--tech-yellow);">⚙️ Tech</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Air, Water (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Fire, Earth (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Tech, Air, Water (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Undead (0×)</p>
+        </div>
+
+        <div class="card elem-air" style="border-color:rgba(127,255,255,0.25);">
+          <h3 style="color:var(--air-cyan);">🌀 Air</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Life, Magic (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Tech, Dark (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Air, Magic (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Earth (0×)</p>
+        </div>
+
+        <div class="card elem-magic" style="border-color:rgba(176,76,255,0.3);">
+          <h3 style="color:var(--magic-purple);">✨ Magic</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Undead, Dark (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Air, Light (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Magic, Dark (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+        <div class="card elem-undead" style="border-color:rgba(136,153,170,0.3);">
+          <h3 style="color:var(--undead-gray);">💀 Undead</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Life, Light (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Fire, Magic (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Undead, Light (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Life (0×)</p>
+        </div>
+
+        <div class="card elem-light" style="border-color:rgba(255,247,214,0.2);">
+          <h3 style="color:#ffe899;">☀️ Light</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Dark, Magic (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Undead, Dark (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Light, Magic (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+        <div class="card elem-dark" style="border-color:rgba(90,50,160,0.4);background:rgba(20,10,40,0.6);">
+          <h3 style="color:#c094ff;">🌑 Dark</h3>
+          <p><strong style="color:var(--portal-blue)">Attacks hit hard:</strong> Light, Air (2×)</p>
+          <p><strong style="color:#ff6b4a">Weak to attacks from:</strong> Light, Magic (2×)</p>
+          <p><strong style="color:var(--text-secondary)">Resists:</strong> Dark, Air (½×)</p>
+          <p><strong style="color:#667">Immune To:</strong> Nothing</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <strong>Skylandex</strong> is a fan-made project. Skylanders is a trademark of <strong>Activision</strong>.
+      Pokémon is a trademark of <strong>Nintendo / Game Freak / Creatures Inc.</strong><br/>
+      This site is not affiliated with or endorsed by either company.
+    </p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
