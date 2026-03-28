@@ -2323,152 +2323,164 @@
 
       /* ── AIR SENSEIS ── */
       {
-        name: "Air Strike", element: "Air", isSensei: true, battleClass: "Bowslinger", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/air-strike.png",
+        name: "Air Strike", element: "Air", isSensei: true, battleClass: "Brawler", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/c/ce/Air_Strike_Icon.png/revision/latest/scale-to-width-down/90?cb=20161012201312",
         stats: { hp:70, attack:72, defense:62, spAttack:90, spDefense:68, speed:95 },
         ability: { name:"Falconer", description:"All bird-based and aerial dive moves gain +1 Priority, striking before the opponent can react." },
         attacks: [
           { name:"Birdie Barrage", type:"Air", power:80, description:"Hops onto Birdie and dashes forward, pressing the attack button to peck through all opponents." },
           { name:"Falcon Strike", type:"Air", power:85, description:"Commands Birdie to dive-bomb the opponent at high speed from above." },
           { name:"Arrow Storm", type:"Air", power:90, description:"Fires a volley of arrows mid-flight, raining down on all adjacent opponents." },
+          { name:"Feather Blade Dive", type:"Air", power:88, description:"Leaps from Birdie's back and dives through the opponent with a spiraling feather blade strike." },
           { name:"Sky-Chi: Talon Tempest", type:"Air", power:120, description:"Birdie and Air Strike circle together in a blazing aerial spiral, locking onto every opponent on the field and striking each simultaneously at blinding speed. Cannot be blocked.", isSkychi:true }
         ]
       },
       {
-        name: "Bad Juju", element: "Air", isSensei: true, battleClass: "Sentinel", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/bad-juju.png",
+        name: "Bad Juju", element: "Air", isSensei: true, battleClass: "Swashbuckler", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/e/e1/Bad_Juju_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052555",
         stats: { hp:72, attack:65, defense:70, spAttack:92, spDefense:78, speed:80 },
         ability: { name:"Spirit Whirlwind", description:"Upon entering battle, Bad Juju summons a localized Air-flavored Sandstorm that deals passive damage to all opponents each turn." },
         attacks: [
           { name:"Juju Curse", type:"Air", power:80, description:"Fires a voodoo curse that lowers the target's Sp. Def by one stage." },
           { name:"Whirlwind Barrier", type:"Air", power:75, description:"Spins a wind barrier around herself, deflecting projectiles and damaging adjacent opponents." },
           { name:"Spirit Surge", type:"Air", power:90, description:"Channels the Spirit Whirlwind into a concentrated beam that hits all opponents." },
+          { name:"Voodoo Storm", type:"Air", power:85, description:"Combines voodoo magic with the sandstorm to launch a hex-laced wind assault." },
           { name:"Sky-Chi: Juju Cyclone", type:"Air", power:115, description:"Bad Juju releases her full spirit power into a catastrophic voodoo cyclone, pulling in all opponents and shredding them with supernatural wind energy. The sandstorm intensifies, dealing double passive damage for 3 turns after.", isSkychi:true }
         ]
       },
       {
-        name: "Wild Storm", element: "Air", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/wild-storm.png",
+        name: "Wild Storm", element: "Air", isSensei: true, battleClass: "Knight", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/7/7c/Wild_Storm_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052555",
         stats: { hp:68, attack:60, defense:62, spAttack:100, spDefense:72, speed:92 },
         ability: { name:"Current Rider", description:"Wild Storm's Speed increases by one stage every time she uses an Air-type move." },
         attacks: [
           { name:"Stormcaller Blast", type:"Air", power:80, description:"Fires a concentrated storm bolt. Speed +1 on use." },
           { name:"Lightning Rider", type:"Air", power:85, description:"Surfs a lightning bolt across the field, hitting all opponents in a line." },
           { name:"Gale Force", type:"Air", power:90, description:"Unleashes a full gale-force storm blast that hits all adjacent opponents. Speed +1." },
+          { name:"Thunder Rider", type:"Air", power:88, description:"Calls down a lightning strike while riding the storm current. Speed +1 on use." },
           { name:"Sky-Chi: Eye of the Storm", type:"Air", power:120, description:"Wild Storm becomes the eye of a catastrophic tempest, summoning hurricane-force winds and lightning that devastates the entire field. Speed is maximized for 3 turns afterward.", isSkychi:true }
         ]
       },
 
       /* ── DARK SENSEIS ── */
       {
-        name: "Blaster-Tron", element: "Dark", isSensei: true, battleClass: "Knight", game: "Imaginators", gameYear: 2016,
+        name: "Blaster-Tron", element: "Light", isSensei: true, battleClass: "Knight", game: "Imaginators", gameYear: 2016,
         icon: "assets/icons/blaster-tron.png",
         stats: { hp:80, attack:92, defense:80, spAttack:70, spDefense:72, speed:72 },
         ability: { name:"Targeting Protocol", description:"Blaster-Tron's attacks never miss, and his first move each battle has +1 priority as his systems boot up instantly." },
         attacks: [
-          { name:"Plasma Blade", type:"Dark", power:85, description:"Slashes with an electrified dark blade that never misses." },
-          { name:"Laser Barrage", type:"Dark", power:80, description:"Fires rapid laser blasts from his blade. High critical-hit ratio." },
-          { name:"System Override", type:"Dark", power:90, description:"Overrides all defensive systems, dealing damage that ignores stat buffs." },
-          { name:"Sky-Chi: Dark Protocol", type:"Dark", power:120, description:"Blaster-Tron enters full combat mode, slicing through every opponent on the field with a rapid sequence of plasma blade strikes at machine precision. Ignores all defensive buffs and barriers.", isSkychi:true }
+          { name:"Plasma Blade", type:"Light", power:85, description:"Slashes with an electrified dark blade that never misses." },
+          { name:"Laser Barrage", type:"Light", power:80, description:"Fires rapid laser blasts from his blade. High critical-hit ratio." },
+          { name:"System Override", type:"Light", power:90, description:"Overrides all defensive systems, dealing damage that ignores stat buffs." },
+          { name:"Null Cannon", type:"Light", power:88, description:"Fires a concentrated dark energy cannon blast. Always hits due to targeting lock." },
+          { name:"Sky-Chi: Dark Protocol", type:"Light", power:120, description:"Blaster-Tron enters full combat mode, slicing through every opponent on the field with a rapid sequence of plasma blade strikes at machine precision. Ignores all defensive buffs and barriers.", isSkychi:true }
         ]
       },
       {
         name: "Hood Sickle", element: "Dark", isSensei: true, battleClass: "Sentinel", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/hood-sickle.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/9/94/Hood_Sickle_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821184030",
         stats: { hp:75, attack:82, defense:70, spAttack:85, spDefense:72, speed:85 },
         ability: { name:"Gravity Well", description:"Hood Sickle's moves pull opponents toward him, preventing switching out for two turns after he uses a Dark-type attack." },
         attacks: [
           { name:"Reaper's Sweep", type:"Dark", power:80, description:"Swings the sickle in a wide arc, hitting all adjacent opponents and pulling them closer." },
           { name:"Dark Sphere", type:"Dark", power:85, description:"Fires dark spheres while spinning, hitting all adjacent opponents every few seconds." },
           { name:"Gravity Pull", type:"Dark", power:75, description:"Creates a gravity well that traps all opponents and lowers their Speed by two stages." },
+          { name:"Sickle Storm", type:"Dark", power:90, description:"Spins rapidly while firing dark spheres outward, hitting all adjacent opponents." },
           { name:"Sky-Chi: Reaper's Reckoning", type:"Dark", power:118, description:"Hood Sickle spins in a massive gravity field, drawing all opponents inward and bombarding them with a barrage of dark spheres before a final devastating sickle slam.", isSkychi:true }
         ]
       },
       {
         name: "Starcast", element: "Dark", isSensei: true, battleClass: "Ninja", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/starcast.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/1/14/Starcast_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821184030",
         stats: { hp:68, attack:85, defense:65, spAttack:82, spDefense:68, speed:98 },
         ability: { name:"Star Orbit", description:"Starcast is surrounded by orbiting shurikens that deal 1/8th max HP damage to any opponent making physical contact with him." },
         attacks: [
           { name:"Shuriken Orbit", type:"Dark", power:80, description:"Kicks orbiting shurikens toward all surrounding enemies." },
           { name:"Megastar Crush", type:"Dark", power:85, description:"Launches his giant rideable Megastar into the opponent." },
           { name:"Dark Torpedo", type:"Dark", power:88, description:"Fires dark torpedo cannons from the Megastar at high speed." },
+          { name:"Star Surf", type:"Dark", power:90, description:"Rides the Megastar across the field, bouncing off opponents and detonating on impact." },
           { name:"Sky-Chi: Stellar Shockwave", type:"Dark", power:115, description:"Starcast's shuriken orbit explodes outward in a blinding shockwave of star energy, hitting every opponent simultaneously and ending with a ground-shattering impact.", isSkychi:true }
         ]
       },
 
       /* ── EARTH SENSEIS ── */
       {
-        name: "Barbella", element: "Earth", isSensei: true, battleClass: "Smasher", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/barbella.png",
+        name: "Barbella", element: "Earth", isSensei: true, battleClass: "Sentinel", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/8/87/Barbella_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183638",
         stats: { hp:88, attack:100, defense:85, spAttack:45, spDefense:72, speed:45 },
         ability: { name:"Heavy Lifter", description:"Barbella's physical moves calculate damage using a Weight multiplier — the heavier her barbells, the more damage she deals." },
         attacks: [
           { name:"Barbell Slam", type:"Earth", power:90, description:"Slams her enormous barbells into the ground for devastating area damage." },
           { name:"Weight Lift", type:"Earth", power:85, description:"Swings both barbells overhead and crashes them down. Damage scales with weight." },
           { name:"Iron Crush", type:"Earth", power:95, description:"Pins the opponent under her barbells for massive weight-based damage." },
+          { name:"Barbell Spin", type:"Earth", power:88, description:"Spins the barbells overhead in a wide arc, knocking back all adjacent opponents." },
           { name:"Sky-Chi: Iron Avalanche", type:"Earth", power:120, description:"Barbella lifts her maximum-weight barbell overhead and hurls it skyward — it returns as an avalanche of iron, crushing the entire field under catastrophic weight.", isSkychi:true }
         ]
       },
       {
         name: "Golden Queen", element: "Earth", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/golden-queen.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/e/e7/Golden_Queen_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183639",
         stats: { hp:82, attack:72, defense:78, spAttack:100, spDefense:80, speed:62 },
         ability: { name:"Midas Touch", description:"Golden Queen's contact moves have a 10% chance to Petrify (Freeze) the target, encasing them in solid gold." },
         attacks: [
           { name:"Golden Beam", type:"Earth", power:85, description:"Fires a beam of golden energy. 10% chance to Petrify the target." },
           { name:"Gold Rush Slam", type:"Earth", power:80, description:"Grows to giant size and slaps the ground, Petrifying targets unlucky enough to be hit." },
           { name:"Treasure Volley", type:"Earth", power:90, description:"Launches a barrage of golden projectiles. Each hit has 10% Petrify chance." },
+          { name:"Royal Wave", type:"Earth", power:85, description:"Sends a wave of gilded energy across the field. 10% chance to Petrify all hit." },
           { name:"Sky-Chi: Reign of Gold", type:"Earth", power:118, description:"Golden Queen grows to colossal size and reigns golden energy down across the entire field, with each hit carrying a 30% Petrify chance — representing her full regal wrath.", isSkychi:true }
         ]
       },
       {
-        name: "Tri-Tip", element: "Earth", isSensei: true, battleClass: "Bazooker", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/tri-tip.png",
+        name: "Tri-Tip", element: "Earth", isSensei: true, battleClass: "Smasher", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/d/d9/Tri-Tip_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183638",
         stats: { hp:85, attack:88, defense:90, spAttack:60, spDefense:80, speed:48 },
         ability: { name:"Fossil Fortify", description:"Reduces damage taken from Super Effective moves by 25%, representing Tri-Tip's prehistoric stone-hard hide." },
         attacks: [
           { name:"Dino Charge", type:"Earth", power:85, description:"Charges forward with prehistoric power. Damage taken from SE moves is reduced." },
           { name:"Fossil Cannon", type:"Earth", power:88, description:"Fires a bone-tipped cannon shot at the opponent." },
           { name:"Tectonic Trample", type:"Earth", power:90, description:"Stamps the ground with all four legs, creating powerful seismic shockwaves." },
+          { name:"Bone Barrage", type:"Earth", power:88, description:"Launches volleys of fossilized bone projectiles from the cannon in rapid succession." },
           { name:"Sky-Chi: Jurassic Blitz", type:"Earth", power:120, description:"Tri-Tip unleashes a full prehistoric rampage, charging and trampling through the entire field with bone-shattering force. Super Effective damage against Tri-Tip is nullified for the duration.", isSkychi:true }
         ]
       },
 
       /* ── FIRE SENSEIS ── */
       {
-        name: "Ember", element: "Fire", isSensei: true, battleClass: "Knight", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/ember.png",
+        name: "Ember", element: "Fire", isSensei: true, battleClass: "Sentinel", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/c/ce/Ember_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183851",
         stats: { hp:75, attack:90, defense:72, spAttack:80, spDefense:68, speed:78 },
         ability: { name:"Blazing Blade", description:"Ember's Fire-type moves completely ignore the opponent's Defense boosts, cutting through all fortifications." },
         attacks: [
           { name:"Flame Saber", type:"Fire", power:85, description:"Slashes with a blazing saber. Ignores all Defense boosts." },
           { name:"Ember Wave", type:"Fire", power:80, description:"Fires a wave of searing flame from the sword's tip." },
           { name:"Inferno Combo", type:"Fire", power:90, description:"A rapid sword combo engulfed in flames, ignoring all defensive buffs." },
+          { name:"Dragonfang Slash", type:"Fire", power:88, description:"Channels dragonfire into the blade for a single devastating cut that strips Defense buffs." },
           { name:"Sky-Chi: Blazing Tempest", type:"Fire", power:118, description:"Ember spins her sword into a roaring flaming tempest that consumes the entire field — all Defense boosts and shields are stripped away before the final devastating slash.", isSkychi:true }
         ]
       },
       {
-        name: "Flare Wolf", element: "Fire", isSensei: true, battleClass: "Quickshot", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/flare-wolf.png",
+        name: "Flare Wolf", element: "Fire", isSensei: true, battleClass: "Bazooker", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/3/3f/Flare_Wolf_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052556",
         stats: { hp:70, attack:78, defense:58, spAttack:92, spDefense:62, speed:95 },
         ability: { name:"Pyrotechnic", description:"Explosive moves deal 1.3× damage but have a 20% chance to Burn the user from the explosive blowback." },
         attacks: [
           { name:"Flame Burst Shot", type:"Fire", power:85, description:"Fires an explosive flaming projectile. 1.3× power with 20% self-burn risk." },
           { name:"Wildfire Volley", type:"Fire", power:80, description:"Rapid-fires a volley of incendiary shots at the target." },
           { name:"Rocket Pounce", type:"Fire", power:90, description:"Rockets forward in a blazing pounce. 1.3× explosion damage on landing." },
+          { name:"Incendiary Howl", type:"Fire", power:85, description:"Howls and releases a burst of explosive fire from the muzzle. 1.3× power, 20% self-burn." },
           { name:"Sky-Chi: Pyroclasm", type:"Fire", power:120, description:"Flare Wolf ignites himself entirely and rockets through the field in a pyroclastic streak, exploding in a wall of fire on the opposite end. Full 1.3× damage applies with no self-burn risk during Sky-Chi.", isSkychi:true }
         ]
       },
       {
         name: "Tae Kwon Crow", element: "Fire", isSensei: true, battleClass: "Ninja", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/tae-kwon-crow.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/4/47/Tae_Kwon_Crow_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183851",
         stats: { hp:68, attack:88, defense:60, spAttack:72, spDefense:62, speed:100 },
         ability: { name:"Dark Fire Style", description:"If Tae Kwon Crow moves before the opponent in a turn, all his moves have a high chance to cause Flinching." },
         attacks: [
           { name:"Fire Kick Combo", type:"Fire", power:85, description:"Delivers a rapid fire-enhanced martial arts kick combo. High flinch rate if moving first." },
           { name:"Shuriken Blaze", type:"Fire", power:80, description:"Throws flaming shurikens that flinch the opponent if striking first." },
           { name:"Blazing Talon", type:"Fire", power:90, description:"Delivers a powerful aerial kick that almost always flinches if landing first." },
+          { name:"Spinning Fire Wheel", type:"Fire", power:88, description:"Spins rapidly with fire-imbued feet, striking all adjacent opponents. High flinch if moving first." },
           { name:"Sky-Chi: Dark Fire Judgment", type:"Fire", power:118, description:"Tae Kwon Crow vanishes and reappears behind every opponent in rapid succession, delivering fire-charged strikes with guaranteed flinch on every hit.", isSkychi:true }
         ]
       },
@@ -2476,175 +2488,189 @@
       /* ── LIFE SENSEIS ── */
       {
         name: "Ambush", element: "Life", isSensei: true, battleClass: "Knight", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/ambush.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/7/72/Ambush_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183636",
         stats: { hp:78, attack:95, defense:70, spAttack:65, spDefense:68, speed:85 },
         ability: { name:"Bamboo Sentinel", description:"Ambush's Critical Hit ratio is significantly increased when using sword-type moves, representing his precision blade mastery." },
         attacks: [
           { name:"Bamboo Blade", type:"Life", power:85, description:"Slashes with a razor-sharp bamboo sword. Increased critical-hit ratio." },
           { name:"Leaf Barrage", type:"Life", power:80, description:"Fires a spread of razor leaves from his sword. High critical rate." },
           { name:"Photon Slash", type:"Life", power:90, description:"Locks onto multiple targets simultaneously before attacking all at the blink of an eye." },
+          { name:"Bamboo Cyclone", type:"Life", power:88, description:"Spins the bamboo blade in a rapid cyclone slash hitting all adjacent opponents. Very high critical rate." },
           { name:"Sky-Chi: Thousand Cuts", type:"Life", power:130, description:"Ambush vanishes, targeting every opponent simultaneously and attacking them all at the blink of an eye in a barrage of over a thousand precise strikes — the only Sky-Chi capable of dealing over 1000 total damage.", isSkychi:true }
         ]
       },
       {
-        name: "Boom Bloom", element: "Life", isSensei: true, battleClass: "Swashbuckler", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/boom-bloom.png",
+        name: "Boom Bloom", element: "Life", isSensei: true, battleClass: "Ninja", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/a/a8/Boom_Bloom_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052556",
         stats: { hp:72, attack:80, defense:65, spAttack:88, spDefense:68, speed:85 },
         ability: { name:"Whiplash Reflex", description:"Contact moves used by Boom Bloom have a 30% chance to lower the opponent's Speed by one stage." },
         attacks: [
           { name:"Whip Strike", type:"Life", power:80, description:"Lashes with the explosive whip for a stinging hit. 30% Speed drop." },
           { name:"Bloom Twirl", type:"Life", power:85, description:"Jumps and twirls the whip in a twister pattern, hitting all adjacent opponents." },
           { name:"Star Snatch", type:"Life", power:82, description:"Grabs a shooting star with the whip and hurls it back at the opponent." },
+          { name:"Petal Lash", type:"Life", power:88, description:"Charges the whip with floral energy and unleashes a multi-hit lashing combo. 30% Speed drop per hit." },
           { name:"Sky-Chi: Blossom Cyclone", type:"Life", power:118, description:"Boom Bloom leaps high and twirls her whip into a massive flowering cyclone, running through every opponent she can reach and lashing continuously for the duration.", isSkychi:true }
         ]
       },
       {
-        name: "Chompy Mage", element: "Life", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/chompy-mage.png",
+        name: "Chompy Mage", element: "Life", isSensei: true, battleClass: "Bazooker", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/6/6b/Chompy_Mage_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052556",
         stats: { hp:75, attack:70, defense:65, spAttack:90, spDefense:70, speed:78 },
         ability: { name:"Chompy Synergy", description:"Upon entering battle, Chompy Mage summons a Chompy substitute at 1/8th HP that absorbs the first hit aimed at him." },
         attacks: [
           { name:"Chompzooka Blast", type:"Life", power:80, description:"Fires the Chompzooka at the opponent. The Chompy substitute absorbs hits first." },
           { name:"Chompy Swarm", type:"Life", power:85, description:"Releases a swarm of Chompies that overwhelm the opponent with biting attacks." },
           { name:"Boing Blast", type:"Life", power:82, description:"Uses the Chompzooka as a pogo stick, bouncing into and through opponents." },
+          { name:"Mega Chompy", type:"Life", power:90, description:"Conjures a giant Chompy that bites down on the opponent for massive damage." },
           { name:"Sky-Chi: Boing-Zooka", type:"Life", power:115, description:"Chompy Mage rides his Chompzooka pogo-stick through the entire field, bouncing from opponent to opponent with explosive Chompy impacts.", isSkychi:true }
         ]
       },
       {
         name: "Crash Bandicoot", element: "Life", isSensei: true, battleClass: "Brawler", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/crash-bandicoot.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/c/c5/Crash_Bandicoot_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183637",
         stats: { hp:85, attack:95, defense:72, spAttack:55, spDefense:65, speed:90 },
         ability: { name:"Wumpa Power", description:"Every third move Crash uses deals double damage, representing his power-up fruit momentum." },
         attacks: [
           { name:"Spin Attack", type:"Life", power:80, description:"Whirls into a tornado spin through opponents." },
           { name:"Belly Flop", type:"Life", power:85, description:"Leaps and belly flops onto the opponent for massive impact damage." },
           { name:"Wumpa Toss", type:"Life", power:82, description:"Hurls Wumpa Fruit at the opponent. Every third use deals double damage." },
+          { name:"Slide Kick", type:"Life", power:88, description:"Slides across the field and kicks the opponent. Every third use deals double damage." },
           { name:"Sky-Chi: Aku Aku Rampage", type:"Life", power:120, description:"Aku Aku grants Crash full invincibility as he spin-charges through every opponent on the field in a supercharged rampage, doubling all damage for its duration.", isSkychi:true }
         ]
       },
 
       /* ── MAGIC SENSEIS ── */
       {
-        name: "Buckshot", element: "Magic", isSensei: true, battleClass: "Quickshot", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/buckshot.png",
+        name: "Buckshot", element: "Magic", isSensei: true, battleClass: "Bowslinger", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/e/ed/Buckshot_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052712",
         stats: { hp:70, attack:72, defense:60, spAttack:95, spDefense:68, speed:90 },
         ability: { name:"Portal Arrow", description:"Buckshot's projectile moves strike from the side through portals, bypassing Protect and Substitute entirely." },
         attacks: [
           { name:"Portal Shot", type:"Magic", power:80, description:"Fires an arrow through a portal, bypassing Protect and Substitute." },
           { name:"Multi-Portal Volley", type:"Magic", power:85, description:"Opens multiple portals and fires through all of them simultaneously. Bypasses all protection." },
           { name:"Dimension Pierce", type:"Magic", power:90, description:"An arrow that rifts through dimensions, ignoring all defensive measures." },
+          { name:"Portal Scatter", type:"Magic", power:88, description:"Opens portals behind the opponent and fires a spread of arrows through them simultaneously." },
           { name:"Sky-Chi: You've Goat to be Kidding Me", type:"Magic", power:118, description:"Buckshot remains stationary and fires a continuous barrage of arrows through portals appearing all around the field, bombarding every opponent from every conceivable angle. Bypasses all protection.", isSkychi:true }
         ]
       },
       {
         name: "Mysticat", element: "Magic", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/mysticat.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/1/1a/Mysticat_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183852",
         stats: { hp:68, attack:62, defense:62, spAttack:100, spDefense:75, speed:85 },
         ability: { name:"Enigma Cat", description:"Mysticat has a 50% chance to completely ignore the secondary effects of any incoming move — status conditions, stat drops, and debuffs." },
         attacks: [
           { name:"Yarnball Blast", type:"Magic", power:80, description:"Fires yarnball familiars that seek out and batter opponents." },
           { name:"Laser Command", type:"Magic", power:85, description:"Controls a gigantic yarnball rift with his laser, directing it into the opponent." },
           { name:"Familiar Storm", type:"Magic", power:88, description:"Commands all yarnball familiars to assault the opponent simultaneously." },
+          { name:"Enigma Warp", type:"Magic", power:90, description:"Teleports behind the opponent and strikes with a burst of arcane yarnball energy." },
           { name:"Sky-Chi: Yarnball Rift", type:"Magic", power:118, description:"Mysticat creates a colossal yarnball rift that tears through the field, shooting out yarnball familiars in all directions and detonating in a final burst of magical energy.", isSkychi:true }
         ]
       },
       {
-        name: "Pain-Yatta", element: "Magic", isSensei: true, battleClass: "Bazooker", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/pain-yatta.png",
+        name: "Pain-Yatta", element: "Magic", isSensei: true, battleClass: "Smasher", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/2/26/Pain-Yatta_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052712",
         stats: { hp:68, attack:75, defense:58, spAttack:95, spDefense:65, speed:82 },
         ability: { name:"Candy Burst", description:"Upon fainting, Pain-Yatta bursts open, restoring 50% HP to the next Skylander sent into battle." },
         attacks: [
           { name:"Candy Whip", type:"Magic", power:80, description:"Suspends from a string and hurls candy weapons at the opponent." },
           { name:"Lollipop Launch", type:"Magic", power:85, description:"Fires a giant lollipop bazooka shot at the opponent." },
           { name:"Sugar Rush", type:"Magic", power:88, description:"Pelts the opponent with a rapid barrage of candy projectiles." },
+          { name:"Jawbreaker Rain", type:"Magic", power:90, description:"Launches a volley of explosive jawbreakers that detonate on impact for area damage." },
           { name:"Sky-Chi: Sweet Destruction", type:"Magic", power:115, description:"Pain-Yatta suspends himself midair and unleashes a cascade of explosive candy weapons in all directions, raining destruction across the entire field — and leaving behind a sweet energy that heals the next ally sent in if Pain-Yatta faints from the effort.", isSkychi:true }
         ]
       },
 
       /* ── TECH SENSEIS ── */
       {
-        name: "Chain Reaction", element: "Tech", isSensei: true, battleClass: "Smasher", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/chain-reaction.png",
+        name: "Chain Reaction", element: "Tech", isSensei: true, battleClass: "Swashbuckler", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/2/24/Chain_Reaction_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052713",
         stats: { hp:80, attack:88, defense:72, spAttack:75, spDefense:68, speed:78 },
         ability: { name:"Overdrive", description:"Chain Reaction's attack power increases each turn he remains on field, but he loses a small amount of HP each turn from the engine strain." },
         attacks: [
           { name:"Chain Smash", type:"Tech", power:85, description:"Slams chains and gears into the opponent. Power increases each turn." },
           { name:"Gear Storm", type:"Tech", power:80, description:"Releases a storm of spinning gears. Damage scales with time on field." },
           { name:"Overdrive Crash", type:"Tech", power:90, description:"Rides a giant version of his inventions for a devastating area crash." },
+          { name:"Chain Detonation", type:"Tech", power:88, description:"Sets off a chain of gear explosions across the field. Power scales with turns on field." },
           { name:"Sky-Chi: Reactor Core", type:"Tech", power:120, description:"Chain Reaction's engine reaches full overdrive, piloting an enormous mechanical contraption that tears through the entire field — releasing all stored chain-reaction power in one catastrophic detonation.", isSkychi:true }
         ]
       },
       {
-        name: "Dr. Krankcase", element: "Tech", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/dr-krankcase.png",
+        name: "Dr. Krankcase", element: "Tech", isSensei: true, battleClass: "Quickshot", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/5/56/Dr._Krankcase_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183852",
         stats: { hp:72, attack:60, defense:68, spAttack:100, spDefense:75, speed:72 },
         ability: { name:"Goo-Tech Mastery", description:"Moves that trap or slow the opponent deal double chip-damage per turn, making escape both futile and painful." },
         attacks: [
           { name:"Goo Blaster", type:"Tech", power:80, description:"Fires a sticky goo blob that traps the opponent and deals double chip damage." },
           { name:"Minion Deploy", type:"Tech", power:78, description:"Deploys a goo-powered minion that slows the opponent — double chip damage applies." },
           { name:"Goo Cannon Barrage", type:"Tech", power:90, description:"Fires a barrage of goo cannonballs that trap all adjacent opponents." },
+          { name:"Corrosive Geyser", type:"Tech", power:88, description:"Erupts a geyser of corrosive goo that traps the opponent and deals double chip damage per turn." },
           { name:"Sky-Chi: Total Goo-tastrophe", type:"Tech", power:115, description:"Dr. Krankcase floods the entire field with a tidal wave of corrosive goo, trapping all opponents simultaneously — every trapped opponent takes quadruple chip damage per turn for 3 turns.", isSkychi:true }
         ]
       },
       {
         name: "Dr. Neo Cortex", element: "Tech", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/dr-neo-cortex.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/3/35/Dr._Neo_Cortex_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183853",
         stats: { hp:70, attack:60, defense:62, spAttack:102, spDefense:72, speed:78 },
         ability: { name:"Mad Science", description:"Dr. Neo Cortex randomly changes the secondary effect of his moves each turn — opponents can never predict whether they'll be Burned, Paralyzed, Confused, or Frozen." },
         attacks: [
           { name:"Cortex Blaster", type:"Tech", power:82, description:"Fires a chaotic energy blast with a randomized secondary effect each use." },
           { name:"Uka Uka Summon", type:"Tech", power:80, description:"Summons Uka Uka to assault the opponent with dark energy." },
           { name:"Staff Slam", type:"Tech", power:85, description:"Transforms his gun into a staff and slams it down. Random secondary effect." },
+          { name:"Experiment 713", type:"Tech", power:90, description:"Fires a deranged experimental ray with a completely random secondary effect each use." },
           { name:"Sky-Chi: Cortex Capacitor", type:"Tech", power:118, description:"Dr. Neo Cortex fires an unstable superweapon beam of pure mad science at the opponent, applying all four secondary effects simultaneously — Burn, Paralysis, Confusion, and Freeze — letting chaos reign supreme.", isSkychi:true }
         ]
       },
       {
         name: "Ro-Bow", element: "Tech", isSensei: true, battleClass: "Bowslinger", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/ro-bow.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/0/01/Ro-Bow_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052712",
         stats: { hp:68, attack:70, defense:65, spAttack:95, spDefense:70, speed:90 },
         ability: { name:"Targeting Array", description:"Ro-Bow's Accuracy increases by one stage every turn he remains on the field, as his targeting system calibrates." },
         attacks: [
           { name:"Auto-Arrow", type:"Tech", power:80, description:"Fires a precision-targeted arrow. Accuracy +1 each turn on field." },
           { name:"Rocket Arrow", type:"Tech", power:85, description:"Launches a rocket-propelled arrow that seeks out the opponent." },
           { name:"Array Volley", type:"Tech", power:90, description:"Fires a spread of targeting-array-guided arrows at all opponents." },
+          { name:"Guided Missile Arrow", type:"Tech", power:88, description:"Fires a rocket-arrow that locks on with the targeting array. Accuracy is now at maximum." },
           { name:"Sky-Chi: Full Lock-On", type:"Tech", power:118, description:"Ro-Bow's targeting array reaches maximum calibration, locking onto every opponent simultaneously and firing a perfect volley of rocket arrows that cannot miss — guaranteed critical hits on each.", isSkychi:true }
         ]
       },
 
       /* ── UNDEAD SENSEIS ── */
       {
-        name: "Chopscotch", element: "Undead", isSensei: true, battleClass: "Swashbuckler", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/chopscotch.png",
+        name: "Chopscotch", element: "Undead", isSensei: true, battleClass: "Smasher", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/0/0b/Chopscotch_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183637",
         stats: { hp:72, attack:85, defense:62, spAttack:80, spDefense:65, speed:92 },
         ability: { name:"Hop Skip Chop", description:"All of Chopscotch's multi-hit moves always strike their maximum number of times." },
         attacks: [
           { name:"Axe Jump Rope", type:"Undead", power:80, description:"Transforms the axe into a jump rope, launching decapitated skulls at opponents. Always maximum hits." },
           { name:"Skull Barrage", type:"Undead", power:85, description:"Launches multiple skulls that persist and orbit the opponent. Always hits max times." },
           { name:"Vortex Slam", type:"Undead", power:90, description:"Reforms the axe and slams it into the ground, creating a vortex of explosive Undead energy." },
+          { name:"Skull Chain", type:"Undead", power:88, description:"Swings a chain of skulls at the opponent, always hitting the maximum number of times." },
           { name:"Sky-Chi: Skull Storm", type:"Undead", power:118, description:"Chopscotch jumps into a frantic sequence, launching an endless barrage of skulls that explode into Undead energy vortexes across the entire field — every hit connects at maximum power.", isSkychi:true }
         ]
       },
       {
-        name: "Pit Boss", element: "Undead", isSensei: true, battleClass: "Sentinel", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/pit-boss.png",
+        name: "Pit Boss", element: "Undead", isSensei: true, battleClass: "Sorcerer", game: "Imaginators", gameYear: 2016,
+        icon: "https://static.wikia.nocookie.net/skylanders/images/f/f0/Pit_Boss_Icon.png/revision/latest/scale-to-width-down/90?cb=20160925011617",
         stats: { hp:75, attack:65, defense:75, spAttack:90, spDefense:80, speed:68 },
         ability: { name:"Serpent's Cunning", description:"All of Pit Boss's status moves cannot miss — his snake voodoo is inescapable." },
         attacks: [
           { name:"Caduceus Summon", type:"Undead", power:0, description:"Channels mysterious magic and summons Caduceus snakes from the sky. Status guaranteed, cannot miss." },
           { name:"Snake Strike", type:"Undead", power:80, description:"Commands a snake familiar to strike the opponent. Status effects cannot miss." },
           { name:"Voodoo Hex", type:"Undead", power:75, description:"Casts an inescapable voodoo hex — guaranteed status effect of choice." },
+          { name:"Serpent Coil", type:"Undead", power:85, description:"Wraps the opponent in giant snake coils — cannot miss, and poisons them for 3 turns." },
           { name:"Sky-Chi: Caduceus Catastrophe", type:"Undead", power:115, description:"Pit Boss channels his full serpent magic, summoning a rain of Caduceus snakes from the sky that cover the entire field — every opponent is hit with a guaranteed voodoo effect that cannot be avoided or removed.", isSkychi:true }
         ]
       },
       {
         name: "Wolfgang", element: "Undead", isSensei: true, battleClass: "Bowslinger", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/wolfgang.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/f/f3/Wolfgang_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183638",
         stats: { hp:75, attack:80, defense:65, spAttack:92, spDefense:68, speed:88 },
         ability: { name:"Bone Howl", description:"All of Wolfgang's sound-based moves lower the target's Special Defense by one stage in addition to their normal effects." },
         attacks: [
           { name:"Sonic Howl", type:"Undead", power:80, description:"Unleashes a devastating sonic howl. Lowers Sp. Def by one stage." },
           { name:"Bone Bow Shot", type:"Undead", power:85, description:"Fires a piercing bone arrow that lowers Sp. Def on contact." },
           { name:"Death Metal Riff", type:"Undead", power:88, description:"Plays a skull-shattering guitar riff. Sound-based, lowers Sp. Def." },
+          { name:"Bone Volley", type:"Undead", power:90, description:"Rapid-fires a volley of bone arrows. Each hit lowers Sp. Def by one stage." },
           { name:"Sky-Chi: Howl of Doom", type:"Undead", power:118, description:"Wolfgang lets loose a primal howl that resonates across the entire field — the soundwave lowers all opponents' Sp. Def by two stages before a final bone-arrow volley finishes them off.", isSkychi:true }
         ]
       },
@@ -2652,37 +2678,40 @@
       /* ── WATER SENSEIS ── */
       {
         name: "Grave Clobber", element: "Water", isSensei: true, battleClass: "Brawler", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/grave-clobber.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/3/36/Grave_Clobber_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052711",
         stats: { hp:80, attack:98, defense:75, spAttack:55, spDefense:68, speed:65 },
         ability: { name:"Sunken Grudge", description:"Grave Clobber deals more damage the lower his HP becomes — he fights hardest with his back against the wall." },
         attacks: [
           { name:"Mummy Fist", type:"Water", power:85, description:"Delivers a powerful mummy-wrap punch. Damage increases as HP lowers." },
           { name:"Clobber Rush", type:"Water", power:90, description:"Charges forward in a berserk fist rush. Power scales with missing HP." },
           { name:"Sunken Slam", type:"Water", power:95, description:"Slams both fists into the ground for a seismic wave — devastating at low HP." },
+          { name:"Grudge Surge", type:"Water", power:90, description:"Channels pent-up grudge energy into a shockwave. Power significantly increases at low HP." },
           { name:"Sky-Chi: Ancient Grudge", type:"Water", power:125, description:"At full power, Grave Clobber channels every grudge he has ever held — the lower his HP when unleashed, the more devastating the strike, potentially reaching catastrophic damage at critical HP.", isSkychi:true }
         ]
       },
       {
         name: "King Pen", element: "Water", isSensei: true, battleClass: "Brawler", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/king-pen.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/7/75/King_Pen_Icon.png/revision/latest/scale-to-width-down/90?cb=20160821183852",
         stats: { hp:88, attack:100, defense:80, spAttack:58, spDefense:72, speed:70 },
         ability: { name:"Chilling Command", description:"King Pen's presence boosts the Attack of all Water-type allies on the field by one stage, representing his commanding presence as a master general." },
         attacks: [
           { name:"Claw Slash", type:"Water", power:85, description:"Slashes with glowing blue claws at blinding speed." },
           { name:"Ponytail Whip", type:"Water", power:80, description:"Whips his glowing ponytail into opponents with surprising force." },
           { name:"Charging Slash", type:"Water", power:90, description:"Imbues claws and ponytail with blue energy and dashes through opponents." },
+          { name:"Arctic Command", type:"Water", power:88, description:"Calls in a frozen blizzard strike that hits all opponents and boosts all Water-type allies' Attack." },
           { name:"Sky-Chi: Blizzard Charge", type:"Water", power:120, description:"King Pen's claws and ponytail glow with maximum intensity as he dashes across the entire field, slashing through every opponent in a series of charging blows — Water-type allies gain an additional Attack boost from the display of mastery.", isSkychi:true }
         ]
       },
       {
         name: "Tidepool", element: "Water", isSensei: true, battleClass: "Quickshot", game: "Imaginators", gameYear: 2016,
-        icon: "assets/icons/tidepool.png",
+        icon: "https://static.wikia.nocookie.net/skylanders/images/d/dc/Tidepool_Icon.png/revision/latest/scale-to-width-down/90?cb=20161112052711",
         stats: { hp:68, attack:65, defense:60, spAttack:98, spDefense:70, speed:90 },
         ability: { name:"Ink Evasion", description:"Tidepool's Evasion increases significantly every time she is hit by a physical move — her ink makes her slippery and hard to pin down." },
         attacks: [
           { name:"Squid Pistol", type:"Water", power:80, description:"Fires rapid ink shots from her squid pistol. Evasion rises on physical hits." },
           { name:"Squid Toss", type:"Water", power:78, description:"Places squid traps around the field. Evasion rises when struck physically." },
           { name:"Squid Pistol Kata", type:"Water", power:88, description:"A flowing kata sequence of rapid-fire ink shots at high speed." },
+          { name:"Ink Whirlpool", type:"Water", power:90, description:"Creates a swirling ink whirlpool that traps the opponent and raises Tidepool's Evasion." },
           { name:"Sky-Chi: Ink Flood", type:"Water", power:115, description:"Tidepool floods the entire field with ink, making the battlefield impossibly slippery. All opponents suffer sharply lowered Accuracy while Tidepool's Evasion is maximized for 3 turns.", isSkychi:true }
         ]
       }
