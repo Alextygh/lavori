@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Creazione Personaggio / Character Creation</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d14;
+    --surface: #13131f;
+    --card: #1a1a2e;
+    --border: rgba(127, 119, 221, 0.2);
+    --border-hover: rgba(127, 119, 221, 0.5);
+    --accent: #7F77DD;
+    --accent2: #D85A30;
+    --accent-glow: rgba(127, 119, 221, 0.15);
+    --text: #e8e8f0;
+    --muted: #888899;
+    --label: #aaaacc;
+    --font-display: 'Orbitron', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Language toggle */
+  .lang-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,20,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 2rem;
+    gap: 8px;
+  }
+
+  .lang-btn {
+    padding: 5px 16px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lang-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .lang-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse at center, rgba(127,119,221,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 5vw, 42px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 2rem;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    max-width: 700px;
+    margin: 0 auto 0.5rem;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+  .progress-pct {
+    font-family: var(--font-display);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* Form container */
+  .form-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 1rem 2rem 4rem;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent-glow);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--label);
+    flex: 1;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  /* Field */
+  .field { margin-bottom: 1rem; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .field input[type="text"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888899' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+  .field select option { background: #1a1a2e; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Chips */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--border-hover); color: var(--text); }
+  .chip.selected {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+    font-weight: 600;
+  }
+
+  /* Submit */
+  .submit-area { margin-top: 2.5rem; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--accent), #5348c7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+  .submit-btn:hover::after { background: rgba(255,255,255,0.07); }
+  .submit-btn:active { transform: scale(0.995); }
+
+  /* Result */
+  .result-wrap {
+    display: none;
+    margin-top: 2rem;
+  }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .result-title {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .result-box {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    font-family: var(--font-body);
+  }
+
+  /* Decorative divider */
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 540px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .hero { padding: 3rem 1.25rem 1.5rem; }
+    .form-wrap { padding: 1rem 1.25rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Language bar -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('it')" id="btn-it">IT</button>
+  <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <p class="hero-eyebrow" data-it="I.S.P. — Creazione Agente" data-en="I.S.P. — Agent Creation">I.S.P. — Creazione Agente</p>
+  <h1 data-it="Crea il tuo <span>Personaggio</span>" data-en="Create your <span>Character</span>">Crea il tuo <span>Personaggio</span></h1>
+  <p class="hero-sub" data-it="Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore." data-en="Fill in what you know — leave blank what you don't. Every detail helps build a better character.">Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore.</p>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="prog"></div></div>
+  <div class="progress-pct" id="prog-pct">0%</div>
+</div>
+
+<!-- Form -->
+<div class="form-wrap">
+
+  <!-- IDENTITÀ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">◈</div>
+      <div class="section-title" data-it="Identità" data-en="Identity">Identità</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label data-it="Nome del personaggio" data-en="Character name">Nome del personaggio</label>
+        <input type="text" id="name" data-placeholder-it="es. Zephyr" data-placeholder-en="e.g. Zephyr" placeholder="es. Zephyr" />
+      </div>
+      <div class="field">
+        <label data-it="Nome in codice / alias" data-en="Codename / alias">Nome in codice / alias</label>
+        <input type="text" id="alias" data-placeholder-it="opzionale" data-placeholder-en="optional" placeholder="opzionale" />
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label data-it="Genere" data-en="Gender">Genere</label>
+        <select id="gender">
+          <option value="" data-it="— seleziona —" data-en="— select —">— seleziona —</option>
+          <option data-it="Maschio" data-en="Male">Maschio</option>
+          <option data-it="Femmina" data-en="Female">Femmina</option>
+          <option data-it="Non-binario" data-en="Non-binary">Non-binario</option>
+          <option data-it="Sconosciuto / N/A" data-en="Unknown / N/A">Sconosciuto / N/A</option>
+          <option data-it="Altro" data-en="Other">Altro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-it="Età / Data di nascita" data-en="Age / Birthday">Età / Data di nascita</label>
+        <input type="text" id="age" data-placeholder-it="es. 27 anni o 11 giugno" data-placeholder-en="e.g. 27 or June 11" placeholder="es. 27 anni o 11 giugno" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-it="Razza / Specie" data-en="Race / Species">Razza / Specie</label>
+      <input type="text" id="race" data-placeholder-it="Umano, alieno, sconosciuto, ecc." data-placeholder-en="Human, alien, unknown, etc." placeholder="Umano, alieno, sconosciuto, ecc." />
+    </div>
+
+    <div class="field">
+      <label data-it="Ruolo / Affiliazione" data-en="Role / Affiliation">Ruolo / Affiliazione</label>
+      <input type="text" id="role" data-placeholder-it="es. Agente I.S.P., villain, mercenario..." data-placeholder-en="e.g. I.S.P. Agent, villain, mercenary..." placeholder="es. Agente I.S.P., villain, mercenario..." />
+    </div>
+  </div>
+
+  <!-- ASPETTO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">◉</div>
+      <div class="section-title" data-it="Aspetto" data-en="Appearance">Aspetto</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label data-it="Altezza e corporatura" data-en="Height & Build">Altezza e corporatura</label>
+        <input type="text" id="build" data-placeholder-it="es. 2m, muscoloso" data-placeholder-en="e.g. 6'7 bulky" placeholder="es. 2m, muscoloso" />
+      </div>
+      <div class="field">
+        <label data-it="Capelli e colore occhi" data-en="Hair & Eye color">Capelli e colore occhi</label>
+        <input type="text" id="looks" data-placeholder-it="es. capelli neri, occhi rossi" data-placeholder-en="e.g. black hair, red eyes" placeholder="es. capelli neri, occhi rossi" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-it="Abbigliamento / stile" data-en="Outfit / clothing style">Abbigliamento / stile</label>
+      <textarea id="outfit" data-placeholder-it="Descrivi cosa indossa — colori, materiali, accessori, maschere..." data-placeholder-en="Describe what they wear — colors, materials, accessories, masks..." placeholder="Descrivi cosa indossa — colori, materiali, accessori, maschere..."></textarea>
+    </div>
+
+    <div class="field">
+      <label data-it="Vibe visiva generale" data-en="Overall visual vibe">Vibe visiva generale</label>
+      <div class="chip-group">
+        <span class="chip" data-group="vibe" data-it="Colorato e vistoso" data-en="Colorful & loud">Colorato e vistoso</span>
+        <span class="chip" data-group="vibe" data-it="Oscuro e misterioso" data-en="Dark & mysterious">Oscuro e misterioso</span>
+        <span class="chip" data-group="vibe" data-it="Pulito e raffinato" data-en="Clean & sleek">Pulito e raffinato</span>
+        <span class="chip" data-group="vibe" data-it="Selvaggio e caotico" data-en="Wild & chaotic">Selvaggio e caotico</span>
+        <span class="chip" data-group="vibe" data-it="Elegante e ricercato" data-en="Elegant & refined">Elegante e ricercato</span>
+        <span class="chip" data-group="vibe" data-it="Grezzo e robusto" data-en="Rough & rugged">Grezzo e robusto</span>
+        <span class="chip" data-group="vibe" data-it="Tech / futuristico" data-en="Techy / futuristic">Tech / futuristico</span>
+        <span class="chip" data-group="vibe" data-it="Soprannaturale / inquietante" data-en="Supernatural / eerie">Soprannaturale / inquietante</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONALITÀ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">◇</div>
+      <div class="section-title" data-it="Personalità" data-en="Personality">Personalità</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="field">
+      <label data-it="Tratti principali" data-en="Core personality traits">Tratti principali</label>
+      <div class="chip-group">
+        <span class="chip" data-group="personality" data-it="Spensierato" data-en="Carefree">Spensierato</span>
+        <span class="chip" data-group="personality" data-it="Stoico" data-en="Stoic">Stoico</span>
+        <span class="chip" data-group="personality" data-it="Carismatico" data-en="Charismatic">Carismatico</span>
+        <span class="chip" data-group="personality" data-it="Aggressivo" data-en="Aggressive">Aggressivo</span>
+        <span class="chip" data-group="personality" data-it="Leale" data-en="Loyal">Leale</span>
+        <span class="chip" data-group="personality" data-it="Astuto" data-en="Cunning">Astuto</span>
+        <span class="chip" data-group="personality" data-it="Compassionevole" data-en="Compassionate">Compassionevole</span>
+        <span class="chip" data-group="personality" data-it="Spericolato" data-en="Reckless">Spericolato</span>
+        <span class="chip" data-group="personality" data-it="Misterioso" data-en="Mysterious">Misterioso</span>
+        <span class="chip" data-group="personality" data-it="Giocoso" data-en="Playful">Giocoso</span>
+        <span class="chip" data-group="personality" data-it="Freddo / spietato" data-en="Cold / ruthless">Freddo / spietato</span>
+        <span class="chip" data-group="personality" data-it="Intellettuale" data-en="Intellectual">Intellettuale</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label data-it="Piace" data-en="Likes">Piace</label>
+        <textarea id="likes" data-placeholder-it="es. danzare, socializzare, feste..." data-placeholder-en="e.g. dancing, socializing, parties..." placeholder="es. danzare, socializzare, feste..." style="min-height:64px"></textarea>
+      </div>
+      <div class="field">
+        <label data-it="Non piace" data-en="Dislikes">Non piace</label>
+        <textarea id="dislikes" data-placeholder-it="es. persone noiose, silenzio..." data-placeholder-en="e.g. boring people, silence..." placeholder="es. persone noiose, silenzio..." style="min-height:64px"></textarea>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-it="Allineamento morale" data-en="Moral alignment">Allineamento morale</label>
+      <div class="chip-group">
+        <span class="chip" data-group="alignment" data-it="Legale Buono" data-en="Lawful Good">Legale Buono</span>
+        <span class="chip" data-group="alignment" data-it="Neutrale Buono" data-en="Neutral Good">Neutrale Buono</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Buono" data-en="Chaotic Good">Caotico Buono</span>
+        <span class="chip" data-group="alignment" data-it="Legale Neutrale" data-en="Lawful Neutral">Legale Neutrale</span>
+        <span class="chip" data-group="alignment" data-it="Vero Neutrale" data-en="True Neutral">Vero Neutrale</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Neutrale" data-en="Chaotic Neutral">Caotico Neutrale</span>
+        <span class="chip" data-group="alignment" data-it="Legale Malvagio" data-en="Lawful Evil">Legale Malvagio</span>
+        <span class="chip" data-group="alignment" data-it="Neutrale Malvagio" data-en="Neutral Evil">Neutrale Malvagio</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Malvagio" data-en="Chaotic Evil">Caotico Malvagio</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORIA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">◎</div>
+      <div class="section-title" data-it="Storia & Origini" data-en="Backstory & Origins">Storia & Origini</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="field">
+      <label data-it="Luogo di nascita / origine" data-en="Place of birth / origin">Luogo di nascita / origine</label>
+      <input type="text" id="origin" data-placeholder-it="es. Isola Campbell, spazio, sconosciuto..." data-placeholder-en="e.g. Campbell Island, outer space, unknown..." placeholder="es. Isola Campbell, spazio, sconosciuto..." />
+    </div>
+
+    <div class="field">
+      <label data-it="Riassunto della storia" data-en="Background summary">Riassunto della storia</label>
+      <textarea id="backstory" data-placeholder-it="Come è cresciuto? Eventi chiave? Come ha ottenuto i suoi poteri o ruolo?" data-placeholder-en="How did they grow up? Any key events? How did they get their powers / role?" placeholder="Come è cresciuto? Eventi chiave? Come ha ottenuto i suoi poteri o ruolo?"></textarea>
+    </div>
+
+    <div class="field">
+      <label data-it="Relazioni importanti" data-en="Important relationships">Relazioni importanti</label>
+      <textarea id="relations" data-placeholder-it="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" data-placeholder-en="Partners, rivals, family, mentors — who matters to them and why?" placeholder="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" style="min-height:64px"></textarea>
+    </div>
+  </div>
+
+  <!-- POTERI -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">◆</div>
+      <div class="section-title" data-it="Poteri & Abilità" data-en="Powers & Abilities">Poteri & Abilità</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="field">
+      <label data-it="Livello di potere" data-en="Power tier / strength level">Livello di potere</label>
+      <div class="chip-group">
+        <span class="chip" data-group="tier" data-it="Livello strada" data-en="Street level">Livello strada</span>
+        <span class="chip" data-group="tier" data-it="Livello città" data-en="City level">Livello città</span>
+        <span class="chip" data-group="tier" data-it="Livello isola" data-en="Island level">Livello isola</span>
+        <span class="chip" data-group="tier" data-it="Livello nazione" data-en="Country level">Livello nazione</span>
+        <span class="chip" data-group="tier" data-it="Continentale" data-en="Continental">Continentale</span>
+        <span class="chip" data-group="tier" data-it="Planetario" data-en="Planetary">Planetario</span>
+        <span class="chip" data-group="tier" data-it="Multiversale" data-en="Multiversal">Multiversale</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-it="Abilità principali" data-en="Main abilities">Abilità principali</label>
+      <textarea id="powers" data-placeholder-it="Elenca poteri, abilità o tecniche. Più dettagli, meglio è!" data-placeholder-en="List their powers, skills, or techniques. Be as detailed as you want!" placeholder="Elenca poteri, abilità o tecniche. Più dettagli, meglio è!"></textarea>
+    </div>
+
+    <div class="field">
+      <label data-it="Debolezze" data-en="Weaknesses">Debolezze</label>
+      <textarea id="weaknesses" data-placeholder-it="Cosa può ferirli o fermarli?" data-placeholder-en="What can hurt or stop them?" placeholder="Cosa può ferirli o fermarli?" style="min-height:64px"></textarea>
+    </div>
+  </div>
+
+  <!-- EXTRA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">✦</div>
+      <div class="section-title" data-it="Extra" data-en="Extra">Extra</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="field">
+      <label data-it="Altro? (stranezze, segreti, curiosità...)" data-en="Anything else? (quirks, secrets, trivia...)">Altro? (stranezze, segreti, curiosità...)</label>
+      <textarea id="extra" data-placeholder-it="Spazio libero — aggiungi tutto quello che non entra sopra." data-placeholder-en="Free space — add whatever doesn't fit above." placeholder="Spazio libero — aggiungi tutto quello che non entra sopra."></textarea>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="generate()">
+      <span data-it="Genera scheda personaggio" data-en="Generate character brief">Genera scheda personaggio</span>
+    </button>
+  </div>
+
+  <!-- Result -->
+  <div class="result-wrap" id="result-wrap">
+    <div class="result-header">
+      <div class="result-title" data-it="Scheda generata" data-en="Generated brief">Scheda generata</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyResult()">
+        <span data-it="Copia testo" data-en="Copy text">Copia testo</span>
+      </button>
+    </div>
+    <div class="result-box" id="result"></div>
+  </div>
+
+</div>
+
+<script>
+  let lang = 'it';
+
+  function setLang(l) {
+    lang = l;
+    document.getElementById('btn-it').classList.toggle('active', l === 'it');
+    document.getElementById('btn-en').classList.toggle('active', l === 'en');
+
+    document.querySelectorAll('[data-it]').forEach(el => {
+      const text = el.getAttribute('data-' + l);
+      if (el.tagName === 'H1') {
+        el.innerHTML = text;
+      } else if (el.tagName === 'OPTION') {
+        el.textContent = text;
+      } else {
+        el.textContent = text;
+      }
+    });
+
+    document.querySelectorAll('[data-placeholder-it]').forEach(el => {
+      el.placeholder = el.getAttribute('data-placeholder-' + l);
+    });
+
+    document.querySelectorAll('.chip[data-it]').forEach(chip => {
+      chip.textContent = chip.getAttribute('data-' + l);
+    });
+  }
+
+  // Progress tracking
+  const allInputs = document.querySelectorAll('input[type="text"], select, textarea');
+  const prog = document.getElementById('prog');
+  const progPct = document.getElementById('prog-pct');
+
+  function updateProgress() {
+    let filled = 0;
+    allInputs.forEach(el => { if (el.value.trim()) filled++; });
+    const chipCount = document.querySelectorAll('.chip.selected').length;
+    const total = allInputs.length + 6;
+    const pct = Math.min(100, Math.round(((filled + chipCount) / total) * 100));
+    prog.style.width = pct + '%';
+    progPct.textContent = pct + '%';
+  }
+
+  allInputs.forEach(el => el.addEventListener('input', updateProgress));
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const group = chip.dataset.group;
+      const isMulti = ['personality', 'vibe'].includes(group);
+      if (!isMulti) {
+        document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+      }
+      chip.classList.toggle('selected');
+      updateProgress();
+    });
+  });
+
+  function getChips(group) {
+    return [...document.querySelectorAll(`.chip[data-group="${group}"].selected`)]
+      .map(c => c.getAttribute('data-' + lang)).join(', ');
+  }
+
+  function val(id) { return document.getElementById(id).value.trim(); }
+
+  function generate() {
+    const isIt = lang === 'it';
+    const lines = [];
+
+    lines.push(isIt ? '=== SCHEDA PERSONAGGIO ===' : '=== CHARACTER BRIEF ===');
+    lines.push('');
+
+    if (val('name'))   lines.push((isIt ? 'Nome: ' : 'Name: ') + val('name'));
+    if (val('alias'))  lines.push((isIt ? 'Alias: ' : 'Alias: ') + val('alias'));
+
+    const genderEl = document.getElementById('gender');
+    const genderVal = genderEl.options[genderEl.selectedIndex]?.getAttribute('data-' + lang);
+    if (genderVal && genderVal !== (isIt ? '— seleziona —' : '— select —')) {
+      lines.push((isIt ? 'Genere: ' : 'Gender: ') + genderVal);
+    }
+
+    if (val('age'))    lines.push((isIt ? 'Età / Nascita: ' : 'Age / Birthday: ') + val('age'));
+    if (val('race'))   lines.push((isIt ? 'Razza / Specie: ' : 'Race / Species: ') + val('race'));
+    if (val('role'))   lines.push((isIt ? 'Ruolo: ' : 'Role: ') + val('role'));
+    if (val('origin')) lines.push((isIt ? 'Luogo di nascita: ' : 'Place of birth: ') + val('origin'));
+
+    const tier = getChips('tier');
+    if (tier) lines.push((isIt ? 'Livello di potere: ' : 'Power tier: ') + tier);
+    const align = getChips('alignment');
+    if (align) lines.push((isIt ? 'Allineamento: ' : 'Alignment: ') + align);
+
+    lines.push('');
+    lines.push(isIt ? '— Aspetto —' : '— Appearance —');
+    if (val('build'))  lines.push((isIt ? 'Altezza/corporatura: ' : 'Height & build: ') + val('build'));
+    if (val('looks'))  lines.push((isIt ? 'Capelli/occhi: ' : 'Hair & eyes: ') + val('looks'));
+    const vibe = getChips('vibe');
+    if (vibe) lines.push((isIt ? 'Vibe visiva: ' : 'Visual vibe: ') + vibe);
+    if (val('outfit')) lines.push((isIt ? 'Abbigliamento: ' : 'Outfit: ') + val('outfit'));
+
+    lines.push('');
+    lines.push(isIt ? '— Personalità —' : '— Personality —');
+    const personality = getChips('personality');
+    if (personality) lines.push((isIt ? 'Tratti: ' : 'Traits: ') + personality);
+    if (val('likes'))    lines.push((isIt ? 'Piace: ' : 'Likes: ') + val('likes'));
+    if (val('dislikes')) lines.push((isIt ? 'Non piace: ' : 'Dislikes: ') + val('dislikes'));
+
+    lines.push('');
+    lines.push(isIt ? '— Storia —' : '— Backstory —');
+    if (val('backstory')) lines.push(val('backstory'));
+    if (val('relations')) lines.push((isIt ? 'Relazioni: ' : 'Relationships: ') + val('relations'));
+
+    lines.push('');
+    lines.push(isIt ? '— Poteri & Abilità —' : '— Powers & Abilities —');
+    if (val('powers'))    lines.push(val('powers'));
+    if (val('weaknesses')) lines.push((isIt ? 'Debolezze: ' : 'Weaknesses: ') + val('weaknesses'));
+
+    if (val('extra')) {
+      lines.push('');
+      lines.push(isIt ? '— Extra —' : '— Extra —');
+      lines.push(val('extra'));
+    }
+
+    const text = lines.join('\n');
+    const box = document.getElementById('result');
+    const wrap = document.getElementById('result-wrap');
+    box.textContent = text;
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copyResult() {
+    const text = document.getElementById('result').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn').querySelector('span');
+      btn.textContent = lang === 'it' ? 'Copiato!' : 'Copied!';
+      setTimeout(() => { btn.textContent = lang === 'it' ? 'Copia testo' : 'Copy text'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
