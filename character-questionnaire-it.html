@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Creazione Personaggio / Character Creation</title>
+<title>Character Creator</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -354,15 +354,15 @@
 
 <!-- Language bar -->
 <div class="lang-bar">
-  <button class="lang-btn active" onclick="setLang('it')" id="btn-it">IT</button>
-  <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  <button class="lang-btn" onclick="setLang('it')" id="btn-it">IT</button>
+  <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
 </div>
 
 <!-- Hero -->
 <div class="hero">
-  <p class="hero-eyebrow" data-it="I.S.P. — Creazione Agente" data-en="I.S.P. — Agent Creation">I.S.P. — Creazione Agente</p>
-  <h1 data-it="Crea il tuo <span>Personaggio</span>" data-en="Create your <span>Character</span>">Crea il tuo <span>Personaggio</span></h1>
-  <p class="hero-sub" data-it="Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore." data-en="Fill in what you know — leave blank what you don't. Every detail helps build a better character.">Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore.</p>
+  <p class="hero-eyebrow" data-it="Creazione Personaggio" data-en="Character Creator">Character Creator</p>
+  <h1 data-it="Crea il tuo <span>Personaggio</span>" data-en="Create your <span>Character</span>">Create your <span>Character</span></h1>
+  <p class="hero-sub" data-it="Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore." data-en="Fill in what you know — leave blank what you don't. Every detail helps build a better character.">Fill in what you know — leave blank what you don't. Every detail helps build a better character.</p>
 </div>
 
 <!-- Progress -->
@@ -378,47 +378,47 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">◈</div>
-      <div class="section-title" data-it="Identità" data-en="Identity">Identità</div>
+      <div class="section-title" data-it="Identità" data-en="Identity">Identity</div>
       <div class="section-line"></div>
     </div>
 
     <div class="grid-2">
       <div class="field">
-        <label data-it="Nome del personaggio" data-en="Character name">Nome del personaggio</label>
-        <input type="text" id="name" data-placeholder-it="es. Zephyr" data-placeholder-en="e.g. Zephyr" placeholder="es. Zephyr" />
+        <label data-it="Nome del personaggio" data-en="Character name">Character name</label>
+        <input type="text" id="name" data-placeholder-it="es. Bob" data-placeholder-en="e.g. Bob" placeholder="e.g. Bob" />
       </div>
       <div class="field">
-        <label data-it="Nome in codice / alias" data-en="Codename / alias">Nome in codice / alias</label>
-        <input type="text" id="alias" data-placeholder-it="opzionale" data-placeholder-en="optional" placeholder="opzionale" />
+        <label data-it="Nome in codice / alias" data-en="Codename / alias">Codename / alias</label>
+        <input type="text" id="alias" data-placeholder-it="opzionale" data-placeholder-en="optional" placeholder="optional" />
       </div>
     </div>
 
     <div class="grid-2">
       <div class="field">
-        <label data-it="Genere" data-en="Gender">Genere</label>
+        <label data-it="Genere" data-en="Gender">Gender</label>
         <select id="gender">
-          <option value="" data-it="— seleziona —" data-en="— select —">— seleziona —</option>
-          <option data-it="Maschio" data-en="Male">Maschio</option>
-          <option data-it="Femmina" data-en="Female">Femmina</option>
-          <option data-it="Non-binario" data-en="Non-binary">Non-binario</option>
-          <option data-it="Sconosciuto / N/A" data-en="Unknown / N/A">Sconosciuto / N/A</option>
-          <option data-it="Altro" data-en="Other">Altro</option>
+          <option value="" data-it="— seleziona —" data-en="— select —">— select —</option>
+          <option data-it="Maschio" data-en="Male">Male</option>
+          <option data-it="Femmina" data-en="Female">Female</option>
+          <option data-it="Non-binario" data-en="Non-binary">Non-binary</option>
+          <option data-it="Sconosciuto / N/A" data-en="Unknown / N/A">Unknown / N/A</option>
+          <option data-it="Altro" data-en="Other">Other</option>
         </select>
       </div>
       <div class="field">
-        <label data-it="Età / Data di nascita" data-en="Age / Birthday">Età / Data di nascita</label>
-        <input type="text" id="age" data-placeholder-it="es. 27 anni o 11 giugno" data-placeholder-en="e.g. 27 or June 11" placeholder="es. 27 anni o 11 giugno" />
+        <label data-it="Età / Data di nascita" data-en="Age / Birthday">Age / Birthday</label>
+        <input type="text" id="age" data-placeholder-it="es. 27 anni o 11 giugno" data-placeholder-en="e.g. 27 or June 11" placeholder="e.g. 27 or June 11" />
       </div>
     </div>
 
     <div class="field">
-      <label data-it="Razza / Specie" data-en="Race / Species">Razza / Specie</label>
-      <input type="text" id="race" data-placeholder-it="Umano, alieno, sconosciuto, ecc." data-placeholder-en="Human, alien, unknown, etc." placeholder="Umano, alieno, sconosciuto, ecc." />
+      <label data-it="Razza / Specie" data-en="Race / Species">Race / Species</label>
+      <input type="text" id="race" data-placeholder-it="Umano, alieno, sconosciuto, ecc." data-placeholder-en="Human, alien, unknown, etc." placeholder="Human, alien, unknown, etc." />
     </div>
 
     <div class="field">
-      <label data-it="Ruolo / Affiliazione" data-en="Role / Affiliation">Ruolo / Affiliazione</label>
-      <input type="text" id="role" data-placeholder-it="es. Agente I.S.P., villain, mercenario..." data-placeholder-en="e.g. I.S.P. Agent, villain, mercenary..." placeholder="es. Agente I.S.P., villain, mercenario..." />
+      <label data-it="Ruolo / Affiliazione" data-en="Role / Affiliation">Role / Affiliation</label>
+      <input type="text" id="role" data-placeholder-it="es. eroe, villain, mercenario..." data-placeholder-en="e.g. hero, villain, mercenary..." placeholder="e.g. hero, villain, mercenary..." />
     </div>
   </div>
 
@@ -426,28 +426,28 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">◉</div>
-      <div class="section-title" data-it="Aspetto" data-en="Appearance">Aspetto</div>
+      <div class="section-title" data-it="Aspetto" data-en="Appearance">Appearance</div>
       <div class="section-line"></div>
     </div>
 
     <div class="grid-2">
       <div class="field">
-        <label data-it="Altezza e corporatura" data-en="Height & Build">Altezza e corporatura</label>
-        <input type="text" id="build" data-placeholder-it="es. 2m, muscoloso" data-placeholder-en="e.g. 6'7 bulky" placeholder="es. 2m, muscoloso" />
+        <label data-it="Altezza e corporatura" data-en="Height & Build">Height & Build</label>
+        <input type="text" id="build" data-placeholder-it="es. 2m, muscoloso" data-placeholder-en="e.g. 6'0 bulky" placeholder="e.g. 6'0 bulky" />
       </div>
       <div class="field">
-        <label data-it="Capelli e colore occhi" data-en="Hair & Eye color">Capelli e colore occhi</label>
-        <input type="text" id="looks" data-placeholder-it="es. capelli neri, occhi rossi" data-placeholder-en="e.g. black hair, red eyes" placeholder="es. capelli neri, occhi rossi" />
+        <label data-it="Capelli e colore occhi" data-en="Hair & Eye color">Hair & Eye color</label>
+        <input type="text" id="looks" data-placeholder-it="es. capelli neri, occhi rossi" data-placeholder-en="e.g. black hair, red eyes" placeholder="e.g. black hair, red eyes" />
       </div>
     </div>
 
     <div class="field">
-      <label data-it="Abbigliamento / stile" data-en="Outfit / clothing style">Abbigliamento / stile</label>
-      <textarea id="outfit" data-placeholder-it="Descrivi cosa indossa — colori, materiali, accessori, maschere..." data-placeholder-en="Describe what they wear — colors, materials, accessories, masks..." placeholder="Descrivi cosa indossa — colori, materiali, accessori, maschere..."></textarea>
+      <label data-it="Abbigliamento / stile" data-en="Outfit / clothing style">Outfit / clothing style</label>
+      <textarea id="outfit" data-placeholder-it="Descrivi cosa indossa — colori, materiali, accessori, maschere..." data-placeholder-en="Describe what they wear — colors, materials, accessories, masks..." placeholder="Describe what they wear — colors, materials, accessories, masks..."></textarea>
     </div>
 
     <div class="field">
-      <label data-it="Vibe visiva generale" data-en="Overall visual vibe">Vibe visiva generale</label>
+      <label data-it="Vibe visiva generale" data-en="Overall visual vibe">Overall visual vibe</label>
       <div class="chip-group">
         <span class="chip" data-group="vibe" data-it="Colorato e vistoso" data-en="Colorful & loud">Colorato e vistoso</span>
         <span class="chip" data-group="vibe" data-it="Oscuro e misterioso" data-en="Dark & mysterious">Oscuro e misterioso</span>
@@ -455,8 +455,8 @@
         <span class="chip" data-group="vibe" data-it="Selvaggio e caotico" data-en="Wild & chaotic">Selvaggio e caotico</span>
         <span class="chip" data-group="vibe" data-it="Elegante e ricercato" data-en="Elegant & refined">Elegante e ricercato</span>
         <span class="chip" data-group="vibe" data-it="Grezzo e robusto" data-en="Rough & rugged">Grezzo e robusto</span>
-        <span class="chip" data-group="vibe" data-it="Tech / futuristico" data-en="Techy / futuristic">Tech / futuristico</span>
-        <span class="chip" data-group="vibe" data-it="Soprannaturale / inquietante" data-en="Supernatural / eerie">Soprannaturale / inquietante</span>
+        <span class="chip" data-group="vibe" data-it="Tech / futuristico" data-en="Techy / futuristic">Techy / futuristic</span>
+        <span class="chip" data-group="vibe" data-it="Soprannaturale / inquietante" data-en="Supernatural / eerie">Supernatural / eerie</span>
       </div>
     </div>
   </div>
@@ -465,51 +465,51 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">◇</div>
-      <div class="section-title" data-it="Personalità" data-en="Personality">Personalità</div>
+      <div class="section-title" data-it="Personalità" data-en="Personality">Personality</div>
       <div class="section-line"></div>
     </div>
 
     <div class="field">
-      <label data-it="Tratti principali" data-en="Core personality traits">Tratti principali</label>
+      <label data-it="Tratti principali" data-en="Core personality traits">Core personality traits</label>
       <div class="chip-group">
-        <span class="chip" data-group="personality" data-it="Spensierato" data-en="Carefree">Spensierato</span>
-        <span class="chip" data-group="personality" data-it="Stoico" data-en="Stoic">Stoico</span>
-        <span class="chip" data-group="personality" data-it="Carismatico" data-en="Charismatic">Carismatico</span>
-        <span class="chip" data-group="personality" data-it="Aggressivo" data-en="Aggressive">Aggressivo</span>
-        <span class="chip" data-group="personality" data-it="Leale" data-en="Loyal">Leale</span>
-        <span class="chip" data-group="personality" data-it="Astuto" data-en="Cunning">Astuto</span>
-        <span class="chip" data-group="personality" data-it="Compassionevole" data-en="Compassionate">Compassionevole</span>
-        <span class="chip" data-group="personality" data-it="Spericolato" data-en="Reckless">Spericolato</span>
-        <span class="chip" data-group="personality" data-it="Misterioso" data-en="Mysterious">Misterioso</span>
-        <span class="chip" data-group="personality" data-it="Giocoso" data-en="Playful">Giocoso</span>
-        <span class="chip" data-group="personality" data-it="Freddo / spietato" data-en="Cold / ruthless">Freddo / spietato</span>
-        <span class="chip" data-group="personality" data-it="Intellettuale" data-en="Intellectual">Intellettuale</span>
+        <span class="chip" data-group="personality" data-it="Spensierato" data-en="Carefree">Carefree</span>
+        <span class="chip" data-group="personality" data-it="Stoico" data-en="Stoic">Stoic</span>
+        <span class="chip" data-group="personality" data-it="Carismatico" data-en="Charismatic">Charismatic</span>
+        <span class="chip" data-group="personality" data-it="Aggressivo" data-en="Aggressive">Aggressive</span>
+        <span class="chip" data-group="personality" data-it="Leale" data-en="Loyal">Loyal</span>
+        <span class="chip" data-group="personality" data-it="Astuto" data-en="Cunning">Cunning</span>
+        <span class="chip" data-group="personality" data-it="Compassionevole" data-en="Compassionate">Compassionate</span>
+        <span class="chip" data-group="personality" data-it="Spericolato" data-en="Reckless">Reckless</span>
+        <span class="chip" data-group="personality" data-it="Misterioso" data-en="Mysterious">Mysterious</span>
+        <span class="chip" data-group="personality" data-it="Giocoso" data-en="Playful">Playful</span>
+        <span class="chip" data-group="personality" data-it="Freddo / spietato" data-en="Cold / ruthless">Cold / ruthless</span>
+        <span class="chip" data-group="personality" data-it="Intellettuale" data-en="Intellectual">Intellectual</span>
       </div>
     </div>
 
     <div class="grid-2">
       <div class="field">
-        <label data-it="Piace" data-en="Likes">Piace</label>
-        <textarea id="likes" data-placeholder-it="es. danzare, socializzare, feste..." data-placeholder-en="e.g. dancing, socializing, parties..." placeholder="es. danzare, socializzare, feste..." style="min-height:64px"></textarea>
+        <label data-it="Piace" data-en="Likes">Likes</label>
+        <textarea id="likes" data-placeholder-it="es. danzare, socializzare, feste..." data-placeholder-en="e.g. dancing, socializing, parties..." placeholder="e.g. dancing, socializing, parties..." style="min-height:64px"></textarea>
       </div>
       <div class="field">
-        <label data-it="Non piace" data-en="Dislikes">Non piace</label>
-        <textarea id="dislikes" data-placeholder-it="es. persone noiose, silenzio..." data-placeholder-en="e.g. boring people, silence..." placeholder="es. persone noiose, silenzio..." style="min-height:64px"></textarea>
+        <label data-it="Non piace" data-en="Dislikes">Dislikes</label>
+        <textarea id="dislikes" data-placeholder-it="es. persone noiose, silenzio..." data-placeholder-en="e.g. boring people, silence..." placeholder="e.g. boring people, silence..." style="min-height:64px"></textarea>
       </div>
     </div>
 
     <div class="field">
-      <label data-it="Allineamento morale" data-en="Moral alignment">Allineamento morale</label>
+      <label data-it="Allineamento morale" data-en="Moral alignment">Moral alignment</label>
       <div class="chip-group">
-        <span class="chip" data-group="alignment" data-it="Legale Buono" data-en="Lawful Good">Legale Buono</span>
-        <span class="chip" data-group="alignment" data-it="Neutrale Buono" data-en="Neutral Good">Neutrale Buono</span>
-        <span class="chip" data-group="alignment" data-it="Caotico Buono" data-en="Chaotic Good">Caotico Buono</span>
-        <span class="chip" data-group="alignment" data-it="Legale Neutrale" data-en="Lawful Neutral">Legale Neutrale</span>
-        <span class="chip" data-group="alignment" data-it="Vero Neutrale" data-en="True Neutral">Vero Neutrale</span>
-        <span class="chip" data-group="alignment" data-it="Caotico Neutrale" data-en="Chaotic Neutral">Caotico Neutrale</span>
-        <span class="chip" data-group="alignment" data-it="Legale Malvagio" data-en="Lawful Evil">Legale Malvagio</span>
-        <span class="chip" data-group="alignment" data-it="Neutrale Malvagio" data-en="Neutral Evil">Neutrale Malvagio</span>
-        <span class="chip" data-group="alignment" data-it="Caotico Malvagio" data-en="Chaotic Evil">Caotico Malvagio</span>
+        <span class="chip" data-group="alignment" data-it="Legale Buono" data-en="Lawful Good">Lawful Good</span>
+        <span class="chip" data-group="alignment" data-it="Neutrale Buono" data-en="Neutral Good">Neutral Good</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Buono" data-en="Chaotic Good">Chaotic Good</span>
+        <span class="chip" data-group="alignment" data-it="Legale Neutrale" data-en="Lawful Neutral">Lawful Neutral</span>
+        <span class="chip" data-group="alignment" data-it="Vero Neutrale" data-en="True Neutral">True Neutral</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Neutrale" data-en="Chaotic Neutral">Chaotic Neutral</span>
+        <span class="chip" data-group="alignment" data-it="Legale Malvagio" data-en="Lawful Evil">Lawful Evil</span>
+        <span class="chip" data-group="alignment" data-it="Neutrale Malvagio" data-en="Neutral Evil">Neutral Evil</span>
+        <span class="chip" data-group="alignment" data-it="Caotico Malvagio" data-en="Chaotic Evil">Chaotic Evil</span>
       </div>
     </div>
   </div>
@@ -518,23 +518,23 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">◎</div>
-      <div class="section-title" data-it="Storia & Origini" data-en="Backstory & Origins">Storia & Origini</div>
+      <div class="section-title" data-it="Storia & Origini" data-en="Backstory & Origins">Backstory & Origins</div>
       <div class="section-line"></div>
     </div>
 
     <div class="field">
-      <label data-it="Luogo di nascita / origine" data-en="Place of birth / origin">Luogo di nascita / origine</label>
-      <input type="text" id="origin" data-placeholder-it="es. Isola Campbell, spazio, sconosciuto..." data-placeholder-en="e.g. Campbell Island, outer space, unknown..." placeholder="es. Isola Campbell, spazio, sconosciuto..." />
+      <label data-it="Luogo di nascita / origine" data-en="Place of birth / origin">Place of birth / origin</label>
+      <input type="text" id="origin" data-placeholder-it="es. Canada, spazio, sconosciuto..." data-placeholder-en="e.g. Canada, outer space, unknown..." placeholder="e.g. Campbell Island, outer space, unknown..." />
     </div>
 
     <div class="field">
-      <label data-it="Riassunto della storia" data-en="Background summary">Riassunto della storia</label>
-      <textarea id="backstory" data-placeholder-it="Come è cresciuto? Eventi chiave? Come ha ottenuto i suoi poteri o ruolo?" data-placeholder-en="How did they grow up? Any key events? How did they get their powers / role?" placeholder="Come è cresciuto? Eventi chiave? Come ha ottenuto i suoi poteri o ruolo?"></textarea>
+      <label data-it="Riassunto della storia" data-en="Background summary">Background summary</label>
+      <textarea id="backstory" data-placeholder-it="Come è cresciuto? Eventi chiave? Come ha ottenuto i suoi poteri o ruolo?" data-placeholder-en="How did they grow up? Any key events? How did they get their powers / role?" placeholder="How did they grow up? Any key events? How did they get their powers / role?"></textarea>
     </div>
 
     <div class="field">
-      <label data-it="Relazioni importanti" data-en="Important relationships">Relazioni importanti</label>
-      <textarea id="relations" data-placeholder-it="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" data-placeholder-en="Partners, rivals, family, mentors — who matters to them and why?" placeholder="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" style="min-height:64px"></textarea>
+      <label data-it="Relazioni importanti" data-en="Important relationships">Important relationships</label>
+      <textarea id="relations" data-placeholder-it="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" data-placeholder-en="Partners, rivals, family, mentors — who matters to them and why?" placeholder="Partners, rivals, family, mentors — who matters to them and why?" style="min-height:64px"></textarea>
     </div>
   </div>
 
@@ -542,31 +542,31 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">◆</div>
-      <div class="section-title" data-it="Poteri & Abilità" data-en="Powers & Abilities">Poteri & Abilità</div>
+      <div class="section-title" data-it="Poteri & Abilità" data-en="Powers & Abilities">Powers & Abilities</div>
       <div class="section-line"></div>
     </div>
 
     <div class="field">
-      <label data-it="Livello di potere" data-en="Power tier / strength level">Livello di potere</label>
+      <label data-it="Livello di potere" data-en="Power tier / strength level">Power tier / strength level</label>
       <div class="chip-group">
-        <span class="chip" data-group="tier" data-it="Livello strada" data-en="Street level">Livello strada</span>
-        <span class="chip" data-group="tier" data-it="Livello città" data-en="City level">Livello città</span>
-        <span class="chip" data-group="tier" data-it="Livello isola" data-en="Island level">Livello isola</span>
-        <span class="chip" data-group="tier" data-it="Livello nazione" data-en="Country level">Livello nazione</span>
-        <span class="chip" data-group="tier" data-it="Continentale" data-en="Continental">Continentale</span>
-        <span class="chip" data-group="tier" data-it="Planetario" data-en="Planetary">Planetario</span>
-        <span class="chip" data-group="tier" data-it="Multiversale" data-en="Multiversal">Multiversale</span>
+        <span class="chip" data-group="tier" data-it="Livello strada" data-en="Street level">Street level</span>
+        <span class="chip" data-group="tier" data-it="Livello città" data-en="City level">City level</span>
+        <span class="chip" data-group="tier" data-it="Livello isola" data-en="Island level">Island level</span>
+        <span class="chip" data-group="tier" data-it="Livello nazione" data-en="Country level">Country level</span>
+        <span class="chip" data-group="tier" data-it="Continentale" data-en="Continental">Continental</span>
+        <span class="chip" data-group="tier" data-it="Planetario" data-en="Planetary">Planetary</span>
+        <span class="chip" data-group="tier" data-it="Multiversale" data-en="Multiversal">Multiversal</span>
       </div>
     </div>
 
     <div class="field">
-      <label data-it="Abilità principali" data-en="Main abilities">Abilità principali</label>
-      <textarea id="powers" data-placeholder-it="Elenca poteri, abilità o tecniche. Più dettagli, meglio è!" data-placeholder-en="List their powers, skills, or techniques. Be as detailed as you want!" placeholder="Elenca poteri, abilità o tecniche. Più dettagli, meglio è!"></textarea>
+      <label data-it="Abilità principali" data-en="Main abilities">Main abilities</label>
+      <textarea id="powers" data-placeholder-it="Elenca poteri, abilità o tecniche. Più dettagli, meglio è!" data-placeholder-en="List their powers, skills, or techniques. Be as detailed as you want!" placeholder="List their powers, skills, or techniques. Be as detailed as you want!"></textarea>
     </div>
 
     <div class="field">
-      <label data-it="Debolezze" data-en="Weaknesses">Debolezze</label>
-      <textarea id="weaknesses" data-placeholder-it="Cosa può ferirli o fermarli?" data-placeholder-en="What can hurt or stop them?" placeholder="Cosa può ferirli o fermarli?" style="min-height:64px"></textarea>
+      <label data-it="Debolezze" data-en="Weaknesses">Weaknesses</label>
+      <textarea id="weaknesses" data-placeholder-it="Cosa può ferirli o fermarli?" data-placeholder-en="What can hurt or stop them?" placeholder="What can hurt or stop them?" style="min-height:64px"></textarea>
     </div>
   </div>
 
@@ -574,29 +574,28 @@
   <div class="section">
     <div class="section-header">
       <div class="section-icon">✦</div>
-      <div class="section-title" data-it="Extra" data-en="Extra">Extra</div>
-      <div class="section-line"></div>
+      <div class="section-title" data-it="Extra" data-en="Extra">Extra</div>      <div class="section-line"></div>
     </div>
 
     <div class="field">
-      <label data-it="Altro? (stranezze, segreti, curiosità...)" data-en="Anything else? (quirks, secrets, trivia...)">Altro? (stranezze, segreti, curiosità...)</label>
-      <textarea id="extra" data-placeholder-it="Spazio libero — aggiungi tutto quello che non entra sopra." data-placeholder-en="Free space — add whatever doesn't fit above." placeholder="Spazio libero — aggiungi tutto quello che non entra sopra."></textarea>
+      <label data-it="Altro? (stranezze, segreti, curiosità...)" data-en="Anything else? (quirks, secrets, trivia...)">Anything else? (quirks, secrets, trivia...)</label>
+      <textarea id="extra" data-placeholder-it="Spazio libero — aggiungi tutto quello che non entra sopra." data-placeholder-en="Free space — add whatever doesn't fit above." placeholder="Free space — add whatever doesn't fit above."></textarea>
     </div>
   </div>
 
   <!-- Submit -->
   <div class="submit-area">
     <button class="submit-btn" id="submit-btn" onclick="generate()">
-      <span data-it="Genera scheda personaggio" data-en="Generate character brief">Genera scheda personaggio</span>
+      <span data-it="Genera scheda personaggio" data-en="Generate character brief">Generate character brief</span>
     </button>
   </div>
 
   <!-- Result -->
   <div class="result-wrap" id="result-wrap">
     <div class="result-header">
-      <div class="result-title" data-it="Scheda generata" data-en="Generated brief">Scheda generata</div>
+      <div class="result-title" data-it="Scheda generata" data-en="Generated brief">Generated brief</div>
       <button class="copy-btn" id="copy-btn" onclick="copyResult()">
-        <span data-it="Copia testo" data-en="Copy text">Copia testo</span>
+        <span data-it="Copia testo" data-en="Copy text">Copy text</span>
       </button>
     </div>
     <div class="result-box" id="result"></div>
@@ -605,7 +604,7 @@
 </div>
 
 <script>
-  let lang = 'it';
+  let lang = 'en';
 
   function setLang(l) {
     lang = l;
