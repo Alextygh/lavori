@@ -1,208 +1,49 @@
-
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans); }
-  #app { padding: 1.5rem 0; }
-  h2.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
-  #header { margin-bottom: 1.5rem; }
-  #header h1 { font-size: 20px; font-weight: 500; color: #534AB7; margin-bottom: 4px; }
-  #header p { font-size: 14px; color: var(--color-text-secondary); }
-  #upload-area {
-    border: 1.5px dashed #AFA9EC;
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    text-align: center;
-    background: #EEEDFE;
-    cursor: pointer;
-    transition: background 0.15s;
-    margin-bottom: 1.5rem;
-  }
-  #upload-area:hover { background: #CECBF6; }
-  #upload-area .icon { font-size: 28px; margin-bottom: 8px; }
-  #upload-area p { font-size: 14px; color: #534AB7; font-weight: 500; }
-  #upload-area small { font-size: 12px; color: #7F77DD; }
-  #file-input { display: none; }
-  #search-row { display: flex; gap: 10px; align-items: center; margin-bottom: 1.5rem; }
-  #search-input {
-    flex: 1;
-    padding: 8px 14px;
-    border: 0.5px solid #AFA9EC;
-    border-radius: var(--border-radius-md);
-    font-size: 14px;
-    background: var(--color-background-primary);
-    color: var(--color-text-primary);
-  }
-  #count-label { font-size: 13px; color: #7F77DD; white-space: nowrap; }
-  #grid {
+  #app { padding: 1rem 0; font-family: var(--font-sans); }
+  input[type=file] { margin-bottom: 1.5rem; }
+  #griglia {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
   }
   .card {
-    background: var(--color-background-primary);
-    border: 0.5px solid #AFA9EC;
-    border-radius: var(--border-radius-lg);
-    padding: 1rem 1.25rem;
-    border-top: 3px solid #7F77DD;
-  }
-  .card-avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
     background: #EEEDFE;
-    color: #534AB7;
-    font-weight: 500;
-    font-size: 15px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 10px;
+    border: 1px solid #AFA9EC;
+    border-radius: 10px;
+    padding: 12px;
   }
-  .card-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; }
-  .card-row { display: flex; gap: 6px; font-size: 13px; margin-bottom: 5px; align-items: flex-start; }
-  .card-label { color: #7F77DD; min-width: 70px; font-size: 12px; }
-  .card-value { color: var(--color-text-primary); word-break: break-word; }
-  #empty-state { text-align: center; padding: 3rem 0; color: var(--color-text-secondary); font-size: 15px; }
-  #example-btn {
-    background: transparent;
-    border: 0.5px solid #AFA9EC;
-    border-radius: var(--border-radius-md);
-    padding: 6px 14px;
-    font-size: 13px;
-    color: #534AB7;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  #example-btn:hover { background: #EEEDFE; }
+  .card p { font-size: 14px; color: #26215C; margin: 3px 0; }
+  .card p span { color: #7F77DD; font-size: 12px; }
 </style>
 
 <div id="app">
-  <h2 class="sr-only">Visualizzatore anagrafica CSV con blocchi card responsivi</h2>
-  <div id="header">
-    <h1>📋 Anagrafica CSV</h1>
-    <p>Importa un file CSV per visualizzare i dati in blocchi</p>
-  </div>
-
-  <div id="upload-area" onclick="document.getElementById('file-input').click()">
-    <div class="icon">📂</div>
-    <p>Clicca per importare un file CSV</p>
-    <small>I campi verranno rilevati automaticamente</small>
-    <br>
-    <button id="example-btn" onclick="event.stopPropagation(); loadExample()">Carica dati di esempio</button>
-  </div>
-  <input type="file" id="file-input" accept=".csv">
-
-  <div id="search-row" style="display:none">
-    <input type="text" id="search-input" placeholder="Cerca..." oninput="renderCards()">
-    <span id="count-label"></span>
-  </div>
-
-  <div id="grid"></div>
-  <div id="empty-state" style="display:none">Nessun risultato trovato.</div>
+  <h2 style="color:#534AB7;font-weight:500;margin-bottom:10px;">Anagrafica CSV</h2>
+  <input type="file" accept=".csv" onchange="caricaCSV(this)">
+  <div id="griglia"></div>
 </div>
 
 <script>
-let allData = [];
-let allKeys = [];
-
-document.getElementById('file-input').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+function caricaCSV(input) {
   const reader = new FileReader();
-  reader.onload = function(ev) {
-    parseCSV(ev.target.result);
+  reader.onload = function(e) {
+    const righe = e.target.result.trim().split('\n');
+    const sep = righe[0].includes(';') ? ';' : ',';
+    const colonne = righe[0].split(sep).map(c => c.trim());
+    const griglia = document.getElementById('griglia');
+    griglia.innerHTML = '';
+
+    for (let i = 1; i < righe.length; i++) {
+      const valori = righe[i].split(sep).map(v => v.trim());
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      colonne.forEach(function(col, j) {
+        card.innerHTML += '<p><span>' + col + '</span><br>' + (valori[j] || '') + '</p>';
+      });
+
+      griglia.appendChild(card);
+    }
   };
-  reader.readAsText(file, 'UTF-8');
-});
-
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return;
-
-  const sep = text.indexOf(';') !== -1 ? ';' : ',';
-  const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
-
-  allData = [];
-  for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(sep).map(v => v.trim().replace(/^"|"$/g, ''));
-    if (vals.length < 2) continue;
-    const obj = {};
-    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
-    allData.push(obj);
-  }
-  allKeys = headers;
-
-  document.getElementById('upload-area').style.display = 'none';
-  document.getElementById('search-row').style.display = 'flex';
-  renderCards();
-}
-
-function getInitials(obj) {
-  const nameKey = allKeys.find(k => /nome|name|cognome|surname/i.test(k));
-  if (!nameKey) return '?';
-  const parts = (obj[nameKey] || '').trim().split(' ');
-  return parts.map(p => p[0] || '').join('').toUpperCase().slice(0, 2) || '?';
-}
-
-function getCardTitle(obj) {
-  const nameKey = allKeys.find(k => /nome|name/i.test(k));
-  const surnameKey = allKeys.find(k => /cognome|surname|lastname/i.test(k));
-  if (nameKey && surnameKey) return (obj[nameKey] + ' ' + obj[surnameKey]).trim();
-  if (nameKey) return obj[nameKey];
-  return obj[allKeys[0]] || '—';
-}
-
-function renderCards() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const grid = document.getElementById('grid');
-  const empty = document.getElementById('empty-state');
-
-  const filtered = allData.filter(row =>
-    Object.values(row).some(v => v.toLowerCase().includes(q))
-  );
-
-  document.getElementById('count-label').textContent = filtered.length + ' record';
-
-  if (filtered.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  grid.innerHTML = filtered.map(row => buildCard(row)).join('');
-}
-
-function buildCard(row) {
-  const title = getCardTitle(row);
-  const initials = getInitials(row);
-  const titleKey = allKeys.find(k => row[k] === title) || allKeys[0];
-
-  const rows = allKeys
-    .filter(k => row[k] && row[k].trim() !== '' && row[k] !== title)
-    .map(k => {
-      const val = row[k];
-      return `<div class="card-row">
-        <span class="card-label">${k}</span>
-        <span class="card-value">${val}</span>
-      </div>`;
-    }).join('');
-
-  return `<div class="card">
-    <div class="card-avatar">${initials}</div>
-    <div class="card-name">${title}</div>
-    ${rows}
-  </div>`;
-}
-
-function loadExample() {
-  const csv = `Nome,Cognome,Email,Telefono,Città,Ruolo
-Mario,Rossi,mario.rossi@email.it,333-1234567,Milano,Sviluppatore
-Giulia,Bianchi,giulia.b@email.it,340-9876543,Roma,Designer
-Luca,Verdi,luca.v@email.it,347-1122334,Torino,Manager
-Francesca,Neri,f.neri@email.it,320-5566778,Napoli,Analista
-Alessandro,Ferrari,a.ferrari@email.it,338-9988776,Bologna,DevOps
-Sara,Esposito,s.esposito@email.it,335-3344556,Firenze,PM
-Giorgio,Russo,g.russo@email.it,329-7788990,Venezia,QA
-Valentina,Conti,v.conti@email.it,342-1234321,Genova,UX
-`;
-  parseCSV(csv);
+  reader.readAsText(input.files[0], 'UTF-8');
 }
 </script>
