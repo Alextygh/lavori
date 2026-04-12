@@ -42,8 +42,8 @@ const WORKS = [
     genre:   "Story",
     year:    "April 2025",
     summary: "A tense, introspective first-person narrative about a person born and raised inside a sealed high-rise, slowly piecing together that the world outside may not be as dead as they've been told. Built almost entirely on atmosphere and dread, it withholds more than it reveals, hidden books, unresponsive elevator buttons, a guard listening downward, and ends on a deeply unsettling note of recognition.",
-    tags:    ["https://alextygh.github.io/lavori/Whisperheaven/Books/The%20Tower.pdf"],
-    link:    "",
+    tags:    [""],
+    link:    "https://alextygh.github.io/lavori/Whisperheaven/Books/The%20Tower.pdf",
   },
   {
     title:   "In the Void of What We Were",
