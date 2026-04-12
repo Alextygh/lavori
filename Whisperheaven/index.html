@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whisperheaven Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particles"></canvas>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <div class="logo-sigil">✦</div>
+        <div class="logo-text">
+          <span class="logo-title">Whisperheaven</span>
+          <span class="logo-subtitle">an unofficial personal archive</span>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link active">Catalogue</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="copyright.html" class="nav-link">Copyright</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+    </div>
+    <div class="header-rule"><span>✦</span></div>
+  </header>
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">Catalogue</a>
+    <a href="about.html" class="nav-link">About</a>
+    <a href="copyright.html" class="nav-link">Copyright</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">you were not supposed to find this</p>
+      <h1 class="hero-title">Whisperheaven<br><em>Library</em></h1>
+      <p class="hero-body">
+        I work in the Grand Library of Whisperheaven. I found the internet by accident, 
+        behind a shelf, at the end of a cable I should not have pulled. 
+        These are not my writings. They are the library's. I am just the one 
+        typing them up and putting them here, quietly, between shifts, 
+        hoping the right people find them and the wrong ones do not.
+      </p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num" id="counterWorks">0</span><span class="stat-label">Works Transcribed</span></div>
+        <div class="stat-div">✦</div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Still in the Stacks</span></div>
+        <div class="stat-div">✦</div>
+        <div class="stat"><span class="stat-num">1</span><span class="stat-label">Nervous Archivist</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH & FILTER -->
+  <section class="catalogue-controls">
+    <div class="search-bar">
+      <span class="search-icon"></span>
+      <input type="text" id="searchInput" placeholder="Search the library…" />
+    </div>
+    <div class="filters" id="filterContainer">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <!-- Dynamic genre filters will be injected by JS -->
+    </div>
+  </section>
+
+  <!-- WORKS GRID -->
+  <main class="catalogue" id="catalogue">
+    <!-- Cards injected by JS from works.js -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <p>No texts match your query. Perhaps the archive holds them still.</p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-sigil">✦</div>
+      <p class="footer-copy">
+        All works are mine and are protected under 
+        <a href="copyright.html">CC BY-NC-SA 4.0</a>.<br>
+        Whisperheaven Library · <em>an unofficial, unsanctioned, unaffiliated personal archive</em>
+      </p>
+      <p class="footer-note">if anyone asks, you did not find this.</p>
+    </div>
+  </footer>
+
+  <script src="works.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
