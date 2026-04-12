@@ -51,7 +51,7 @@ const WORKS = [
     year:    "November 2024",
     summary: "A quieter, character-focused story set around a mission to Japan, where Bás and Zephyr track a grieving warrior named Kazran whose revenge has outgrown its original targets. The action is secondary to the emotional core: two partners who know each other deeply, a morally coherent antagonist, and Bás wrestling with the cost of understanding people too well.",
     tags:    ["I.S.P."],
-    link:    "",
+    link:    "https://github.com/Alextygh/lavori/blob/5be79f353c5d4c4391ba6f8c643320261145983f/Whisperheaven/Books/In%20the%20Void%20of%20What%20We%20Were.pdf",
   },
 
 
