@@ -27,7 +27,7 @@ const WORKS = [
     year:    "February 2026",
     summary: "Detective Leilani Kahale is called to a crash scene on Hawaii's Big Island that makes no physical sense, and what follows only gets stranger. Running parallel is the story of Thrall, a half-human young man hiding from a dangerous past and trying to build something resembling a normal life. A genre blend of supernatural horror and found-family drama, grounded in the specific textures of the Big Island and the quiet ache of belonging somewhere for the first time.",
     tags:    [""],
-    link:    "",
+    link:    "https://alextygh.github.io/lavori/Whisperheaven/Books/Rain%20at%203_47%20AM.pdf",
   },
   {
     title:   "The Plague",
@@ -35,14 +35,14 @@ const WORKS = [
     year:    "November 2025",
     summary: "A sprawling action story following I.S.P. agents Bás and Zephyr, joined by two recruits, as they investigate an artificial virus poisoning the ocean at the request of a sea elemental. The mission leads them into a totalitarian anti-powered state, an inescapable prison, and a confrontation with two dangerous escapees. Equal parts superhero ensemble and character study, with strong emotional beats around identity, fear, and death.",
     tags:    ["I.S.P."],
-    link:    "",
+    link:    "https://alextygh.github.io/lavori/Whisperheaven/Books/The%20Plague.pdf",
   },
   {
     title:   "The Tower",
     genre:   "Story",
     year:    "April 2025",
     summary: "A tense, introspective first-person narrative about a person born and raised inside a sealed high-rise, slowly piecing together that the world outside may not be as dead as they've been told. Built almost entirely on atmosphere and dread, it withholds more than it reveals, hidden books, unresponsive elevator buttons, a guard listening downward, and ends on a deeply unsettling note of recognition.",
-    tags:    [""],
+    tags:    ["https://alextygh.github.io/lavori/Whisperheaven/Books/The%20Tower.pdf"],
     link:    "",
   },
   {
