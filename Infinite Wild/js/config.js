@@ -7,4 +7,4 @@
 //             https://github.com/settings/tokens → Generate new token (classic) → check "gist"
 
 export const GIST_ID    = 'bbd472273a60b9e86fd3974db4566b14';
-export const GIST_TOKEN = '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';
+export const GIST_TOKEN = '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';
