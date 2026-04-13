@@ -125,7 +125,7 @@ searchZEl.addEventListener('keydown', e => { if (e.key === 'Enter') searchCoords
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
-visitedLocations = loadAllLocations();
+loadAllLocations().then(locs => { visitedLocations = locs; renderVisited(); redraw(); });
 setupControls(canvas, hoverEl, redraw);
 window.addEventListener('resize', redraw);
 renderVisited();

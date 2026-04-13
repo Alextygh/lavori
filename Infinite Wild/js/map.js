@@ -267,8 +267,9 @@ export function buildLegend(containerEl) {
 
 export function fitCanvas(canvas) {
   const rect = canvas.parentElement.getBoundingClientRect();
-  const w = Math.floor(rect.width);
-  const h = Math.floor(rect.height);
-  if (canvas.width !== w) canvas.width = w;
+  const w = Math.floor(rect.width)  || canvas.width;
+  const h = Math.floor(rect.height) || canvas.height;
+  // Setting width/height clears the canvas buffer — only do it when size actually changed
+  if (canvas.width !== w)  canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
 }

@@ -84,8 +84,8 @@ async function arrive() {
   }
 
   // Save + reload
-  saveLocation(x, z, biomeId, weatherId);
-  visitedLocations = loadAllLocations();
+  await saveLocation(x, z, biomeId, weatherId);
+  visitedLocations = await loadAllLocations();
   redraw();
 
   arriveBtn.disabled = false;
@@ -119,7 +119,7 @@ arriveBtn.addEventListener('click', arrive);
 copyBtn.addEventListener('click', copyCoords);
 
 buildLegend(legendEl);
-visitedLocations = loadAllLocations();
+loadAllLocations().then(locs => { visitedLocations = locs; redraw(); });
 setupControls(canvas, hoverEl, redraw);
 window.addEventListener('resize', redraw);
 redraw();

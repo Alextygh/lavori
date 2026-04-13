@@ -1,44 +1,99 @@
-// storage.js — localStorage-backed shared registry
-// In a real deployment, replace with a backend API or Firebase for true cross-user sharing.
-// As a single-user local site, localStorage persists across tabs and sessions.
+// storage.js — Shared location registry via GitHub Gist
+//
+// Setup (one-time):
+//   1. Go to https://gist.github.com → create a new PUBLIC gist
+//      Filename: locations.json  Content: []
+//   2. Copy the Gist ID from the URL (the long hash after your username)
+//   3. Go to https://github.com/settings/tokens → Generate new token (classic)
+//      Scopes: check "gist" only
+//   4. Edit js/config.js and fill in GIST_ID and GIST_TOKEN
 
-const PREFIX = 'iw:loc:';
+import { GIST_ID, GIST_TOKEN } from './config.js';
 
-export function saveLocation(x, z, biomeId, weatherId) {
+const CACHE_KEY  = 'iw:cache';     // local cache of remote list
+const CACHE_TIME = 'iw:cache_ts';  // when we last fetched
+
+// ─── READ ────────────────────────────────────────────────────────────────────
+
+export async function loadAllLocations() {
+  // Return cache if fresh (< 30s old) to avoid hammering the API
   try {
-    const key = PREFIX + x + ':' + z;
-    const record = { x, z, biomeId, weatherId, ts: Date.now() };
-    localStorage.setItem(key, JSON.stringify(record));
+    const ts = parseInt(localStorage.getItem(CACHE_TIME) || '0', 10);
+    if (Date.now() - ts < 30_000) {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    }
+  } catch {}
+
+  try {
+    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `Bearer ${GIST_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+      },
+    });
+    if (!res.ok) throw new Error('Gist fetch failed: ' + res.status);
+    const data = await res.json();
+    const raw  = data.files?.['locations.json']?.content || '[]';
+    const locs = JSON.parse(raw);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(locs));
+    localStorage.setItem(CACHE_TIME, String(Date.now()));
+    return locs;
+  } catch (e) {
+    console.warn('Could not load from Gist, using local cache:', e);
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return [];
+  }
+}
+
+// ─── WRITE ───────────────────────────────────────────────────────────────────
+
+export async function saveLocation(x, z, biomeId, weatherId) {
+  const record = { x, z, biomeId, weatherId, ts: Date.now() };
+
+  // Optimistically update local cache
+  try {
+    const cached  = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+    const updated = [record, ...cached.filter(l => !(l.x === x && l.z === z))];
+    localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+    localStorage.setItem(CACHE_TIME, String(Date.now()));
+  } catch {}
+
+  // Write to Gist — fetch first to avoid stomping concurrent writes
+  try {
+    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `Bearer ${GIST_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+      },
+    });
+    if (!res.ok) throw new Error('Fetch before write failed: ' + res.status);
+    const data    = await res.json();
+    const raw     = data.files?.['locations.json']?.content || '[]';
+    const locs    = JSON.parse(raw);
+    // No cap — every coordinate ever visited lives here forever
+    const updated = [record, ...locs.filter(l => !(l.x === x && l.z === z))];
+
+    const patch = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${GIST_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        files: { 'locations.json': { content: JSON.stringify(updated, null, 2) } },
+      }),
+    });
+    if (!patch.ok) throw new Error('Gist PATCH failed: ' + patch.status);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+    localStorage.setItem(CACHE_TIME, String(Date.now()));
     return true;
   } catch (e) {
-    console.warn('Storage save failed:', e);
+    console.warn('Could not save to Gist:', e);
     return false;
   }
-}
-
-export function loadAllLocations() {
-  const locs = [];
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith(PREFIX)) continue;
-      try {
-        const val = localStorage.getItem(key);
-        if (val) locs.push(JSON.parse(val));
-      } catch (e) { /* skip malformed */ }
-    }
-    locs.sort((a, b) => b.ts - a.ts);
-  } catch (e) {
-    console.warn('Storage load failed:', e);
-  }
-  return locs;
-}
-
-export function clearAll() {
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith(PREFIX)) keys.push(k);
-  }
-  keys.forEach(k => localStorage.removeItem(k));
 }
