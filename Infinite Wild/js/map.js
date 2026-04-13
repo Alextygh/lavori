@@ -1,18 +1,20 @@
 import { BIOMES, BIOME_MAP, getBiomeAt } from './world.js';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-// cx/cz = world coordinate at the center of the screen
-// zoom  = pixels per world unit
 
 const state = { cx: 0, cz: 0, zoom: 8, dragging: false, lastMX: 0, lastMY: 0 };
 
 // ─── TILE CACHE ───────────────────────────────────────────────────────────────
+// Cache by world-integer coords — always 1 world unit per entry
 
 const tileCache = new Map();
-function getTileColor(wx, wz) {
-  const key = wx + ',' + wz;
+function getBiomeColor(wx, wz) {
+  // Round to integer world coords for cache key
+  const ix = Math.round(wx), iz = Math.round(wz);
+  const key = ix + ',' + iz;
   if (tileCache.has(key)) return tileCache.get(key);
-  const color = (BIOME_MAP[getBiomeAt(wx, wz)] || BIOMES[0]).color;
+  const color = (BIOME_MAP[getBiomeAt(ix, iz)] || BIOMES[0]).color;
+  if (tileCache.size > 20000) tileCache.clear(); // prevent unbounded growth
   tileCache.set(key, color);
   return color;
 }
@@ -28,7 +30,6 @@ export function fitCanvas(canvas) {
 }
 
 // ─── COORDINATE HELPERS ───────────────────────────────────────────────────────
-// Convert world coord → pixel on canvas (and back)
 
 function worldToPixel(wx, wz, W, H) {
   return {
@@ -53,50 +54,93 @@ export function screenToWorld(sx, sz, W, H) {
 
 export function drawMap(canvas, visitedLocations, playerPos, searchPos, mode = 'sparse') {
   const W = canvas.width, H = canvas.height;
+  if (!W || !H) return;
   const ctx = canvas.getContext('2d');
-  const CELL = Math.max(1, Math.round(state.zoom));
 
   ctx.fillStyle = '#050709';
   ctx.fillRect(0, 0, W, H);
 
   if (mode === 'full' && playerPos) {
-    // Figure out which world tiles are visible
-    // Top-left pixel → world coord → floor to tile
-    const topLeftWX = Math.floor(state.cx - (W / 2) / state.zoom) - 1;
-    const topLeftWZ = Math.floor(state.cz - (H / 2) / state.zoom) - 1;
-    const tilesX = Math.ceil(W / CELL) + 3;
-    const tilesZ = Math.ceil(H / CELL) + 3;
+    // How many world units fit in one pixel (minimum 1)
+    const worldPerPixel = Math.max(1, 1 / state.zoom);
+    // Pixel size of one world unit (minimum 1)
+    const pixelPerWorld = Math.max(1, state.zoom);
 
-    for (let tz = 0; tz < tilesZ; tz++) {
-      for (let tx = 0; tx < tilesX; tx++) {
-        const wx = topLeftWX + tx;
-        const wz = topLeftWZ + tz;
-        // Pixel position of this tile's top-left corner
+    // Step through screen pixels, sampling world space
+    // We iterate in world-unit steps and draw rectangles
+    const step = worldPerPixel;  // world units per tile
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step)); // pixels per tile
+
+    // World coord at top-left of screen
+    const worldLeft = state.cx - (W / 2) / state.zoom;
+    const worldTop  = state.cz - (H / 2) / state.zoom;
+
+    // Snap to grid
+    const startWX = Math.floor(worldLeft / step) * step;
+    const startWZ = Math.floor(worldTop  / step) * step;
+
+    for (let wz = startWZ; ; wz += step) {
+      const py = Math.round(H / 2 + (wz - state.cx) * state.zoom);
+      // use cz for z axis
+      const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
+      if (py2 > H + cellPx) break;
+
+      for (let wx = startWX; ; wx += step) {
         const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
-        const pz = Math.round(H / 2 + (wz - state.cz) * state.zoom);
-        ctx.fillStyle = getTileColor(wx, wz);
-        ctx.fillRect(px, pz, CELL + 1, CELL + 1);
+        if (px > W + cellPx) break;
+
+        ctx.fillStyle = getBiomeColor(wx, wz);
+        ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
       }
     }
   } else {
+    // Sparse mode: draw visited locations as dots
     if (visitedLocations.length === 0) {
       ctx.fillStyle = 'rgba(107,114,128,0.4)';
       ctx.font = '11px monospace';
       ctx.textAlign = 'center';
       ctx.fillText('No visited locations yet', W / 2, H / 2);
       ctx.textAlign = 'left';
+      return;
     }
     visitedLocations.forEach(loc => {
       const p = worldToPixel(loc.x, loc.z, W, H);
-      const size = Math.max(4, Math.min(16, state.zoom * 3));
+      const size = 10;
       const biome = BIOME_MAP[loc.biomeId] || BIOMES[0];
       ctx.fillStyle = biome.color;
       ctx.strokeStyle = biome.textColor;
-      ctx.lineWidth = 0.5;
+      ctx.lineWidth = 1;
       ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
       ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
     });
   }
+}
+
+// ─── AUTO-FIT for sparse/explore mode ────────────────────────────────────────
+// Call this to zoom/pan so all visited dots are visible
+
+export function fitToLocations(locations, W, H) {
+  if (!locations.length) return;
+  if (locations.length === 1) {
+    state.cx = locations[0].x;
+    state.cz = locations[0].z;
+    state.zoom = 0.000001;
+    return;
+  }
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  locations.forEach(l => {
+    if (l.x < minX) minX = l.x;
+    if (l.x > maxX) maxX = l.x;
+    if (l.z < minZ) minZ = l.z;
+    if (l.z > maxZ) maxZ = l.z;
+  });
+  state.cx = (minX + maxX) / 2;
+  state.cz = (minZ + maxZ) / 2;
+  const rangeX = maxX - minX || 1;
+  const rangeZ = maxZ - minZ || 1;
+  // Fit with padding
+  state.zoom = Math.min(W / rangeX, H / rangeZ) * 0.7;
+  state.zoom = Math.max(0.0000001, Math.min(64, state.zoom));
 }
 
 // ─── OVERLAY ─────────────────────────────────────────────────────────────────
@@ -120,8 +164,8 @@ export function updateOverlay(overlayEl, visitedLocations, playerPos, searchPos,
     addMarker('other-marker', loc.x, loc.z);
   });
 
-  if (searchPos)  addMarker('search-marker', searchPos.x, searchPos.z);
-  if (playerPos)  addMarker('player-marker', playerPos.x, playerPos.z);
+  if (searchPos) addMarker('search-marker', searchPos.x, searchPos.z);
+  if (playerPos) addMarker('player-marker', playerPos.x, playerPos.z);
 }
 
 // ─── CAMERA ──────────────────────────────────────────────────────────────────
@@ -135,7 +179,7 @@ export function centerOn(wx, wz, newZoom = null) {
 export function getState() { return state; }
 
 export function zoom(factor) {
-  state.zoom = Math.max(0.001, Math.min(64, state.zoom * factor));
+  state.zoom = Math.max(0.0000001, Math.min(64, state.zoom * factor));
 }
 
 export function resetZoom() { state.zoom = 8; }

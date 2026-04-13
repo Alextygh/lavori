@@ -1,5 +1,5 @@
 import { BIOME_MAP, WEATHER_MAP, getBiomeAt, getWeatherAt, timeAgo } from './world.js';
-import { drawMap, updateOverlay, fitCanvas, setupControls, centerOn, getState, zoom, resetZoom } from './map.js';
+import { drawMap, updateOverlay, fitCanvas, setupControls, centerOn, fitToLocations, getState, zoom, resetZoom } from './map.js';
 import { loadAllLocations } from './storage.js';
 import { generateArrivalDescription, fallbackDescription } from './ai.js';
 
@@ -127,6 +127,8 @@ searchZEl.addEventListener('keydown', e => { if (e.key === 'Enter') searchCoords
 
 visitedLocations = loadAllLocations();
 renderVisited();
+fitCanvas(canvas);
+fitToLocations(visitedLocations, canvas.width || 800, canvas.height || 320);
 setupControls(canvas, hoverEl, redraw);
 window.addEventListener('resize', redraw);
 renderVisited();
