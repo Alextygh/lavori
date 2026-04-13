@@ -27,10 +27,10 @@ function redraw() {
   raf = requestAnimationFrame(() => {
     fitCanvas(canvas);
     const W = canvas.width, H = canvas.height;
+    drawMap(canvas, visitedLocations, null, searchedLocation, 'sparse');
     const others = visitedLocations.filter(l =>
       !searchedLocation || l.x !== searchedLocation.x || l.z !== searchedLocation.z
     );
-    drawMap(canvas, visitedLocations, null, searchedLocation, 'sparse');
     updateOverlay(overlay, others, null, searchedLocation, W, H);
   });
 }
@@ -52,8 +52,6 @@ async function searchCoords() {
   const weather = WEATHER_MAP[weatherId];
 
   searchedLocation = { x, z, biomeId, weatherId };
-  centerOn(x, z, 0.0000001); // zoom to fit all visited + this point
-  // Actually just center on it at current zoom
   centerOn(x, z);
   redraw();
 
@@ -127,9 +125,14 @@ searchZEl.addEventListener('keydown', e => { if (e.key === 'Enter') searchCoords
 
 visitedLocations = loadAllLocations();
 renderVisited();
-fitCanvas(canvas);
-fitToLocations(visitedLocations, canvas.width || 800, canvas.height || 320);
 setupControls(canvas, hoverEl, redraw);
 window.addEventListener('resize', redraw);
-renderVisited();
-redraw();
+
+// Defer first draw until after layout is complete so offsetWidth is available
+requestAnimationFrame(() => {
+  fitCanvas(canvas);
+  if (visitedLocations.length > 0) {
+    fitToLocations(visitedLocations, canvas.width || 800, canvas.height || 320);
+  }
+  redraw();
+});

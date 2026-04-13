@@ -37,6 +37,30 @@ const WEATHER_PHRASES = {
   'static':    ['as static pulses through the air at irregular intervals', 'in electromagnetic conditions that make hair and thought both rise', 'through a static pulse that arrived exactly when you did'],
 };
 
+// Varied closing lines — coordinates are injected where {coords} appears
+const CLOSINGS = [
+  'The coordinates are correct. Everything else is uncertain.',
+  'You are the only record that this place exists.',
+  'Whatever named this world did not get this far.',
+  'There is no signal here. There is no one to send one to.',
+  'This location will outlast your knowledge of it.',
+  'The world generates this place whether or not anyone arrives.',
+  'Distance from here to anywhere is not a number that fits on a sign.',
+  'Something about the air suggests this is not the first time, but the evidence is gone.',
+  'You have not discovered this place. You have simply confirmed its coordinates.',
+  'The silence here predates language.',
+  'If you leave, nothing about this place will remember you did.',
+  'The grid extends. You are one point on it.',
+  'This terrain was always here. Your arrival changes nothing about that.',
+  'There is no landmark. You are the landmark, temporarily.',
+  'Somewhere beyond this, the pattern continues without variation or end.',
+  'The coordinates are logged. The place is indifferent to that.',
+  'Unmapped is not the same as unknown — the math knew this was here.',
+  'This exists at the same depth of wilderness as every other coordinate.',
+  'You have not gone further than anyone. You have simply gone differently.',
+  'The world does not run out. It just gets less visited.',
+];
+
 // Maps biome display names → biome IDs (from world.js BIOMES)
 const BIOME_NAME_TO_ID = {
   'Void': 'void', 'Deep Ocean': 'deep-ocean', 'Ocean': 'ocean',
@@ -83,13 +107,16 @@ export function generateArrivalDescription(x, z, biomeName, weatherName) {
   const seed = hashInt(x, z);
   const coordStr = x.toLocaleString() + ', ' + z.toLocaleString();
 
-  const opener     = pick(ARRIVAL_OPENERS, seed).replace('{coords}', coordStr);
-  const biomeLine  = pick(BIOME_PHRASES[biomeKey],   seed + 1);
+  const opener      = pick(ARRIVAL_OPENERS, seed).replace('{coords}', coordStr);
+  const biomeLine   = pick(BIOME_PHRASES[biomeKey],    seed + 1);
   const weatherLine = pick(WEATHER_PHRASES[weatherKey], seed + 2);
+  const closing     = pick(CLOSINGS,                    seed + 3);
 
-  return Promise.resolve(`${opener} ${biomeLine} ${weatherLine}. No map has ever recorded this place.`);
+  return Promise.resolve(`${opener} ${biomeLine} ${weatherLine}. ${closing}`);
 }
 
 export function fallbackDescription(x, z, biomeName, weatherName) {
-  return `You arrive at ${x.toLocaleString()}, ${z.toLocaleString()}. A ${biomeName.toLowerCase()} stretches in every direction under ${weatherName.toLowerCase()} skies. The silence here is absolute — no map has ever recorded this place, and no one will come looking for you.`;
+  const seed = hashInt(x, z);
+  const closing = pick(CLOSINGS, seed + 3);
+  return `You arrive at ${x.toLocaleString()}, ${z.toLocaleString()}. A ${biomeName.toLowerCase()} stretches in every direction under ${weatherName.toLowerCase()} skies. ${closing}`;
 }

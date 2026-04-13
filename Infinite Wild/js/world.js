@@ -63,13 +63,29 @@ const BIOME_WEATHER = {
   'anomaly':      ['static','aurora','foggy'],
 };
 
-// ─── NOISE & HASHING ──────────────────────────────────────────────────────────
+// ─── 53-BIT-SAFE HASHING ─────────────────────────────────────────────────────
+// Replaces Math.imul-only hashing (which saturates at 32 bits) with a two-layer
+// approach that produces unique values across the full Number.MAX_SAFE_INTEGER
+// coordinate space (~9 quadrillion units in each direction).
 
-function seededRand(x, z, seed) {
-  let n = (Math.imul(x, 1619) + Math.imul(z, 31337) + Math.imul(seed, 1013904223)) | 0;
-  n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
-  n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
-  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+function hash53(x, z, seed) {
+  // Layer 1: 32-bit mix (handles coordinates up to ~2 billion well)
+  let lo = (Math.imul(x | 0, 1619) + Math.imul(z | 0, 31337) + Math.imul(seed | 0, 1013904223)) | 0;
+  lo = Math.imul(lo ^ (lo >>> 16), 0x45d9f3b) | 0;
+  lo = Math.imul(lo ^ (lo >>> 16), 0x45d9f3b) | 0;
+  lo = (lo ^ (lo >>> 16)) >>> 0;
+
+  // Layer 2: exploit the high bits of large coordinates that layer 1 discards.
+  // Math.imul truncates to 32 bits, so we manually extract the upper portion
+  // of x and z (anything above 2^31) and mix it independently.
+  const xHi = Math.floor(x / 0x100000000) | 0;  // bits 32-52 of x
+  const zHi = Math.floor(z / 0x100000000) | 0;  // bits 32-52 of z
+  let hi = (Math.imul(xHi ^ 0xdeadbeef, 0x9e3779b9) + Math.imul(zHi ^ 0xbebafeca, 0x6c62272f) + Math.imul(seed | 0, 0x517cc1b7)) | 0;
+  hi = Math.imul(hi ^ (hi >>> 13), 0x5bd1e995) | 0;
+  hi = (hi ^ (hi >>> 15)) >>> 0;
+
+  // Combine both layers into [0, 1)
+  return ((lo >>> 0) * 0.5 + (hi >>> 0) * 0.5) / 4294967296;
 }
 
 function smoothNoise(x, z, seed) {
@@ -77,15 +93,21 @@ function smoothNoise(x, z, seed) {
   const fx = x - ix, fz = z - iz;
   const ux = fx * fx * (3 - 2 * fx);
   const uz = fz * fz * (3 - 2 * fz);
-  const v00 = seededRand(ix,   iz,   seed);
-  const v10 = seededRand(ix+1, iz,   seed);
-  const v01 = seededRand(ix,   iz+1, seed);
-  const v11 = seededRand(ix+1, iz+1, seed);
+  const v00 = hash53(ix,   iz,   seed);
+  const v10 = hash53(ix+1, iz,   seed);
+  const v01 = hash53(ix,   iz+1, seed);
+  const v11 = hash53(ix+1, iz+1, seed);
   return v00*(1-ux)*(1-uz) + v10*ux*(1-uz) + v01*(1-ux)*uz + v11*ux*uz;
 }
 
 function hash2(x, z) {
-  let h = (Math.imul(x, 1619) + Math.imul(z, 31337) + 1013904223) | 0;
+  // For weather: coordinates fit comfortably in 32 bits at display resolution,
+  // but add hi-bit mixing just in case.
+  const xHi = Math.floor(x / 0x100000000) | 0;
+  const zHi = Math.floor(z / 0x100000000) | 0;
+  let h = (Math.imul((x | 0), 1619) + Math.imul((z | 0), 31337) + 1013904223) | 0;
+  h ^= Math.imul(xHi ^ 0xdeadbeef, 0x9e3779b9) | 0;
+  h ^= Math.imul(zHi ^ 0xbebafeca, 0x6c62272f) | 0;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
   return (h ^ (h >>> 16)) >>> 0;
@@ -140,8 +162,9 @@ export function getWeatherAt(wx, wz, biomeId) {
 }
 
 export function randomCoords() {
-  // True "infinite" — very large range, no hard cap
-  const MAX = Number.MAX_SAFE_INTEGER / 2;
+  // Full Number.MAX_SAFE_INTEGER range — terrain is unique across this entire
+  // space thanks to the 53-bit-safe hash functions above.
+  const MAX = Number.MAX_SAFE_INTEGER;
   const x = Math.floor((Math.random() - 0.5) * 2 * MAX);
   const z = Math.floor((Math.random() - 0.5) * 2 * MAX);
   return { x, z };

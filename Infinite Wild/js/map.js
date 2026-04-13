@@ -5,16 +5,14 @@ import { BIOMES, BIOME_MAP, getBiomeAt } from './world.js';
 const state = { cx: 0, cz: 0, zoom: 8, dragging: false, lastMX: 0, lastMY: 0 };
 
 // ─── TILE CACHE ───────────────────────────────────────────────────────────────
-// Cache by world-integer coords — always 1 world unit per entry
 
 const tileCache = new Map();
 function getBiomeColor(wx, wz) {
-  // Round to integer world coords for cache key
   const ix = Math.round(wx), iz = Math.round(wz);
   const key = ix + ',' + iz;
   if (tileCache.has(key)) return tileCache.get(key);
   const color = (BIOME_MAP[getBiomeAt(ix, iz)] || BIOMES[0]).color;
-  if (tileCache.size > 20000) tileCache.clear(); // prevent unbounded growth
+  if (tileCache.size > 20000) tileCache.clear();
   tileCache.set(key, color);
   return color;
 }
@@ -23,8 +21,16 @@ function getBiomeColor(wx, wz) {
 
 export function fitCanvas(canvas) {
   const p = canvas.parentElement;
-  const w = p.offsetWidth  || 800;
-  const h = p.offsetHeight || parseInt(p.style.height) || 480;
+  // Try offsetWidth first, fall back to getBoundingClientRect, then style, then default
+  let w = p.offsetWidth;
+  let h = p.offsetHeight;
+  if (!w || !h) {
+    const rect = p.getBoundingClientRect();
+    w = rect.width || w;
+    h = rect.height || h;
+  }
+  if (!w) w = parseInt(p.style.width) || 800;
+  if (!h) h = parseInt(p.style.height) || 320;
   if (canvas.width  !== w) canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
 }
@@ -61,48 +67,49 @@ export function drawMap(canvas, visitedLocations, playerPos, searchPos, mode = '
   ctx.fillRect(0, 0, W, H);
 
   if (mode === 'full' && playerPos) {
-    // How many world units fit in one pixel (minimum 1)
     const worldPerPixel = Math.max(1, 1 / state.zoom);
-    // Pixel size of one world unit (minimum 1)
     const pixelPerWorld = Math.max(1, state.zoom);
-
-    // Step through screen pixels, sampling world space
-    // We iterate in world-unit steps and draw rectangles
-    const step = worldPerPixel;  // world units per tile
-    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step)); // pixels per tile
-
-    // World coord at top-left of screen
+    const step = worldPerPixel;
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step));
     const worldLeft = state.cx - (W / 2) / state.zoom;
     const worldTop  = state.cz - (H / 2) / state.zoom;
-
-    // Snap to grid
     const startWX = Math.floor(worldLeft / step) * step;
     const startWZ = Math.floor(worldTop  / step) * step;
 
     for (let wz = startWZ; ; wz += step) {
-      const py = Math.round(H / 2 + (wz - state.cx) * state.zoom);
-      // use cz for z axis
       const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
       if (py2 > H + cellPx) break;
-
       for (let wx = startWX; ; wx += step) {
         const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
         if (px > W + cellPx) break;
-
         ctx.fillStyle = getBiomeColor(wx, wz);
         ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
       }
     }
   } else {
-    // Sparse mode: draw visited locations as dots
-    if (visitedLocations.length === 0) {
-      ctx.fillStyle = 'rgba(107,114,128,0.4)';
-      ctx.font = '11px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('No visited locations yet', W / 2, H / 2);
-      ctx.textAlign = 'left';
-      return;
+    // Sparse mode — always draw the grid regardless of visited count
+    // so the map is never just a black void
+    const worldPerPixel = Math.max(4, 1 / state.zoom);
+    const pixelPerWorld = Math.max(1, state.zoom);
+    const step = worldPerPixel;
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step));
+    const worldLeft = state.cx - (W / 2) / state.zoom;
+    const worldTop  = state.cz - (H / 2) / state.zoom;
+    const startWX = Math.floor(worldLeft / step) * step;
+    const startWZ = Math.floor(worldTop  / step) * step;
+
+    for (let wz = startWZ; ; wz += step) {
+      const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
+      if (py2 > H + cellPx) break;
+      for (let wx = startWX; ; wx += step) {
+        const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
+        if (px > W + cellPx) break;
+        ctx.fillStyle = getBiomeColor(wx, wz);
+        ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
+      }
     }
+
+    // Draw visited location squares on top
     visitedLocations.forEach(loc => {
       const p = worldToPixel(loc.x, loc.z, W, H);
       const size = 10;
@@ -113,11 +120,18 @@ export function drawMap(canvas, visitedLocations, playerPos, searchPos, mode = '
       ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
       ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
     });
+
+    if (visitedLocations.length === 0 && !searchPos) {
+      ctx.fillStyle = 'rgba(107,114,128,0.7)';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('No visited locations yet', W / 2, H / 2);
+      ctx.textAlign = 'left';
+    }
   }
 }
 
-// ─── AUTO-FIT for sparse/explore mode ────────────────────────────────────────
-// Call this to zoom/pan so all visited dots are visible
+// ─── AUTO-FIT ─────────────────────────────────────────────────────────────────
 
 export function fitToLocations(locations, W, H) {
   if (!locations.length) return;
@@ -138,7 +152,6 @@ export function fitToLocations(locations, W, H) {
   state.cz = (minZ + maxZ) / 2;
   const rangeX = maxX - minX || 1;
   const rangeZ = maxZ - minZ || 1;
-  // Fit with padding
   state.zoom = Math.min(W / rangeX, H / rangeZ) * 0.7;
   state.zoom = Math.max(0.0000001, Math.min(64, state.zoom));
 }
