@@ -1,10 +1,11 @@
 // config.js — Fill these in before deploying
 //
-// GIST_ID:    The long hash in your Gist URL
-//             e.g. https://gist.github.com/yourname/abc123def456  →  "abc123def456"
+// JSONBIN_ID:  The bin ID from jsonbin.io
+//              e.g. https://jsonbin.io/  → after creating a bin, copy the ID
+//              looks like: 6618f1e8ad19ca34f87a1234
 //
-// GIST_TOKEN: A GitHub personal access token with "gist" scope only
-//             https://github.com/settings/tokens → Generate new token (classic) → check "gist"
+// JSONBIN_KEY: Your Master Key from jsonbin.io → API Keys tab
+//              looks like: $2a$10$...
 
-export const GIST_ID    = 'bbd472273a60b9e86fd3974db4566b14';
-export const GIST_TOKEN = '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';
+export const JSONBIN_ID  = '69dcd07e36566621a8aa55cd ';
+export const JSONBIN_KEY = '$2a$10$o/IALU6Vs8bo/EPkNbcqzuIRrPkGKZtoNwOvFi8QMeksdxY8Mktka';

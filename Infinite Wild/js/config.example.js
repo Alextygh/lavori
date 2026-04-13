@@ -1,5 +1,4 @@
-// config.example.js — Copy this to config.js and fill in your values.
-// config.js is gitignored and will never be committed.
+// config.example.js — Copy to config.js and fill in your values
 
-export const GIST_ID    = 'YOUR_GIST_ID_HERE';
-export const GIST_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
+export const JSONBIN_ID  = 'YOUR_BIN_ID_HERE';
+export const JSONBIN_KEY = 'YOUR_MASTER_KEY_HERE';

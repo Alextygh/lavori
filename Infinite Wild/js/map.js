@@ -266,10 +266,10 @@ export function buildLegend(containerEl) {
 // ─── CANVAS RESIZE ───────────────────────────────────────────────────────────
 
 export function fitCanvas(canvas) {
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const w = Math.floor(rect.width)  || canvas.width;
-  const h = Math.floor(rect.height) || canvas.height;
-  // Setting width/height clears the canvas buffer — only do it when size actually changed
-  if (canvas.width !== w)  canvas.width  = w;
+  const parent = canvas.parentElement;
+  // Use offsetWidth/offsetHeight — works even before first paint
+  const w = parent.offsetWidth  || 800;
+  const h = parent.offsetHeight || parseInt(parent.style.height) || 480;
+  if (canvas.width  !== w) canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
 }
