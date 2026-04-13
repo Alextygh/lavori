@@ -1,5 +1,6 @@
-// descriptions.js — Preset-based arrival descriptions (no server required)
+// ai.js — Preset-based arrival descriptions (no server required)
 
+// Keys match the biome IDs from world.js
 const BIOME_PHRASES = {
   'void':         ['An absence of everything surrounds you here', 'The void offers no landmarks, no horizon, no sound', 'Nothing here confirms you exist'],
   'deep-ocean':   ['Impossible depths press in from all sides', 'The water is black and absolutely still', 'No light has reached this place in centuries'],
@@ -22,6 +23,7 @@ const BIOME_PHRASES = {
   'anomaly':      ['The rules of the surrounding landscape do not apply here', 'Something about this zone resists description', 'You arrived correctly, but nothing else about this place is correct'],
 };
 
+// Keys match the weather IDs from world.js
 const WEATHER_PHRASES = {
   'clear':     ['under a sky too clear to trust', 'in light that reveals everything and explains nothing', 'beneath open sky with nowhere to hide'],
   'cloudy':    ['under a ceiling of grey that offers no weather, only threat', 'in flat overcast light that flattens all shadows', 'beneath clouds moving with purpose toward somewhere else'],
@@ -35,47 +37,55 @@ const WEATHER_PHRASES = {
   'static':    ['as static pulses through the air at irregular intervals', 'in electromagnetic conditions that make hair and thought both rise', 'through a static pulse that arrived exactly when you did'],
 };
 
+// Maps biome display names → biome IDs (from world.js BIOMES)
+const BIOME_NAME_TO_ID = {
+  'Void': 'void', 'Deep Ocean': 'deep-ocean', 'Ocean': 'ocean',
+  'Shoreline': 'shore', 'Tundra': 'tundra', 'Snowfield': 'snow',
+  'Plains': 'plains', 'Forest': 'forest', 'Dense Forest': 'dense-forest',
+  'Jungle': 'jungle', 'Swamp': 'swamp', 'Desert': 'desert',
+  'Badlands': 'badlands', 'Mountains': 'mountain', 'Peak': 'peak',
+  'Volcanic': 'volcanic', 'Lava Fields': 'lava', 'Crystal Basin': 'crystal',
+  'Anomaly Zone': 'anomaly',
+};
+
+// Maps weather display names → weather IDs (from world.js WEATHERS)
+const WEATHER_NAME_TO_ID = {
+  'Clear': 'clear', 'Overcast': 'cloudy', 'Heavy Fog': 'foggy',
+  'Rainfall': 'rain', 'Thunderstorm': 'storm', 'Snowfall': 'snow',
+  'Blizzard': 'blizzard', 'Ash Rain': 'ash', 'Aurora': 'aurora',
+  'Static Pulse': 'static',
+};
+
 const ARRIVAL_OPENERS = [
   'You arrive at {coords}.',
   'Coordinates {coords}.',
   'The Infinite Wild delivers you to {coords}.',
   'At {coords}, you materialize.',
-  '{coords} — you are here.',
+  '{coords} —',
   'You surface at {coords}.',
 ];
 
 function pick(arr, seed) {
-  // Deterministic pick based on a seed value
   return arr[Math.abs(seed) % arr.length];
 }
 
-function hashCode(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-  }
-  return h;
+function hashInt(x, z) {
+  let h = (Math.imul(x | 0, 1619) + Math.imul(z | 0, 31337) + 1013904223) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  return (h ^ (h >>> 16)) >>> 0;
 }
 
 export function generateArrivalDescription(x, z, biomeName, weatherName) {
-  // Find matching biome key (match by name)
-  const biomeKey = Object.entries(BIOME_PHRASES).find(([, ]) => true) &&
-    Object.keys(BIOME_PHRASES).find(k =>
-      BIOME_PHRASES[k] && biomeName &&
-      k.replace(/-/g,' ').toLowerCase() === biomeName.toLowerCase().replace(/-/g,' ')
-    ) || 'plains';
+  const biomeKey   = BIOME_NAME_TO_ID[biomeName]   || 'plains';
+  const weatherKey = WEATHER_NAME_TO_ID[weatherName] || 'clear';
 
-  const weatherKey = Object.keys(WEATHER_PHRASES).find(k =>
-    WEATHER_PHRASES[k] && weatherName &&
-    k.toLowerCase() === weatherName.toLowerCase()
-  ) || 'clear';
-
-  const seed = hashCode(`${x},${z}`);
+  const seed = hashInt(x, z);
   const coordStr = x.toLocaleString() + ', ' + z.toLocaleString();
 
-  const opener = pick(ARRIVAL_OPENERS, seed).replace('{coords}', coordStr);
-  const biomeLine = pick(BIOME_PHRASES[biomeKey] || BIOME_PHRASES['plains'], seed + 1);
-  const weatherLine = pick(WEATHER_PHRASES[weatherKey] || WEATHER_PHRASES['clear'], seed + 2);
+  const opener     = pick(ARRIVAL_OPENERS, seed).replace('{coords}', coordStr);
+  const biomeLine  = pick(BIOME_PHRASES[biomeKey],   seed + 1);
+  const weatherLine = pick(WEATHER_PHRASES[weatherKey], seed + 2);
 
   return Promise.resolve(`${opener} ${biomeLine} ${weatherLine}. No map has ever recorded this place.`);
 }

@@ -87,6 +87,7 @@ html, body {
   cursor: crosshair;
   user-select: none;
   touch-action: none;
+  height: 520px;
 }
 
 .map-container canvas {
