@@ -631,10 +631,10 @@ function drawMap(canvas, visitedLocations, playerPos, searchPos) {
 
 function fitToLocations(locations, W, H) {
   if (!locations.length) return;
+  state.cx = locations[0].x;
+  state.cz = locations[0].z;
   if (locations.length === 1) {
-    state.cx = locations[0].x;
-    state.cz = locations[0].z;
-    state.zoom = 0.000001;
+    state.zoom = 4;
     return;
   }
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -646,10 +646,9 @@ function fitToLocations(locations, W, H) {
   });
   state.cx = (minX + maxX) / 2;
   state.cz = (minZ + maxZ) / 2;
-  const rangeX = maxX - minX || 1;
-  const rangeZ = maxZ - minZ || 1;
-  state.zoom = Math.min(W / rangeX, H / rangeZ) * 0.7;
-  state.zoom = Math.max(0.0000001, Math.min(64, state.zoom));
+  // Clamp zoom: must be high enough that the tile step stays reasonable
+  // step = max(4, 1/zoom), so zoom must stay >= 0.001 to keep step <= 1000
+  state.zoom = 4; // always use a fixed readable zoom for sparse overview
 }
 
 function updateOverlay(overlayEl, visitedLocations, playerPos, searchPos, W, H) {
