@@ -607,26 +607,7 @@ function drawMap(canvas, visitedLocations, playerPos, searchPos, mode) {
   ctx.fillStyle = '#050709';
   ctx.fillRect(0, 0, W, H);
 
-  if (mode === 'full' && playerPos) {
-    const worldPerPixel = Math.max(1, 1 / state.zoom);
-    const pixelPerWorld = Math.max(1, state.zoom);
-    const step = worldPerPixel;
-    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step));
-    const worldLeft = state.cx - (W / 2) / state.zoom;
-    const worldTop  = state.cz - (H / 2) / state.zoom;
-    const startWX = Math.floor(worldLeft / step) * step;
-    const startWZ = Math.floor(worldTop  / step) * step;
-    for (let wz = startWZ; ; wz += step) {
-      const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
-      if (py2 > H + cellPx) break;
-      for (let wx = startWX; ; wx += step) {
-        const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
-        if (px > W + cellPx) break;
-        ctx.fillStyle = getBiomeColor(wx, wz);
-        ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
-      }
-    }
-  } else {
+  {
     const worldPerPixel = Math.max(4, 1 / state.zoom);
     const pixelPerWorld = Math.max(1, state.zoom);
     const step = worldPerPixel;
@@ -903,7 +884,7 @@ function redraw() {
     const W = canvas.width, H = canvas.height;
     const playerPos = currentLocation ? { x: currentLocation.x, z: currentLocation.z } : null;
     const others = visitedLocations.filter(l => !playerPos || l.x !== playerPos.x || l.z !== playerPos.z);
-    drawMap(canvas, others, playerPos, null, currentLocation ? 'full' : 'sparse');
+    drawMap(canvas, others, playerPos, null, 'sparse');
     updateOverlay(overlay, others, playerPos, null, W, H);
   });
 }
