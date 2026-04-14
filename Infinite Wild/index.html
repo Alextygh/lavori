@@ -607,7 +607,26 @@ function drawMap(canvas, visitedLocations, playerPos, searchPos, mode) {
   ctx.fillStyle = '#050709';
   ctx.fillRect(0, 0, W, H);
 
-  {
+  if (mode === 'full' && playerPos) {
+    // Full mode: draw per-pixel biome tiles around the player
+    // Safety: cap step so float arithmetic stays precise
+    const pixelPerWorld = Math.max(1, state.zoom);
+    const worldPerPixel = 1 / pixelPerWorld;
+    const step = Math.max(worldPerPixel, 1 / pixelPerWorld);
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld));
+    const worldLeft = state.cx - (W / 2) / state.zoom;
+    const worldTop  = state.cz - (H / 2) / state.zoom;
+    // Use pixel-based loop to avoid float precision issues at extreme coords
+    for (let py = 0; py < H; py += cellPx) {
+      const wz = state.cz + (py - H / 2) / state.zoom;
+      for (let px = 0; px < W; px += cellPx) {
+        const wx = state.cx + (px - W / 2) / state.zoom;
+        ctx.fillStyle = getBiomeColor(wx, wz);
+        ctx.fillRect(px, py, cellPx + 1, cellPx + 1);
+      }
+    }
+  } else {
+    // Sparse mode: coarser grid, safe at any coordinate scale
     const worldPerPixel = Math.max(4, 1 / state.zoom);
     const pixelPerWorld = Math.max(1, state.zoom);
     const step = worldPerPixel;
@@ -884,7 +903,7 @@ function redraw() {
     const W = canvas.width, H = canvas.height;
     const playerPos = currentLocation ? { x: currentLocation.x, z: currentLocation.z } : null;
     const others = visitedLocations.filter(l => !playerPos || l.x !== playerPos.x || l.z !== playerPos.z);
-    drawMap(canvas, others, playerPos, null, 'sparse');
+    drawMap(canvas, others, playerPos, null, currentLocation ? 'full' : 'sparse');
     updateOverlay(overlay, others, playerPos, null, W, H);
   });
 }
