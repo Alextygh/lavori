@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinite Wild — Arrive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0c0f;
+  --surface: #13171e;
+  --surface2: #1c2230;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --accent: #4ade80;
+  --accent2: #22c55e;
+  --danger: #f87171;
+  --gold: #fbbf24;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.25rem;
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.85rem 1rem 0.85rem 0;
+  margin-right: 1rem;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.nav a {
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.nav a:hover { color: var(--text); }
+.nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.page { padding: 1.5rem; }
+
+.arrive-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.map-container {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #050709;
+  cursor: crosshair;
+  user-select: none;
+  touch-action: none;
+}
+
+.map-container canvas {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.map-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.player-marker {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--accent);
+  z-index: 10;
+  transition: left 0.3s ease, top 0.3s ease;
+}
+
+.other-marker {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  border: 1.5px solid rgba(255,255,255,0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  opacity: 0.85;
+}
+
+.map-coords-display {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.45);
+  background: rgba(0,0,0,0.55);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: 'Space Mono', monospace;
+  pointer-events: none;
+}
+
+.map-zoom-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zoom-btn {
+  width: 26px;
+  height: 26px;
+  background: rgba(0,0,0,0.72);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-family: 'Space Mono', monospace;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.zoom-btn:hover { background: rgba(255,255,255,0.1); }
+
+.legend {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px 10px;
+  margin-top: 0.6rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.coord-display {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.coord-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.biome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.weather-row {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.desc-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 0.875rem 1rem;
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--text);
+  min-height: 80px;
+}
+
+.desc-loading { color: var(--muted); font-style: italic; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent);
+  color: #0a0c0f;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  width: 100%;
+  padding: 0.6rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-secondary:hover { color: var(--text); border-color: var(--text); }
+
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(74,222,128,0.25);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 720px) {
+  .arrive-layout { grid-template-columns: 1fr; }
+  .legend { grid-template-columns: repeat(2, 1fr); }
+}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-title">Infinite Wild</div>
+  <a href="index.html" class="active">Arrive</a>
+  <a href="explore.html">Explore</a>
+</nav>
+
+<main class="page">
+  <div class="arrive-layout">
+
+    <div>
+      <div class="map-container" id="map-wrap" style="height: 480px;">
+        <canvas id="map-canvas" width="800" height="480"></canvas>
+        <div class="map-overlay" id="map-overlay"></div>
+        <div class="map-coords-display" id="map-hover"></div>
+        <div class="map-zoom-controls">
+          <button class="zoom-btn" id="btn-zoom-in">+</button>
+          <button class="zoom-btn" id="btn-zoom-out">−</button>
+          <button class="zoom-btn" id="btn-zoom-reset" style="font-size:9px;">⌂</button>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="info-panel">
+      <div>
+        <div class="section-label">Your coordinates</div>
+        <div class="coord-display" id="coord-display">—</div>
+        <div class="coord-sub" id="coord-sub">Press arrive to teleport</div>
+      </div>
+
+      <hr class="divider" />
+
+      <div id="biome-weather-wrap" style="display:none;">
+        <div class="section-label">Biome &amp; weather</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="biome-badge" id="biome-badge"></div>
+          <div class="weather-row" id="weather-display"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Arrival report</div>
+        <div class="desc-box" id="desc-box">
+          <span class="desc-loading">Awaiting coordinates...</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="arrive-btn">&#x21E5; Arrive somewhere</button>
+      <button class="btn-secondary" id="copy-btn" style="display:none;">Copy coordinates</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── WORLD ────────────────────────────────────────────────────────────────────
+
+const BIOMES = [
+  { id:'void',         name:'Void',          color:'#050709',  textColor:'#4a5568', border:'#1a202c' },
+  { id:'deep-ocean',   name:'Deep Ocean',    color:'#0a1628',  textColor:'#63b3ed', border:'#2b6cb0' },
+  { id:'ocean',        name:'Ocean',         color:'#0e2040',  textColor:'#63b3ed', border:'#2b6cb0' },
+  { id:'shore',        name:'Shoreline',     color:'#1a3a5c',  textColor:'#90cdf4', border:'#3182ce' },
+  { id:'tundra',       name:'Tundra',        color:'#8aa8c8',  textColor:'#e2e8f0', border:'#a0aec0' },
+  { id:'snow',         name:'Snowfield',     color:'#d0e8f0',  textColor:'#2d3748', border:'#90cdf4' },
+  { id:'plains',       name:'Plains',        color:'#4a7a2a',  textColor:'#c6f6d5', border:'#276749' },
+  { id:'forest',       name:'Forest',        color:'#2a5018',  textColor:'#9ae6b4', border:'#276749' },
+  { id:'dense-forest', name:'Dense Forest',  color:'#183210',  textColor:'#68d391', border:'#2f855a' },
+  { id:'jungle',       name:'Jungle',        color:'#154a14',  textColor:'#68d391', border:'#276749' },
+  { id:'swamp',        name:'Swamp',         color:'#243a18',  textColor:'#d69e2e', border:'#744210' },
+  { id:'desert',       name:'Desert',        color:'#b89040',  textColor:'#744210', border:'#c05621' },
+  { id:'badlands',     name:'Badlands',      color:'#7a3818',  textColor:'#fbd38d', border:'#c05621' },
+  { id:'mountain',     name:'Mountains',     color:'#5a6070',  textColor:'#e2e8f0', border:'#718096' },
+  { id:'peak',         name:'Peak',          color:'#909aaa',  textColor:'#1a202c', border:'#a0aec0' },
+  { id:'volcanic',     name:'Volcanic',      color:'#330c0c',  textColor:'#fc8181', border:'#c53030' },
+  { id:'lava',         name:'Lava Fields',   color:'#7a1c08',  textColor:'#feb2b2', border:'#e53e3e' },
+  { id:'crystal',      name:'Crystal Basin', color:'#3a2058',  textColor:'#d6bcfa', border:'#805ad5' },
+  { id:'anomaly',      name:'Anomaly Zone',  color:'#200830',  textColor:'#e9d8fd', border:'#6b46c1' },
+];
+
+const BIOME_MAP = Object.fromEntries(BIOMES.map(b => [b.id, b]));
+
+const WEATHERS = [
+  { id:'clear',    name:'Clear',        icon:'☀' },
+  { id:'cloudy',   name:'Overcast',     icon:'◻' },
+  { id:'foggy',    name:'Heavy Fog',    icon:'≈' },
+  { id:'rain',     name:'Rainfall',     icon:'|' },
+  { id:'storm',    name:'Thunderstorm', icon:'⚡' },
+  { id:'snow',     name:'Snowfall',     icon:'*' },
+  { id:'blizzard', name:'Blizzard',     icon:'#' },
+  { id:'ash',      name:'Ash Rain',     icon:'~' },
+  { id:'aurora',   name:'Aurora',       icon:'◈' },
+  { id:'static',   name:'Static Pulse', icon:'§' },
+];
+
+const WEATHER_MAP = Object.fromEntries(WEATHERS.map(w => [w.id, w]));
+
+const BIOME_WEATHER = {
+  'void':         ['foggy','static'],
+  'deep-ocean':   ['rain','storm','cloudy'],
+  'ocean':        ['clear','cloudy','rain','storm'],
+  'shore':        ['clear','cloudy','rain'],
+  'tundra':       ['snow','blizzard','cloudy','foggy'],
+  'snow':         ['snow','blizzard','clear'],
+  'plains':       ['clear','cloudy','rain','storm'],
+  'forest':       ['clear','cloudy','rain','foggy'],
+  'dense-forest': ['foggy','rain','cloudy'],
+  'jungle':       ['rain','storm','foggy','cloudy'],
+  'swamp':        ['foggy','rain','cloudy'],
+  'desert':       ['clear','cloudy','ash'],
+  'badlands':     ['cloudy','ash','storm'],
+  'mountain':     ['clear','cloudy','snow','storm'],
+  'peak':         ['snow','blizzard','clear'],
+  'volcanic':     ['ash','cloudy','storm'],
+  'lava':         ['ash','static'],
+  'crystal':      ['aurora','static','clear'],
+  'anomaly':      ['static','aurora','foggy'],
+};
+
+function hash53(x, z, seed) {
+  let lo = (Math.imul(x | 0, 1619) + Math.imul(z | 0, 31337) + Math.imul(seed | 0, 1013904223)) | 0;
+  lo = Math.imul(lo ^ (lo >>> 16), 0x45d9f3b) | 0;
+  lo = Math.imul(lo ^ (lo >>> 16), 0x45d9f3b) | 0;
+  lo = (lo ^ (lo >>> 16)) >>> 0;
+  const xHi = Math.floor(x / 0x100000000) | 0;
+  const zHi = Math.floor(z / 0x100000000) | 0;
+  let hi = (Math.imul(xHi ^ 0xdeadbeef, 0x9e3779b9) + Math.imul(zHi ^ 0xbebafeca, 0x6c62272f) + Math.imul(seed | 0, 0x517cc1b7)) | 0;
+  hi = Math.imul(hi ^ (hi >>> 13), 0x5bd1e995) | 0;
+  hi = (hi ^ (hi >>> 15)) >>> 0;
+  return ((lo >>> 0) * 0.5 + (hi >>> 0) * 0.5) / 4294967296;
+}
+
+function smoothNoise(x, z, seed) {
+  const ix = Math.floor(x), iz = Math.floor(z);
+  const fx = x - ix, fz = z - iz;
+  const ux = fx * fx * (3 - 2 * fx);
+  const uz = fz * fz * (3 - 2 * fz);
+  return hash53(ix,   iz,   seed)*(1-ux)*(1-uz)
+       + hash53(ix+1, iz,   seed)*ux*(1-uz)
+       + hash53(ix,   iz+1, seed)*(1-ux)*uz
+       + hash53(ix+1, iz+1, seed)*ux*uz;
+}
+
+function hash2(x, z) {
+  const xHi = Math.floor(x / 0x100000000) | 0;
+  const zHi = Math.floor(z / 0x100000000) | 0;
+  let h = (Math.imul((x | 0), 1619) + Math.imul((z | 0), 31337) + 1013904223) | 0;
+  h ^= Math.imul(xHi ^ 0xdeadbeef, 0x9e3779b9) | 0;
+  h ^= Math.imul(zHi ^ 0xbebafeca, 0x6c62272f) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+function mulberry32(seed) {
+  return function() {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function getBiomeAt(wx, wz) {
+  const S = 1 / 280;
+  const elev = smoothNoise(wx*S, wz*S, 42)*0.5
+             + smoothNoise(wx*S*2.1, wz*S*2.1, 137)*0.3
+             + smoothNoise(wx*S*0.4, wz*S*0.4, 271)*0.2;
+  const temp  = smoothNoise(wx*S*0.7, wz*S*0.7+1000, 43);
+  const moist = smoothNoise(wx*S*0.9+500, wz*S*0.9, 138);
+  const anom  = smoothNoise(wx*S*3, wz*S*3, 370);
+  if (anom > 0.78) return 'anomaly';
+  if (anom > 0.72) return 'crystal';
+  if (elev < 0.15) return 'void';
+  if (elev < 0.25) return 'deep-ocean';
+  if (elev < 0.35) return 'ocean';
+  if (elev < 0.40) return 'shore';
+  if (elev > 0.80) return 'peak';
+  if (elev > 0.70) return 'mountain';
+  if (elev > 0.75 && temp < 0.3) return 'snow';
+  if (temp > 0.78) {
+    if (elev > 0.60) return 'volcanic';
+    if (elev > 0.55) return 'lava';
+    return moist > 0.5 ? 'badlands' : 'desert';
+  }
+  if (temp < 0.22) return moist > 0.5 ? 'tundra' : 'snow';
+  if (moist > 0.75) return elev > 0.6 ? 'jungle' : 'swamp';
+  if (moist > 0.60) return elev > 0.55 ? 'dense-forest' : 'forest';
+  if (moist > 0.40) return 'forest';
+  if (moist > 0.25) return 'plains';
+  return 'desert';
+}
+
+function getWeatherAt(wx, wz, biomeId) {
+  const opts = BIOME_WEATHER[biomeId] || ['clear', 'cloudy'];
+  const r = mulberry32(hash2(wx, wz));
+  return opts[Math.floor(r() * opts.length)];
+}
+
+function randomCoords() {
+  const MAX = Number.MAX_SAFE_INTEGER;
+  const x = Math.floor((Math.random() - 0.5) * 2 * MAX);
+  const z = Math.floor((Math.random() - 0.5) * 2 * MAX);
+  return { x, z };
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+
+const PREFIX = 'iw:loc:';
+
+function saveLocation(x, z, biomeId, weatherId) {
+  try {
+    const key = PREFIX + x + ':' + z;
+    localStorage.setItem(key, JSON.stringify({ x, z, biomeId, weatherId, ts: Date.now() }));
+    return true;
+  } catch (e) {
+    console.warn('Storage save failed:', e);
+    return false;
+  }
+}
+
+function loadAllLocations() {
+  const locs = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(PREFIX)) continue;
+      try { locs.push(JSON.parse(localStorage.getItem(key))); } catch {}
+    }
+    locs.sort((a, b) => b.ts - a.ts);
+  } catch (e) {
+    console.warn('Storage load failed:', e);
+  }
+  return locs;
+}
+
+// ─── MAP ─────────────────────────────────────────────────────────────────────
+
+const state = { cx: 0, cz: 0, zoom: 8, dragging: false, lastMX: 0, lastMY: 0 };
+
+const tileCache = new Map();
+function getBiomeColor(wx, wz) {
+  const ix = Math.round(wx), iz = Math.round(wz);
+  const key = ix + ',' + iz;
+  if (tileCache.has(key)) return tileCache.get(key);
+  const color = (BIOME_MAP[getBiomeAt(ix, iz)] || BIOMES[0]).color;
+  if (tileCache.size > 20000) tileCache.clear();
+  tileCache.set(key, color);
+  return color;
+}
+
+function fitCanvas(canvas) {
+  const p = canvas.parentElement;
+  let w = p.offsetWidth, h = p.offsetHeight;
+  if (!w || !h) {
+    const rect = p.getBoundingClientRect();
+    w = rect.width || w;
+    h = rect.height || h;
+  }
+  if (!w) w = parseInt(p.style.width) || 800;
+  if (!h) h = parseInt(p.style.height) || 480;
+  if (canvas.width  !== w) canvas.width  = w;
+  if (canvas.height !== h) canvas.height = h;
+}
+
+function worldToPixel(wx, wz, W, H) {
+  return {
+    x: W / 2 + (wx - state.cx) * state.zoom,
+    y: H / 2 + (wz - state.cz) * state.zoom,
+  };
+}
+
+function screenToWorld(sx, sz, W, H) {
+  return {
+    x: state.cx + (sx - W / 2) / state.zoom,
+    z: state.cz + (sz - H / 2) / state.zoom,
+  };
+}
+
+function drawMap(canvas, visitedLocations, playerPos, searchPos, mode) {
+  const W = canvas.width, H = canvas.height;
+  if (!W || !H) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#050709';
+  ctx.fillRect(0, 0, W, H);
+
+  if (mode === 'full' && playerPos) {
+    const worldPerPixel = Math.max(1, 1 / state.zoom);
+    const pixelPerWorld = Math.max(1, state.zoom);
+    const step = worldPerPixel;
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step));
+    const worldLeft = state.cx - (W / 2) / state.zoom;
+    const worldTop  = state.cz - (H / 2) / state.zoom;
+    const startWX = Math.floor(worldLeft / step) * step;
+    const startWZ = Math.floor(worldTop  / step) * step;
+    for (let wz = startWZ; ; wz += step) {
+      const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
+      if (py2 > H + cellPx) break;
+      for (let wx = startWX; ; wx += step) {
+        const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
+        if (px > W + cellPx) break;
+        ctx.fillStyle = getBiomeColor(wx, wz);
+        ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
+      }
+    }
+  } else {
+    const worldPerPixel = Math.max(4, 1 / state.zoom);
+    const pixelPerWorld = Math.max(1, state.zoom);
+    const step = worldPerPixel;
+    const cellPx = Math.max(1, Math.ceil(pixelPerWorld * step));
+    const worldLeft = state.cx - (W / 2) / state.zoom;
+    const worldTop  = state.cz - (H / 2) / state.zoom;
+    const startWX = Math.floor(worldLeft / step) * step;
+    const startWZ = Math.floor(worldTop  / step) * step;
+    for (let wz = startWZ; ; wz += step) {
+      const py2 = Math.round(H / 2 + (wz - state.cz) * state.zoom);
+      if (py2 > H + cellPx) break;
+      for (let wx = startWX; ; wx += step) {
+        const px = Math.round(W / 2 + (wx - state.cx) * state.zoom);
+        if (px > W + cellPx) break;
+        ctx.fillStyle = getBiomeColor(wx, wz);
+        ctx.fillRect(px, py2, cellPx + 1, cellPx + 1);
+      }
+    }
+    visitedLocations.forEach(loc => {
+      const p = worldToPixel(loc.x, loc.z, W, H);
+      const size = 10;
+      const biome = BIOME_MAP[loc.biomeId] || BIOMES[0];
+      ctx.fillStyle = biome.color;
+      ctx.strokeStyle = biome.textColor;
+      ctx.lineWidth = 1;
+      ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
+      ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
+    });
+  }
+}
+
+function updateOverlay(overlayEl, visitedLocations, playerPos, searchPos, W, H) {
+  overlayEl.innerHTML = '';
+  function addMarker(cls, wx, wz) {
+    const p = worldToPixel(wx, wz, W, H);
+    if (p.x < -20 || p.x > W + 20 || p.y < -20 || p.y > H + 20) return;
+    const dot = document.createElement('div');
+    dot.className = cls;
+    dot.style.left = p.x + 'px';
+    dot.style.top  = p.y + 'px';
+    overlayEl.appendChild(dot);
+  }
+  visitedLocations.forEach(loc => {
+    if (playerPos && loc.x === playerPos.x && loc.z === playerPos.z) return;
+    addMarker('other-marker', loc.x, loc.z);
+  });
+  if (searchPos) addMarker('search-marker', searchPos.x, searchPos.z);
+  if (playerPos) addMarker('player-marker', playerPos.x, playerPos.z);
+}
+
+function centerOn(wx, wz, newZoom) {
+  state.cx = wx;
+  state.cz = wz;
+  if (newZoom != null) state.zoom = newZoom;
+}
+
+function zoomMap(factor) {
+  state.zoom = Math.max(0.0000001, Math.min(64, state.zoom * factor));
+}
+
+function resetZoom() { state.zoom = 8; }
+
+function setupControls(canvas, hoverEl, onRedraw) {
+  canvas.addEventListener('mousedown', e => {
+    state.dragging = true;
+    state.lastMX = e.clientX;
+    state.lastMY = e.clientY;
+    canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const wp = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, canvas.width, canvas.height);
+    if (hoverEl) hoverEl.textContent = Math.round(wp.x) + ', ' + Math.round(wp.z);
+    if (!state.dragging) return;
+    state.cx -= (e.clientX - state.lastMX) / state.zoom;
+    state.cz -= (e.clientY - state.lastMY) / state.zoom;
+    state.lastMX = e.clientX;
+    state.lastMY = e.clientY;
+    onRedraw();
+  });
+  window.addEventListener('mouseup', () => {
+    state.dragging = false;
+    canvas.style.cursor = 'crosshair';
+  });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoomMap(e.deltaY < 0 ? 1.25 : 0.8);
+    onRedraw();
+  }, { passive: false });
+
+  let lastTouchDist = null;
+  canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      state.dragging = true;
+      state.lastMX = e.touches[0].clientX;
+      state.lastMY = e.touches[0].clientY;
+    }
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && state.dragging) {
+      state.cx -= (e.touches[0].clientX - state.lastMX) / state.zoom;
+      state.cz -= (e.touches[0].clientY - state.lastMY) / state.zoom;
+      state.lastMX = e.touches[0].clientX;
+      state.lastMY = e.touches[0].clientY;
+      onRedraw();
+    }
+    if (e.touches.length === 2 && lastTouchDist) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      zoomMap(dist / lastTouchDist);
+      lastTouchDist = dist;
+      onRedraw();
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => { state.dragging = false; lastTouchDist = null; });
+}
+
+function buildLegend(containerEl) {
+  containerEl.innerHTML = '';
+  BIOMES.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-dot" style="background:${b.color};border:1px solid ${b.textColor}33;"></div><span>${b.name}</span>`;
+    containerEl.appendChild(item);
+  });
+}
+
+// ─── AI DESCRIPTIONS ─────────────────────────────────────────────────────────
+
+const BIOME_PHRASES = {
+  'void':         ['An absence of everything surrounds you here', 'The void offers no landmarks, no horizon, no sound', 'Nothing here confirms you exist'],
+  'deep-ocean':   ['Impossible depths press in from all sides', 'The water is black and absolutely still', 'No light has reached this place in centuries'],
+  'ocean':        ['A grey expanse of open water stretches without limit', 'The ocean swells and breathes around you', 'Waves carry no message from any shore'],
+  'shore':        ['The tide pulls at sand that has never known footprints', 'Where water meets land, something watches from the surf', 'The shoreline curves away in both directions forever'],
+  'tundra':       ['Frozen ground crunches underfoot in the windswept flatness', 'The tundra offers nothing to hide behind', 'A pale sky presses down on an unbroken horizon'],
+  'snow':         ['Snowfields stretch in every direction without a single track', 'Silence here is the kind that swallows sound before it travels', 'The whiteness offers no depth, no shadow, no relief'],
+  'plains':       ['Tall grass sways in a wind that carries no smell of anything alive', 'The plains roll on past where vision ends', 'Something moved through here long ago and left no trail'],
+  'forest':       ['Trees close in from every direction, their canopy blocking all sky', 'The forest has been here longer than any map', 'Bark older than memory absorbs the sound of your arrival'],
+  'dense-forest': ['The undergrowth is impenetrable in every direction but here', 'Light barely reaches the ground through this canopy', 'Something shifts in the dark between the trunks'],
+  'jungle':       ['Vegetation presses close, wet and indifferent', 'The jungle breathes humidity and rot and growth', 'Everything here is in the process of consuming something else'],
+  'swamp':        ['Still water reflects a sky you cannot see directly', 'The swamp accepts your weight reluctantly', 'Gas rises from the mud in slow, purposeful columns'],
+  'desert':       ['Sand extends to every horizon without interruption', 'Heat distorts the air into shapes that almost resemble things', 'The desert has outlasted everyone who came before you'],
+  'badlands':     ['Eroded rock towers above in formations with no natural name', 'The badlands were beautiful once, before whatever happened', 'Rust-colored stone crumbles at the edges of the path'],
+  'mountain':     ['The mountains rise around you, indifferent to your scale', 'Thin air and distance make everything feel further than it is', 'Rock faces reflect nothing back'],
+  'peak':         ['From the peak, everything below is the same shade of small', 'Cold air moves through without stopping', 'The summit offers a view of more of the same'],
+  'volcanic':     ['Heat rises from cracks in the ground without flame', 'The volcanic rock is young here, geologically speaking', 'Sulfur and silence share the air equally'],
+  'lava':         ['Lava fields have cooled to a brittle black crust underfoot', 'The ground here has memory of when it was liquid', 'Cracks in the rock glow faintly from below'],
+  'crystal':      ['Crystal formations catch light from no visible source', 'The basin resonates at a frequency just below hearing', 'Refracted color moves across surfaces that should be still'],
+  'anomaly':      ['The rules of the surrounding landscape do not apply here', 'Something about this zone resists description', 'You arrived correctly, but nothing else about this place is correct'],
+};
+
+const WEATHER_PHRASES = {
+  'clear':     ['under a sky too clear to trust', 'in light that reveals everything and explains nothing', 'beneath open sky with nowhere to hide'],
+  'cloudy':    ['under a ceiling of grey that offers no weather, only threat', 'in flat overcast light that flattens all shadows', 'beneath clouds moving with purpose toward somewhere else'],
+  'foggy':     ['in fog that arrived before you did', 'through heavy mist that reduces the world to ten meters in any direction', 'in fog that makes distance impossible to judge'],
+  'rain':      ['in rainfall that has been going on for longer than your arrival', 'as rain falls without wind or drama', 'through steady rain that soaks without announcing itself'],
+  'storm':     ['as a storm builds without moving closer or further', 'under electrical sky that illuminates nothing clearly', 'in storm conditions that make no sound between strikes'],
+  'snow':      ['as snowfall erases everything that came before', 'in falling snow that makes the air itself disappear', 'through snow that accumulates without intent'],
+  'blizzard':  ['in a blizzard that makes direction meaningless', 'as white-out conditions remove all reference points', 'through a blizzard that does not distinguish between ground and sky'],
+  'ash':       ['as ash falls without any visible source', 'in a rain of grey particles that coat everything equally', 'through ash fall that carries the smell of something ended'],
+  'aurora':    ['under aurora that moves against the logic of atmosphere', 'as colored light bends across the sky without explanation', 'beneath an aurora that responds to nothing visible'],
+  'static':    ['as static pulses through the air at irregular intervals', 'in electromagnetic conditions that make hair and thought both rise', 'through a static pulse that arrived exactly when you did'],
+};
+
+const CLOSINGS = [
+  'The coordinates are correct. Everything else is uncertain.',
+  'You are the only record that this place exists.',
+  'Whatever named this world did not get this far.',
+  'There is no signal here. There is no one to send one to.',
+  'This location will outlast your knowledge of it.',
+  'The world generates this place whether or not anyone arrives.',
+  'Distance from here to anywhere is not a number that fits on a sign.',
+  'Something about the air suggests this is not the first time, but the evidence is gone.',
+  'You have not discovered this place. You have simply confirmed its coordinates.',
+  'The silence here predates language.',
+  'If you leave, nothing about this place will remember you did.',
+  'The grid extends. You are one point on it.',
+  'This terrain was always here. Your arrival changes nothing about that.',
+  'There is no landmark. You are the landmark, temporarily.',
+  'Somewhere beyond this, the pattern continues without variation or end.',
+  'The coordinates are logged. The place is indifferent to that.',
+  'Unmapped is not the same as unknown — the math knew this was here.',
+  'This exists at the same depth of wilderness as every other coordinate.',
+  'You have not gone further than anyone. You have simply gone differently.',
+  'The world does not run out. It just gets less visited.',
+];
+
+const BIOME_NAME_TO_ID = {
+  'Void': 'void', 'Deep Ocean': 'deep-ocean', 'Ocean': 'ocean',
+  'Shoreline': 'shore', 'Tundra': 'tundra', 'Snowfield': 'snow',
+  'Plains': 'plains', 'Forest': 'forest', 'Dense Forest': 'dense-forest',
+  'Jungle': 'jungle', 'Swamp': 'swamp', 'Desert': 'desert',
+  'Badlands': 'badlands', 'Mountains': 'mountain', 'Peak': 'peak',
+  'Volcanic': 'volcanic', 'Lava Fields': 'lava', 'Crystal Basin': 'crystal',
+  'Anomaly Zone': 'anomaly',
+};
+
+const WEATHER_NAME_TO_ID = {
+  'Clear': 'clear', 'Overcast': 'cloudy', 'Heavy Fog': 'foggy',
+  'Rainfall': 'rain', 'Thunderstorm': 'storm', 'Snowfall': 'snow',
+  'Blizzard': 'blizzard', 'Ash Rain': 'ash', 'Aurora': 'aurora',
+  'Static Pulse': 'static',
+};
+
+const ARRIVAL_OPENERS = [
+  'You arrive at {coords}.',
+  'Coordinates {coords}.',
+  'The Infinite Wild delivers you to {coords}.',
+  'At {coords}, you materialize.',
+  '{coords} —',
+  'You surface at {coords}.',
+];
+
+function pick(arr, seed) { return arr[Math.abs(seed) % arr.length]; }
+
+function hashInt(x, z) {
+  let h = (Math.imul(x | 0, 1619) + Math.imul(z | 0, 31337) + 1013904223) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) | 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+function generateArrivalDescription(x, z, biomeName, weatherName) {
+  const biomeKey   = BIOME_NAME_TO_ID[biomeName]   || 'plains';
+  const weatherKey = WEATHER_NAME_TO_ID[weatherName] || 'clear';
+  const seed = hashInt(x, z);
+  const coordStr = x.toLocaleString() + ', ' + z.toLocaleString();
+  const opener      = pick(ARRIVAL_OPENERS, seed).replace('{coords}', coordStr);
+  const biomeLine   = pick(BIOME_PHRASES[biomeKey],    seed + 1);
+  const weatherLine = pick(WEATHER_PHRASES[weatherKey], seed + 2);
+  const closing     = pick(CLOSINGS,                    seed + 3);
+  return Promise.resolve(`${opener} ${biomeLine} ${weatherLine}. ${closing}`);
+}
+
+function fallbackDescription(x, z, biomeName, weatherName) {
+  const seed = hashInt(x, z);
+  const closing = pick(CLOSINGS, seed + 3);
+  return `You arrive at ${x.toLocaleString()}, ${z.toLocaleString()}. A ${biomeName.toLowerCase()} stretches in every direction under ${weatherName.toLowerCase()} skies. ${closing}`;
+}
+
+// ─── ARRIVE APP ──────────────────────────────────────────────────────────────
+
+const canvas        = document.getElementById('map-canvas');
+const overlay       = document.getElementById('map-overlay');
+const hoverEl       = document.getElementById('map-hover');
+const legendEl      = document.getElementById('legend');
+const coordDisplay  = document.getElementById('coord-display');
+const coordSub      = document.getElementById('coord-sub');
+const biomeWrap     = document.getElementById('biome-weather-wrap');
+const biomeBadge    = document.getElementById('biome-badge');
+const weatherDisp   = document.getElementById('weather-display');
+const descBox       = document.getElementById('desc-box');
+const arriveBtn     = document.getElementById('arrive-btn');
+const copyBtn       = document.getElementById('copy-btn');
+
+let currentLocation  = null;
+let visitedLocations = [];
+let isLoading        = false;
+let raf              = null;
+
+function redraw() {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    fitCanvas(canvas);
+    const W = canvas.width, H = canvas.height;
+    const playerPos = currentLocation ? { x: currentLocation.x, z: currentLocation.z } : null;
+    const others = visitedLocations.filter(l => !playerPos || l.x !== playerPos.x || l.z !== playerPos.z);
+    drawMap(canvas, others, playerPos, null, currentLocation ? 'full' : 'sparse');
+    updateOverlay(overlay, others, playerPos, null, W, H);
+  });
+}
+
+async function arrive() {
+  if (isLoading) return;
+  isLoading = true;
+  arriveBtn.disabled = true;
+  arriveBtn.innerHTML = '<span class="spinner"></span>Arriving...';
+
+  const { x, z } = randomCoords();
+  const biomeId   = getBiomeAt(x, z);
+  const weatherId = getWeatherAt(x, z, biomeId);
+  const biome     = BIOME_MAP[biomeId];
+  const weather   = WEATHER_MAP[weatherId];
+
+  currentLocation = { x, z, biomeId, weatherId };
+
+  coordDisplay.textContent = x.toLocaleString() + ', ' + z.toLocaleString();
+  coordSub.textContent     = 'coordinates in the Infinite Wild';
+
+  biomeWrap.style.display  = 'block';
+  biomeBadge.innerHTML     = `<div style="width:8px;height:8px;background:${biome.color};border-radius:1px;border:1px solid ${biome.textColor};"></div>${biome.name}`;
+  biomeBadge.style.cssText = `color:${biome.textColor};border-color:${biome.textColor}44;background:${biome.color}33;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid;`;
+  weatherDisp.textContent  = weather.icon + '  ' + weather.name;
+  copyBtn.style.display    = 'block';
+  descBox.textContent      = '';
+
+  centerOn(x, z, 8);
+  redraw();
+
+  try {
+    const desc = await generateArrivalDescription(x, z, biome.name, weather.name);
+    descBox.textContent = desc;
+  } catch (e) {
+    descBox.textContent = fallbackDescription(x, z, biome.name, weather.name);
+  }
+
+  saveLocation(x, z, biomeId, weatherId);
+  visitedLocations = loadAllLocations();
+  redraw();
+
+  arriveBtn.disabled = false;
+  arriveBtn.innerHTML = '&#x21E5; Arrive somewhere else';
+  isLoading = false;
+}
+
+function copyCoords() {
+  if (!currentLocation) return;
+  navigator.clipboard.writeText(currentLocation.x + ', ' + currentLocation.z).catch(() => {});
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => { copyBtn.textContent = 'Copy coordinates'; }, 1500);
+}
+
+document.getElementById('btn-zoom-in').addEventListener('click',  () => { zoomMap(1.5); redraw(); });
+document.getElementById('btn-zoom-out').addEventListener('click', () => { zoomMap(0.66); redraw(); });
+document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+  resetZoom();
+  if (currentLocation) centerOn(currentLocation.x, currentLocation.z, 8);
+  redraw();
+});
+
+arriveBtn.addEventListener('click', arrive);
+copyBtn.addEventListener('click', copyCoords);
+
+buildLegend(legendEl);
+visitedLocations = loadAllLocations();
+setupControls(canvas, hoverEl, redraw);
+window.addEventListener('resize', redraw);
+redraw();
+</script>
+</body>
+</html>
