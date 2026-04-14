@@ -579,14 +579,9 @@ function getBiomeColor(wx, wz) {
 
 function fitCanvas(canvas) {
   const p = canvas.parentElement;
-  let w = p.offsetWidth, h = p.offsetHeight;
-  if (!w || !h) {
-    const rect = p.getBoundingClientRect();
-    w = rect.width || w;
-    h = rect.height || h;
-  }
-  if (!w) w = parseInt(p.style.width) || 800;
-  if (!h) h = parseInt(p.style.height) || 480;
+  const rect = p.getBoundingClientRect();
+  const w = Math.round(rect.width)  || p.offsetWidth  || 800;
+  const h = Math.round(rect.height) || p.offsetHeight || 480;
   if (canvas.width  !== w) canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
 }

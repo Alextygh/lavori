@@ -561,14 +561,9 @@ function getBiomeColor(wx, wz) {
 
 function fitCanvas(canvas) {
   const p = canvas.parentElement;
-  let w = p.offsetWidth, h = p.offsetHeight;
-  if (!w || !h) {
-    const rect = p.getBoundingClientRect();
-    w = rect.width || w;
-    h = rect.height || h;
-  }
-  if (!w) w = parseInt(p.style.width) || 800;
-  if (!h) h = parseInt(p.style.height) || 320;
+  const rect = p.getBoundingClientRect();
+  const w = Math.round(rect.width)  || p.offsetWidth  || 800;
+  const h = Math.round(rect.height) || p.offsetHeight || 320;
   if (canvas.width  !== w) canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
 }
@@ -971,13 +966,22 @@ renderVisited();
 setupControls(canvas, hoverEl, redraw);
 window.addEventListener('resize', redraw);
 
-requestAnimationFrame(() => {
+function initialDraw() {
   fitCanvas(canvas);
-  if (visitedLocations.length > 0) {
-    fitToLocations(visitedLocations, canvas.width || 800, canvas.height || 320);
+  if (canvas.width > 0 && canvas.height > 0) {
+    if (visitedLocations.length > 0) {
+      fitToLocations(visitedLocations, canvas.width, canvas.height);
+    }
+    redraw();
   }
-  redraw();
-});
+}
+
+if (typeof ResizeObserver !== 'undefined') {
+  const ro = new ResizeObserver(() => { initialDraw(); ro.disconnect(); });
+  ro.observe(canvas.parentElement);
+} else {
+  requestAnimationFrame(() => requestAnimationFrame(initialDraw));
+}
 </script>
 </body>
 </html>
