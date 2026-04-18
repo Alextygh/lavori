@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMIC REALTY — Interstellar Properties Since 2847</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --void: #03020a;
+    --deep: #07050f;
+    --nebula: #0d0a1e;
+    --gold: #c9a84c;
+    --gold-dim: #7a6230;
+    --gold-light: #f0d078;
+    --silver: #9ba8b8;
+    --white: #f0ede8;
+    --red: #c94c4c;
+    --teal: #4cccc9;
+    --glow: rgba(201,168,76,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* STAR FIELD */
+  #starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* LAYOUT */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 40px 0 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--gold-dim);
+    margin-bottom: 60px;
+  }
+
+  .logo-block {}
+
+  .logo-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .logo-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(201,168,76,0.4);
+  }
+
+  .logo-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--silver);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 0.2em;
+    line-height: 2;
+  }
+
+  /* HERO SECTION */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 80px;
+  }
+
+  @media (max-width: 700px) {
+    .hero { grid-template-columns: 1fr; }
+    header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .header-right { text-align: left; }
+  }
+
+  .hero-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: var(--white);
+  }
+
+  .hero-text h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-text p {
+    font-size: 12px;
+    line-height: 2;
+    color: var(--silver);
+    margin-bottom: 28px;
+    letter-spacing: 0.05em;
+  }
+
+  .code-section {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid var(--gold-dim);
+    padding: 20px;
+    position: relative;
+  }
+
+  .code-section::before {
+    content: 'PROPERTY RETRIEVAL';
+    position: absolute;
+    top: -8px;
+    left: 16px;
+    background: var(--void);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+  }
+
+  .code-input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .code-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 10px 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .code-input::placeholder { color: var(--gold-dim); letter-spacing: 0.15em; }
+  .code-input:focus { border-color: var(--gold); }
+
+  .btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    background: var(--gold);
+    color: var(--void);
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--void);
+    font-weight: 700;
+    padding: 14px 28px;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    box-shadow: 0 0 30px rgba(201,168,76,0.5);
+  }
+
+  .btn-danger {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .btn-danger:hover {
+    background: var(--red);
+    color: white;
+  }
+
+  /* PLANET CARD */
+  .planet-stage {
+    display: none;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .planet-stage.visible { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .planet-card {
+    border: 1px solid var(--gold-dim);
+    background: rgba(7,5,15,0.8);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .planet-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .listing-id {
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+  }
+
+  .status-badge {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 4px 10px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+
+  .status-turnkey { border-color: var(--teal); color: var(--teal); }
+  .status-fixer { border-color: var(--gold); color: var(--gold); }
+  .status-undevelopable { border-color: var(--red); color: var(--red); }
+
+  .card-body {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+  }
+
+  @media (max-width: 750px) {
+    .card-body { grid-template-columns: 1fr; }
+  }
+
+  /* PLANET CANVAS */
+  .planet-visual {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    border-right: 1px solid rgba(201,168,76,0.1);
+    background: radial-gradient(ellipse at center, rgba(201,168,76,0.03) 0%, transparent 70%);
+  }
+
+  #planetCanvas {
+    border-radius: 50%;
+    display: block;
+  }
+
+  .planet-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-align: center;
+    text-shadow: 0 0 20px rgba(201,168,76,0.5);
+  }
+
+  .planet-class-tag {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--silver);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  /* PLANET INFO */
+  .planet-info {
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .info-price {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .price-label {
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    margin-bottom: 4px;
+  }
+
+  .price-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.08em;
+    color: var(--gold-light);
+    line-height: 1;
+  }
+
+  .price-unit {
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 0.2em;
+    margin-top: 2px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .info-item {
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid var(--gold-dim);
+  }
+
+  .info-item-label {
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .info-item-value {
+    font-size: 12px;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  .info-section {
+    margin-bottom: 16px;
+  }
+
+  .info-section-title {
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .info-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201,168,76,0.2);
+  }
+
+  .biome-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .biome-tag {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--silver);
+  }
+
+  .hazard-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hazard-list li {
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.05em;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .hazard-list li::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    font-size: 8px;
+  }
+
+  .safe-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .safe-list li {
+    font-size: 10px;
+    color: var(--teal);
+    letter-spacing: 0.05em;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .safe-list li::before {
+    content: '✦';
+    position: absolute;
+    left: 0;
+    font-size: 8px;
+  }
+
+  .atmosphere-bar {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .atm-seg {
+    height: 8px;
+    border-radius: 1px;
+    position: relative;
+    cursor: default;
+  }
+
+  .atm-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .atm-label {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--silver);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .atm-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    display: inline-block;
+  }
+
+  /* CODE DISPLAY */
+  .code-reveal {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(201,168,76,0.05);
+    border: 1px solid var(--gold-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .code-reveal-label {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    white-space: nowrap;
+  }
+
+  .code-reveal-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { border-color: var(--teal); color: var(--teal); }
+
+  /* CARD FOOTER */
+  .card-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  /* GENERATE ZONE */
+  .generate-zone {
+    text-align: center;
+    padding: 60px 40px;
+    border: 1px dashed var(--gold-dim);
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  .generate-zone::before {
+    content: 'NEW LISTING';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--void);
+    padding: 0 16px;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+  }
+
+  .generate-zone p {
+    font-size: 11px;
+    color: var(--silver);
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+    line-height: 2;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3,2,10,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .loading-overlay.active { display: flex; }
+
+  .loader-ring {
+    width: 80px;
+    height: 80px;
+    border: 1px solid var(--gold-dim);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loader-text {
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* ERROR */
+  .error-msg {
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    margin-top: 8px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--gold-dim);
+    padding: 30px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--gold-dim);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+  /* RINGS ANIMATION on canvas */
+  .rings-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .rings-wrapper canvas { display: block; }
+
+  /* tooltip */
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: var(--deep);
+    border: 1px solid var(--gold-dim);
+    padding: 4px 10px;
+    font-size: 10px;
+    color: var(--gold);
+    pointer-events: none;
+    z-index: 200;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="tooltip" id="tooltip"></div>
+
+<div class="loading-overlay" id="loading">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Scanning the cosmos…</div>
+</div>
+
+<div class="page">
+  <header>
+    <div class="logo-block">
+      <div class="logo-eyebrow">Est. 2847 · Licensed Across 14 Galaxies</div>
+      <div class="logo-main">Cosmic Realty</div>
+      <div class="logo-sub">Your Dream World is Out There</div>
+    </div>
+    <div class="header-right">
+      <div>OFFICES IN ANDROMEDA · MILKY WAY · MAGELLANIC CLOUD</div>
+      <div>COMM: +∞ 0800 PLANET NOW</div>
+      <div>LICENSE #GX-2847-REAL-∞</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Find Your <em>Perfect</em><br>World Among the Stars</h1>
+      <p>From lush ocean worlds to volcanic investment properties, Cosmic Realty has been matching sentient beings with their ideal planetary home since the Third Galactic Expansion. Every listing is surveyed, graded, and priced by certified xenogeologists.</p>
+      <div class="code-section">
+        <div class="code-input-row">
+          <input class="code-input" id="codeInput" type="text" placeholder="ENTER PROPERTY CODE" maxlength="12" autocomplete="off" spellcheck="false">
+          <button class="btn" onclick="loadFromCode()">RETRIEVE</button>
+        </div>
+        <div class="error-msg" id="errorMsg">⚠ Invalid or expired property code.</div>
+      </div>
+    </div>
+
+    <div class="generate-zone">
+      <p>Let our AI broker scan the cosmos and find an available world for your consideration. Each scan is unique — no two planets are alike.</p>
+      <button class="btn-primary btn" onclick="generatePlanet()">⬡ SCAN FOR NEW PLANET</button>
+    </div>
+  </div>
+
+  <!-- PLANET CARD -->
+  <div class="planet-stage" id="planetStage">
+    <div class="planet-card">
+      <div class="card-header">
+        <div class="listing-id" id="listingId">LISTING #—</div>
+        <div class="status-badge" id="statusBadge">—</div>
+      </div>
+      <div class="card-body">
+        <div class="planet-visual">
+          <div class="rings-wrapper" id="ringsWrapper">
+            <canvas id="planetCanvas" width="220" height="220"></canvas>
+          </div>
+          <div class="planet-name" id="planetName">—</div>
+          <div class="planet-class-tag" id="planetClass">—</div>
+          <div class="code-reveal">
+            <div>
+              <div class="code-reveal-label">PROPERTY CODE</div>
+              <div class="code-reveal-value" id="codeDisplay">—</div>
+            </div>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">COPY</button>
+          </div>
+        </div>
+        <div class="planet-info">
+          <div class="info-price">
+            <div class="price-label">ASKING PRICE</div>
+            <div class="price-value" id="priceValue">—</div>
+            <div class="price-unit" id="priceUnit">—</div>
+          </div>
+
+          <div class="info-grid" id="infoGrid"></div>
+
+          <div class="info-section" id="atmosphereSection">
+            <div class="info-section-title">Atmospheric Composition</div>
+            <div class="atmosphere-bar" id="atmosphereBar"></div>
+            <div class="atm-labels" id="atmosphereLabels"></div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-section-title">Major Biomes</div>
+            <div class="biome-tags" id="biomeTags"></div>
+          </div>
+
+          <div class="info-section" id="resourceSection">
+            <div class="info-section-title">Resources & Commercial Value</div>
+            <ul class="safe-list" id="resourceList"></ul>
+          </div>
+
+          <div class="info-section" id="hazardSection">
+            <div class="info-section-title">Hazard Disclosures</div>
+            <ul class="hazard-list" id="hazardList"></ul>
+          </div>
+
+          <div class="info-section" id="featuresSection">
+            <div class="info-section-title">Notable Features</div>
+            <ul class="safe-list" id="featureList"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-danger" onclick="generatePlanet()">↺ DISCARD & RESCAN</button>
+        <button class="btn btn-primary" onclick="enquire()">✉ ENQUIRE ABOUT THIS PROPERTY</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>© 2847–2999 COSMIC REALTY GROUP · ALL RIGHTS RESERVED ACROSS ALL KNOWN DIMENSIONS</span>
+    <span>DISCLAIMER: SELLER NOT RESPONSIBLE FOR PRE-EXISTING ALIEN CIVILIZATIONS</span>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STAR FIELD
+// ═══════════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildStars();
+  }
+
+  function buildStars() {
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 3500);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2,
+        a: Math.random(),
+        da: (Math.random() - 0.5) * 0.003
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.1 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,210,230,${s.a})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+// ═══════════════════════════════════════════════════════
+//  SEEDED RNG (mulberry32)
+// ═══════════════════════════════════════════════════════
+function createRNG(seed) {
+  let s = seed;
+  return function() {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function seedFromCode(code) {
+  let h = 0;
+  for (let i = 0; i < code.length; i++) {
+    h = Math.imul(31, h) + code.charCodeAt(i) | 0;
+  }
+  return Math.abs(h);
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) code += '-';
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+// ═══════════════════════════════════════════════════════
+//  DATA TABLES
+// ═══════════════════════════════════════════════════════
+const PLANET_TYPES = [
+  { type: 'Terrestrial', subtype: 'Continental World', weight: 20 },
+  { type: 'Terrestrial', subtype: 'Ocean World', weight: 12 },
+  { type: 'Terrestrial', subtype: 'Desert World', weight: 10 },
+  { type: 'Terrestrial', subtype: 'Tundra World', weight: 8 },
+  { type: 'Terrestrial', subtype: 'Jungle World', weight: 8 },
+  { type: 'Terrestrial', subtype: 'Volcanic World', weight: 7 },
+  { type: 'Gas Giant', subtype: 'Hot Jupiter', weight: 6 },
+  { type: 'Gas Giant', subtype: 'Cold Gas Giant', weight: 6 },
+  { type: 'Ice Giant', subtype: 'Methane Ice World', weight: 8 },
+  { type: 'Ocean World', subtype: 'Subsurface Ocean', weight: 8 },
+  { type: 'Exotic', subtype: 'Carbon World', weight: 3 },
+  { type: 'Exotic', subtype: 'Iron Superearth', weight: 4 },
+];
+
+const PLANET_NAMES_1 = ['Aelyx','Vorn','Caeld','Theras','Orix','Kelvyn','Zura','Miren','Draath','Selyx','Oph','Thalion','Vex','Nix','Calyx','Ouren','Petra','Zyra','Meld','Faen'];
+const PLANET_NAMES_2 = ['Prime','Magna','Secundus','Nova','Ultima','Keth','Voss','Dune','Reach','Deep','Pax','Rex','Core','Edge','Pale','Dark','Lux','Void','Crest','Drift'];
+const STAR_TYPES = ['Yellow Dwarf (G-type)','Red Dwarf (M-type)','Orange Dwarf (K-type)','Blue Subgiant (A-type)','Binary (G+K)','Binary (M+M)','White Subgiant (F-type)'];
+const ATMOSPHERES = {
+  'Terrestrial': [
+    { label: 'Nitrogen', color: '#4a7ab5' },
+    { label: 'Oxygen', color: '#5bc4a0' },
+    { label: 'Argon', color: '#8b7bc4' },
+    { label: 'CO₂', color: '#c4884a' },
+  ],
+  'Gas Giant': [
+    { label: 'Hydrogen', color: '#c4c48b' },
+    { label: 'Helium', color: '#8b4ac4' },
+    { label: 'Methane', color: '#4ac4c4' },
+  ],
+  'Ice Giant': [
+    { label: 'Hydrogen', color: '#c4c48b' },
+    { label: 'Helium', color: '#8b4ac4' },
+    { label: 'Methane', color: '#4ac4c4' },
+    { label: 'Ammonia', color: '#c44a4a' },
+  ],
+  'Ocean World': [
+    { label: 'Nitrogen', color: '#4a7ab5' },
+    { label: 'Water Vapor', color: '#87ceeb' },
+    { label: 'Oxygen', color: '#5bc4a0' },
+  ],
+  'Exotic': [
+    { label: 'Carbon Monoxide', color: '#8b4a4a' },
+    { label: 'Carbon Dioxide', color: '#c4884a' },
+    { label: 'Sulfur Dioxide', color: '#c4c44a' },
+    { label: 'Silicates', color: '#a0856a' },
+  ],
+};
+
+const BIOMES = {
+  'Continental World': ['Temperate Forests','Grassland Plains','Mountain Ranges','Shallow Seas','Arctic Poles','River Deltas'],
+  'Ocean World': ['Infinite Pelagic Sea','Coral Mega-Reefs','Floating Algae Mats','Deep Hydrothermal Fields','Polar Ice Shelves'],
+  'Desert World': ['Red Iron Dunes','Glass-Sand Flats','Canyon Labyrinths','Oasis Clusters','Sunstone Mesas'],
+  'Tundra World': ['Permafrost Tundra','Glacial Fjords','Frozen Methane Lakes','Sub-ice Caverns','Crystal Ice Plains'],
+  'Jungle World': ['Megaflora Rainforests','Canopy Cloud Cities','Bioluminescent Swamps','Volcanic Soil Plains','Fungal Megacolonies'],
+  'Volcanic World': ['Lava Plains','Obsidian Peaks','Pyroclastic Flats','Sulfur Fields','Cinder Valleys'],
+  'Hot Jupiter': ['Upper Cloud Layer','Ammonia Crystal Bands','Iron Rain Zone','Hydrogen Storm Belt'],
+  'Cold Gas Giant': ['Helium Cloud Bands','Ammonia Snow','Diamond Core Layer','Cyclone Arrays'],
+  'Methane Ice World': ['Methane Sleet Plains','Nitrogen Ice Caps','Ethane Lake Basins','Sub-ice Ocean'],
+  'Subsurface Ocean': ['Ice Shell Crust','Hydrothermal Vents','Brine Channels','Rocky Seafloor'],
+  'Carbon World': ['Diamond Dunes','Graphite Plateaus','Carbide Badlands','Carbon Soot Seas'],
+  'Iron Superearth': ['Iron Basalt Plains','Magnetic Anomaly Zones','Deep Mantle Rifts','Heavy Metal Oceans'],
+};
+
+const RESOURCES = [
+  'Rich titanium deposits','Gold-bearing asteroid debris field','Rare-earth mineral veins','Helium-3 reserves','Methane extraction viable','Subsurface ice mining viable','Native medicinal flora','Unobtainium trace deposits','Deuterium-rich ocean','Silicate crystal formations','Dense iron ore seams','Platinum group metals present','Native biosphere (tourism potential)','Geothermal energy tappable','Atmospheric gas harvesting viable','Gravitonite nodules detected','Xenocrystal mineral pockets','Deep carbon-fiber ore veins',
+];
+
+const HAZARDS_ALL = [
+  'Frequent hypercane systems','Global dust storms (seasonal)','Acid rain (sulphuric)','Active super-volcanism','Extreme tidal forces from proximity to parent body','High cosmic radiation (no magnetic field)','Dense asteroid field in orbital path','Toxic atmospheric composition','Extreme temperature swings (>300°C daily)','Micro-organism contamination risk','Gravitational anomalies near core','Unstable crust — high earthquake risk','Extreme surface pressure','Solar flare bombardment (volatile star)','Permanent storm systems (no breaks recorded)','Subsurface void collapse risk',
+];
+
+const FEATURES_ALL = [
+  'Spectacular ring system visible from surface','Three moons (dramatic tidal vistas)','Stable 24.3-hour day length','Mild seasons — temperate axial tilt','Binary sunset views (dual-star system)','Bioluminescent native fauna','Ancient ruin structures (pre-sentient origin)','Natural magnetic auroras','Low gravity (ideal for elderly settlers)','Pristine atmosphere — no prior habitation','Protected UNESCO Galactic Heritage Zone','Confirmed native sentient species (disclosure required)','Verified liquid water table','Extraordinarily rich soil — agri-potential Class A','Stellar nursery panorama view','Unique low-density atmosphere — extended flight viable',
+];
+
+// ═══════════════════════════════════════════════════════
+//  PLANET DATA GENERATION
+// ═══════════════════════════════════════════════════════
+function generatePlanetData(code) {
+  const seed = seedFromCode(code);
+  const rng = createRNG(seed);
+
+  // Pick type
+  const totalWeight = PLANET_TYPES.reduce((a, b) => a + b.weight, 0);
+  let pick = rng() * totalWeight;
+  let planetType = PLANET_TYPES[0];
+  for (const pt of PLANET_TYPES) {
+    pick -= pt.weight;
+    if (pick <= 0) { planetType = pt; break; }
+  }
+
+  // Name
+  const name1 = PLANET_NAMES_1[Math.floor(rng() * PLANET_NAMES_1.length)];
+  const name2 = PLANET_NAMES_2[Math.floor(rng() * PLANET_NAMES_2.length)];
+  const name = name1 + ' ' + name2;
+
+  // Gravity
+  const gravBase = { 'Terrestrial': [0.4, 2.4], 'Gas Giant': [2.5, 8.0], 'Ice Giant': [0.8, 2.0], 'Ocean World': [0.5, 1.5], 'Exotic': [1.0, 4.0] }[planetType.type];
+  const gravity = (gravBase[0] + rng() * (gravBase[1] - gravBase[0])).toFixed(2);
+
+  // Day length
+  const dayHrs = (4 + rng() * 96).toFixed(1);
+
+  // Year length
+  const yearEarth = (0.3 + rng() * 20).toFixed(2);
+
+  // Surface area
+  const radiusMult = (0.3 + rng() * 8).toFixed(2);
+  const surfaceArea = (5.1e8 * radiusMult * radiusMult / 1e8).toFixed(2);
+
+  // Temperatures
+  const tempProfiles = {
+    'Continental World': [-60, 45], 'Ocean World': [-20, 35], 'Desert World': [-10, 90],
+    'Tundra World': [-150, -10], 'Jungle World': [15, 60], 'Volcanic World': [200, 800],
+    'Hot Jupiter': [700, 2000], 'Cold Gas Giant': [-200, -100], 'Methane Ice World': [-220, -150],
+    'Subsurface Ocean': [-10, 5], 'Carbon World': [400, 1200], 'Iron Superearth': [300, 900],
+  };
+  const [tMin, tMax] = tempProfiles[planetType.subtype] || [-50, 50];
+  const avgTemp = Math.round(tMin + rng() * (tMax - tMin));
+  const extremeHot = Math.round(avgTemp + 20 + rng() * 60);
+  const extremeCold = Math.round(avgTemp - 20 - rng() * 80);
+
+  // Star
+  const star = STAR_TYPES[Math.floor(rng() * STAR_TYPES.length)];
+
+  // Moons
+  const moonCount = Math.floor(rng() * 7);
+  const hasRings = rng() > 0.65;
+
+  // Distance from galactic center
+  const galDist = (8000 + rng() * 22000).toFixed(0);
+
+  // Trade route proximity
+  const tradeLY = (0.5 + rng() * 80).toFixed(1);
+
+  // Terraforming status
+  const isGas = planetType.type === 'Gas Giant';
+  const isVolcanic = planetType.subtype === 'Volcanic World';
+  const isExotic = planetType.type === 'Exotic';
+  let terraStatus, statusClass;
+  if (isGas) {
+    terraStatus = 'UNDEVELOPABLE'; statusClass = 'status-undevelopable';
+  } else if (isExotic || isVolcanic) {
+    const r = rng();
+    if (r < 0.2) { terraStatus = 'TURNKEY'; statusClass = 'status-turnkey'; }
+    else { terraStatus = 'FIXER-UPPER'; statusClass = 'status-fixer'; }
+  } else {
+    const r = rng();
+    if (r < 0.35) { terraStatus = 'TURNKEY'; statusClass = 'status-turnkey'; }
+    else if (r < 0.85) { terraStatus = 'FIXER-UPPER'; statusClass = 'status-fixer'; }
+    else { terraStatus = 'UNDEVELOPABLE'; statusClass = 'status-undevelopable'; }
+  }
+
+  // Breathable
+  const breathable = terraStatus === 'TURNKEY' && planetType.type === 'Terrestrial';
+
+  // Atmosphere
+  const atmGas = ATMOSPHERES[planetType.type] || ATMOSPHERES['Terrestrial'];
+  let atmPcts = [];
+  let leftover = 100;
+  for (let i = 0; i < atmGas.length - 1; i++) {
+    const pct = Math.round(rng() * leftover * 0.7);
+    atmPcts.push(pct);
+    leftover -= pct;
+  }
+  atmPcts.push(leftover);
+  // Sort desc
+  atmPcts.sort((a, b) => b - a);
+
+  // Biomes
+  const biomePool = BIOMES[planetType.subtype] || BIOMES['Continental World'];
+  const biomeCount = Math.min(2 + Math.floor(rng() * 3), biomePool.length);
+  const shuffledBiomes = [...biomePool].sort(() => rng() - 0.5).slice(0, biomeCount);
+
+  // Resources
+  const resCount = 2 + Math.floor(rng() * 4);
+  const shuffledRes = [...RESOURCES].sort(() => rng() - 0.5).slice(0, resCount);
+
+  // Hazards
+  const hazCount = isGas ? 3 + Math.floor(rng() * 3) : 1 + Math.floor(rng() * 4);
+  const shuffledHaz = [...HAZARDS_ALL].sort(() => rng() - 0.5).slice(0, hazCount);
+
+  // Features
+  const featCount = 1 + Math.floor(rng() * 4);
+  const featPool = hasRings
+    ? FEATURES_ALL
+    : FEATURES_ALL.filter(f => !f.includes('ring'));
+  const shuffledFeat = [...featPool].sort(() => rng() - 0.5).slice(0, featCount);
+  if (hasRings && !shuffledFeat.some(f => f.includes('ring'))) {
+    shuffledFeat[0] = 'Spectacular ring system visible from surface';
+  }
+
+  // PRICE calculation
+  const basePrices = {
+    'Terrestrial': 1e14, 'Gas Giant': 5e13, 'Ice Giant': 6e13, 'Ocean World': 1.2e14, 'Exotic': 2e14
+  };
+  let price = basePrices[planetType.type] || 1e14;
+  price *= (0.5 + rng() * 2.5);
+  if (terraStatus === 'TURNKEY') price *= 3.5;
+  if (terraStatus === 'UNDEVELOPABLE') price *= 0.15;
+  if (hasRings) price *= 1.3;
+  price *= parseFloat(radiusMult);
+  price = Math.round(price);
+
+  // Format price
+  function formatPrice(n) {
+    if (n >= 1e18) return { val: (n/1e18).toFixed(2) + ' Quintillion', unit: 'Galactic Credits (GLC)' };
+    if (n >= 1e15) return { val: (n/1e15).toFixed(2) + ' Quadrillion', unit: 'Galactic Credits (GLC)' };
+    if (n >= 1e12) return { val: (n/1e12).toFixed(2) + ' Trillion', unit: 'Galactic Credits (GLC)' };
+    return { val: n.toLocaleString(), unit: 'Galactic Credits (GLC)' };
+  }
+
+  return {
+    code, seed,
+    name, planetType, gravity, dayHrs, yearEarth,
+    radiusMult, surfaceArea,
+    avgTemp, extremeHot, extremeCold,
+    star, moonCount, hasRings,
+    galDist, tradeLY,
+    terraStatus, statusClass, breathable,
+    atmGas, atmPcts,
+    shuffledBiomes, shuffledRes, shuffledHaz, shuffledFeat,
+    price: formatPrice(price),
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  PLANET CANVAS RENDERER
+// ═══════════════════════════════════════════════════════
+function renderPlanet(data) {
+  const canvas = document.getElementById('planetCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = W/2 - 4;
+  const rng = createRNG(data.seed + 9999);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Color palettes per type
+  const palettes = {
+    'Continental World': { base: ['#2d5a3d','#3a7a52','#5a9a6e','#8ab87f','#c5d8a8'], highlight: '#d4e8c0', accent: '#5ba3d0', dark: '#1a3829' },
+    'Ocean World':       { base: ['#1a4a7a','#2560a0','#3080c0','#50a0d8','#80c0e8'], highlight: '#b0d8f0', accent: '#70d8ff', dark: '#0a1a30' },
+    'Desert World':      { base: ['#a05828','#c07040','#d89060','#e8b080','#f0c8a0'], highlight: '#f8dfc0', accent: '#c89050', dark: '#502810' },
+    'Tundra World':      { base: ['#607080','#8090a8','#a0b0c0','#c0d0e0','#dce8f0'], highlight: '#f0f8ff', accent: '#90c0e0', dark: '#202830' },
+    'Jungle World':      { base: ['#1a4010','#2a5a18','#3a7a20','#5a9a30','#80c050'], highlight: '#a0e060', accent: '#40a020', dark: '#0a2008' },
+    'Volcanic World':    { base: ['#301010','#601820','#901820','#c03020','#e05020'], highlight: '#f08040', accent: '#ff6000', dark: '#100808' },
+    'Hot Jupiter':       { base: ['#a07020','#c09030','#d8a850','#e8c070','#f0d890'], highlight: '#f8e8a0', accent: '#e0b040', dark: '#302010' },
+    'Cold Gas Giant':    { base: ['#304060','#405080','#5070a0','#7090c0','#90b0d8'], highlight: '#b0d0f0', accent: '#8090c0', dark: '#102030' },
+    'Methane Ice World': { base: ['#204060','#306080','#408090','#50a0a8','#70c0c0'], highlight: '#a0e0e0', accent: '#40b0d0', dark: '#102030' },
+    'Subsurface Ocean':  { base: ['#203040','#304858','#406070','#508088','#60a0a0'], highlight: '#80c0c0', accent: '#40d0e0', dark: '#0a1820' },
+    'Carbon World':      { base: ['#202020','#303030','#484848','#606060','#787878'], highlight: '#909090', accent: '#c0c0c0', dark: '#080808' },
+    'Iron Superearth':   { base: ['#4a3020','#6a4020','#8a5020','#a06030','#b87840'], highlight: '#d09060', accent: '#c08040', dark: '#1a1008' },
+  };
+
+  const pal = palettes[data.planetType.subtype] || palettes['Continental World'];
+
+  // Clip to circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.clip();
+
+  // Base gradient
+  const bg = ctx.createRadialGradient(cx - R*0.2, cy - R*0.2, R*0.05, cx, cy, R);
+  bg.addColorStop(0, pal.highlight);
+  bg.addColorStop(0.4, pal.base[2]);
+  bg.addColorStop(0.75, pal.base[0]);
+  bg.addColorStop(1, pal.dark);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Terrain blobs
+  const blobCount = 6 + Math.floor(rng() * 8);
+  for (let i = 0; i < blobCount; i++) {
+    const bx = rng() * W;
+    const by = rng() * H;
+    const br = 20 + rng() * 60;
+    const bColor = pal.base[Math.floor(rng() * pal.base.length)];
+    const grad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+    grad.addColorStop(0, bColor + 'cc');
+    grad.addColorStop(1, bColor + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(bx, by, br, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Cloud/band stripes (for gas giants and some terrestrials)
+  if (['Hot Jupiter','Cold Gas Giant','Methane Ice World'].includes(data.planetType.subtype)) {
+    const bandCount = 4 + Math.floor(rng() * 6);
+    for (let i = 0; i < bandCount; i++) {
+      const by = (i / bandCount) * H + rng() * (H / bandCount * 0.5);
+      const bh = 8 + rng() * 28;
+      const ba = 0.12 + rng() * 0.25;
+      ctx.fillStyle = `rgba(255,255,255,${ba})`;
+      ctx.beginPath();
+      ctx.ellipse(cx, by, R + 10, bh, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else {
+    // Clouds for terrestrial types
+    const cloudCount = 3 + Math.floor(rng() * 5);
+    for (let i = 0; i < cloudCount; i++) {
+      const cx2 = rng() * W;
+      const cy2 = rng() * H;
+      const cr = 15 + rng() * 40;
+      ctx.fillStyle = `rgba(255,255,255,${0.1 + rng() * 0.25})`;
+      ctx.beginPath();
+      ctx.ellipse(cx2, cy2, cr * 1.6, cr * 0.6, rng() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Specular highlight
+  const spec = ctx.createRadialGradient(cx - R*0.3, cy - R*0.3, 0, cx - R*0.3, cy - R*0.3, R*0.6);
+  spec.addColorStop(0, 'rgba(255,255,255,0.25)');
+  spec.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+  spec.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = spec;
+  ctx.fillRect(0,0,W,H);
+
+  // Dark limb
+  const limb = ctx.createRadialGradient(cx, cy, R*0.65, cx, cy, R);
+  limb.addColorStop(0, 'rgba(0,0,0,0)');
+  limb.addColorStop(1, 'rgba(0,0,0,0.75)');
+  ctx.fillStyle = limb;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+
+  // Planet border glow
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(201,168,76,0.3)`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  // RINGS (drawn outside circle clip)
+  if (data.hasRings) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.28);
+    const rInner = R * 1.18;
+    const rOuter = R * 1.65;
+    const ringGrad = ctx.createRadialGradient(0, 0, rInner, 0, 0, rOuter);
+    const ringColor = pal.accent;
+    ringGrad.addColorStop(0, ringColor + '80');
+    ringGrad.addColorStop(0.4, ringColor + 'cc');
+    ringGrad.addColorStop(0.7, ringColor + '99');
+    ringGrad.addColorStop(1, ringColor + '00');
+    ctx.fillStyle = ringGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, rOuter, 0, Math.PI * 2);
+    ctx.arc(0, 0, rInner, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+
+    // Second ring band
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.28);
+    const r2Grad = ctx.createRadialGradient(0, 0, rInner*1.1, 0, 0, rInner*1.25);
+    r2Grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+    r2Grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = r2Grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, rInner*1.25, 0, Math.PI * 2);
+    ctx.arc(0, 0, rInner*1.1, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Atmosphere glow around planet
+  ctx.save();
+  const atmGlow = ctx.createRadialGradient(cx, cy, R - 4, cx, cy, R + 16);
+  atmGlow.addColorStop(0, pal.accent + '60');
+  atmGlow.addColorStop(1, pal.accent + '00');
+  ctx.fillStyle = atmGlow;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R + 16, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+//  UI POPULATION
+// ═══════════════════════════════════════════════════════
+let currentCode = '';
+
+function populateUI(data) {
+  currentCode = data.code;
+
+  // Header
+  document.getElementById('listingId').textContent = `LISTING #CR-${data.code.replace('-','')}`;
+  const badge = document.getElementById('statusBadge');
+  badge.textContent = data.terraStatus;
+  badge.className = `status-badge ${data.statusClass}`;
+
+  // Visual
+  renderPlanet(data);
+  document.getElementById('planetName').textContent = data.name;
+  document.getElementById('planetClass').textContent = `${data.planetType.type} · ${data.planetType.subtype}`;
+  document.getElementById('codeDisplay').textContent = data.code;
+  document.getElementById('copyBtn').textContent = 'COPY';
+  document.getElementById('copyBtn').className = 'copy-btn';
+
+  // Price
+  document.getElementById('priceValue').textContent = data.price.val;
+  document.getElementById('priceUnit').textContent = data.price.unit;
+
+  // Info grid
+  const grid = document.getElementById('infoGrid');
+  grid.innerHTML = '';
+  const gridItems = [
+    ['Surface Gravity', `${data.gravity} G`],
+    ['Day Length', `${data.dayHrs} hrs`],
+    ['Year Length', `${data.yearEarth} Earth years`],
+    ['Surface Area', `${data.surfaceArea} × 10⁸ km²`],
+    ['Avg Temperature', `${data.avgTemp}°C`],
+    ['Extreme High', `${data.extremeHot}°C (equator)`],
+    ['Extreme Low', `${data.extremeCold}°C (poles)`],
+    ['Parent Star', data.star],
+    ['Moons', data.moonCount === 0 ? 'None' : `${data.moonCount} moon${data.moonCount > 1 ? 's' : ''}`],
+    ['Ring System', data.hasRings ? 'Yes (spectacular)' : 'None'],
+    ['Galactic Distance', `${Number(data.galDist).toLocaleString()} ly from core`],
+    ['Nearest Trade Route', `${data.tradeLY} ly`],
+    ['Atmosphere', data.breathable ? 'Breathable (O₂/N₂)' : 'Non-breathable'],
+    ['Radius (Earth=1)', `${data.radiusMult}×`],
+  ];
+  for (const [label, value] of gridItems) {
+    grid.innerHTML += `<div class="info-item"><div class="info-item-label">${label}</div><div class="info-item-value">${value}</div></div>`;
+  }
+
+  // Atmosphere bar
+  const bar = document.getElementById('atmosphereBar');
+  const labels = document.getElementById('atmosphereLabels');
+  bar.innerHTML = '';
+  labels.innerHTML = '';
+  for (let i = 0; i < data.atmGas.length; i++) {
+    const g = data.atmGas[i];
+    const pct = data.atmPcts[i];
+    const seg = document.createElement('div');
+    seg.className = 'atm-seg';
+    seg.style.width = pct + '%';
+    seg.style.background = g.color;
+    seg.title = `${g.label}: ${pct}%`;
+    bar.appendChild(seg);
+    labels.innerHTML += `<span class="atm-label"><span class="atm-swatch" style="background:${g.color}"></span>${g.label} ${pct}%</span>`;
+  }
+
+  // Biomes
+  const biomeEl = document.getElementById('biomeTags');
+  biomeEl.innerHTML = data.shuffledBiomes.map(b => `<span class="biome-tag">${b}</span>`).join('');
+
+  // Resources
+  const resList = document.getElementById('resourceList');
+  resList.innerHTML = data.shuffledRes.map(r => `<li>${r}</li>`).join('');
+
+  // Hazards
+  const hazList = document.getElementById('hazardList');
+  hazList.innerHTML = data.shuffledHaz.map(h => `<li>${h}</li>`).join('');
+
+  // Features
+  const featList = document.getElementById('featureList');
+  featList.innerHTML = data.shuffledFeat.map(f => `<li>${f}</li>`).join('');
+
+  // Show card
+  const stage = document.getElementById('planetStage');
+  stage.classList.add('visible');
+  stage.style.animation = 'none';
+  setTimeout(() => {
+    stage.style.animation = '';
+    stage.classList.remove('visible');
+    void stage.offsetWidth;
+    stage.classList.add('visible');
+  }, 10);
+
+  // Scroll to card
+  setTimeout(() => {
+    stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════
+function generatePlanet() {
+  const loading = document.getElementById('loading');
+  loading.classList.add('active');
+  setTimeout(() => {
+    const code = generateCode();
+    const data = generatePlanetData(code);
+    populateUI(data);
+    loading.classList.remove('active');
+  }, 600 + Math.random() * 400);
+}
+
+function loadFromCode() {
+  const input = document.getElementById('codeInput');
+  const err = document.getElementById('errorMsg');
+  let code = input.value.trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+  err.classList.remove('visible');
+
+  // Normalize: insert dash if missing
+  if (code.length === 8 && !code.includes('-')) {
+    code = code.slice(0,4) + '-' + code.slice(4);
+  }
+
+  // Validate format: 4 chars, dash, 4 chars
+  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+    err.classList.add('visible');
+    return;
+  }
+
+  const loading = document.getElementById('loading');
+  loading.classList.add('active');
+  setTimeout(() => {
+    const data = generatePlanetData(code);
+    populateUI(data);
+    input.value = '';
+    loading.classList.remove('active');
+  }, 600);
+}
+
+function copyCode() {
+  if (!currentCode) return;
+  navigator.clipboard.writeText(currentCode).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'COPIED!';
+    btn.className = 'copy-btn copied';
+    setTimeout(() => {
+      btn.textContent = 'COPY';
+      btn.className = 'copy-btn';
+    }, 2000);
+  });
+}
+
+function enquire() {
+  if (!currentCode) return;
+  const name = document.getElementById('planetName').textContent;
+  alert(`Thank you for your interest in ${name} (${currentCode}).\n\nA Cosmic Realty broker will contact you within 3-5 business millennia.\n\nSave your property code: ${currentCode}`);
+}
+
+// Enter key on code input
+document.getElementById('codeInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') loadFromCode();
+});
+
+// Generate one planet on load
+window.addEventListener('load', () => {
+  setTimeout(() => generatePlanet(), 300);
+});
+</script>
+</body>
+</html>
