@@ -1,344 +1,1542 @@
 {
-  "animals": [
-    {
-      "id": "saltwater-crocodile",
-      "name": "Saltwater Crocodile",
-      "species": "Crocodylus porosus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Crocodylus_porosus_painting.jpg/800px-Crocodylus_porosus_painting.jpg",
-      "taxonomy": {
-        "class": "Reptilia",
-        "order": "Crocodilia",
-        "family": "Crocodylidae",
-        "genus": "Crocodylus",
-        "species": "C. porosus"
+  "_blank_model": {
+    "id": "unique-kebab-case-id",
+    "name": "Common Name",
+    "species": "Genus species",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/X/XX/Filename.jpg/800px-Filename.jpg",
+    "taxonomy": {
+      "class": "Mammalia",
+      "order": "Rodentia",
+      "suborder": "Sciuromorpha | Myomorpha | Anomaluromorpha | Castorimorpha | Hystricomorpha",
+      "family": "Familyidae",
+      "genus": "Genus",
+      "species": "G. species"
+    },
+    "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "FamilyName", "Genus"],
+    "description": "Short combat lore description of this animal.",
+    "stats": {
+      "survivability": {
+        "hp": 0,
+        "endurance": 0,
+        "armor": 0,
+        "regeneration": 0
       },
-      "classification_chain": ["Vertebrata", "Reptilia", "Archosauria", "Crocodilia", "Crocodylidae", "Crocodylus"],
-      "description": "The largest living reptile and most dangerous crocodilian. Apex ambush predator of tropical coastlines and estuaries across Southeast Asia and Oceania.",
-      "stats": {
-        "survivability": {
-          "hp": 91,
-          "endurance": 62,
-          "armor": 85,
-          "regeneration": 44
-        },
-        "offense": {
-          "bite_strike_force": 97,
-          "venom_toxin": 0,
-          "reach": 74
-        },
-        "mobility": {
-          "speed": 52,
-          "agility": 41,
-          "stamina_drain": 38
-        },
-        "senses_tactics": {
-          "perception": 78,
-          "intimidation": 88,
-          "camouflage": 80
-        },
-        "class_specific": {
-          "thermal_state": "Ectotherm — Cold/Warm/Hot",
-          "thermal_cold_modifier": -25,
-          "thermal_warm_modifier": 0,
-          "thermal_hot_modifier": 15
-        }
+      "offense": {
+        "bite_strike_force": 0,
+        "venom_toxin": 0,
+        "reach": 0
+      },
+      "mobility": {
+        "speed": 0,
+        "agility": 0,
+        "stamina_drain": 0
+      },
+      "senses_tactics": {
+        "perception": 0,
+        "intimidation": 0,
+        "camouflage": 0
+      },
+      "class_specific": {
+        "pack_cohesion": 0,
+        "blood_clotting": 0
       }
+    }
+  },
+
+  "animals": [
+
+    {
+      "_note": "── SUBORDER: SCIUROMORPHA ─────────────────────────────────────────────",
+      "_family": "Sciuridae — Squirrels, Chipmunks, Marmots, Prairie Dogs"
     },
     {
-      "id": "siberian-tiger",
-      "name": "Siberian Tiger",
-      "species": "Panthera tigris altaica",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Tigr_amursky.jpg/800px-Tigr_amursky.jpg",
+      "id": "north-american-beaver",
+      "_note_family": "Castoridae",
+      "name": "North American Beaver",
+      "species": "Castor canadensis",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/American_Beaver.jpg/800px-American_Beaver.jpg",
       "taxonomy": {
         "class": "Mammalia",
-        "order": "Carnivora",
-        "family": "Felidae",
-        "genus": "Panthera",
-        "species": "P. tigris"
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Castoridae",
+        "genus": "Castor",
+        "species": "C. canadensis"
       },
-      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Carnivora", "Felidae", "Panthera"],
-      "description": "The largest wild cat on Earth. A solitary apex predator built for ambush in the snows of the Russian Far East, combining raw power with explosive stealth.",
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Castorimorpha", "Castoridae", "Castor"],
+      "description": "The largest rodent of North America and an ecosystem engineer of rivers. Equipped with ironically iron-reinforced incisors that never stop growing, a flat paddle tail it can use as a weapon, and a second eyelid for underwater vision. Slower than most rodents but armored in thick fur, fearless, and capable of felling trees. In combat, it is a siege engine: difficult to kill, focused, and devastating at close range.",
       "stats": {
         "survivability": {
-          "hp": 85,
+          "hp": 58,
+          "endurance": 70,
+          "armor": 30,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 72,
+          "venom_toxin": 0,
+          "reach": 30
+        },
+        "mobility": {
+          "speed": 35,
+          "agility": 28,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 38,
+          "camouflage": 42
+        },
+        "class_specific": {
+          "pack_cohesion": 55,
+          "blood_clotting": 45
+        }
+      }
+    },
+
+    {
+      "id": "eurasian-beaver",
+      "_note_family": "Castoridae",
+      "name": "Eurasian Beaver",
+      "species": "Castor fiber",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castor_fiber_2.jpg/800px-Castor_fiber_2.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Castoridae",
+        "genus": "Castor",
+        "species": "C. fiber"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Castorimorpha", "Castoridae", "Castor"],
+      "description": "The Eurasian beaver is the slightly larger of the two living beaver species, once hunted to near-extinction across Europe for its fur and castoreum. A tireless builder and a ferocious defender of its territory — river otters and wolves have been driven off by a determined adult beaver protecting a dam.",
+      "stats": {
+        "survivability": {
+          "hp": 60,
           "endurance": 72,
-          "armor": 38,
-          "regeneration": 31
-        },
-        "offense": {
-          "bite_strike_force": 89,
-          "venom_toxin": 0,
-          "reach": 80
-        },
-        "mobility": {
-          "speed": 86,
-          "agility": 84,
-          "stamina_drain": 55
-        },
-        "senses_tactics": {
-          "perception": 85,
-          "intimidation": 91,
-          "camouflage": 77
-        },
-        "class_specific": {
-          "pack_cohesion": 30,
-          "blood_clotting": 65
-        }
-      }
-    },
-    {
-      "id": "golden-eagle",
-      "name": "Golden Eagle",
-      "species": "Aquila chrysaetos",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/24701-nature-natural-beauty.jpg/800px-24701-nature-natural-beauty.jpg",
-      "taxonomy": {
-        "class": "Aves",
-        "order": "Accipitriformes",
-        "family": "Accipitridae",
-        "genus": "Aquila",
-        "species": "A. chrysaetos"
-      },
-      "classification_chain": ["Vertebrata", "Aves", "Neoaves", "Accipitriformes", "Accipitridae", "Aquila"],
-      "description": "One of the most widely distributed and respected raptors. Masters of aerial dominance, golden eagles can strike prey far larger than themselves using gravity as a weapon.",
-      "stats": {
-        "survivability": {
-          "hp": 54,
-          "endurance": 81,
-          "armor": 22,
-          "regeneration": 20
-        },
-        "offense": {
-          "bite_strike_force": 71,
-          "venom_toxin": 0,
-          "reach": 68
-        },
-        "mobility": {
-          "speed": 93,
-          "agility": 89,
-          "stamina_drain": 42
-        },
-        "senses_tactics": {
-          "perception": 98,
-          "intimidation": 72,
-          "camouflage": 30
-        },
-        "class_specific": {
-          "altitude": 90,
-          "talon_grip": 84
-        }
-      }
-    },
-    {
-      "id": "great-white-shark",
-      "name": "Great White Shark",
-      "species": "Carcharodon carcharias",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/White_shark.jpg/800px-White_shark.jpg",
-      "taxonomy": {
-        "class": "Chondrichthyes",
-        "order": "Lamniformes",
-        "family": "Lamnidae",
-        "genus": "Carcharodon",
-        "species": "C. carcharias"
-      },
-      "classification_chain": ["Vertebrata", "Chondrichthyes", "Elasmobranchii", "Lamniformes", "Lamnidae", "Carcharodon"],
-      "description": "The ocean's most iconic apex predator. Armed with electroreception, 300 serrated teeth arranged in rows, and a torpedo body capable of breaching out of the water at full speed.",
-      "stats": {
-        "survivability": {
-          "hp": 88,
-          "endurance": 85,
-          "armor": 44,
-          "regeneration": 50
-        },
-        "offense": {
-          "bite_strike_force": 95,
-          "venom_toxin": 0,
-          "reach": 72
-        },
-        "mobility": {
-          "speed": 80,
-          "agility": 60,
-          "stamina_drain": 28
-        },
-        "senses_tactics": {
-          "perception": 95,
-          "intimidation": 90,
-          "camouflage": 48
-        },
-        "class_specific": {
-          "buoyancy": 88,
-          "pressure_resistance": 72
-        }
-      }
-    },
-    {
-      "id": "komodo-dragon",
-      "name": "Komodo Dragon",
-      "species": "Varanus komodoensis",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Varanus_komodoensis_2021.jpg/800px-Varanus_komodoensis_2021.jpg",
-      "taxonomy": {
-        "class": "Reptilia",
-        "order": "Squamata",
-        "family": "Varanidae",
-        "genus": "Varanus",
-        "species": "V. komodoensis"
-      },
-      "classification_chain": ["Vertebrata", "Reptilia", "Lepidosauria", "Squamata", "Varanidae", "Varanus"],
-      "description": "The world's largest lizard. Patient and relentless, it combines venom-laced saliva, serrated teeth, and an almost indestructible hide. Its prey often dies of shock and blood loss long after the initial strike.",
-      "stats": {
-        "survivability": {
-          "hp": 78,
-          "endurance": 58,
-          "armor": 70,
-          "regeneration": 55
+          "armor": 32,
+          "regeneration": 29
         },
         "offense": {
           "bite_strike_force": 74,
-          "venom_toxin": 68,
-          "reach": 55
+          "venom_toxin": 0,
+          "reach": 30
         },
         "mobility": {
-          "speed": 48,
-          "agility": 39,
-          "stamina_drain": 30
+          "speed": 34,
+          "agility": 27,
+          "stamina_drain": 38
         },
         "senses_tactics": {
-          "perception": 82,
-          "intimidation": 78,
+          "perception": 64,
+          "intimidation": 40,
+          "camouflage": 44
+        },
+        "class_specific": {
+          "pack_cohesion": 57,
+          "blood_clotting": 46
+        }
+      }
+    },
+
+    {
+      "id": "alpine-marmot",
+      "_note_family": "Sciuridae",
+      "name": "Alpine Marmot",
+      "species": "Marmota marmota",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Marmota_marmota_01.jpg/800px-Marmota_marmota_01.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Sciuromorpha",
+        "family": "Sciuridae",
+        "genus": "Marmota",
+        "species": "M. marmota"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Sciuromorpha", "Sciuridae", "Marmota"],
+      "description": "A stocky, powerfully built rodent of the high Alps, capable of surviving months of hibernation. When cornered, an alpine marmot is no pushover — it will bite hard and use its chunky body as a battering ram. Highly social, it relies on alarm calls and group vigilance to detect threats before they arrive.",
+      "stats": {
+        "survivability": {
+          "hp": 44,
+          "endurance": 60,
+          "armor": 18,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 40,
+          "venom_toxin": 0,
+          "reach": 18
+        },
+        "mobility": {
+          "speed": 42,
+          "agility": 45,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 80,
+          "intimidation": 32,
           "camouflage": 55
         },
         "class_specific": {
-          "thermal_state": "Ectotherm — Cold/Warm/Hot",
-          "thermal_cold_modifier": -30,
-          "thermal_warm_modifier": 0,
-          "thermal_hot_modifier": 20
+          "pack_cohesion": 82,
+          "blood_clotting": 38
         }
       }
     },
+
     {
-      "id": "african-elephant",
-      "name": "African Elephant",
-      "species": "Loxodonta africana",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/800px-African_Bush_Elephant.jpg",
+      "id": "black-tailed-prairie-dog",
+      "_note_family": "Sciuridae",
+      "name": "Black-tailed Prairie Dog",
+      "species": "Cynomys ludovicianus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Cynomys_ludovicianus_-_prairie_dog.jpg/800px-Cynomys_ludovicianus_-_prairie_dog.jpg",
       "taxonomy": {
         "class": "Mammalia",
-        "order": "Proboscidea",
-        "family": "Elephantidae",
-        "genus": "Loxodonta",
-        "species": "L. africana"
+        "order": "Rodentia",
+        "suborder": "Sciuromorpha",
+        "family": "Sciuridae",
+        "genus": "Cynomys",
+        "species": "C. ludovicianus"
       },
-      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Afrotheria", "Proboscidea", "Elephantidae", "Loxodonta"],
-      "description": "The largest land animal alive. A walking fortress of intelligence and raw force. Its tusks can gore, its trunk can crush, and no other land predator willingly confronts a healthy adult.",
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Sciuromorpha", "Sciuridae", "Cynomys"],
+      "description": "Masters of collective intelligence on the open plains. Prairie dogs communicate through one of the most sophisticated vocalizations in the animal kingdom — their alarm calls encode predator species, size, color, and direction. In the arena, a prairie dog fights as if the whole coterie is watching, which it is.",
       "stats": {
         "survivability": {
-          "hp": 99,
-          "endurance": 80,
-          "armor": 60,
-          "regeneration": 25
+          "hp": 28,
+          "endurance": 52,
+          "armor": 8,
+          "regeneration": 20
         },
         "offense": {
-          "bite_strike_force": 92,
+          "bite_strike_force": 25,
           "venom_toxin": 0,
-          "reach": 91
+          "reach": 10
         },
         "mobility": {
           "speed": 55,
-          "agility": 22,
-          "stamina_drain": 45
+          "agility": 60,
+          "stamina_drain": 30
         },
         "senses_tactics": {
-          "perception": 88,
-          "intimidation": 96,
-          "camouflage": 5
+          "perception": 90,
+          "intimidation": 20,
+          "camouflage": 48
         },
         "class_specific": {
-          "pack_cohesion": 90,
-          "blood_clotting": 50
+          "pack_cohesion": 95,
+          "blood_clotting": 30
         }
       }
     },
+
     {
-      "id": "poison-dart-frog",
-      "name": "Poison Dart Frog",
-      "species": "Dendrobates tinctorius",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dendrobates_tinctorius_-_Rolf_Lawrenz.jpg/800px-Dendrobates_tinctorius_-_Rolf_Lawrenz.jpg",
+      "id": "eastern-gray-squirrel",
+      "_note_family": "Sciuridae",
+      "name": "Eastern Gray Squirrel",
+      "species": "Sciurus carolinensis",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Sciurus_carolinensis_common_squirrel.jpg/800px-Sciurus_carolinensis_common_squirrel.jpg",
       "taxonomy": {
-        "class": "Amphibia",
-        "order": "Anura",
-        "family": "Dendrobatidae",
-        "genus": "Dendrobates",
-        "species": "D. tinctorius"
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Sciuromorpha",
+        "family": "Sciuridae",
+        "genus": "Sciurus",
+        "species": "S. carolinensis"
       },
-      "classification_chain": ["Vertebrata", "Amphibia", "Batrachia", "Anura", "Dendrobatidae", "Dendrobates"],
-      "description": "Small, jewel-bright, and lethally toxic. What this frog lacks in size it compensates with batrachotoxin — one of the most potent non-protein toxins known. Aposematic coloration is its first warning.",
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Sciuromorpha", "Sciuridae", "Sciurus"],
+      "description": "Deceptively ordinary in appearance, the gray squirrel is one of the most invasively successful mammals on Earth, outcompeting native species across continents. An aerial acrobat with spatial memory exceeding most mammals, sharp incisors, and reflexes honed by a lifetime of predator evasion. Do not underestimate it.",
       "stats": {
         "survivability": {
-          "hp": 18,
-          "endurance": 40,
+          "hp": 20,
+          "endurance": 55,
           "armor": 5,
-          "regeneration": 35
+          "regeneration": 18
         },
         "offense": {
-          "bite_strike_force": 5,
-          "venom_toxin": 99,
+          "bite_strike_force": 18,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 70,
+          "agility": 88,
+          "stamina_drain": 22
+        },
+        "senses_tactics": {
+          "perception": 78,
+          "intimidation": 8,
+          "camouflage": 50
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 25
+        }
+      }
+    },
+
+    {
+      "id": "southern-flying-squirrel",
+      "_note_family": "Sciuridae",
+      "name": "Southern Flying Squirrel",
+      "species": "Glaucomys volans",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Glaucomys_volans.jpg/800px-Glaucomys_volans.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Sciuromorpha",
+        "family": "Sciuridae",
+        "genus": "Glaucomys",
+        "species": "G. volans"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Sciuromorpha", "Sciuridae", "Glaucomys"],
+      "description": "A nocturnal glider that navigates the forest canopy using a patagium membrane stretched between its limbs. Carnivorous tendencies belie its soft appearance — it will eat insects, birds' eggs, and carrion. Surprisingly aggressive for its size, and in combat its three-dimensional mobility makes it nearly impossible to pin down.",
+      "stats": {
+        "survivability": {
+          "hp": 14,
+          "endurance": 48,
+          "armor": 3,
+          "regeneration": 15
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 65,
+          "agility": 95,
+          "stamina_drain": 18
+        },
+        "senses_tactics": {
+          "perception": 85,
+          "intimidation": 5,
+          "camouflage": 62
+        },
+        "class_specific": {
+          "pack_cohesion": 40,
+          "blood_clotting": 20
+        }
+      }
+    },
+
+    {
+      "_note": "── SUBORDER: CASTORIMORPHA ── Pocket Gophers & Kangaroo Rats ────────",
+      "id": "banner-tailed-kangaroo-rat",
+      "_note_family": "Heteromyidae",
+      "name": "Banner-tailed Kangaroo Rat",
+      "species": "Dipodomys spectabilis",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Dipodomys_spectabilis.jpg/800px-Dipodomys_spectabilis.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Dipodomys",
+        "species": "D. spectabilis"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Castorimorpha", "Heteromyidae", "Dipodomys"],
+      "description": "Built like a tiny kangaroo, the kangaroo rat is an evasion specialist of the American desert. It can detect rattlesnake strikes by the vibration through the ground and has evolved a high-amplitude leap that carries it clear of most ambushes. Its foot-drumming is a direct signal to would-be predators: I know you are there.",
+      "stats": {
+        "survivability": {
+          "hp": 12,
+          "endurance": 50,
+          "armor": 4,
+          "regeneration": 14
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 82,
+          "agility": 96,
+          "stamina_drain": 16
+        },
+        "senses_tactics": {
+          "perception": 88,
+          "intimidation": 12,
+          "camouflage": 70
+        },
+        "class_specific": {
+          "pack_cohesion": 15,
+          "blood_clotting": 18
+        }
+      }
+    },
+
+    {
+      "id": "plains-pocket-gopher",
+      "_note_family": "Geomyidae",
+      "name": "Plains Pocket Gopher",
+      "species": "Geomys bursarius",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Pocket_Gopher_-_Geomys_bursarius.jpg/800px-Pocket_Gopher_-_Geomys_bursarius.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Geomyidae",
+        "genus": "Geomys",
+        "species": "G. bursarius"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Castorimorpha", "Geomyidae", "Geomys"],
+      "description": "An armored tunneling machine. The pocket gopher's skull is massively reinforced for excavation, and its incisors protrude in front of its lips so it can bite and dig simultaneously without swallowing soil. Aggressive in its burrow to a pathological degree — it will attack animals many times its size that invade its tunnel.",
+      "stats": {
+        "survivability": {
+          "hp": 22,
+          "endurance": 58,
+          "armor": 20,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 30,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 25,
+          "agility": 30,
+          "stamina_drain": 28
+        },
+        "senses_tactics": {
+          "perception": 55,
+          "intimidation": 22,
+          "camouflage": 65
+        },
+        "class_specific": {
+          "pack_cohesion": 10,
+          "blood_clotting": 35
+        }
+      }
+    },
+
+    {
+      "_note": "── SUBORDER: MYOMORPHA ─────────────────────────────────────────────",
+      "id": "brown-rat",
+      "_note_family": "Muridae",
+      "name": "Brown Rat",
+      "species": "Rattus norvegicus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Rattus_norvegicus_1.jpg/800px-Rattus_norvegicus_1.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. norvegicus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Muridae", "Rattus"],
+      "description": "One of the most successful mammals on Earth. The brown rat has colonized every continent, survived two world wars, and outlasted countless extermination campaigns. Highly intelligent, deeply social, with a bite that transmits diseases even as it lands. In the arena, it is a scrapper — relentless, resilient, and willing to eat almost anything.",
+      "stats": {
+        "survivability": {
+          "hp": 22,
+          "endurance": 68,
+          "armor": 6,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 22,
+          "venom_toxin": 15,
           "reach": 10
         },
         "mobility": {
           "speed": 62,
-          "agility": 78,
-          "stamina_drain": 22
+          "agility": 72,
+          "stamina_drain": 20
         },
         "senses_tactics": {
-          "perception": 55,
-          "intimidation": 60,
-          "camouflage": 15
+          "perception": 82,
+          "intimidation": 18,
+          "camouflage": 40
         },
         "class_specific": {
-          "buoyancy": 70,
-          "pressure_resistance": 20
+          "pack_cohesion": 80,
+          "blood_clotting": 38
         }
       }
     },
+
     {
-      "id": "harpy-eagle",
-      "name": "Harpy Eagle",
-      "species": "Harpia harpyja",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Harpia_harpyja_001.jpg/640px-Harpia_harpyja_001.jpg",
+      "id": "house-mouse",
+      "_note_family": "Muridae",
+      "name": "House Mouse",
+      "species": "Mus musculus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Mus_musculus_household_mouse.jpg/800px-Mus_musculus_household_mouse.jpg",
       "taxonomy": {
-        "class": "Aves",
-        "order": "Accipitriformes",
-        "family": "Accipitridae",
-        "genus": "Harpia",
-        "species": "H. harpyja"
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Mus",
+        "species": "M. musculus"
       },
-      "classification_chain": ["Vertebrata", "Aves", "Neoaves", "Accipitriformes", "Accipitridae", "Harpia"],
-      "description": "The largest and most powerful raptor in the Americas. Its talons exceed the size of grizzly bear claws. It hunts sloths and monkeys by threading silently through dense jungle canopy.",
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Muridae", "Mus"],
+      "description": "The archetype of small and quick. Few animals have been as thoroughly studied, but in the wild the house mouse is an adaptable, cunning survivor that has spread to every corner of the Earth. It is outclassed by almost everything in a straight fight — but it is faster, sneakier, and harder to catch than most give it credit for.",
       "stats": {
         "survivability": {
-          "hp": 58,
-          "endurance": 77,
-          "armor": 25,
-          "regeneration": 22
+          "hp": 8,
+          "endurance": 42,
+          "armor": 2,
+          "regeneration": 15
         },
         "offense": {
-          "bite_strike_force": 75,
+          "bite_strike_force": 6,
           "venom_toxin": 0,
-          "reach": 70
+          "reach": 4
         },
         "mobility": {
-          "speed": 85,
-          "agility": 91,
-          "stamina_drain": 38
+          "speed": 70,
+          "agility": 85,
+          "stamina_drain": 15
         },
         "senses_tactics": {
-          "perception": 94,
-          "intimidation": 80,
+          "perception": 75,
+          "intimidation": 2,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 65,
+          "blood_clotting": 20
+        }
+      }
+    },
+
+    {
+      "id": "grasshopper-mouse",
+      "_note_family": "Cricetidae",
+      "name": "Northern Grasshopper Mouse",
+      "species": "Onychomys leucogaster",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Northern_grasshopper_mouse_%28Onychomys_leucogaster%29.jpg/800px-Northern_grasshopper_mouse_%28Onychomys_leucogaster%29.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Onychomys",
+        "species": "O. leucogaster"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Cricetidae", "Onychomys"],
+      "description": "The only truly carnivorous mouse in North America. It howls. It hunts scorpions — and has evolved a neurological adaptation that reroutes scorpion venom as a painkiller rather than suffering from it. The grasshopper mouse approaches combat the way a wolf does: methodically, fearlessly, going for the head.",
+      "stats": {
+        "survivability": {
+          "hp": 14,
+          "endurance": 60,
+          "armor": 4,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 68,
+          "agility": 80,
+          "stamina_drain": 18
+        },
+        "senses_tactics": {
+          "perception": 84,
+          "intimidation": 35,
+          "camouflage": 52
+        },
+        "class_specific": {
+          "pack_cohesion": 20,
+          "blood_clotting": 28
+        }
+      }
+    },
+
+    {
+      "id": "golden-hamster",
+      "_note_family": "Cricetidae",
+      "name": "Golden Hamster",
+      "species": "Mesocricetus auratus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Hamster_1.jpg/800px-Hamster_1.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Mesocricetus",
+        "species": "M. auratus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Cricetidae", "Mesocricetus"],
+      "description": "In the wild, the golden hamster is a solitary, ferociously territorial animal found in the arid highlands of Syria. It digs complex burrow systems and will fight other hamsters to the death over territory. Its reputation as a gentle pet is an artifact of millennia of captive breeding — in its ancestral form, it is a pugnacious and stubborn fighter.",
+      "stats": {
+        "survivability": {
+          "hp": 18,
+          "endurance": 50,
+          "armor": 6,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 18,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 50,
+          "agility": 58,
+          "stamina_drain": 22
+        },
+        "senses_tactics": {
+          "perception": 72,
+          "intimidation": 20,
+          "camouflage": 45
+        },
+        "class_specific": {
+          "pack_cohesion": 5,
+          "blood_clotting": 25
+        }
+      }
+    },
+
+    {
+      "id": "norway-lemming",
+      "_note_family": "Cricetidae",
+      "name": "Norway Lemming",
+      "species": "Lemmus lemmus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Lemmus_lemmus.jpg/800px-Lemmus_lemmus.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Lemmus",
+        "species": "L. lemmus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Cricetidae", "Lemmus"],
+      "description": "A creature that actively attacks animals vastly larger than itself — including humans, dogs, and birds of prey. The Norway lemming does not run. It stands its ground, screams, and charges. Its legendary aggression during population booms makes it one of the most unpredictable small combatants in the animal kingdom.",
+      "stats": {
+        "survivability": {
+          "hp": 12,
+          "endurance": 55,
+          "armor": 5,
+          "regeneration": 16
+        },
+        "offense": {
+          "bite_strike_force": 16,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 60,
+          "stamina_drain": 20
+        },
+        "senses_tactics": {
+          "perception": 60,
+          "intimidation": 55,
+          "camouflage": 38
+        },
+        "class_specific": {
+          "pack_cohesion": 50,
+          "blood_clotting": 22
+        }
+      }
+    },
+
+    {
+      "id": "mongolian-gerbil",
+      "_note_family": "Muridae / Gerbillinae",
+      "name": "Mongolian Gerbil",
+      "species": "Meriones unguiculatus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Mongolian_gerbil_%28Meriones_unguiculatus%29.jpg/800px-Mongolian_gerbil_%28Meriones_unguiculatus%29.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Meriones",
+        "species": "M. unguiculatus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Muridae", "Meriones"],
+      "description": "Built for life in the Mongolian steppe where temperatures swing 80 degrees and predators come from every direction. Gerbils are hypervigilant, inquisitive, and intensely social — a lone gerbil declines rapidly in health, a bonded pair is nearly unmanageable. Their kidney efficiency is legendary: they can go months without drinking free water.",
+      "stats": {
+        "survivability": {
+          "hp": 10,
+          "endurance": 52,
+          "armor": 3,
+          "regeneration": 16
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 66,
+          "agility": 82,
+          "stamina_drain": 14
+        },
+        "senses_tactics": {
+          "perception": 80,
+          "intimidation": 8,
           "camouflage": 60
         },
         "class_specific": {
-          "altitude": 75,
-          "talon_grip": 96
+          "pack_cohesion": 85,
+          "blood_clotting": 20
+        }
+      }
+    },
+
+    {
+      "id": "african-giant-pouched-rat",
+      "_note_family": "Nesomyidae",
+      "name": "African Giant Pouched Rat",
+      "species": "Cricetomys gambianus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Cricetomys_gambianus01.jpg/800px-Cricetomys_gambianus01.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Cricetomys",
+        "species": "C. gambianus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Nesomyidae", "Cricetomys"],
+      "description": "The largest murine rodent of sub-Saharan Africa and a working animal of remarkable intelligence — trained to detect landmines and tuberculosis. Its size, powerful claws, and fearless curiosity make it a genuine mid-tier combatant. Do not let the whiskers fool you.",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "endurance": 65,
+          "armor": 8,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 35,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 60,
+          "stamina_drain": 25
+        },
+        "senses_tactics": {
+          "perception": 92,
+          "intimidation": 22,
+          "camouflage": 42
+        },
+        "class_specific": {
+          "pack_cohesion": 55,
+          "blood_clotting": 30
+        }
+      }
+    },
+
+    {
+      "id": "common-dormouse",
+      "_note_family": "Gliridae",
+      "name": "Hazel Dormouse",
+      "species": "Muscardinus avellanarius",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Muscardinus_avellanarius.jpg/800px-Muscardinus_avellanarius.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Muscardinus",
+        "species": "M. avellanarius"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Gliridae", "Muscardinus"],
+      "description": "A European forest specialist that spends more than half of its life asleep. Dormice are considered by ecologists an indicator species — their presence signals a healthy woodland. In the arena, a dormouse is an extreme glass cannon: tiny, fragile, but capable of spending months in torpor, conserving its energy for a single perfect moment.",
+      "stats": {
+        "survivability": {
+          "hp": 7,
+          "endurance": 45,
+          "armor": 2,
+          "regeneration": 12
+        },
+        "offense": {
+          "bite_strike_force": 5,
+          "venom_toxin": 0,
+          "reach": 3
+        },
+        "mobility": {
+          "speed": 60,
+          "agility": 80,
+          "stamina_drain": 12
+        },
+        "senses_tactics": {
+          "perception": 70,
+          "intimidation": 3,
+          "camouflage": 72
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 15
+        }
+      }
+    },
+
+    {
+      "id": "great-jerboa",
+      "_note_family": "Dipodidae",
+      "name": "Great Jerboa",
+      "species": "Allactaga major",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Allactaga_major.jpg/800px-Allactaga_major.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. major"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Dipodidae", "Allactaga"],
+      "description": "The great jerboa of the Central Asian steppes is built entirely around evasion. Its hind legs are three times the length of its forelimbs, allowing it to bound at nearly 25 km/h in random-direction zigzags that confuse even trained falcons. Its enormous ears detect approaching predators through vibration long before they arrive.",
+      "stats": {
+        "survivability": {
+          "hp": 10,
+          "endurance": 48,
+          "armor": 2,
+          "regeneration": 12
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 88,
+          "agility": 94,
+          "stamina_drain": 14
+        },
+        "senses_tactics": {
+          "perception": 86,
+          "intimidation": 4,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 12,
+          "blood_clotting": 15
+        }
+      }
+    },
+
+    {
+      "_note": "── SUBORDER: ANOMALUROMORPHA ───────────────────────────────────────",
+      "id": "pel-flying-squirrel",
+      "_note_family": "Anomaluridae",
+      "name": "Pel's Scaly-tailed Flying Squirrel",
+      "species": "Anomalurus pelii",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Anomalurus_peli01.jpg/800px-Anomalurus_peli01.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Anomaluromorpha",
+        "family": "Anomaluridae",
+        "genus": "Anomalurus",
+        "species": "A. pelii"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Anomaluromorpha", "Anomaluridae", "Anomalurus"],
+      "description": "A large gliding rodent of the Central African rainforest, entirely distinct from the flying squirrels of Sciuridae despite superficial resemblance — a classic case of convergent evolution. It uses rows of spiny scales on its tail to grip bark when landing. Mostly nocturnal and poorly studied, which makes it dangerous in ways we do not fully understand.",
+      "stats": {
+        "survivability": {
+          "hp": 25,
+          "endurance": 50,
+          "armor": 12,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 15
+        },
+        "mobility": {
+          "speed": 60,
+          "agility": 88,
+          "stamina_drain": 20
+        },
+        "senses_tactics": {
+          "perception": 80,
+          "intimidation": 15,
+          "camouflage": 60
+        },
+        "class_specific": {
+          "pack_cohesion": 25,
+          "blood_clotting": 22
+        }
+      }
+    },
+
+    {
+      "id": "springhare",
+      "_note_family": "Pedetidae",
+      "name": "Springhare",
+      "species": "Pedetes capensis",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Pedetes_capensis.jpg/800px-Pedetes_capensis.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Anomaluromorpha",
+        "family": "Pedetidae",
+        "genus": "Pedetes",
+        "species": "P. capensis"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Anomaluromorpha", "Pedetidae", "Pedetes"],
+      "description": "Southern Africa's answer to the kangaroo — a large, powerful jumping rodent that can cover 2 meters per leap and reaches speeds of 45 km/h when fleeing predators. Its powerful hind claws are capable of raking wounds, and it has a thick muscular tail used for balance and sudden redirection. An ambush predator's nightmare.",
+      "stats": {
+        "survivability": {
+          "hp": 32,
+          "endurance": 62,
+          "armor": 10,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 28,
+          "venom_toxin": 0,
+          "reach": 20
+        },
+        "mobility": {
+          "speed": 85,
+          "agility": 90,
+          "stamina_drain": 22
+        },
+        "senses_tactics": {
+          "perception": 82,
+          "intimidation": 25,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 20,
+          "blood_clotting": 28
+        }
+      }
+    },
+
+    {
+      "_note": "── SUBORDER: HYSTRICOMORPHA ────────────────────────────────────────",
+      "id": "crested-porcupine",
+      "_note_family": "Hystricidae",
+      "name": "Crested Porcupine",
+      "species": "Hystrix cristata",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Hystrix_cristata.jpg/800px-Hystrix_cristata.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Hystricidae",
+        "genus": "Hystrix",
+        "species": "H. cristata"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Hystricidae", "Hystrix"],
+      "description": "The largest rodent in Africa and one of the most effectively armored animals of its size. Its quills are not passive — the porcupine charges backwards into threats, driving 35-cm hollow quills deep into flesh with enough force to kill lions. Documented kills include leopards, hyenas, and large pythons. No one rushes a porcupine twice.",
+      "stats": {
+        "survivability": {
+          "hp": 62,
+          "endurance": 65,
+          "armor": 88,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 45,
+          "venom_toxin": 0,
+          "reach": 35
+        },
+        "mobility": {
+          "speed": 28,
+          "agility": 20,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 80,
+          "camouflage": 20
+        },
+        "class_specific": {
+          "pack_cohesion": 40,
+          "blood_clotting": 50
+        }
+      }
+    },
+
+    {
+      "id": "north-american-porcupine",
+      "_note_family": "Erethizontidae",
+      "name": "North American Porcupine",
+      "species": "Erethizon dorsatum",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Erethizon_dorsatum_1.jpg/800px-Erethizon_dorsatum_1.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Erethizontidae",
+        "genus": "Erethizon",
+        "species": "E. dorsatum"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Erethizontidae", "Erethizon"],
+      "description": "The arboreal counterpart to the Old World porcupine. North America's only quilled mammal carries up to 30,000 barbed quills — retrobarbed so that muscle movement drives them deeper with each passing minute. It is slow, confident, and almost completely fearless. There is no reason to hurry when you are the most uncomfortable thing in the forest to bite.",
+      "stats": {
+        "survivability": {
+          "hp": 52,
+          "endurance": 58,
+          "armor": 82,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 38,
+          "venom_toxin": 0,
+          "reach": 30
+        },
+        "mobility": {
+          "speed": 22,
+          "agility": 18,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 60,
+          "intimidation": 72,
+          "camouflage": 25
+        },
+        "class_specific": {
+          "pack_cohesion": 15,
+          "blood_clotting": 45
+        }
+      }
+    },
+
+    {
+      "id": "capybara",
+      "_note_family": "Caviidae / Hydrochoerinae",
+      "name": "Capybara",
+      "species": "Hydrochoerus hydrochaeris",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Capybara_%28Hydrochoerus_hydrochaeris%29.jpg/800px-Capybara_%28Hydrochoerus_hydrochaeris%29.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Caviidae",
+        "genus": "Hydrochoerus",
+        "species": "H. hydrochaeris"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Caviidae", "Hydrochoerus"],
+      "description": "The world's largest living rodent. Semi-aquatic, highly social, and alarmingly calm about most threats — including apex predators. A capybara can hold its breath for five minutes, run at 35 km/h in short bursts, and bite through a concrete block with its chisel incisors. Its true strength is social: groups function as a collective security apparatus.",
+      "stats": {
+        "survivability": {
+          "hp": 75,
+          "endurance": 72,
+          "armor": 20,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 62,
+          "venom_toxin": 0,
+          "reach": 35
+        },
+        "mobility": {
+          "speed": 48,
+          "agility": 38,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 70,
+          "intimidation": 45,
+          "camouflage": 30
+        },
+        "class_specific": {
+          "pack_cohesion": 88,
+          "blood_clotting": 42
+        }
+      }
+    },
+
+    {
+      "id": "guinea-pig",
+      "_note_family": "Caviidae / Caviinae",
+      "name": "Wild Guinea Pig",
+      "species": "Cavia aperea",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Cavia_aperea.jpg/800px-Cavia_aperea.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Caviidae",
+        "genus": "Cavia",
+        "species": "C. aperea"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Caviidae", "Cavia"],
+      "description": "The wild ancestor of the domestic guinea pig, native to the grasslands and rocky areas of South America. More alert, leaner, and faster than its domesticated cousin. Entirely precocial — born with open eyes and full fur — and functionally running within hours of birth. In the arena its stats are unremarkable but its threat perception is not.",
+      "stats": {
+        "survivability": {
+          "hp": 16,
+          "endurance": 45,
+          "armor": 4,
+          "regeneration": 16
+        },
+        "offense": {
+          "bite_strike_force": 12,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 62,
+          "stamina_drain": 18
+        },
+        "senses_tactics": {
+          "perception": 72,
+          "intimidation": 8,
+          "camouflage": 50
+        },
+        "class_specific": {
+          "pack_cohesion": 75,
+          "blood_clotting": 22
+        }
+      }
+    },
+
+    {
+      "id": "patagonian-mara",
+      "_note_family": "Caviidae / Dolichotinae",
+      "name": "Patagonian Mara",
+      "species": "Dolichotis patagonum",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Dolichotis_patagonum.jpg/800px-Dolichotis_patagonum.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Caviidae",
+        "genus": "Dolichotis",
+        "species": "D. patagonum"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Caviidae", "Dolichotis"],
+      "description": "A large cursorial rodent that fills the ecological niche of a small deer across the Patagonian steppe. It runs like a dog, bounces like a rabbit, and sprints like a gazelle — up to 45 km/h. Monogamous and highly attentive to offspring, it uses its long legs to deliver powerful donkey-kicks when cornered.",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "endurance": 68,
+          "armor": 8,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 30,
+          "venom_toxin": 0,
+          "reach": 25
+        },
+        "mobility": {
+          "speed": 80,
+          "agility": 75,
+          "stamina_drain": 25
+        },
+        "senses_tactics": {
+          "perception": 78,
+          "intimidation": 28,
+          "camouflage": 40
+        },
+        "class_specific": {
+          "pack_cohesion": 55,
+          "blood_clotting": 30
+        }
+      }
+    },
+
+    {
+      "id": "long-tailed-chinchilla",
+      "_note_family": "Chinchillidae",
+      "name": "Long-tailed Chinchilla",
+      "species": "Chinchilla lanigera",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Chinchilla_lanigera-4.jpg/800px-Chinchilla_lanigera-4.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Chinchillidae",
+        "genus": "Chinchilla",
+        "species": "C. lanigera"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Chinchillidae", "Chinchilla"],
+      "description": "Native to the Andes at elevations above 4,000 meters, the chinchilla's fur is the densest of any land mammal — 60 hairs per follicle, arranged to shed heat and moisture in an instant. It can survive temperatures that would kill most rodents. When threatened it releases chunks of its own fur (fur-slip) to escape a predator's grip. It is also a surprisingly powerful biter for its size.",
+      "stats": {
+        "survivability": {
+          "hp": 16,
+          "endurance": 55,
+          "armor": 15,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 72,
+          "agility": 85,
+          "stamina_drain": 16
+        },
+        "senses_tactics": {
+          "perception": 78,
+          "intimidation": 12,
+          "camouflage": 50
+        },
+        "class_specific": {
+          "pack_cohesion": 60,
+          "blood_clotting": 28
+        }
+      }
+    },
+
+    {
+      "id": "plains-viscacha",
+      "_note_family": "Chinchillidae",
+      "name": "Plains Viscacha",
+      "species": "Lagostomus maximus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Lagostomus_maximus.jpg/800px-Lagostomus_maximus.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Chinchillidae",
+        "genus": "Lagostomus",
+        "species": "L. maximus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Chinchillidae", "Lagostomus"],
+      "description": "A stocky, heavy-set rodent of the Argentine pampas with one of the highest brain-to-body ratios among rodents. Viscacha colonies construct elaborate burrow networks called viscacheras, which become long-term landmarks on the landscape used by generations. The male plains viscacha is significantly larger than the female and highly territorial.",
+      "stats": {
+        "survivability": {
+          "hp": 40,
+          "endurance": 62,
+          "armor": 14,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 38,
+          "venom_toxin": 0,
+          "reach": 18
+        },
+        "mobility": {
+          "speed": 45,
+          "agility": 48,
+          "stamina_drain": 30
+        },
+        "senses_tactics": {
+          "perception": 72,
+          "intimidation": 32,
+          "camouflage": 38
+        },
+        "class_specific": {
+          "pack_cohesion": 70,
+          "blood_clotting": 32
+        }
+      }
+    },
+
+    {
+      "id": "pacarana",
+      "_note_family": "Dinomyidae",
+      "name": "Pacarana",
+      "species": "Dinomys branickii",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Dinomys_branickii.jpg/800px-Dinomys_branickii.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Dinomyidae",
+        "genus": "Dinomys",
+        "species": "D. branickii"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Dinomyidae", "Dinomys"],
+      "description": "The sole surviving member of the Dinomyidae — once a diverse family that included Josephoartigasia monesi, the largest rodent ever to walk the Earth. The pacarana is slow, rotund, and rarely seen, haunting Andean cloud forests in small family groups. What it lacks in speed it compensates with mass, powerful incisors, and the eerie composure of an animal that has almost no natural fear.",
+      "stats": {
+        "survivability": {
+          "hp": 55,
+          "endurance": 55,
+          "armor": 16,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 55,
+          "venom_toxin": 0,
+          "reach": 22
+        },
+        "mobility": {
+          "speed": 20,
+          "agility": 18,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 48,
+          "camouflage": 35
+        },
+        "class_specific": {
+          "pack_cohesion": 52,
+          "blood_clotting": 35
+        }
+      }
+    },
+
+    {
+      "id": "south-american-coati-paca",
+      "_note_family": "Cuniculidae",
+      "name": "Lowland Paca",
+      "species": "Cuniculus paca",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Cuniculus_paca.jpg/800px-Cuniculus_paca.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Cuniculidae",
+        "genus": "Cuniculus",
+        "species": "C. paca"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Cuniculidae", "Cuniculus"],
+      "description": "The most hunted large rodent of the Neotropics — sought for its meat, which is considered some of the finest bushmeat in Latin America. The paca is largely nocturnal, semi-aquatic, and powerful enough to sprint at speed through dense jungle. Its spotted coat provides exceptional cover in dappled forest light. It will bite savagely when caught.",
+      "stats": {
+        "survivability": {
+          "hp": 42,
+          "endurance": 60,
+          "armor": 10,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 40,
+          "venom_toxin": 0,
+          "reach": 18
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 58,
+          "stamina_drain": 28
+        },
+        "senses_tactics": {
+          "perception": 74,
+          "intimidation": 28,
+          "camouflage": 75
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 35
+        }
+      }
+    },
+
+    {
+      "id": "central-american-agouti",
+      "_note_family": "Dasyproctidae",
+      "name": "Central American Agouti",
+      "species": "Dasyprocta punctata",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Dasyprocta_punctata.jpg/800px-Dasyprocta_punctata.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Dasyproctidae",
+        "genus": "Dasyprocta",
+        "species": "D. punctata"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Dasyproctidae", "Dasyprocta"],
+      "description": "The only animal in the world capable of cracking open a Brazil nut with its teeth alone — a feat that requires more jaw force per unit size than a crocodile. The agouti is also one of the primary seed dispersers of tropical forests, caching thousands of seeds per year. In combat it relies on sharp hooves, speed, and a bite that leaves lasting damage.",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "endurance": 60,
+          "armor": 8,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 48,
+          "venom_toxin": 0,
+          "reach": 16
+        },
+        "mobility": {
+          "speed": 65,
+          "agility": 68,
+          "stamina_drain": 24
+        },
+        "senses_tactics": {
+          "perception": 80,
+          "intimidation": 25,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 32
+        }
+      }
+    },
+
+    {
+      "id": "degu",
+      "_note_family": "Octodontidae",
+      "name": "Degu",
+      "species": "Octodon degus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Octodon_degus.jpg/800px-Octodon_degus.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Octodontidae",
+        "genus": "Octodon",
+        "species": "O. degus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Octodontidae", "Octodon"],
+      "description": "A diurnal social rodent of the Chilean pre-Andes, remarkable for its intelligence and complex social structures. Degus are used as models in neuroscience research because of their unusual sugar metabolism and social cognition. Like chinchillas, they can shed fur when seized. Their alarm calls encode specific threat information and are transmitted socially.",
+      "stats": {
+        "survivability": {
+          "hp": 12,
+          "endurance": 52,
+          "armor": 4,
+          "regeneration": 14
+        },
+        "offense": {
+          "bite_strike_force": 12,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 62,
+          "agility": 75,
+          "stamina_drain": 16
+        },
+        "senses_tactics": {
+          "perception": 78,
+          "intimidation": 10,
+          "camouflage": 48
+        },
+        "class_specific": {
+          "pack_cohesion": 82,
+          "blood_clotting": 20
+        }
+      }
+    },
+
+    {
+      "id": "naked-mole-rat",
+      "_note_family": "Bathyergidae",
+      "name": "Naked Mole-rat",
+      "species": "Heterocephalus glaber",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Naked_mole_rat.jpg/800px-Naked_mole_rat.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Heterocephalus",
+        "species": "H. glaber"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Bathyergidae", "Heterocephalus"],
+      "description": "One of the most biologically anomalous mammals alive. The naked mole-rat is eusocial like a bee, nearly insensitive to acid-burn pain, resistant to cancer, capable of surviving 18 minutes without oxygen by switching to fructose metabolism, and lives up to 32 years — ten times the expected lifespan for its size. It does not feel the bite of an enemy the way other animals do. It just keeps fighting.",
+      "stats": {
+        "survivability": {
+          "hp": 18,
+          "endurance": 88,
+          "armor": 10,
+          "regeneration": 45
+        },
+        "offense": {
+          "bite_strike_force": 28,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 22,
+          "agility": 30,
+          "stamina_drain": 8
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 30,
+          "camouflage": 15
+        },
+        "class_specific": {
+          "pack_cohesion": 98,
+          "blood_clotting": 55
+        }
+      }
+    },
+
+    {
+      "id": "coypu",
+      "_note_family": "Myocastoridae",
+      "name": "Coypu (Nutria)",
+      "species": "Myocastor coypus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Myocastor_coypus_Bjoern_S_01.jpg/800px-Myocastor_coypus_Bjoern_S_01.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Myocastoridae",
+        "genus": "Myocastor",
+        "species": "M. coypus"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Hystricomorpha", "Myocastoridae", "Myocastor"],
+      "description": "A large semi-aquatic rodent native to South America, now invasive across three continents. The nutria grows up to 9 kg, is a powerful swimmer, and has large orange incisors stained by iron-containing enamel. It is territorial, aggressive toward perceived threats, and in water it holds a decisive advantage over most rodents of similar size.",
+      "stats": {
+        "survivability": {
+          "hp": 50,
+          "endurance": 65,
+          "armor": 14,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 55,
+          "venom_toxin": 0,
+          "reach": 22
+        },
+        "mobility": {
+          "speed": 40,
+          "agility": 42,
+          "stamina_drain": 30
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 35,
+          "camouflage": 38
+        },
+        "class_specific": {
+          "pack_cohesion": 45,
+          "blood_clotting": 38
+        }
+      }
+    },
+
+    {
+      "id": "african-crested-rat",
+      "_note_family": "Muridae / special",
+      "name": "African Crested Rat",
+      "species": "Lophiomys imhausi",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lophiomys_imhausi.jpg/800px-Lophiomys_imhausi.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Lophiomys",
+        "species": "L. imhausi"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Rodentia", "Myomorpha", "Muridae", "Lophiomys"],
+      "description": "The only mammal known to sequester plant toxins into its fur as a defensive chemical weapon. The African crested rat chews bark of the Acokanthera tree — source of ouabain, an arrow poison — and coats specialized absorbent hairs along its flank. A single lick from a dog has caused death. When threatened it erects its crest and parts its fur to expose the toxic hairs, daring anything to touch it.",
+      "stats": {
+        "survivability": {
+          "hp": 25,
+          "endurance": 55,
+          "armor": 8,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 18,
+          "venom_toxin": 90,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 38,
+          "agility": 45,
+          "stamina_drain": 22
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 75,
+          "camouflage": 30
+        },
+        "class_specific": {
+          "pack_cohesion": 18,
+          "blood_clotting": 28
         }
       }
     }
+
   ]
 }
