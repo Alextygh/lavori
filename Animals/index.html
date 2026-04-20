@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animalia Arena — Nature's Fiercest Fighters</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ─── SITE HEADER ──────────────────────────────────────── -->
+<header class="site-header">
+  <nav class="nav-inner">
+    <a class="nav-brand" href="index.html">ANIMALIA <span>ARENA</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="roster.html">Roster</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ─── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg-art" aria-hidden="true">
+    <svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="400" cy="400" r="350" fill="none" stroke="#c9a84c" stroke-width="1"/>
+      <circle cx="400" cy="400" r="300" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+      <circle cx="400" cy="400" r="250" fill="none" stroke="#c9a84c" stroke-width="1"/>
+      <polygon points="400,60 738,590 62,590" fill="none" stroke="#c9a84c" stroke-width="0.8"/>
+      <polygon points="400,740 62,210 738,210" fill="none" stroke="#c9a84c" stroke-width="0.8"/>
+      <circle cx="400" cy="400" r="5" fill="#c9a84c"/>
+      <line x1="400" y1="50" x2="400" y2="750" stroke="#c9a84c" stroke-width="0.3"/>
+      <line x1="50" y1="400" x2="750" y2="400" stroke="#c9a84c" stroke-width="0.3"/>
+      <line x1="130" y1="130" x2="670" y2="670" stroke="#c9a84c" stroke-width="0.3"/>
+      <line x1="670" y1="130" x2="130" y2="670" stroke="#c9a84c" stroke-width="0.3"/>
+    </svg>
+  </div>
+
+  <p class="hero-eyebrow">Welcome to the Colosseum of the Wild</p>
+  <h1 class="hero-title">ANIMALIA<br>ARENA</h1>
+  <p class="hero-subtitle">Vertebrates in Combat</p>
+  <p class="hero-lore">
+    From the crushing depth of the abyss to the thermal peaks of the Himalayas —
+    every creature here has been forged by millions of years of predation,
+    adaptation, and survival. The arena does not care about size.
+    It cares about stats.
+  </p>
+  <div class="hero-cta-row">
+    <a class="btn btn-primary" href="roster.html">View Full Roster ›</a>
+    <a class="btn btn-ghost" href="#featured">Featured Fighters</a>
+  </div>
+</section>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────── -->
+<main class="page-wrapper">
+
+  <div class="divider" id="featured">
+    <span class="divider-text">Featured Fighters</span>
+  </div>
+
+  <!-- Featured grid — populated by JS -->
+  <div id="featured-grid" class="featured-grid"></div>
+
+  <div style="text-align:center; margin-bottom:3rem;">
+    <a class="btn btn-ghost" href="roster.html">View All Animals ›</a>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider">
+    <span class="divider-text">Combat System</span>
+  </div>
+
+  <!-- Mechanics overview -->
+  <div class="section-header">
+    <h2>How the Arena Works</h2>
+    <p>Every fight is resolved through an interlocking system of phase-specific stats. Know your fighter.</p>
+  </div>
+
+  <div class="mechanics-grid">
+    <div class="mechanic-card">
+      <h3><span class="icon">🛡</span> Survivability</h3>
+      <p>
+        <strong>HP</strong> sets the raw health pool. <strong>Endurance</strong> governs how long a fighter can sustain peak performance before stats begin to decay.
+        <strong>Armor</strong> reduces incoming physical damage from scales, hide, and bone.
+        <strong>Regeneration</strong> provides passive healing — critical in long battles.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">⚔</span> Offense</h3>
+      <p>
+        <strong>Bite / Strike Force</strong> is raw damage output. <strong>Venom / Toxin</strong> adds damage-over-time for venomous species — 0 for all others.
+        <strong>Reach</strong> determines initiative: longer reach strikes first.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">💨</span> Mobility</h3>
+      <p>
+        <strong>Speed</strong> governs burst movement and repositioning windows.
+        <strong>Agility</strong> determines the chance to dodge incoming attacks.
+        <strong>Stamina Drain</strong> is the action cost per move — tied to Endurance decay.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">👁</span> Senses & Tactics</h3>
+      <p>
+        <strong>Perception</strong> detects enemies and prevents ambushes.
+        <strong>Intimidation</strong> can inflict a <em>Fear</em> debuff, temporarily reducing enemy stats.
+        <strong>Camouflage</strong> governs the probability of landing a first-strike ambush.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">🐊</span> Reptile: Thermal State</h3>
+      <p>
+        Reptiles are ectotherms. Arena temperature directly modifies their Speed and Strike Force.
+        <em>Cold</em> environments severely penalize their combat performance. <em>Hot</em> arenas push them to peak output.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">🦅</span> Bird: Altitude & Talon Grip</h3>
+      <p>
+        Birds expend <strong>Altitude</strong> as a resource to gain initiative and deal dive-strike bonus damage.
+        <strong>Talon Grip</strong> governs grapple checks — critical for eagles and raptors.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">🐘</span> Mammal: Pack Cohesion & Clotting</h3>
+      <p>
+        Even solo mammal fighters benefit from <strong>Pack Cohesion</strong> as psychological resilience.
+        <strong>Blood Clotting</strong> reduces bleed damage — essential in fights against slashing opponents.
+      </p>
+    </div>
+    <div class="mechanic-card">
+      <h3><span class="icon">🐟</span> Fish & Amphibian: Water Mechanics</h3>
+      <p>
+        <strong>Buoyancy</strong> controls positional advantage in aquatic arenas.
+        <strong>Pressure Resistance</strong> applies in deep-water stages, directly affecting sustained combat performance at depth.
+      </p>
+    </div>
+  </div>
+
+  <div style="height: 3rem;"></div>
+
+</main>
+
+<!-- ─── FOOTER ────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <p>Animalia Arena &mdash; A Vertebrate Combat Encyclopedia &mdash; All taxonomy per ITIS & IUCN</p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

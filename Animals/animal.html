@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fighter — Animalia Arena</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ─── SITE HEADER ──────────────────────────────────────── -->
+<header class="site-header">
+  <nav class="nav-inner">
+    <a class="nav-brand" href="index.html">ANIMALIA <span>ARENA</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="roster.html">Roster</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────── -->
+<main class="page-wrapper">
+
+  <!-- HERO SECTION -->
+  <div class="detail-hero">
+
+    <!-- Image column -->
+    <div class="detail-image-col fade-in">
+      <div class="detail-img-frame">
+        <img id="detail-img" class="detail-img" src="" alt="" loading="eager">
+        <span class="detail-img-credit">Image: Wikimedia Commons</span>
+      </div>
+    </div>
+
+    <!-- Info column -->
+    <div class="detail-info-col fade-in">
+      <a class="detail-back" href="roster.html">‹ Back to Roster</a>
+
+      <span id="class-badge" class="class-badge" style="margin-bottom:1rem; display:inline-flex;"></span>
+
+      <h1 id="detail-name" class="detail-name">—</h1>
+      <p id="detail-species" class="detail-species">—</p>
+
+      <p id="detail-desc" class="detail-desc">—</p>
+
+      <!-- Taxonomy chain -->
+      <div class="divider" style="margin:1.5rem 0 1rem;">
+        <span class="divider-text">Classification Chain</span>
+      </div>
+
+      <div id="taxonomy-chain" class="taxonomy-chain"></div>
+
+      <!-- Taxonomy table -->
+      <table class="taxonomy-table" style="margin-top:1.25rem;">
+        <tbody id="taxonomy-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STATS SECTION -->
+  <div class="stats-section">
+    <div class="divider">
+      <span class="divider-text">Combat Statistics</span>
+    </div>
+    <h2 style="margin-bottom:1.5rem; font-size:1.1rem; color:var(--ivory-muted); font-family:var(--font-title); letter-spacing:0.1em; text-transform:uppercase;">
+      All stats rated 0–100
+    </h2>
+    <div id="stat-groups" class="stat-groups"></div>
+  </div>
+
+  <div style="height:2rem;"></div>
+
+</main>
+
+<!-- ─── FOOTER ────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <p>Animalia Arena &mdash; A Vertebrate Combat Encyclopedia &mdash; All taxonomy per ITIS & IUCN</p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

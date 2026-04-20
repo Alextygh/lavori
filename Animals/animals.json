@@ -1,0 +1,344 @@
+{
+  "animals": [
+    {
+      "id": "saltwater-crocodile",
+      "name": "Saltwater Crocodile",
+      "species": "Crocodylus porosus",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Crocodylus_porosus_painting.jpg/800px-Crocodylus_porosus_painting.jpg",
+      "taxonomy": {
+        "class": "Reptilia",
+        "order": "Crocodilia",
+        "family": "Crocodylidae",
+        "genus": "Crocodylus",
+        "species": "C. porosus"
+      },
+      "classification_chain": ["Vertebrata", "Reptilia", "Archosauria", "Crocodilia", "Crocodylidae", "Crocodylus"],
+      "description": "The largest living reptile and most dangerous crocodilian. Apex ambush predator of tropical coastlines and estuaries across Southeast Asia and Oceania.",
+      "stats": {
+        "survivability": {
+          "hp": 91,
+          "endurance": 62,
+          "armor": 85,
+          "regeneration": 44
+        },
+        "offense": {
+          "bite_strike_force": 97,
+          "venom_toxin": 0,
+          "reach": 74
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 41,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 78,
+          "intimidation": 88,
+          "camouflage": 80
+        },
+        "class_specific": {
+          "thermal_state": "Ectotherm — Cold/Warm/Hot",
+          "thermal_cold_modifier": -25,
+          "thermal_warm_modifier": 0,
+          "thermal_hot_modifier": 15
+        }
+      }
+    },
+    {
+      "id": "siberian-tiger",
+      "name": "Siberian Tiger",
+      "species": "Panthera tigris altaica",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Tigr_amursky.jpg/800px-Tigr_amursky.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Carnivora",
+        "family": "Felidae",
+        "genus": "Panthera",
+        "species": "P. tigris"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Carnivora", "Felidae", "Panthera"],
+      "description": "The largest wild cat on Earth. A solitary apex predator built for ambush in the snows of the Russian Far East, combining raw power with explosive stealth.",
+      "stats": {
+        "survivability": {
+          "hp": 85,
+          "endurance": 72,
+          "armor": 38,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 89,
+          "venom_toxin": 0,
+          "reach": 80
+        },
+        "mobility": {
+          "speed": 86,
+          "agility": 84,
+          "stamina_drain": 55
+        },
+        "senses_tactics": {
+          "perception": 85,
+          "intimidation": 91,
+          "camouflage": 77
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 65
+        }
+      }
+    },
+    {
+      "id": "golden-eagle",
+      "name": "Golden Eagle",
+      "species": "Aquila chrysaetos",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/24701-nature-natural-beauty.jpg/800px-24701-nature-natural-beauty.jpg",
+      "taxonomy": {
+        "class": "Aves",
+        "order": "Accipitriformes",
+        "family": "Accipitridae",
+        "genus": "Aquila",
+        "species": "A. chrysaetos"
+      },
+      "classification_chain": ["Vertebrata", "Aves", "Neoaves", "Accipitriformes", "Accipitridae", "Aquila"],
+      "description": "One of the most widely distributed and respected raptors. Masters of aerial dominance, golden eagles can strike prey far larger than themselves using gravity as a weapon.",
+      "stats": {
+        "survivability": {
+          "hp": 54,
+          "endurance": 81,
+          "armor": 22,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 71,
+          "venom_toxin": 0,
+          "reach": 68
+        },
+        "mobility": {
+          "speed": 93,
+          "agility": 89,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 98,
+          "intimidation": 72,
+          "camouflage": 30
+        },
+        "class_specific": {
+          "altitude": 90,
+          "talon_grip": 84
+        }
+      }
+    },
+    {
+      "id": "great-white-shark",
+      "name": "Great White Shark",
+      "species": "Carcharodon carcharias",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/White_shark.jpg/800px-White_shark.jpg",
+      "taxonomy": {
+        "class": "Chondrichthyes",
+        "order": "Lamniformes",
+        "family": "Lamnidae",
+        "genus": "Carcharodon",
+        "species": "C. carcharias"
+      },
+      "classification_chain": ["Vertebrata", "Chondrichthyes", "Elasmobranchii", "Lamniformes", "Lamnidae", "Carcharodon"],
+      "description": "The ocean's most iconic apex predator. Armed with electroreception, 300 serrated teeth arranged in rows, and a torpedo body capable of breaching out of the water at full speed.",
+      "stats": {
+        "survivability": {
+          "hp": 88,
+          "endurance": 85,
+          "armor": 44,
+          "regeneration": 50
+        },
+        "offense": {
+          "bite_strike_force": 95,
+          "venom_toxin": 0,
+          "reach": 72
+        },
+        "mobility": {
+          "speed": 80,
+          "agility": 60,
+          "stamina_drain": 28
+        },
+        "senses_tactics": {
+          "perception": 95,
+          "intimidation": 90,
+          "camouflage": 48
+        },
+        "class_specific": {
+          "buoyancy": 88,
+          "pressure_resistance": 72
+        }
+      }
+    },
+    {
+      "id": "komodo-dragon",
+      "name": "Komodo Dragon",
+      "species": "Varanus komodoensis",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Varanus_komodoensis_2021.jpg/800px-Varanus_komodoensis_2021.jpg",
+      "taxonomy": {
+        "class": "Reptilia",
+        "order": "Squamata",
+        "family": "Varanidae",
+        "genus": "Varanus",
+        "species": "V. komodoensis"
+      },
+      "classification_chain": ["Vertebrata", "Reptilia", "Lepidosauria", "Squamata", "Varanidae", "Varanus"],
+      "description": "The world's largest lizard. Patient and relentless, it combines venom-laced saliva, serrated teeth, and an almost indestructible hide. Its prey often dies of shock and blood loss long after the initial strike.",
+      "stats": {
+        "survivability": {
+          "hp": 78,
+          "endurance": 58,
+          "armor": 70,
+          "regeneration": 55
+        },
+        "offense": {
+          "bite_strike_force": 74,
+          "venom_toxin": 68,
+          "reach": 55
+        },
+        "mobility": {
+          "speed": 48,
+          "agility": 39,
+          "stamina_drain": 30
+        },
+        "senses_tactics": {
+          "perception": 82,
+          "intimidation": 78,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "thermal_state": "Ectotherm — Cold/Warm/Hot",
+          "thermal_cold_modifier": -30,
+          "thermal_warm_modifier": 0,
+          "thermal_hot_modifier": 20
+        }
+      }
+    },
+    {
+      "id": "african-elephant",
+      "name": "African Elephant",
+      "species": "Loxodonta africana",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/800px-African_Bush_Elephant.jpg",
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Proboscidea",
+        "family": "Elephantidae",
+        "genus": "Loxodonta",
+        "species": "L. africana"
+      },
+      "classification_chain": ["Vertebrata", "Mammalia", "Placentalia", "Afrotheria", "Proboscidea", "Elephantidae", "Loxodonta"],
+      "description": "The largest land animal alive. A walking fortress of intelligence and raw force. Its tusks can gore, its trunk can crush, and no other land predator willingly confronts a healthy adult.",
+      "stats": {
+        "survivability": {
+          "hp": 99,
+          "endurance": 80,
+          "armor": 60,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 92,
+          "venom_toxin": 0,
+          "reach": 91
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 22,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 88,
+          "intimidation": 96,
+          "camouflage": 5
+        },
+        "class_specific": {
+          "pack_cohesion": 90,
+          "blood_clotting": 50
+        }
+      }
+    },
+    {
+      "id": "poison-dart-frog",
+      "name": "Poison Dart Frog",
+      "species": "Dendrobates tinctorius",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Dendrobates_tinctorius_-_Rolf_Lawrenz.jpg/800px-Dendrobates_tinctorius_-_Rolf_Lawrenz.jpg",
+      "taxonomy": {
+        "class": "Amphibia",
+        "order": "Anura",
+        "family": "Dendrobatidae",
+        "genus": "Dendrobates",
+        "species": "D. tinctorius"
+      },
+      "classification_chain": ["Vertebrata", "Amphibia", "Batrachia", "Anura", "Dendrobatidae", "Dendrobates"],
+      "description": "Small, jewel-bright, and lethally toxic. What this frog lacks in size it compensates with batrachotoxin — one of the most potent non-protein toxins known. Aposematic coloration is its first warning.",
+      "stats": {
+        "survivability": {
+          "hp": 18,
+          "endurance": 40,
+          "armor": 5,
+          "regeneration": 35
+        },
+        "offense": {
+          "bite_strike_force": 5,
+          "venom_toxin": 99,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 62,
+          "agility": 78,
+          "stamina_drain": 22
+        },
+        "senses_tactics": {
+          "perception": 55,
+          "intimidation": 60,
+          "camouflage": 15
+        },
+        "class_specific": {
+          "buoyancy": 70,
+          "pressure_resistance": 20
+        }
+      }
+    },
+    {
+      "id": "harpy-eagle",
+      "name": "Harpy Eagle",
+      "species": "Harpia harpyja",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Harpia_harpyja_001.jpg/640px-Harpia_harpyja_001.jpg",
+      "taxonomy": {
+        "class": "Aves",
+        "order": "Accipitriformes",
+        "family": "Accipitridae",
+        "genus": "Harpia",
+        "species": "H. harpyja"
+      },
+      "classification_chain": ["Vertebrata", "Aves", "Neoaves", "Accipitriformes", "Accipitridae", "Harpia"],
+      "description": "The largest and most powerful raptor in the Americas. Its talons exceed the size of grizzly bear claws. It hunts sloths and monkeys by threading silently through dense jungle canopy.",
+      "stats": {
+        "survivability": {
+          "hp": 58,
+          "endurance": 77,
+          "armor": 25,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 75,
+          "venom_toxin": 0,
+          "reach": 70
+        },
+        "mobility": {
+          "speed": 85,
+          "agility": 91,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 94,
+          "intimidation": 80,
+          "camouflage": 60
+        },
+        "class_specific": {
+          "altitude": 75,
+          "talon_grip": 96
+        }
+      }
+    }
+  ]
+}
