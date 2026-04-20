@@ -10,7 +10,7 @@
       "_note_family": "Castoridae",
       "name": "North American Beaver",
       "species": "Castor canadensis",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/American_Beaver.jpg/800px-American_Beaver.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/6/6b/American_Beaver.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -55,7 +55,7 @@
       "_note_family": "Castoridae",
       "name": "Eurasian Beaver",
       "species": "Castor fiber",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castor_fiber_2.jpg/800px-Castor_fiber_2.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Beaver_pho34.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -100,7 +100,7 @@
       "_note_family": "Sciuridae",
       "name": "Alpine Marmot",
       "species": "Marmota marmota",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Marmota_marmota_01.jpg/800px-Marmota_marmota_01.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/071_Wild_marmot_at_Grand_Muveran_Nature_Reserve_Photo_by_Giles_Laurent.jpg/1280px-071_Wild_marmot_at_Grand_Muveran_Nature_Reserve_Photo_by_Giles_Laurent.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -145,7 +145,7 @@
       "_note_family": "Sciuridae",
       "name": "Black-tailed Prairie Dog",
       "species": "Cynomys ludovicianus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Cynomys_ludovicianus_-_prairie_dog.jpg/800px-Cynomys_ludovicianus_-_prairie_dog.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Cynomys_ludovicianus_%2854906540630%29.jpg/1280px-Cynomys_ludovicianus_%2854906540630%29.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -190,7 +190,7 @@
       "_note_family": "Sciuridae",
       "name": "Eastern Gray Squirrel",
       "species": "Sciurus carolinensis",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Sciurus_carolinensis_common_squirrel.jpg/800px-Sciurus_carolinensis_common_squirrel.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/EasternGraySquirrel_GAm.jpg/960px-EasternGraySquirrel_GAm.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -235,7 +235,7 @@
       "_note_family": "Sciuridae",
       "name": "Southern Flying Squirrel",
       "species": "Glaucomys volans",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Glaucomys_volans.jpg/800px-Glaucomys_volans.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Southern_Flying_Squirrel_-_Glaucomys_volans%2C_Arlington%2C_Virginia%2C_December_22%2C_2020_%2853406816432%29.jpg/960px-Southern_Flying_Squirrel_-_Glaucomys_volans%2C_Arlington%2C_Virginia%2C_December_22%2C_2020_%2853406816432%29.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -281,7 +281,7 @@
       "_note_family": "Heteromyidae",
       "name": "Banner-tailed Kangaroo Rat",
       "species": "Dipodomys spectabilis",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Dipodomys_spectabilis.jpg/800px-Dipodomys_spectabilis.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Banner-tailed_kangaroo_rat_Wildlife_World.jpg/1920px-Banner-tailed_kangaroo_rat_Wildlife_World.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -326,7 +326,7 @@
       "_note_family": "Geomyidae",
       "name": "Plains Pocket Gopher",
       "species": "Geomys bursarius",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Pocket_Gopher_-_Geomys_bursarius.jpg/800px-Pocket_Gopher_-_Geomys_bursarius.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Geomys_bursarius.jpg/500px-Geomys_bursarius.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -372,7 +372,7 @@
       "_note_family": "Muridae",
       "name": "Brown Rat",
       "species": "Rattus norvegicus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Rattus_norvegicus_1.jpg/800px-Rattus_norvegicus_1.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Rattus_norvegicus_-_Brown_rat_02.jpg/500px-Rattus_norvegicus_-_Brown_rat_02.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -417,7 +417,7 @@
       "_note_family": "Muridae",
       "name": "House Mouse",
       "species": "Mus musculus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Mus_musculus_household_mouse.jpg/800px-Mus_musculus_household_mouse.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/%D0%9C%D1%8B%D1%88%D1%8C_2.jpg/500px-%D0%9C%D1%8B%D1%88%D1%8C_2.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -462,7 +462,7 @@
       "_note_family": "Cricetidae",
       "name": "Northern Grasshopper Mouse",
       "species": "Onychomys leucogaster",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Northern_grasshopper_mouse_%28Onychomys_leucogaster%29.jpg/800px-Northern_grasshopper_mouse_%28Onychomys_leucogaster%29.jpg",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZrsUWIimp0Jb6p1r5dXhprilGBg6tzs7yK6uTNM5ouMrXKpqEDfPKavYrfiaC4P4-JsI28l-rT7WZ7B1AOuVswfjPa94pN2KZWJFlWnm-wA&s=10",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -507,7 +507,7 @@
       "_note_family": "Cricetidae",
       "name": "Golden Hamster",
       "species": "Mesocricetus auratus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Hamster_1.jpg/800px-Hamster_1.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Golden_hamster_front_1.jpg/500px-Golden_hamster_front_1.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -552,7 +552,7 @@
       "_note_family": "Cricetidae",
       "name": "Norway Lemming",
       "species": "Lemmus lemmus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Lemmus_lemmus.jpg/800px-Lemmus_lemmus.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Tunturisopuli_Lemmus_Lemmus.jpg/500px-Tunturisopuli_Lemmus_Lemmus.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -597,7 +597,7 @@
       "_note_family": "Muridae / Gerbillinae",
       "name": "Mongolian Gerbil",
       "species": "Meriones unguiculatus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Mongolian_gerbil_%28Meriones_unguiculatus%29.jpg/800px-Mongolian_gerbil_%28Meriones_unguiculatus%29.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Meriones_unguiculatus_%28wild%29.jpg/500px-Meriones_unguiculatus_%28wild%29.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -642,7 +642,7 @@
       "_note_family": "Nesomyidae",
       "name": "African Giant Pouched Rat",
       "species": "Cricetomys gambianus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Cricetomys_gambianus01.jpg/800px-Cricetomys_gambianus01.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Cricetomys_gambianus_as_a_captive_pet.jpg/500px-Cricetomys_gambianus_as_a_captive_pet.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -687,7 +687,7 @@
       "_note_family": "Gliridae",
       "name": "Hazel Dormouse",
       "species": "Muscardinus avellanarius",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Muscardinus_avellanarius.jpg/800px-Muscardinus_avellanarius.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Haselmaus.jpg/500px-Haselmaus.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -732,7 +732,7 @@
       "_note_family": "Dipodidae",
       "name": "Great Jerboa",
       "species": "Allactaga major",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Allactaga_major.jpg/800px-Allactaga_major.jpg",
+      "image": "data:image/jpeg;base64,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",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -778,7 +778,7 @@
       "_note_family": "Anomaluridae",
       "name": "Pel's Scaly-tailed Flying Squirrel",
       "species": "Anomalurus pelii",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Anomalurus_peli01.jpg/800px-Anomalurus_peli01.jpg",
+      "image": "data:image/jpeg;base64,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",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -819,11 +819,11 @@
     },
 
     {
-      "id": "springhare",
+      "id": "south-african-springhare",
       "_note_family": "Pedetidae",
-      "name": "Springhare",
+      "name": "South African Springhare",
       "species": "Pedetes capensis",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Pedetes_capensis.jpg/800px-Pedetes_capensis.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Spring_Hare_%28Pedetes_capensis%29_%286042009463%29.jpg/500px-Spring_Hare_%28Pedetes_capensis%29_%286042009463%29.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -869,7 +869,7 @@
       "_note_family": "Hystricidae",
       "name": "Crested Porcupine",
       "species": "Hystrix cristata",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Hystrix_cristata.jpg/800px-Hystrix_cristata.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Hystrix_cristata_qtl1.jpg/500px-Hystrix_cristata_qtl1.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -914,7 +914,7 @@
       "_note_family": "Erethizontidae",
       "name": "North American Porcupine",
       "species": "Erethizon dorsatum",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Erethizon_dorsatum_1.jpg/800px-Erethizon_dorsatum_1.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Porcupine-BioDome.jpg/500px-Porcupine-BioDome.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -959,7 +959,7 @@
       "_note_family": "Caviidae / Hydrochoerinae",
       "name": "Capybara",
       "species": "Hydrochoerus hydrochaeris",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Capybara_%28Hydrochoerus_hydrochaeris%29.jpg/800px-Capybara_%28Hydrochoerus_hydrochaeris%29.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Capybaracropped.jpg/500px-Capybaracropped.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1004,7 +1004,7 @@
       "_note_family": "Caviidae / Caviinae",
       "name": "Wild Guinea Pig",
       "species": "Cavia aperea",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Cavia_aperea.jpg/800px-Cavia_aperea.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/George_the_amazing_guinea_pig.jpg/500px-George_the_amazing_guinea_pig.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1049,7 +1049,7 @@
       "_note_family": "Caviidae / Dolichotinae",
       "name": "Patagonian Mara",
       "species": "Dolichotis patagonum",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Dolichotis_patagonum.jpg/800px-Dolichotis_patagonum.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Dolichotis_patagonum_99386074.jpg/500px-Dolichotis_patagonum_99386074.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1094,7 +1094,7 @@
       "_note_family": "Chinchillidae",
       "name": "Long-tailed Chinchilla",
       "species": "Chinchilla lanigera",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Chinchilla_lanigera-4.jpg/800px-Chinchilla_lanigera-4.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Chinchilla_lanigera_%28Wroclaw_zoo%29-2.JPG/500px-Chinchilla_lanigera_%28Wroclaw_zoo%29-2.JPG",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1139,7 +1139,7 @@
       "_note_family": "Chinchillidae",
       "name": "Plains Viscacha",
       "species": "Lagostomus maximus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Lagostomus_maximus.jpg/800px-Lagostomus_maximus.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Lagostomus_maximus%2C_Plains_Viscacha.jpg/500px-Lagostomus_maximus%2C_Plains_Viscacha.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1184,7 +1184,7 @@
       "_note_family": "Dinomyidae",
       "name": "Pacarana",
       "species": "Dinomys branickii",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Dinomys_branickii.jpg/800px-Dinomys_branickii.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dinomys_branickii.JPG/500px-Dinomys_branickii.JPG",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1229,7 +1229,7 @@
       "_note_family": "Cuniculidae",
       "name": "Lowland Paca",
       "species": "Cuniculus paca",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Cuniculus_paca.jpg/800px-Cuniculus_paca.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Cuniculus_paca.jpg/500px-Cuniculus_paca.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1274,7 +1274,7 @@
       "_note_family": "Dasyproctidae",
       "name": "Central American Agouti",
       "species": "Dasyprocta punctata",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Dasyprocta_punctata.jpg/800px-Dasyprocta_punctata.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Central_American_agouti_%28Dasyprocta_punctata%29_Paz_de_las_Aves.jpg/500px-Central_American_agouti_%28Dasyprocta_punctata%29_Paz_de_las_Aves.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1315,11 +1315,11 @@
     },
 
     {
-      "id": "degu",
+      "id": "Common degu",
       "_note_family": "Octodontidae",
       "name": "Degu",
       "species": "Octodon degus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Octodon_degus.jpg/800px-Octodon_degus.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Octodon_degus_-Heidelberg_Zoo%2C_Germany-8a.jpg/500px-Octodon_degus_-Heidelberg_Zoo%2C_Germany-8a.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1364,7 +1364,7 @@
       "_note_family": "Bathyergidae",
       "name": "Naked Mole-rat",
       "species": "Heterocephalus glaber",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Naked_mole_rat.jpg/800px-Naked_mole_rat.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nacktmull.jpg/500px-Nacktmull.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1407,9 +1407,9 @@
     {
       "id": "coypu",
       "_note_family": "Myocastoridae",
-      "name": "Coypu (Nutria)",
+      "name": "Nutria",
       "species": "Myocastor coypus",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Myocastor_coypus_Bjoern_S_01.jpg/800px-Myocastor_coypus_Bjoern_S_01.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Myocastor_coypus_02.jpg/500px-Myocastor_coypus_02.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
@@ -1454,7 +1454,7 @@
       "_note_family": "Muridae / special",
       "name": "African Crested Rat",
       "species": "Lophiomys imhausi",
-      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lophiomys_imhausi.jpg/800px-Lophiomys_imhausi.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Lophiomys_imhausi.jpg",
       "taxonomy": {
         "class": "Mammalia",
         "order": "Rodentia",
