@@ -17,7 +17,7 @@ async function loadAnimals() {
   try {
     const res = await fetch(DATA_URL);
     const data = await res.json();
-    allAnimals = data.animals.filter(a => a.id && a.taxonomy);
+    allAnimals = data.animals.filter(a => a.id && a.taxonomy).sort((a, b) => a.name.localeCompare(b.name));
   } catch (e) {
     console.error('Could not load animals.json:', e);
   }
