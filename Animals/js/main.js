@@ -1,6 +1,6 @@
 /* ── ANIMALIA ARENA — main.js ─────────────────────────────── */
 
-const DATA_URL = 'data/animals.json';
+const MANIFEST_URL = 'data/manifest.json';
 
 /* ─── State ─────────────────────────────────────────────── */
 let allAnimals = [];
@@ -15,11 +15,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ─── Load JSON ─────────────────────────────────────────── */
 async function loadAnimals() {
   try {
-    const res = await fetch(DATA_URL);
-    const data = await res.json();
-    allAnimals = data.animals.filter(a => a.id && a.taxonomy).sort((a, b) => a.name.localeCompare(b.name));
+    // Load manifest to discover all data files
+    const manifestRes = await fetch(MANIFEST_URL);
+    const filePaths = await manifestRes.json();
+
+    // Fetch all files in parallel
+    const results = await Promise.all(
+      filePaths.map(path => fetch(path).then(r => r.json()).catch(e => {
+        console.error(`Could not load ${path}:`, e);
+        return { animals: [] };
+      }))
+    );
+
+    // Merge all animals, filter invalid, sort alphabetically
+    const merged = results.flatMap(data => data.animals ?? []);
+    allAnimals = merged
+      .filter(a => a.id && a.taxonomy)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
   } catch (e) {
-    console.error('Could not load animals.json:', e);
+    console.error('Could not load manifest.json:', e);
   }
 }
 
