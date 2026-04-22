@@ -108028,6 +108028,5778 @@
           "blood_clotting": 39
         }
       }
+    },
+    {
+      "id": "kivu-giant-pouched-rat",
+      "name": "Kivu giant pouched rat",
+      "species": "Cricetomys kivuensis",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Cricetomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Cricetomys",
+        "species": "C. kivuensis"
+      },
+      "description": "Endemic to highland Congo forests, this pouched rat navigates dense undergrowth with acute olfactory senses.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Cricetomys_gambianus.jpg/500px-Cricetomys_gambianus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 50,
+          "armor": 8,
+          "endurance": 30,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 11,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 32,
+          "agility": 58,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 12,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 38,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "lesser-tufted-tailed-rat",
+      "name": "Lesser tufted-tailed rat",
+      "species": "Eliurus minor",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. minor"
+      },
+      "description": "A nimble Malagasy endemic darting through dry deciduous forest floors at dusk.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "armor": 7,
+          "endurance": 36,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 16,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 28,
+          "agility": 52,
+          "stamina_drain": 41
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 23,
+          "camouflage": 52
+        },
+        "class_specific": {
+          "pack_cohesion": 39,
+          "blood_clotting": 38
+        }
+      }
+    },
+    {
+      "id": "majors-tufted-tailed-rat",
+      "name": "Major's tufted-tailed rat",
+      "species": "Eliurus majori",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. majori"
+      },
+      "description": "Found in eastern Madagascar's rainforest understory, notable for its brush-tipped tail used in balance.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "armor": 5,
+          "endurance": 54,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 38,
+          "agility": 43,
+          "stamina_drain": 39
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 20,
+          "camouflage": 48
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 32
+        }
+      }
+    },
+    {
+      "id": "tanala-tufted-tailed-rat",
+      "name": "Tanala tufted-tailed rat",
+      "species": "Eliurus tanala",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. tanala"
+      },
+      "description": "A rain-forest specialist of the Tanala highlands, scrambling across fallen logs with surprising speed.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 33,
+          "armor": 16,
+          "endurance": 41,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 42,
+          "agility": 52,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 12,
+          "camouflage": 62
+        },
+        "class_specific": {
+          "pack_cohesion": 34,
+          "blood_clotting": 31
+        }
+      }
+    },
+    {
+      "id": "webbs-tufted-tailed-rat",
+      "name": "Webb's tufted-tailed rat",
+      "species": "Eliurus webbi",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. webbi"
+      },
+      "description": "Restricted to northern Madagascar's dry-forest patches, this rat emerges only on moonless nights.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 48,
+          "armor": 11,
+          "endurance": 52,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 15
+        },
+        "mobility": {
+          "speed": 35,
+          "agility": 44,
+          "stamina_drain": 37
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 13,
+          "camouflage": 57
+        },
+        "class_specific": {
+          "pack_cohesion": 33,
+          "blood_clotting": 34
+        }
+      }
+    },
+    {
+      "id": "petters-big-footed-mouse",
+      "name": "Petter's big-footed mouse",
+      "species": "Macrotarsomys petteri",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Macrotarsomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Macrotarsomys",
+        "species": "M. petteri"
+      },
+      "description": "A jerboa-like Malagasy endemic bounding across sandy southwestern Madagascar with oversized hindfoot pads.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Macrotarsomys_bastardi_01.jpg/500px-Macrotarsomys_bastardi_01.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 50,
+          "armor": 16,
+          "endurance": 35,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 49,
+          "agility": 43,
+          "stamina_drain": 55
+        },
+        "senses_tactics": {
+          "perception": 42,
+          "intimidation": 15,
+          "camouflage": 62
+        },
+        "class_specific": {
+          "pack_cohesion": 48,
+          "blood_clotting": 27
+        }
+      }
+    },
+    {
+      "id": "northwestern-fat-mouse",
+      "name": "Northwestern fat mouse",
+      "species": "Steatomys caurinus",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Steatomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Steatomys",
+        "species": "S. caurinus"
+      },
+      "description": "Fattening itself on seeds before dry-season torpor, it can more than double its body mass.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Dendromus_melanotis.jpg/500px-Dendromus_melanotis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "armor": 19,
+          "endurance": 42,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 22,
+          "venom_toxin": 0,
+          "reach": 15
+        },
+        "mobility": {
+          "speed": 50,
+          "agility": 52,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 20,
+          "camouflage": 69
+        },
+        "class_specific": {
+          "pack_cohesion": 49,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "large-fat-mouse",
+      "name": "Large fat mouse",
+      "species": "Steatomys opimus",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Steatomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Steatomys",
+        "species": "S. opimus"
+      },
+      "description": "Among the largest fat mice, its reserves sustain it through multiple months of food scarcity.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Dendromus_melanotis.jpg/500px-Dendromus_melanotis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 6,
+          "endurance": 55,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 30,
+          "agility": 41,
+          "stamina_drain": 53
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 20,
+          "camouflage": 51
+        },
+        "class_specific": {
+          "pack_cohesion": 45,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "naked-tailed-voalavo",
+      "name": "Naked-tailed voalavo",
+      "species": "Voalavo gymnocaudus",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Voalavo"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Voalavo",
+        "species": "V. gymnocaudus"
+      },
+      "description": "A scaly-tailed Malagasy rodent from high-altitude cloud forest, nearly unknown to science.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 42,
+          "armor": 19,
+          "endurance": 34,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 45,
+          "agility": 52,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 23,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 37,
+          "blood_clotting": 31
+        }
+      }
+    },
+    {
+      "id": "anthonys-pocket-mouse",
+      "name": "Anthony's pocket mouse",
+      "species": "Chaetodipus anthonyi",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. anthonyi"
+      },
+      "description": "A Baja California spiny pocket mouse inhabiting rocky desert slopes with sparse cactus cover.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 29,
+          "armor": 6,
+          "endurance": 44,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 77,
+          "agility": 58,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 7,
+          "camouflage": 75
+        },
+        "class_specific": {
+          "pack_cohesion": 23,
+          "blood_clotting": 27
+        }
+      }
+    },
+    {
+      "id": "narrow-skulled-pocket-mouse",
+      "name": "Narrow-skulled pocket mouse",
+      "species": "Chaetodipus artus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. artus"
+      },
+      "description": "Named for its compressed skull, this Sonoran pocket mouse slips under flat rocks with remarkable ease.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 24,
+          "armor": 10,
+          "endurance": 40,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 58,
+          "agility": 72,
+          "stamina_drain": 28
+        },
+        "senses_tactics": {
+          "perception": 63,
+          "intimidation": 16,
+          "camouflage": 53
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "california-pocket-mouse",
+      "name": "California pocket mouse",
+      "species": "Chaetodipus californicus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. californicus"
+      },
+      "description": "A chaparral specialist filling its external cheek pouches with seeds from dry-season shrubs.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "armor": 14,
+          "endurance": 38,
+          "regeneration": 19
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 69,
+          "stamina_drain": 28
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 16,
+          "camouflage": 58
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "dalquests-pocket-mouse",
+      "name": "Dalquest's pocket mouse",
+      "species": "Chaetodipus dalquesti",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. dalquesti"
+      },
+      "description": "A Tamaulipan scrubland pocket mouse navigating thorny brush with stiff-spined flanks protecting it from owls.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 27,
+          "armor": 12,
+          "endurance": 31,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 16,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 76,
+          "agility": 75,
+          "stamina_drain": 44
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 8,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "lined-pocket-mouse",
+      "name": "Lined pocket mouse",
+      "species": "Chaetodipus lineatus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. lineatus"
+      },
+      "description": "Faint dorsal stripes disrupt its silhouette against rocky Chihuahuan terrain under moonlight.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 27,
+          "armor": 12,
+          "endurance": 44,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 6,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 65,
+          "agility": 55,
+          "stamina_drain": 31
+        },
+        "senses_tactics": {
+          "perception": 53,
+          "intimidation": 18,
+          "camouflage": 75
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "baja-pocket-mouse",
+      "name": "Baja pocket mouse",
+      "species": "Chaetodipus rudinoris",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Chaetodipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Chaetodipus",
+        "species": "C. rudinoris"
+      },
+      "description": "A rough-nosed Baja California pocket mouse wedging into rock crevices to cache seeds from desert shrubs.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 23,
+          "armor": 7,
+          "endurance": 46,
+          "regeneration": 19
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 76,
+          "agility": 57,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 7,
+          "camouflage": 71
+        },
+        "class_specific": {
+          "pack_cohesion": 25,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "island-kangaroo-rat",
+      "name": "Island kangaroo rat",
+      "species": "Dipodomys insularis",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Dipodomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Dipodomys",
+        "species": "D. insularis"
+      },
+      "description": "Isolated on Isla San José, this rare insular kangaroo rat has evolved a compact body form distinct from mainland cousins.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kangaroo_rat.jpg/500px-Kangaroo_rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 27,
+          "armor": 8,
+          "endurance": 44,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 80,
+          "agility": 61,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 16,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 24
+        }
+      }
+    },
+    {
+      "id": "santa-margarita-kangaroo-rat",
+      "name": "Santa Margarita kangaroo rat",
+      "species": "Dipodomys margaritae",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Dipodomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Dipodomys",
+        "species": "D. margaritae"
+      },
+      "description": "Among the most endangered Baja kangaroo rats, surviving in a tiny coastal island habitat.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kangaroo_rat.jpg/500px-Kangaroo_rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 42,
+          "armor": 9,
+          "endurance": 42,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 53,
+          "agility": 62,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 44,
+          "intimidation": 10,
+          "camouflage": 50
+        },
+        "class_specific": {
+          "pack_cohesion": 28,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "nelsons-kangaroo-rat",
+      "name": "Nelson's kangaroo rat",
+      "species": "Dipodomys nelsoni",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Dipodomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Dipodomys",
+        "species": "D. nelsoni"
+      },
+      "description": "A large, crested Chihuahuan kangaroo rat famed for its dust-bathing displays to maintain pelt condition.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kangaroo_rat.jpg/500px-Kangaroo_rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 29,
+          "armor": 13,
+          "endurance": 35,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 57,
+          "stamina_drain": 29
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 6,
+          "camouflage": 66
+        },
+        "class_specific": {
+          "pack_cohesion": 17,
+          "blood_clotting": 22
+        }
+      }
+    },
+    {
+      "id": "baja-california-kangaroo-rat",
+      "name": "Baja California kangaroo rat",
+      "species": "Dipodomys peninsularis",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Dipodomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Dipodomys",
+        "species": "D. peninsularis"
+      },
+      "description": "A slender-tailed peninsula endemic that converts metabolic water from dry seeds to survive rainless summers.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kangaroo_rat.jpg/500px-Kangaroo_rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 7,
+          "endurance": 45,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 17,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 80,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 55,
+          "intimidation": 8,
+          "camouflage": 53
+        },
+        "class_specific": {
+          "pack_cohesion": 13,
+          "blood_clotting": 28
+        }
+      }
+    },
+    {
+      "id": "gaumers-spiny-pocket-mouse",
+      "name": "Gaumer's spiny pocket mouse",
+      "species": "Heteromys gaumeri",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Heteromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Heteromys",
+        "species": "H. gaumeri"
+      },
+      "description": "A Yucatan Peninsula forest mouse using its spiny pelage to deter snakes in dense tropical undergrowth.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "armor": 9,
+          "endurance": 41,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 71,
+          "agility": 75,
+          "stamina_drain": 48
+        },
+        "senses_tactics": {
+          "perception": 45,
+          "intimidation": 5,
+          "camouflage": 62
+        },
+        "class_specific": {
+          "pack_cohesion": 20,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "goldmans-spiny-pocket-mouse",
+      "name": "Goldman's spiny pocket mouse",
+      "species": "Heteromys goldmani",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Heteromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Heteromys",
+        "species": "H. goldmani"
+      },
+      "description": "A Chiapan highland mouse that stores seeds in moisture-resistant cheek pouches during storm-heavy wet seasons.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 25,
+          "armor": 7,
+          "endurance": 34,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 54,
+          "agility": 68,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 12,
+          "camouflage": 57
+        },
+        "class_specific": {
+          "pack_cohesion": 12,
+          "blood_clotting": 25
+        }
+      }
+    },
+    {
+      "id": "nelsons-spiny-pocket-mouse",
+      "name": "Nelson's spiny pocket mouse",
+      "species": "Heteromys nelsoni",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Heteromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Heteromys",
+        "species": "H. nelsoni"
+      },
+      "description": "Confined to Chiapas cloud-forest remnants, this critically rare pocket mouse moves only on foggy nights.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 39,
+          "armor": 5,
+          "endurance": 29,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 79,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 11,
+          "camouflage": 65
+        },
+        "class_specific": {
+          "pack_cohesion": 25,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "mexican-spiny-pocket-mouse",
+      "name": "Mexican spiny pocket mouse",
+      "species": "Liomys irroratus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Liomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Liomys",
+        "species": "L. irroratus"
+      },
+      "description": "A versatile Mexican spiny mouse inhabiting everything from arid thorn scrub to humid pine-oak forest.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 34,
+          "armor": 4,
+          "endurance": 33,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 6,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 58,
+          "agility": 80,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 51,
+          "intimidation": 11,
+          "camouflage": 72
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 28
+        }
+      }
+    },
+    {
+      "id": "painted-spiny-pocket-mouse",
+      "name": "Painted spiny pocket mouse",
+      "species": "Liomys pictus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Liomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Liomys",
+        "species": "L. pictus"
+      },
+      "description": "Boldly marked with pale-tipped spines, this Mexican Pacific slope mouse is active in the hour before dawn.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 6,
+          "endurance": 34,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 68,
+          "agility": 78,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 43,
+          "intimidation": 16,
+          "camouflage": 60
+        },
+        "class_specific": {
+          "pack_cohesion": 11,
+          "blood_clotting": 18
+        }
+      }
+    },
+    {
+      "id": "salvins-spiny-pocket-mouse",
+      "name": "Salvin's spiny pocket mouse",
+      "species": "Liomys salvini",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Liomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Liomys",
+        "species": "L. salvini"
+      },
+      "description": "Ranging from southern Mexico to Costa Rica, this widespread spiny pocket mouse colonizes disturbed forest edges.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 40,
+          "armor": 11,
+          "endurance": 44,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 51,
+          "agility": 71,
+          "stamina_drain": 30
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 6,
+          "camouflage": 69
+        },
+        "class_specific": {
+          "pack_cohesion": 12,
+          "blood_clotting": 28
+        }
+      }
+    },
+    {
+      "id": "olive-backed-pocket-mouse",
+      "name": "Olive-backed pocket mouse",
+      "species": "Perognathus fasciatus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. fasciatus"
+      },
+      "description": "A Great Plains pocket mouse gathering grass seeds in its cheek pouches under the cover of dense sage.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 29,
+          "armor": 10,
+          "endurance": 31,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 68,
+          "agility": 74,
+          "stamina_drain": 29
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 6,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 28,
+          "blood_clotting": 27
+        }
+      }
+    },
+    {
+      "id": "san-joaquin-pocket-mouse",
+      "name": "San Joaquin pocket mouse",
+      "species": "Perognathus inornatus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. inornatus"
+      },
+      "description": "A California valley endemic, pale and unadorned, blending with the alkali flats of the San Joaquin.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "armor": 9,
+          "endurance": 36,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 16,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 63,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 15,
+          "camouflage": 70
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 25
+        }
+      }
+    },
+    {
+      "id": "soft-haired-pocket-mouse",
+      "name": "Soft-haired pocket mouse",
+      "species": "Perognathus mollipilosus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. mollipilosus"
+      },
+      "description": "Unusually silky for a pocket mouse, it slips through bunchgrass tussocks almost without disturbing a stem.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 32,
+          "armor": 5,
+          "endurance": 28,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 72,
+          "stamina_drain": 34
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 9,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 32
+        }
+      }
+    },
+    {
+      "id": "yellow-eared-pocket-mouse",
+      "name": "Yellow-eared pocket mouse",
+      "species": "Perognathus xanthonotus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. xanthonotus"
+      },
+      "description": "A high-altitude Californian pocket mouse with distinctively warm-toned auricular patches.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 24,
+          "armor": 7,
+          "endurance": 39,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 76,
+          "agility": 72,
+          "stamina_drain": 37
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 17,
+          "camouflage": 70
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 18
+        }
+      }
+    },
+    {
+      "id": "apache-pocket-mouse",
+      "name": "Apache pocket mouse",
+      "species": "Perognathus apache",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. apache"
+      },
+      "description": "Scurrying across piñon-juniper flats of the Colorado Plateau, this pocket mouse enters deep torpor in winter.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 39,
+          "armor": 8,
+          "endurance": 49,
+          "regeneration": 19
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 53,
+          "agility": 58,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 9,
+          "camouflage": 59
+        },
+        "class_specific": {
+          "pack_cohesion": 29,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "lords-pocket-mouse",
+      "name": "Lord's pocket mouse",
+      "species": "Perognathus lordi",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Perognathus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Perognathus",
+        "species": "P. lordi"
+      },
+      "description": "A Columbia Basin pocket mouse exploiting sagebrush seed falls in autumn to fill large underground stores.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 32,
+          "armor": 7,
+          "endurance": 49,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 65,
+          "agility": 63,
+          "stamina_drain": 29
+        },
+        "senses_tactics": {
+          "perception": 44,
+          "intimidation": 15,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 18,
+          "blood_clotting": 18
+        }
+      }
+    },
+    {
+      "id": "great-jerboa",
+      "name": "Great jerboa",
+      "species": "Allactaga major",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Allactaga"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. major"
+      },
+      "description": "The largest five-toed jerboa, traversing Eurasian steppes in bounding 3-meter leaps that confuse predators.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Allactaga_major.jpg/500px-Allactaga_major.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 18,
+          "armor": 8,
+          "endurance": 29,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 81,
+          "agility": 74,
+          "stamina_drain": 47
+        },
+        "senses_tactics": {
+          "perception": 67,
+          "intimidation": 11,
+          "camouflage": 72
+        },
+        "class_specific": {
+          "pack_cohesion": 8,
+          "blood_clotting": 17
+        }
+      }
+    },
+    {
+      "id": "mongolian-five-toed-jerboa",
+      "name": "Mongolian five-toed jerboa",
+      "species": "Allactaga sibirica",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Allactaga"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. sibirica"
+      },
+      "description": "A cold-steppe specialist that hibernates six months each year in a sealed clay-plugged burrow.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Allactaga_major.jpg/500px-Allactaga_major.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 20,
+          "armor": 5,
+          "endurance": 42,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 71,
+          "agility": 64,
+          "stamina_drain": 31
+        },
+        "senses_tactics": {
+          "perception": 54,
+          "intimidation": 10,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 19
+        }
+      }
+    },
+    {
+      "id": "tousses-jerboa",
+      "name": "Tousse's jerboa",
+      "species": "Allactaga toussi",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Allactaga"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. toussi"
+      },
+      "description": "An Iranian plateau jerboa with an exceptionally long tail tuft used for mid-leap direction correction.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Allactaga_major.jpg/500px-Allactaga_major.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 25,
+          "armor": 4,
+          "endurance": 36,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 77,
+          "agility": 83,
+          "stamina_drain": 34
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 7,
+          "camouflage": 60
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 16
+        }
+      }
+    },
+    {
+      "id": "deasys-jerboa",
+      "name": "Deasy's jerboa",
+      "species": "Dipus deasyi",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Dipus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Dipus",
+        "species": "D. deasyi"
+      },
+      "description": "A Central Asian sand-jerboa with stiff hairbrush feet that act as natural snowshoes on cold dune surfaces.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dipus_sagitta.jpg/500px-Dipus_sagitta.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 23,
+          "armor": 8,
+          "endurance": 38,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 66,
+          "agility": 65,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 57,
+          "intimidation": 5,
+          "camouflage": 70
+        },
+        "class_specific": {
+          "pack_cohesion": 15,
+          "blood_clotting": 19
+        }
+      }
+    },
+    {
+      "id": "turkmen-jerboa",
+      "name": "Turkmen jerboa",
+      "species": "Jaculus turcmenicus",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Jaculus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Jaculus",
+        "species": "J. turcmenicus"
+      },
+      "description": "Named for Turkmenistan's Karakum desert, this pale jerboa vanishes into loess hollows by day.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dipus_sagitta.jpg/500px-Dipus_sagitta.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 32,
+          "armor": 8,
+          "endurance": 34,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 58,
+          "agility": 81,
+          "stamina_drain": 36
+        },
+        "senses_tactics": {
+          "perception": 57,
+          "intimidation": 10,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 10,
+          "blood_clotting": 28
+        }
+      }
+    },
+    {
+      "id": "eastern-jerboa",
+      "name": "Eastern jerboa",
+      "species": "Jaculus vocator",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Jaculus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Jaculus",
+        "species": "J. vocator"
+      },
+      "description": "An Uzbekistan and Tajikistan endemic known for its unusually resonant foot-drumming alarm signal.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dipus_sagitta.jpg/500px-Dipus_sagitta.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 26,
+          "armor": 8,
+          "endurance": 45,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 11,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 58,
+          "agility": 63,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 14,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 9,
+          "blood_clotting": 17
+        }
+      }
+    },
+    {
+      "id": "shitkovs-dwarf-jerboa",
+      "name": "Shitkov's dwarf jerboa",
+      "species": "Pygeretmus shitkovi",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Pygeretmus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Pygeretmus",
+        "species": "P. shitkovi"
+      },
+      "description": "An obscure Caspian Basin dwarf jerboa whose three-toed feet leave distinctive dot-dash trails in salt crust.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dipus_sagitta.jpg/500px-Dipus_sagitta.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 9,
+          "endurance": 36,
+          "regeneration": 29
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 77,
+          "agility": 76,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 57,
+          "intimidation": 14,
+          "camouflage": 61
+        },
+        "class_specific": {
+          "pack_cohesion": 16,
+          "blood_clotting": 16
+        }
+      }
+    },
+    {
+      "id": "four-toed-jerboa",
+      "name": "Four-toed jerboa",
+      "species": "Scarturus tetradactylus",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Scarturus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Scarturus",
+        "species": "S. tetradactylus"
+      },
+      "description": "Unusual among jerboas for having four rather than three functional toes, affording extra grip on gravel flats.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dipus_sagitta.jpg/500px-Dipus_sagitta.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 31,
+          "armor": 3,
+          "endurance": 41,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 69,
+          "agility": 73,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 66,
+          "intimidation": 10,
+          "camouflage": 74
+        },
+        "class_specific": {
+          "pack_cohesion": 18,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "severtzovs-birch-mouse",
+      "name": "Severtzov's birch mouse",
+      "species": "Sicista severtzovi",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Sicista"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Sicista",
+        "species": "S. severtzovi"
+      },
+      "description": "A Ukrainian steppe birch mouse with unique dorsal stripe dimorphism that puzzled early taxonomists.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sicista_betulina.jpg/500px-Sicista_betulina.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 21,
+          "armor": 7,
+          "endurance": 41,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 68,
+          "agility": 72,
+          "stamina_drain": 39
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 7,
+          "camouflage": 61
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "southern-birch-mouse",
+      "name": "Southern birch mouse",
+      "species": "Sicista subtilis",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Sicista"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Sicista",
+        "species": "S. subtilis"
+      },
+      "description": "Ranges across the Pontic-Caspian steppe, diving into deep grass tunnels when pursued.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sicista_betulina.jpg/500px-Sicista_betulina.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "armor": 5,
+          "endurance": 44,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 75,
+          "agility": 60,
+          "stamina_drain": 39
+        },
+        "senses_tactics": {
+          "perception": 54,
+          "intimidation": 8,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 18,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "connecting-tuco-tuco",
+      "name": "Connecting tuco-tuco",
+      "species": "Ctenomys annectens",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. annectens"
+      },
+      "description": "A transitional-zone tuco-tuco linking morphological traits between two distinct Argentinian clades.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 54,
+          "armor": 19,
+          "endurance": 41,
+          "regeneration": 38
+        },
+        "offense": {
+          "bite_strike_force": 35,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 28,
+          "agility": 24,
+          "stamina_drain": 44
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 38,
+          "camouflage": 52
+        },
+        "class_specific": {
+          "pack_cohesion": 22,
+          "blood_clotting": 39
+        }
+      }
+    },
+    {
+      "id": "bergs-tuco-tuco",
+      "name": "Berg's tuco-tuco",
+      "species": "Ctenomys bergi",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. bergi"
+      },
+      "description": "A sandy-soil specialist of the Pampas using its chisel teeth to cut through compacted root mats.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 47,
+          "armor": 24,
+          "endurance": 41,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 21,
+          "agility": 37,
+          "stamina_drain": 54
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 42,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 35,
+          "blood_clotting": 48
+        }
+      }
+    },
+    {
+      "id": "dorbignys-tuco-tuco",
+      "name": "d'Orbigny's tuco-tuco",
+      "species": "Ctenomys dorbignyi",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. dorbignyi"
+      },
+      "description": "Named after the 19th-century naturalist, this Bolivian lowland tuco-tuco is rarely encountered above 500 m.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 46,
+          "armor": 23,
+          "endurance": 47,
+          "regeneration": 37
+        },
+        "offense": {
+          "bite_strike_force": 32,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 20,
+          "agility": 22,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 35,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 37,
+          "blood_clotting": 46
+        }
+      }
+    },
+    {
+      "id": "slow-tuco-tuco",
+      "name": "Slow tuco-tuco",
+      "species": "Ctenomys lentulus",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. lentulus"
+      },
+      "description": "Despite its name, it compensates slow above-ground speed with extraordinary excavation efficiency.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 54,
+          "armor": 12,
+          "endurance": 52,
+          "regeneration": 29
+        },
+        "offense": {
+          "bite_strike_force": 23,
+          "venom_toxin": 0,
+          "reach": 13
+        },
+        "mobility": {
+          "speed": 20,
+          "agility": 36,
+          "stamina_drain": 51
+        },
+        "senses_tactics": {
+          "perception": 62,
+          "intimidation": 38,
+          "camouflage": 64
+        },
+        "class_specific": {
+          "pack_cohesion": 34,
+          "blood_clotting": 46
+        }
+      }
+    },
+    {
+      "id": "marsh-tuco-tuco",
+      "name": "Marsh tuco-tuco",
+      "species": "Ctenomys oxymycterus",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. oxymycterus"
+      },
+      "description": "An unusual semi-aquatic tuco-tuco burrowing in damp Uruguayan coastal marshes.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 53,
+          "armor": 25,
+          "endurance": 52,
+          "regeneration": 36
+        },
+        "offense": {
+          "bite_strike_force": 25,
+          "venom_toxin": 0,
+          "reach": 13
+        },
+        "mobility": {
+          "speed": 25,
+          "agility": 30,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 36,
+          "camouflage": 66
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 37
+        }
+      }
+    },
+    {
+      "id": "pundts-tuco-tuco",
+      "name": "Pundt's tuco-tuco",
+      "species": "Ctenomys pundti",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. pundti"
+      },
+      "description": "An obscure Córdoba Province tuco-tuco whose vocalizations are lower-pitched than most congeners.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 48,
+          "armor": 19,
+          "endurance": 37,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 27,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 23,
+          "agility": 32,
+          "stamina_drain": 52
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 32,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 22,
+          "blood_clotting": 42
+        }
+      }
+    },
+    {
+      "id": "forest-tuco-tuco",
+      "name": "Forest tuco-tuco",
+      "species": "Ctenomys sylvanus",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. sylvanus"
+      },
+      "description": "Unusually, this Argentine tuco-tuco tolerates shaded gallery-forest soils alongside open grassland.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 44,
+          "armor": 23,
+          "endurance": 41,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 33,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 23,
+          "agility": 36,
+          "stamina_drain": 48
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 34,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 48
+        }
+      }
+    },
+    {
+      "id": "talas-tuco-tuco",
+      "name": "Talas tuco-tuco",
+      "species": "Ctenomys talarum",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. talarum"
+      },
+      "description": "A Buenos Aires province tuco-tuco that maintains the same burrow system for multiple generations.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 40,
+          "armor": 25,
+          "endurance": 53,
+          "regeneration": 34
+        },
+        "offense": {
+          "bite_strike_force": 35,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 23,
+          "agility": 31,
+          "stamina_drain": 47
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 45,
+          "camouflage": 67
+        },
+        "class_specific": {
+          "pack_cohesion": 34,
+          "blood_clotting": 37
+        }
+      }
+    },
+    {
+      "id": "collared-tuco-tuco",
+      "name": "Collared tuco-tuco",
+      "species": "Ctenomys torquatus",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. torquatus"
+      },
+      "description": "Named for its pale neck ring, this Brazilian tuco-tuco is among the most studied for social vocalizations.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 55,
+          "armor": 15,
+          "endurance": 43,
+          "regeneration": 35
+        },
+        "offense": {
+          "bite_strike_force": 35,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 24,
+          "agility": 32,
+          "stamina_drain": 47
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 42,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 34,
+          "blood_clotting": 47
+        }
+      }
+    },
+    {
+      "id": "robust-tuco-tuco",
+      "name": "Robust tuco-tuco",
+      "species": "Ctenomys tuconax",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. tuconax"
+      },
+      "description": "A powerfully built Andean foothill tuco-tuco capable of extending its burrow system over 20 meters.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 40,
+          "armor": 18,
+          "endurance": 53,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 22,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 20,
+          "agility": 36,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 36,
+          "camouflage": 62
+        },
+        "class_specific": {
+          "pack_cohesion": 25,
+          "blood_clotting": 36
+        }
+      }
+    },
+    {
+      "id": "viperine-tuco-tuco",
+      "name": "Viperine tuco-tuco",
+      "species": "Ctenomys viperinus",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. viperinus"
+      },
+      "description": "Named by early naturalists who found its aggressive bite rivaling the local pit viper's impact.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 54,
+          "armor": 17,
+          "endurance": 45,
+          "regeneration": 34
+        },
+        "offense": {
+          "bite_strike_force": 28,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 22,
+          "agility": 24,
+          "stamina_drain": 50
+        },
+        "senses_tactics": {
+          "perception": 45,
+          "intimidation": 45,
+          "camouflage": 51
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 37
+        }
+      }
+    },
+    {
+      "id": "yolandas-tuco-tuco",
+      "name": "Yolanda's tuco-tuco",
+      "species": "Ctenomys yolandae",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. yolandae"
+      },
+      "description": "A recently described Santa Fe Province tuco-tuco honoring field biologist Yolanda Davies.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 60,
+          "armor": 13,
+          "endurance": 55,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 21,
+          "agility": 22,
+          "stamina_drain": 54
+        },
+        "senses_tactics": {
+          "perception": 49,
+          "intimidation": 35,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 33
+        }
+      }
+    },
+    {
+      "id": "zarattinis-tuco-tuco",
+      "name": "Zarattini's tuco-tuco",
+      "species": "Ctenomys zarattinii",
+      "_note_family": "Ctenomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Ctenomyidae",
+        "Ctenomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Ctenomyidae",
+        "genus": "Ctenomys",
+        "species": "C. zarattinii"
+      },
+      "description": "A Corrientes lowland specialist whose burrow openings are sealed with clay pellets against flooding.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Ctenomys_torquatus.jpg/500px-Ctenomys_torquatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 58,
+          "armor": 15,
+          "endurance": 49,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 31,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 27,
+          "agility": 25,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 54,
+          "intimidation": 31,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 15,
+          "blood_clotting": 39
+        }
+      }
+    },
+    {
+      "id": "angolan-dormouse",
+      "name": "Angolan dormouse",
+      "species": "Graphiurus angolensis",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. angolensis"
+      },
+      "description": "A savanna-woodland dormouse of the Angolan plateau, nesting in hollow termite mounds.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 43,
+          "armor": 15,
+          "endurance": 40,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 34,
+          "agility": 60,
+          "stamina_drain": 52
+        },
+        "senses_tactics": {
+          "perception": 55,
+          "intimidation": 11,
+          "camouflage": 74
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "christys-dormouse",
+      "name": "Christy's dormouse",
+      "species": "Graphiurus christyi",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. christyi"
+      },
+      "description": "A Congo Basin canopy dormouse that caches insects and berries in bark-lined tree hollows.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 43,
+          "armor": 5,
+          "endurance": 39,
+          "regeneration": 33
+        },
+        "offense": {
+          "bite_strike_force": 18,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 34,
+          "agility": 58,
+          "stamina_drain": 52
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 10,
+          "camouflage": 65
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "jentinks-dormouse",
+      "name": "Jentink's dormouse",
+      "species": "Graphiurus crassicaudatus",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. crassicaudatus"
+      },
+      "description": "Armed with a thickened, fleshy tail storing fat reserves, this West African dormouse outlasts dry seasons.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "armor": 10,
+          "endurance": 48,
+          "regeneration": 34
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 45,
+          "agility": 47,
+          "stamina_drain": 48
+        },
+        "senses_tactics": {
+          "perception": 68,
+          "intimidation": 14,
+          "camouflage": 71
+        },
+        "class_specific": {
+          "pack_cohesion": 29,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "kellens-dormouse",
+      "name": "Kellen's dormouse",
+      "species": "Graphiurus kelleni",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. kelleni"
+      },
+      "description": "Occupying rocky koppies across southern Africa, it disappears for weeks during cold snaps in shallow torpor.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 39,
+          "armor": 11,
+          "endurance": 46,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 34,
+          "agility": 50,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 55,
+          "intimidation": 22,
+          "camouflage": 66
+        },
+        "class_specific": {
+          "pack_cohesion": 30,
+          "blood_clotting": 32
+        }
+      }
+    },
+    {
+      "id": "monards-dormouse",
+      "name": "Monard's dormouse",
+      "species": "Graphiurus monardi",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. monardi"
+      },
+      "description": "An Angolan woodland specialist named for the Belgian naturalist who first collected it from miombo trees.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "armor": 5,
+          "endurance": 43,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 38,
+          "agility": 53,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 14,
+          "camouflage": 71
+        },
+        "class_specific": {
+          "pack_cohesion": 20,
+          "blood_clotting": 20
+        }
+      }
+    },
+    {
+      "id": "nagtglass-dormouse",
+      "name": "Nagtglas's dormouse",
+      "species": "Graphiurus nagtglasii",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Graphiurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Graphiurus",
+        "species": "G. nagtglasii"
+      },
+      "description": "A West African forest dormouse whose sharp claws let it run headfirst down smooth tree trunks.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Graphiurus_murinus.jpg/500px-Graphiurus_murinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 41,
+          "armor": 8,
+          "endurance": 30,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 47,
+          "agility": 59,
+          "stamina_drain": 39
+        },
+        "senses_tactics": {
+          "perception": 70,
+          "intimidation": 17,
+          "camouflage": 72
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 34
+        }
+      }
+    },
+    {
+      "id": "desert-dormouse",
+      "name": "Desert dormouse",
+      "species": "Selevinia betpakdalaensis",
+      "_note_family": "Gliridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Gliridae",
+        "Selevinia"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Gliridae",
+        "genus": "Selevinia",
+        "species": "S. betpakdalaensis"
+      },
+      "description": "A Kazakhstani desert oddity that sheds and regrows its entire tail skin annually — unique among rodents.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Myoxus_glis.jpg/500px-Myoxus_glis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 25,
+          "armor": 6,
+          "endurance": 37,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 41,
+          "agility": 63,
+          "stamina_drain": 50
+        },
+        "senses_tactics": {
+          "perception": 59,
+          "intimidation": 17,
+          "camouflage": 69
+        },
+        "class_specific": {
+          "pack_cohesion": 28,
+          "blood_clotting": 31
+        }
+      }
+    },
+    {
+      "id": "bocages-mole-rat",
+      "name": "Bocage's mole-rat",
+      "species": "Cryptomys bocagei",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Cryptomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Cryptomys",
+        "species": "C. bocagei"
+      },
+      "description": "A colonial Angolan mole-rat whose castes cooperate to maintain kilometers of root-foraging tunnels.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Heterocephalus_glaber_portrait.jpg/500px-Heterocephalus_glaber_portrait.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 55,
+          "armor": 25,
+          "endurance": 55,
+          "regeneration": 35
+        },
+        "offense": {
+          "bite_strike_force": 33,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 19,
+          "agility": 29,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 42,
+          "intimidation": 35,
+          "camouflage": 48
+        },
+        "class_specific": {
+          "pack_cohesion": 55,
+          "blood_clotting": 38
+        }
+      }
+    },
+    {
+      "id": "bocages-fukomys-mole-rat",
+      "name": "Bocage's Fukomys mole-rat",
+      "species": "Fukomys bocagei",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Fukomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Fukomys",
+        "species": "F. bocagei"
+      },
+      "description": "Operates in cooperative colonies beneath Angolan miombo woodland, distributing foraging effort among workers.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Heterocephalus_glaber_portrait.jpg/500px-Heterocephalus_glaber_portrait.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 65,
+          "armor": 22,
+          "endurance": 60,
+          "regeneration": 30
+        },
+        "offense": {
+          "bite_strike_force": 28,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 26,
+          "agility": 35,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 53,
+          "intimidation": 48,
+          "camouflage": 61
+        },
+        "class_specific": {
+          "pack_cohesion": 54,
+          "blood_clotting": 38
+        }
+      }
+    },
+    {
+      "id": "darlings-mole-rat",
+      "name": "Darling's mole-rat",
+      "species": "Fukomys darlingi",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Fukomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Fukomys",
+        "species": "F. darlingi"
+      },
+      "description": "A Zimbabwe highland mole-rat with notably elongated incisors for gnawing through lateritic hardpan.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Heterocephalus_glaber_portrait.jpg/500px-Heterocephalus_glaber_portrait.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 48,
+          "armor": 18,
+          "endurance": 45,
+          "regeneration": 36
+        },
+        "offense": {
+          "bite_strike_force": 27,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 15,
+          "agility": 24,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 36,
+          "intimidation": 33,
+          "camouflage": 59
+        },
+        "class_specific": {
+          "pack_cohesion": 54,
+          "blood_clotting": 39
+        }
+      }
+    },
+    {
+      "id": "ilarias-mole-rat",
+      "name": "Ilaria's mole-rat",
+      "species": "Fukomys ilariae",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Fukomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Fukomys",
+        "species": "F. ilariae"
+      },
+      "description": "A recently described Zambian mole-rat distinguished by its lighter dorsal pelage and larger colony size.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Heterocephalus_glaber_portrait.jpg/500px-Heterocephalus_glaber_portrait.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 62,
+          "armor": 27,
+          "endurance": 53,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 22,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 22,
+          "agility": 35,
+          "stamina_drain": 52
+        },
+        "senses_tactics": {
+          "perception": 45,
+          "intimidation": 37,
+          "camouflage": 43
+        },
+        "class_specific": {
+          "pack_cohesion": 53,
+          "blood_clotting": 50
+        }
+      }
+    },
+    {
+      "id": "whytes-mole-rat",
+      "name": "Whyte's mole-rat",
+      "species": "Fukomys whytei",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Fukomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Fukomys",
+        "species": "F. whytei"
+      },
+      "description": "A Malawian montane mole-rat with extra-thick skin to resist the bites of rival colony intruders.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Heterocephalus_glaber_portrait.jpg/500px-Heterocephalus_glaber_portrait.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 45,
+          "armor": 27,
+          "endurance": 40,
+          "regeneration": 37
+        },
+        "offense": {
+          "bite_strike_force": 37,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 24,
+          "agility": 21,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 39,
+          "intimidation": 50,
+          "camouflage": 51
+        },
+        "class_specific": {
+          "pack_cohesion": 47,
+          "blood_clotting": 42
+        }
+      }
+    },
+    {
+      "id": "linkage-mole-rat",
+      "name": "Linkage mole-rat",
+      "species": "Tachyoryctes annectens",
+      "_note_family": "Bathyergidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Bathyergidae",
+        "Tachyoryctes"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Bathyergidae",
+        "genus": "Tachyoryctes",
+        "species": "T. annectens"
+      },
+      "description": "An Ethiopian giant mole-rat that seals tunnel sections with packed earth plugs after each foraging bout.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Rhizomys_pruinosus.jpg/500px-Rhizomys_pruinosus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 45,
+          "armor": 22,
+          "endurance": 51,
+          "regeneration": 32
+        },
+        "offense": {
+          "bite_strike_force": 38,
+          "venom_toxin": 0,
+          "reach": 13
+        },
+        "mobility": {
+          "speed": 22,
+          "agility": 34,
+          "stamina_drain": 47
+        },
+        "senses_tactics": {
+          "perception": 53,
+          "intimidation": 45,
+          "camouflage": 51
+        },
+        "class_specific": {
+          "pack_cohesion": 63,
+          "blood_clotting": 54
+        }
+      }
+    },
+    {
+      "id": "black-tailed-hutia",
+      "name": "Black-tailed hutia",
+      "species": "Capromys melanurus",
+      "_note_family": "Capromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Capromyidae",
+        "Capromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Capromyidae",
+        "genus": "Capromys",
+        "species": "C. melanurus"
+      },
+      "description": "A Cuban forest hutia with a jet-black tail tip used in social recognition among treetop groups.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capromys_pilorides.jpg/500px-Capromys_pilorides.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 49,
+          "armor": 18,
+          "endurance": 44,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 28,
+          "venom_toxin": 0,
+          "reach": 18
+        },
+        "mobility": {
+          "speed": 24,
+          "agility": 30,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 43,
+          "intimidation": 45,
+          "camouflage": 40
+        },
+        "class_specific": {
+          "pack_cohesion": 33,
+          "blood_clotting": 28
+        }
+      }
+    },
+    {
+      "id": "wide-footed-hutia",
+      "name": "Wide-footed hutia",
+      "species": "Capromys latus",
+      "_note_family": "Capromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Capromyidae",
+        "Capromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Capromyidae",
+        "genus": "Capromys",
+        "species": "C. latus"
+      },
+      "description": "Broad foot pads give this Cuban hutia unrivaled grip on rain-slicked limestone karst cliff faces.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capromys_pilorides.jpg/500px-Capromys_pilorides.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 61,
+          "armor": 29,
+          "endurance": 60,
+          "regeneration": 40
+        },
+        "offense": {
+          "bite_strike_force": 29,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 29,
+          "agility": 34,
+          "stamina_drain": 44
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 30,
+          "camouflage": 59
+        },
+        "class_specific": {
+          "pack_cohesion": 35,
+          "blood_clotting": 36
+        }
+      }
+    },
+    {
+      "id": "little-swan-island-hutia",
+      "name": "Little Swan Island hutia",
+      "species": "Geocapromys columbianus",
+      "_note_family": "Capromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Capromyidae",
+        "Geocapromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Capromyidae",
+        "genus": "Geocapromys",
+        "species": "G. columbianus"
+      },
+      "description": "Once considered extinct, small relict populations persist on remote Caribbean cays.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capromys_pilorides.jpg/500px-Capromys_pilorides.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 68,
+          "armor": 21,
+          "endurance": 51,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 27,
+          "venom_toxin": 0,
+          "reach": 18
+        },
+        "mobility": {
+          "speed": 26,
+          "agility": 33,
+          "stamina_drain": 39
+        },
+        "senses_tactics": {
+          "perception": 40,
+          "intimidation": 29,
+          "camouflage": 43
+        },
+        "class_specific": {
+          "pack_cohesion": 37,
+          "blood_clotting": 37
+        }
+      }
+    },
+    {
+      "id": "samana-hutia",
+      "name": "Samana hutia",
+      "species": "Plagiodontia ipnaeum",
+      "_note_family": "Capromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Capromyidae",
+        "Plagiodontia"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Capromyidae",
+        "genus": "Plagiodontia",
+        "species": "P. ipnaeum"
+      },
+      "description": "A Dominican mountain hutia whose fossils outnumber live sightings in the modern scientific literature.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capromys_pilorides.jpg/500px-Capromys_pilorides.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 62,
+          "armor": 18,
+          "endurance": 52,
+          "regeneration": 34
+        },
+        "offense": {
+          "bite_strike_force": 32,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 38,
+          "agility": 42,
+          "stamina_drain": 50
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 30,
+          "camouflage": 57
+        },
+        "class_specific": {
+          "pack_cohesion": 29,
+          "blood_clotting": 41
+        }
+      }
+    },
+    {
+      "id": "southern-hutia",
+      "name": "Southern hutia",
+      "species": "Mysateles meridionalis",
+      "_note_family": "Capromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Hystricomorpha",
+        "Capromyidae",
+        "Mysateles"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Hystricomorpha",
+        "family": "Capromyidae",
+        "genus": "Mysateles",
+        "species": "M. meridionalis"
+      },
+      "description": "Retreating to Cuba's southern mangrove edges, this hutia forages at the land-sea interface.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Capromys_pilorides.jpg/500px-Capromys_pilorides.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 71,
+          "armor": 25,
+          "endurance": 57,
+          "regeneration": 33
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 29,
+          "agility": 25,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 56,
+          "intimidation": 29,
+          "camouflage": 43
+        },
+        "class_specific": {
+          "pack_cohesion": 43,
+          "blood_clotting": 44
+        }
+      }
+    },
+    {
+      "id": "blangorum-rat",
+      "name": "Blangorum rat",
+      "species": "Rattus blangorum",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. blangorum"
+      },
+      "description": "Restricted to Sumatran montane cloud forest, this rat forages along moss-covered streams at altitude.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 11,
+          "endurance": 34,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 34,
+          "agility": 59,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 46,
+          "intimidation": 20,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 36,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "sula-islands-rat",
+      "name": "Sula Islands rat",
+      "species": "Rattus elaphinus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. elaphinus"
+      },
+      "description": "Endemic to the Sula archipelago, this slender rat traverses dense vine tangles with fluid agility.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 27,
+          "armor": 14,
+          "endurance": 43,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 21,
+          "venom_toxin": 0,
+          "reach": 13
+        },
+        "mobility": {
+          "speed": 48,
+          "agility": 41,
+          "stamina_drain": 41
+        },
+        "senses_tactics": {
+          "perception": 64,
+          "intimidation": 20,
+          "camouflage": 67
+        },
+        "class_specific": {
+          "pack_cohesion": 36,
+          "blood_clotting": 24
+        }
+      }
+    },
+    {
+      "id": "ricefield-rat",
+      "name": "Ricefield rat",
+      "species": "Rattus foramineus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. foramineus"
+      },
+      "description": "Burrowing beneath paddy bunds, this Southeast Asian rat exploits irrigation networks as highways.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 29,
+          "armor": 12,
+          "endurance": 49,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 18,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 60,
+          "agility": 57,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 59,
+          "intimidation": 10,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 25,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "sri-lanka-mountain-rat",
+      "name": "Sri Lanka mountain rat",
+      "species": "Rattus montanus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. montanus"
+      },
+      "description": "Dwelling above 1500 m in Sri Lanka's wet-zone cloud forest, this thick-furred rat braves near-daily fog.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 26,
+          "armor": 9,
+          "endurance": 45,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 21,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 41,
+          "agility": 52,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 52,
+          "intimidation": 24,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 37
+        }
+      }
+    },
+    {
+      "id": "christmas-island-rat",
+      "name": "Christmas Island rat",
+      "species": "Rattus nativitatis",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. nativitatis"
+      },
+      "description": "Once abundant on Christmas Island, this species vanished by 1900 following the arrival of ship rats.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 39,
+          "armor": 5,
+          "endurance": 39,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 53,
+          "agility": 60,
+          "stamina_drain": 44
+        },
+        "senses_tactics": {
+          "perception": 57,
+          "intimidation": 13,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 36,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "peleng-rat",
+      "name": "Peleng rat",
+      "species": "Rattus pelurus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. pelurus"
+      },
+      "description": "An island endemic of Peleng in Sulawesi, this forest rat moves silently along rotting logs.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 26,
+          "armor": 6,
+          "endurance": 28,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 23,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 56,
+          "agility": 48,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 51,
+          "intimidation": 28,
+          "camouflage": 42
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 27
+        }
+      }
+    },
+    {
+      "id": "richardsons-highland-rat",
+      "name": "Richardson's highland rat",
+      "species": "Rattus richardsoni",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. richardsoni"
+      },
+      "description": "A Papuan alpine rat dwelling in subalpine grasslands above 3000 m, insulated by unusually dense underfur.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 44,
+          "armor": 5,
+          "endurance": 40,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 12,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 42,
+          "agility": 41,
+          "stamina_drain": 31
+        },
+        "senses_tactics": {
+          "perception": 58,
+          "intimidation": 14,
+          "camouflage": 54
+        },
+        "class_specific": {
+          "pack_cohesion": 23,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "sahyadri-forest-rat",
+      "name": "Sahyadri forest rat",
+      "species": "Rattus satarae",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. satarae"
+      },
+      "description": "A Western Ghats endemic found only in dense shola forest patches above the monsoon cloud line.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 18,
+          "endurance": 52,
+          "regeneration": 22
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 59,
+          "agility": 36,
+          "stamina_drain": 34
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 27,
+          "camouflage": 64
+        },
+        "class_specific": {
+          "pack_cohesion": 38,
+          "blood_clotting": 22
+        }
+      }
+    },
+    {
+      "id": "canefield-rat",
+      "name": "Canefield rat",
+      "species": "Rattus sordidus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. sordidus"
+      },
+      "description": "A notorious sugar cane pest of Queensland, capable of population explosions after wet seasons.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 44,
+          "armor": 11,
+          "endurance": 31,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 11,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 39,
+          "agility": 40,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 51,
+          "intimidation": 12,
+          "camouflage": 46
+        },
+        "class_specific": {
+          "pack_cohesion": 43,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "spencers-rat",
+      "name": "Spencer's rat",
+      "species": "Rattus spenceri",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. spenceri"
+      },
+      "description": "An arid-zone Australian rat that constructs elaborate stick nests around spinifex hummocks.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "armor": 17,
+          "endurance": 43,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 16,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 61,
+          "stamina_drain": 41
+        },
+        "senses_tactics": {
+          "perception": 43,
+          "intimidation": 10,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 24,
+          "blood_clotting": 18
+        }
+      }
+    },
+    {
+      "id": "tawi-tawi-forest-rat",
+      "name": "Tawi-Tawi forest rat",
+      "species": "Rattus tawitawiensis",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. tawitawiensis"
+      },
+      "description": "Found only on the Tawi-Tawi island group, this rat descends from ancient Sundaland colonists.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 43,
+          "armor": 18,
+          "endurance": 29,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 42,
+          "agility": 45,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 21,
+          "camouflage": 66
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "dark-forest-rat",
+      "name": "Dark forest rat",
+      "species": "Rattus tenebricus",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. tenebricus"
+      },
+      "description": "A poorly known Sulawesi montane rat occupying primary forest above 1800 m.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 27,
+          "armor": 7,
+          "endurance": 29,
+          "regeneration": 29
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 37,
+          "agility": 44,
+          "stamina_drain": 50
+        },
+        "senses_tactics": {
+          "perception": 45,
+          "intimidation": 28,
+          "camouflage": 63
+        },
+        "class_specific": {
+          "pack_cohesion": 24,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "van-deusens-rat",
+      "name": "Van Deusen's rat",
+      "species": "Rattus vandeuseni",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. vandeuseni"
+      },
+      "description": "A New Guinea highland rat discovered in 1962, still among the least documented Papuan rodents.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 52,
+          "armor": 16,
+          "endurance": 51,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 14,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 42,
+          "stamina_drain": 42
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 22,
+          "camouflage": 64
+        },
+        "class_specific": {
+          "pack_cohesion": 45,
+          "blood_clotting": 20
+        }
+      }
+    },
+    {
+      "id": "wahgi-valley-rat",
+      "name": "Wahgi Valley rat",
+      "species": "Rattus wahgiensis",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Rattus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Rattus",
+        "species": "R. wahgiensis"
+      },
+      "description": "Named for the Wahgi Valley in the Papua New Guinea highlands, this rat thrives in secondary regrowth.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Rattus_norvegicus_-_Brown_Rat.jpg/500px-Rattus_norvegicus_-_Brown_Rat.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 53,
+          "armor": 12,
+          "endurance": 41,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 10,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 39,
+          "agility": 56,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 63,
+          "intimidation": 23,
+          "camouflage": 57
+        },
+        "class_specific": {
+          "pack_cohesion": 19,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "fragile-tailed-mouse",
+      "name": "Fragile-tailed mouse",
+      "species": "Mus fragilicauda",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Mus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Mus",
+        "species": "M. fragilicauda"
+      },
+      "description": "Its tail skin detaches under light pressure, allowing escape from predator grips in Thai forest.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Mus_musculus_assorted.jpg/500px-Mus_musculus_assorted.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "armor": 9,
+          "endurance": 41,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 17,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 51,
+          "agility": 56,
+          "stamina_drain": 49
+        },
+        "senses_tactics": {
+          "perception": 65,
+          "intimidation": 27,
+          "camouflage": 61
+        },
+        "class_specific": {
+          "pack_cohesion": 37,
+          "blood_clotting": 32
+        }
+      }
+    },
+    {
+      "id": "orange-free-state-mouse",
+      "name": "Orange Free State mouse",
+      "species": "Mus orangiae",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Mus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Mus",
+        "species": "M. orangiae"
+      },
+      "description": "An endemic South African grassland mouse surviving the Highveld winters in insulated grass-lined burrows.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Mus_musculus_assorted.jpg/500px-Mus_musculus_assorted.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 31,
+          "armor": 11,
+          "endurance": 38,
+          "regeneration": 24
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 51,
+          "agility": 46,
+          "stamina_drain": 52
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 14,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 36,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "maghrebi-gerbil",
+      "name": "Maghrebi gerbil",
+      "species": "Gerbillus maghrebi",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Gerbillus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Gerbillus",
+        "species": "G. maghrebi"
+      },
+      "description": "Restricted to Morocco's Atlantic coastal dunes, this gerbil surfs loose sand slopes on enlarged hindpads.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Gerbillus_perpallidus.jpg/500px-Gerbillus_perpallidus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 50,
+          "armor": 15,
+          "endurance": 36,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 15,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 62,
+          "stamina_drain": 41
+        },
+        "senses_tactics": {
+          "perception": 59,
+          "intimidation": 20,
+          "camouflage": 40
+        },
+        "class_specific": {
+          "pack_cohesion": 18,
+          "blood_clotting": 34
+        }
+      }
+    },
+    {
+      "id": "petters-soft-furred-rat",
+      "name": "Petter's soft-furred rat",
+      "species": "Praomys petteri",
+      "_note_family": "Muridae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Muridae",
+        "Praomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Muridae",
+        "genus": "Praomys",
+        "species": "P. petteri"
+      },
+      "description": "A West African forest Praomys whose dental row proportions deviate subtly from all congeners.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Mastomys_natalensis.jpg/500px-Mastomys_natalensis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 42,
+          "armor": 8,
+          "endurance": 28,
+          "regeneration": 34
+        },
+        "offense": {
+          "bite_strike_force": 17,
+          "venom_toxin": 0,
+          "reach": 14
+        },
+        "mobility": {
+          "speed": 53,
+          "agility": 40,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 63,
+          "intimidation": 22,
+          "camouflage": 46
+        },
+        "class_specific": {
+          "pack_cohesion": 23,
+          "blood_clotting": 31
+        }
+      }
+    },
+    {
+      "id": "baja-california-mouse",
+      "name": "Baja California mouse",
+      "species": "Peromyscus caniceps",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Peromyscus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Peromyscus",
+        "species": "P. caniceps"
+      },
+      "description": "An island-endemic Baja California mouse with gray-headed coloration distinct from mainland relatives.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Deer_mouse.jpg/500px-Deer_mouse.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 36,
+          "armor": 12,
+          "endurance": 42,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 3
+        },
+        "mobility": {
+          "speed": 31,
+          "agility": 57,
+          "stamina_drain": 37
+        },
+        "senses_tactics": {
+          "perception": 38,
+          "intimidation": 25,
+          "camouflage": 39
+        },
+        "class_specific": {
+          "pack_cohesion": 42,
+          "blood_clotting": 17
+        }
+      }
+    },
+    {
+      "id": "collared-mouse",
+      "name": "Collared mouse",
+      "species": "Peromyscus collatus",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Peromyscus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Peromyscus",
+        "species": "P. collatus"
+      },
+      "description": "A montane Mexican mouse bearing a faint pale collar that intensifies during breeding season.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Deer_mouse.jpg/500px-Deer_mouse.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 35,
+          "armor": 8,
+          "endurance": 37,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 4
+        },
+        "mobility": {
+          "speed": 55,
+          "agility": 57,
+          "stamina_drain": 40
+        },
+        "senses_tactics": {
+          "perception": 48,
+          "intimidation": 12,
+          "camouflage": 46
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "schmidlys-deer-mouse",
+      "name": "Schmidly's deer mouse",
+      "species": "Peromyscus schmidlyi",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Peromyscus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Peromyscus",
+        "species": "P. schmidlyi"
+      },
+      "description": "A 2004-described Durango highland mouse honoring mammalogist David Schmidly, still poorly surveyed.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Deer_mouse.jpg/500px-Deer_mouse.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 26,
+          "armor": 6,
+          "endurance": 40,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 58,
+          "agility": 54,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 47,
+          "intimidation": 15,
+          "camouflage": 44
+        },
+        "class_specific": {
+          "pack_cohesion": 20,
+          "blood_clotting": 30
+        }
+      }
+    },
+    {
+      "id": "colombian-grass-mouse",
+      "name": "Colombian grass mouse",
+      "species": "Akodon affinis",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Akodon"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Akodon",
+        "species": "A. affinis"
+      },
+      "description": "An Andean grass mouse of Colombia's páramo, foraging through frost-rimed tussock grasses at dawn.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Akodon_cursor.jpg/500px-Akodon_cursor.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 40,
+          "armor": 15,
+          "endurance": 38,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 22,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 56,
+          "agility": 52,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 57,
+          "intimidation": 12,
+          "camouflage": 40
+        },
+        "class_specific": {
+          "pack_cohesion": 29,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "huosui-thomasomys",
+      "name": "Huosui Thomasomys",
+      "species": "Thomasomys huosui",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Thomasomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Thomasomys",
+        "species": "T. huosui"
+      },
+      "description": "Discovered in 2000 from Peru's Amazonas department, described from a single type series.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Thomasomys.jpg/500px-Thomasomys.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 36,
+          "armor": 12,
+          "endurance": 26,
+          "regeneration": 19
+        },
+        "offense": {
+          "bite_strike_force": 17,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 30,
+          "agility": 42,
+          "stamina_drain": 48
+        },
+        "senses_tactics": {
+          "perception": 59,
+          "intimidation": 7,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 33,
+          "blood_clotting": 33
+        }
+      }
+    },
+    {
+      "id": "bavarian-pine-vole",
+      "name": "Bavarian pine vole",
+      "species": "Microtus bavaricus",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. bavaricus"
+      },
+      "description": "Once thought extinct, this critically endangered Bavarian vole was rediscovered in 2000 in a single Austrian meadow.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "armor": 14,
+          "endurance": 26,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 33,
+          "agility": 36,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 37,
+          "intimidation": 19,
+          "camouflage": 39
+        },
+        "class_specific": {
+          "pack_cohesion": 13,
+          "blood_clotting": 26
+        }
+      }
+    },
+    {
+      "id": "feltens-vole",
+      "name": "Felten's vole",
+      "species": "Microtus felteni",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. felteni"
+      },
+      "description": "A Balkan montane vole whose range barely extends beyond the Dinaric Alps; still rarely photographed alive.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 38,
+          "armor": 7,
+          "endurance": 43,
+          "regeneration": 25
+        },
+        "offense": {
+          "bite_strike_force": 12,
+          "venom_toxin": 0,
+          "reach": 10
+        },
+        "mobility": {
+          "speed": 29,
+          "agility": 54,
+          "stamina_drain": 41
+        },
+        "senses_tactics": {
+          "perception": 43,
+          "intimidation": 13,
+          "camouflage": 41
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "hartings-vole",
+      "name": "Harting's vole",
+      "species": "Microtus hartingi",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. hartingi"
+      },
+      "description": "A Balkans-Turkey vole found in rocky limestone meadows, its burrow openings often hidden beneath stone slabs.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 30,
+          "armor": 8,
+          "endurance": 47,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 11
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 38,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 41,
+          "intimidation": 18,
+          "camouflage": 58
+        },
+        "class_specific": {
+          "pack_cohesion": 42,
+          "blood_clotting": 33
+        }
+      }
+    },
+    {
+      "id": "liechtensteins-vole",
+      "name": "Liechtenstein's vole",
+      "species": "Microtus liechtensteini",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. liechtensteini"
+      },
+      "description": "A central European alpine vole whose population clusters follow snowmelt fronts upslope each spring.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 24,
+          "armor": 15,
+          "endurance": 47,
+          "regeneration": 19
+        },
+        "offense": {
+          "bite_strike_force": 11,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 32,
+          "agility": 49,
+          "stamina_drain": 30
+        },
+        "senses_tactics": {
+          "perception": 37,
+          "intimidation": 23,
+          "camouflage": 58
+        },
+        "class_specific": {
+          "pack_cohesion": 24,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "alpine-pine-vole",
+      "name": "Alpine pine vole",
+      "species": "Microtus multiplex",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. multiplex"
+      },
+      "description": "A European vole complex of the Alpine and Apennine foothills, distinguished genetically from M. subterraneus.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 33,
+          "armor": 16,
+          "endurance": 48,
+          "regeneration": 23
+        },
+        "offense": {
+          "bite_strike_force": 12,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 52,
+          "agility": 33,
+          "stamina_drain": 38
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 20,
+          "camouflage": 44
+        },
+        "class_specific": {
+          "pack_cohesion": 21,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "jalapan-pine-vole",
+      "name": "Jalapan pine vole",
+      "species": "Microtus quasiater",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. quasiater"
+      },
+      "description": "A Mexican highland pine-forest vole adapted to the cool, damp soils of the Sierra Madre Oriental.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 45,
+          "armor": 5,
+          "endurance": 30,
+          "regeneration": 31
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 40,
+          "agility": 53,
+          "stamina_drain": 31
+        },
+        "senses_tactics": {
+          "perception": 61,
+          "intimidation": 14,
+          "camouflage": 56
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "tatra-vole",
+      "name": "Tatra vole",
+      "species": "Microtus tatricus",
+      "_note_family": "Cricetidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Cricetidae",
+        "Microtus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Cricetidae",
+        "genus": "Microtus",
+        "species": "M. tatricus"
+      },
+      "description": "Strictly confined to the Tatra Mountains above 1500 m, this vole is a sentinel species for Alpine climate change.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Microtus_pennsylvanicus.jpg/500px-Microtus_pennsylvanicus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 49,
+          "armor": 5,
+          "endurance": 31,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 21,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 36,
+          "agility": 42,
+          "stamina_drain": 46
+        },
+        "senses_tactics": {
+          "perception": 37,
+          "intimidation": 25,
+          "camouflage": 50
+        },
+        "class_specific": {
+          "pack_cohesion": 12,
+          "blood_clotting": 25
+        }
+      }
+    },
+    {
+      "id": "ellermans-tufted-tailed-rat",
+      "name": "Ellerman's tufted-tailed rat",
+      "species": "Eliurus ellermani",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. ellermani"
+      },
+      "description": "A mid-altitude Malagasy forest rat named for the taxonomist John Ellerman, active in tree hollows.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 33,
+          "armor": 7,
+          "endurance": 28,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 12
+        },
+        "mobility": {
+          "speed": 35,
+          "agility": 41,
+          "stamina_drain": 35
+        },
+        "senses_tactics": {
+          "perception": 53,
+          "intimidation": 21,
+          "camouflage": 67
+        },
+        "class_specific": {
+          "pack_cohesion": 22,
+          "blood_clotting": 19
+        }
+      }
+    },
+    {
+      "id": "pencil-tailed-tufted-rat",
+      "name": "Pencil-tailed tufted rat",
+      "species": "Eliurus penicillatus",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Eliurus"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Eliurus",
+        "species": "E. penicillatus"
+      },
+      "description": "An eastern Madagascar rainforest specialist whose pencil-thin tail tuft is used for balance on steep trunks.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Eliurus_myoxinus.jpg/500px-Eliurus_myoxinus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 39,
+          "armor": 7,
+          "endurance": 47,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 20,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 47,
+          "agility": 42,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 50,
+          "intimidation": 16,
+          "camouflage": 61
+        },
+        "class_specific": {
+          "pack_cohesion": 27,
+          "blood_clotting": 35
+        }
+      }
+    },
+    {
+      "id": "kuru-thicket-rat",
+      "name": "Kuru thicket rat",
+      "species": "Grammomys kuru",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Grammomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Grammomys",
+        "species": "G. kuru"
+      },
+      "description": "An Ethiopian montane thicket rat restricted to Afromontane forest above 2000 m.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Dendromus_melanotis.jpg/500px-Dendromus_melanotis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 32,
+          "armor": 16,
+          "endurance": 49,
+          "regeneration": 18
+        },
+        "offense": {
+          "bite_strike_force": 19,
+          "venom_toxin": 0,
+          "reach": 8
+        },
+        "mobility": {
+          "speed": 49,
+          "agility": 44,
+          "stamina_drain": 45
+        },
+        "senses_tactics": {
+          "perception": 54,
+          "intimidation": 15,
+          "camouflage": 47
+        },
+        "class_specific": {
+          "pack_cohesion": 36,
+          "blood_clotting": 31
+        }
+      }
+    },
+    {
+      "id": "rudds-thicket-rat",
+      "name": "Rudd's thicket rat",
+      "species": "Grammomys minnaeus",
+      "_note_family": "Nesomyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Nesomyidae",
+        "Grammomys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Nesomyidae",
+        "genus": "Grammomys",
+        "species": "G. minnaeus"
+      },
+      "description": "A small-bodied East African thicket rat with an unusually long tail for acrobatic canopy navigation.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Dendromus_melanotis.jpg/500px-Dendromus_melanotis.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 29,
+          "armor": 8,
+          "endurance": 35,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 13
+        },
+        "mobility": {
+          "speed": 29,
+          "agility": 45,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 56,
+          "intimidation": 8,
+          "camouflage": 68
+        },
+        "class_specific": {
+          "pack_cohesion": 26,
+          "blood_clotting": 22
+        }
+      }
+    },
+    {
+      "id": "euphrates-jerboa",
+      "name": "Euphrates jerboa",
+      "species": "Allactaga euphratica",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Allactaga"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. euphratica"
+      },
+      "description": "A Near Eastern jerboa inhabiting the floodplain steppes of the Tigris-Euphrates basin.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Allactaga_major.jpg/500px-Allactaga_major.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 22,
+          "armor": 7,
+          "endurance": 24,
+          "regeneration": 21
+        },
+        "offense": {
+          "bite_strike_force": 7,
+          "venom_toxin": 0,
+          "reach": 7
+        },
+        "mobility": {
+          "speed": 82,
+          "agility": 73,
+          "stamina_drain": 32
+        },
+        "senses_tactics": {
+          "perception": 44,
+          "intimidation": 14,
+          "camouflage": 55
+        },
+        "class_specific": {
+          "pack_cohesion": 23,
+          "blood_clotting": 21
+        }
+      }
+    },
+    {
+      "id": "firuzis-jerboa",
+      "name": "Firuzi's jerboa",
+      "species": "Allactaga firouzi",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Allactaga"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Allactaga",
+        "species": "A. firouzi"
+      },
+      "description": "An Iranian endemic described from the Kavir Desert, surviving on a diet of blown seed husks and beetle grubs.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Allactaga_major.jpg/500px-Allactaga_major.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 31,
+          "armor": 4,
+          "endurance": 28,
+          "regeneration": 26
+        },
+        "offense": {
+          "bite_strike_force": 8,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 71,
+          "agility": 64,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 63,
+          "intimidation": 5,
+          "camouflage": 65
+        },
+        "class_specific": {
+          "pack_cohesion": 23,
+          "blood_clotting": 17
+        }
+      }
+    },
+    {
+      "id": "tian-shan-birch-mouse",
+      "name": "Tian Shan birch mouse",
+      "species": "Sicista tianshanica",
+      "_note_family": "Dipodidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Myomorpha",
+        "Dipodidae",
+        "Sicista"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Myomorpha",
+        "family": "Dipodidae",
+        "genus": "Sicista",
+        "species": "S. tianshanica"
+      },
+      "description": "An isolated central Asian birch mouse of the Tian Shan range, hibernating at altitudes above 2500 m.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sicista_betulina.jpg/500px-Sicista_betulina.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 24,
+          "armor": 10,
+          "endurance": 29,
+          "regeneration": 28
+        },
+        "offense": {
+          "bite_strike_force": 6,
+          "venom_toxin": 0,
+          "reach": 6
+        },
+        "mobility": {
+          "speed": 77,
+          "agility": 66,
+          "stamina_drain": 33
+        },
+        "senses_tactics": {
+          "perception": 48,
+          "intimidation": 11,
+          "camouflage": 77
+        },
+        "class_specific": {
+          "pack_cohesion": 14,
+          "blood_clotting": 17
+        }
+      }
+    },
+    {
+      "id": "trinidad-spiny-pocket-mouse",
+      "name": "Trinidad spiny pocket mouse",
+      "species": "Heteromys anomalus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Heteromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Heteromys",
+        "species": "H. anomalus"
+      },
+      "description": "The only Heteromys native to Trinidad and Tobago, bridging the mainland and island fauna of South America.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 42,
+          "armor": 8,
+          "endurance": 32,
+          "regeneration": 27
+        },
+        "offense": {
+          "bite_strike_force": 13,
+          "venom_toxin": 0,
+          "reach": 5
+        },
+        "mobility": {
+          "speed": 57,
+          "agility": 61,
+          "stamina_drain": 43
+        },
+        "senses_tactics": {
+          "perception": 48,
+          "intimidation": 15,
+          "camouflage": 71
+        },
+        "class_specific": {
+          "pack_cohesion": 22,
+          "blood_clotting": 23
+        }
+      }
+    },
+    {
+      "id": "mountain-spiny-pocket-mouse",
+      "name": "Mountain spiny pocket mouse",
+      "species": "Heteromys oresterus",
+      "_note_family": "Heteromyidae",
+      "classification_chain": [
+        "Vertebrata",
+        "Mammalia",
+        "Placentalia",
+        "Rodentia",
+        "Castorimorpha",
+        "Heteromyidae",
+        "Heteromys"
+      ],
+      "taxonomy": {
+        "class": "Mammalia",
+        "order": "Rodentia",
+        "suborder": "Castorimorpha",
+        "family": "Heteromyidae",
+        "genus": "Heteromys",
+        "species": "H. oresterus"
+      },
+      "description": "A Costa Rican and Panamanian highland specialist collecting seeds in montane oak forest understory.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Chaetodipus_penicillatus.jpg/500px-Chaetodipus_penicillatus.jpg",
+      "stats": {
+        "survivability": {
+          "hp": 37,
+          "armor": 12,
+          "endurance": 29,
+          "regeneration": 20
+        },
+        "offense": {
+          "bite_strike_force": 9,
+          "venom_toxin": 0,
+          "reach": 9
+        },
+        "mobility": {
+          "speed": 74,
+          "agility": 72,
+          "stamina_drain": 37
+        },
+        "senses_tactics": {
+          "perception": 56,
+          "intimidation": 8,
+          "camouflage": 52
+        },
+        "class_specific": {
+          "pack_cohesion": 29,
+          "blood_clotting": 17
+        }
+      }
     }
   ]
 }
