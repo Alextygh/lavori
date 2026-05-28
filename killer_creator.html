@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echoes of the Hunt — Killer Creator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0c0a;
+    --parchment: #f5f0e8;
+    --parchment-dark: #ede5d0;
+    --seam: #8b4513;
+    --seam-light: #c17a3a;
+    --seam-glow: #d4942a;
+    --echo: #2a3f5f;
+    --echo-light: #4a6a9f;
+    --blood: #7a1a1a;
+    --ash: #4a4540;
+    --mist: #9a9490;
+    --border-ornate: #8b4513;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #0e0c0a;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(139,69,19,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(42,63,95,0.1) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--parchment);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* Header */
+  .site-header {
+    text-align: center;
+    padding: 60px 24px 40px;
+    position: relative;
+  }
+
+  .site-header::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--seam-light));
+    margin: 0 auto 20px;
+  }
+
+  .site-header::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--seam-light), transparent);
+    margin: 20px auto 0;
+  }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--seam-light);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--parchment);
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+  }
+
+  h1 span {
+    display: block;
+    color: var(--seam-glow);
+    font-size: 0.55em;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    margin-top: 8px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--mist);
+    font-style: italic;
+    margin-top: 20px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  /* Ornamental divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    padding: 0 24px;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--seam), transparent);
+  }
+
+  .divider-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--seam-glow);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* Main layout */
+  .creator-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  @media (max-width: 820px) {
+    .creator-layout { grid-template-columns: 1fr; }
+    .preview-panel { order: -1; }
+  }
+
+  /* Section cards */
+  .section-card {
+    background: rgba(245,240,232,0.03);
+    border: 1px solid rgba(139,69,19,0.25);
+    border-radius: 2px;
+    padding: 28px 28px 24px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px;
+    width: 60px; height: 1px;
+    background: var(--seam-glow);
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--seam-light);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* Form elements */
+  label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--mist);
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+  }
+
+  input[type="text"],
+  textarea,
+  select {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(139,69,19,0.3);
+    border-radius: 1px;
+    color: var(--parchment);
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    padding: 10px 14px;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    margin-bottom: 18px;
+    appearance: none;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--seam-light);
+    background: rgba(0,0,0,0.6);
+  }
+
+  input[type="text"]::placeholder,
+  textarea::placeholder {
+    color: rgba(154,148,144,0.4);
+    font-style: italic;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.6;
+  }
+
+  select option {
+    background: #1a1510;
+    color: var(--parchment);
+  }
+
+  /* Grid fields */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  }
+
+  /* Stat sliders */
+  .stat-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 28px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--mist);
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: rgba(139,69,19,0.2);
+    border-radius: 0;
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--seam-glow);
+    border: none;
+    border-radius: 0;
+    transform: rotate(45deg);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--parchment);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--seam-glow);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--seam-glow);
+    text-align: right;
+    min-width: 28px;
+    margin: 0;
+  }
+
+  /* Tags / chips */
+  .tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .tag-option {
+    display: none;
+  }
+
+  .tag-option + label {
+    display: inline-block;
+    padding: 5px 14px;
+    border: 1px solid rgba(139,69,19,0.3);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--mist);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .tag-option:checked + label {
+    border-color: var(--seam-glow);
+    color: var(--seam-glow);
+    background: rgba(212,148,42,0.08);
+  }
+
+  .tag-option + label:hover {
+    border-color: var(--seam-light);
+    color: var(--parchment-dark);
+  }
+
+  /* Color pickers */
+  .color-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .color-swatch {
+    position: relative;
+  }
+
+  .color-swatch input[type="radio"] {
+    display: none;
+  }
+
+  .color-swatch label {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    margin: 0;
+  }
+
+  .color-swatch input[type="radio"]:checked + label {
+    border-color: var(--parchment);
+    transform: scale(1.15);
+  }
+
+  input[type="color"] {
+    width: 30px;
+    height: 30px;
+    padding: 2px;
+    border: 1px solid rgba(139,69,19,0.3);
+    background: rgba(0,0,0,0.4);
+    cursor: pointer;
+    border-radius: 0;
+  }
+
+  /* Ability builder */
+  .ability-block {
+    border: 1px solid rgba(139,69,19,0.2);
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .ability-block .remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: 1px solid rgba(122,26,26,0.4);
+    color: var(--blood);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .ability-block .remove-btn:hover {
+    background: rgba(122,26,26,0.15);
+    border-color: var(--blood);
+  }
+
+  .add-btn {
+    width: 100%;
+    background: none;
+    border: 1px dashed rgba(139,69,19,0.35);
+    color: var(--seam-light);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 18px;
+  }
+
+  .add-btn:hover {
+    border-color: var(--seam-glow);
+    color: var(--seam-glow);
+    background: rgba(212,148,42,0.04);
+  }
+
+  /* Preview panel */
+  .preview-panel {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  .preview-card {
+    background: rgba(14,12,10,0.95);
+    border: 1px solid rgba(139,69,19,0.4);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(139,69,19,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(42,63,95,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .preview-header {
+    background: rgba(139,69,19,0.08);
+    border-bottom: 1px solid rgba(139,69,19,0.25);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .preview-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--seam-light);
+    text-transform: uppercase;
+  }
+
+  .preview-body {
+    padding: 24px 20px 20px;
+  }
+
+  .preview-symbol {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border: 1px solid rgba(139,69,19,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    background: rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .preview-symbol::before,
+  .preview-symbol::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--seam);
+    background: var(--ink);
+  }
+
+  .preview-symbol::before { top: -5px; left: -5px; }
+  .preview-symbol::after { bottom: -5px; right: -5px; }
+
+  .preview-name {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--parchment);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .preview-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--seam-light);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .preview-quote {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--mist);
+    text-align: center;
+    line-height: 1.6;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(139,69,19,0.15);
+    border-bottom: 1px solid rgba(139,69,19,0.15);
+    margin-bottom: 18px;
+  }
+
+  .preview-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(139,69,19,0.15);
+    margin-bottom: 18px;
+    border: 1px solid rgba(139,69,19,0.15);
+  }
+
+  .preview-stat {
+    background: rgba(14,12,10,0.9);
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .preview-stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .preview-stat-bar {
+    height: 3px;
+    background: rgba(139,69,19,0.15);
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .preview-stat-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--seam), var(--seam-glow));
+    transition: width 0.4s ease;
+  }
+
+  .preview-stat-num {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--seam-glow);
+  }
+
+  .preview-ability {
+    border-top: 1px solid rgba(139,69,19,0.15);
+    padding: 12px 0 0;
+    margin-top: 2px;
+  }
+
+  .preview-ability-name {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--seam-light);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .preview-ability-desc {
+    font-size: 13px;
+    color: var(--mist);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 14px;
+  }
+
+  .preview-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--echo-light);
+    border: 1px solid rgba(74,106,159,0.35);
+    padding: 3px 8px;
+    text-transform: uppercase;
+  }
+
+  .preview-lore {
+    font-size: 13px;
+    color: rgba(154,148,144,0.7);
+    line-height: 1.65;
+    font-style: italic;
+    padding-top: 14px;
+    border-top: 1px solid rgba(139,69,19,0.12);
+    margin-top: 14px;
+  }
+
+  /* Export */
+  .export-section {
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  .export-btn {
+    background: none;
+    border: 1px solid var(--seam-light);
+    color: var(--seam-glow);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 13px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .export-btn:hover {
+    background: rgba(212,148,42,0.08);
+    border-color: var(--seam-glow);
+  }
+
+  .export-btn:active {
+    transform: scale(0.98);
+  }
+
+  .share-output {
+    margin-top: 16px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(139,69,19,0.25);
+    padding: 14px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--mist);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.6;
+    display: none;
+    text-align: left;
+  }
+
+  .share-output.visible { display: block; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(14,12,10,0.95);
+    border: 1px solid var(--seam-light);
+    color: var(--parchment);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    padding: 10px 24px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+    text-transform: uppercase;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Scroll animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-card {
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section-card:nth-child(1) { animation-delay: 0.05s; }
+  .section-card:nth-child(2) { animation-delay: 0.12s; }
+  .section-card:nth-child(3) { animation-delay: 0.19s; }
+  .section-card:nth-child(4) { animation-delay: 0.26s; }
+  .section-card:nth-child(5) { animation-delay: 0.33s; }
+
+  /* Misc */
+  small {
+    display: block;
+    font-size: 12px;
+    color: var(--mist);
+    font-style: italic;
+    margin-top: -14px;
+    margin-bottom: 18px;
+    opacity: 0.7;
+  }
+
+  .field-note {
+    font-size: 12px;
+    color: rgba(154,148,144,0.5);
+    font-style: italic;
+    margin-top: -14px;
+    margin-bottom: 18px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <p class="eyebrow">Echoes of the Hunt</p>
+  <h1>Killer Creator<span>Design your entity from the seam</span></h1>
+  <p class="subtitle">Every killer that hunts within the echo gap was something else before the seam took them. What did yours leave behind?</p>
+</header>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+<div class="creator-layout">
+
+  <!-- LEFT: Form -->
+  <div class="form-column">
+
+    <!-- Identity -->
+    <div class="section-card">
+      <p class="section-title">Identity</p>
+
+      <label for="killer-name">Name</label>
+      <input type="text" id="killer-name" placeholder="The Archivist" maxlength="40">
+
+      <label for="killer-title">Title</label>
+      <input type="text" id="killer-title" placeholder="He who catalogues the forgotten" maxlength="60">
+
+      <label for="killer-quote">Opening quote</label>
+      <textarea id="killer-quote" placeholder="A short, atmospheric line. Something survivors might find scratched into a wall." rows="2"></textarea>
+
+      <div class="field-row">
+        <div>
+          <label for="killer-origin">Origin</label>
+          <select id="killer-origin">
+            <option value="">Select origin...</option>
+            <option>Taken by the seam</option>
+            <option>Born within the seam</option>
+            <option>Deliberately entered</option>
+            <option>Created by another entity</option>
+            <option>Remnant of a collapsed echo</option>
+            <option>Unknown</option>
+          </select>
+        </div>
+        <div>
+          <label for="killer-era">Era (before the seam)</label>
+          <select id="killer-era">
+            <option value="">Select era...</option>
+            <option>Ancient / Medieval</option>
+            <option>Industrial age</option>
+            <option>Early 20th century</option>
+            <option>Mid 20th century</option>
+            <option>Late 20th century</option>
+            <option>Modern</option>
+            <option>Unknown / Timeless</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="section-card">
+      <p class="section-title">Appearance</p>
+
+      <label for="killer-symbol">Symbol / Icon (emoji or single character)</label>
+      <input type="text" id="killer-symbol" placeholder="e.g. ✦ ☽ ⊗ ∅" maxlength="2">
+
+      <label>Primary colour</label>
+      <div class="color-row">
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc1" value="#8b4513" checked><label for="pc1" style="background:#8b4513"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc2" value="#2a3f5f"><label for="pc2" style="background:#2a3f5f"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc3" value="#7a1a1a"><label for="pc3" style="background:#7a1a1a"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc4" value="#1a4a2a"><label for="pc4" style="background:#1a4a2a"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc5" value="#3a1a5f"><label for="pc5" style="background:#3a1a5f"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc6" value="#4a3a2a"><label for="pc6" style="background:#4a3a2a"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc7" value="#1a3a4a"><label for="pc7" style="background:#1a3a4a"></label></div>
+        <div class="color-swatch"><input type="radio" name="pcolor" id="pc8" value="#5a1a3a"><label for="pc8" style="background:#5a1a3a"></label></div>
+        <input type="color" id="custom-pcolor" title="Custom colour" style="margin-left:4px">
+      </div>
+
+      <label for="killer-silhouette">Silhouette description</label>
+      <input type="text" id="killer-silhouette" placeholder="e.g. Tall and stooped, wearing a long coat sewn from pages" maxlength="100">
+
+      <label for="killer-mask">Mask / face</label>
+      <input type="text" id="killer-mask" placeholder="e.g. Wrapped in bandages, no visible features" maxlength="100">
+
+      <label for="killer-weapon">Weapon or tool</label>
+      <input type="text" id="killer-weapon" placeholder="e.g. A bone-handled blade that leaves no wound" maxlength="80">
+    </div>
+
+    <!-- Stats -->
+    <div class="section-card">
+      <p class="section-title">Stats</p>
+
+      <div class="stat-row">
+        <span class="stat-label">Speed</span>
+        <input type="range" min="1" max="10" value="5" id="stat-speed" oninput="updateStat('speed',this.value)">
+        <span class="stat-value" id="val-speed">5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Terror radius</span>
+        <input type="range" min="1" max="10" value="5" id="stat-terror" oninput="updateStat('terror',this.value)">
+        <span class="stat-value" id="val-terror">5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Echo sight</span>
+        <input type="range" min="1" max="10" value="5" id="stat-echo" oninput="updateStat('echo',this.value)">
+        <span class="stat-value" id="val-echo">5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Stealth</span>
+        <input type="range" min="1" max="10" value="5" id="stat-stealth" oninput="updateStat('stealth',this.value)">
+        <span class="stat-value" id="val-stealth">5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Map control</span>
+        <input type="range" min="1" max="10" value="5" id="stat-map" oninput="updateStat('map',this.value)">
+        <span class="stat-value" id="val-map">5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Lethality</span>
+        <input type="range" min="1" max="10" value="5" id="stat-lethality" oninput="updateStat('lethality',this.value)">
+        <span class="stat-value" id="val-lethality">5</span>
+      </div>
+    </div>
+
+    <!-- Abilities -->
+    <div class="section-card">
+      <p class="section-title">Abilities</p>
+      <div id="abilities-list"></div>
+      <button class="add-btn" onclick="addAbility()">+ Add ability</button>
+    </div>
+
+    <!-- Playstyle -->
+    <div class="section-card">
+      <p class="section-title">Playstyle &amp; traits</p>
+
+      <label>Playstyle tags (select all that apply)</label>
+      <div class="tag-container">
+        <input type="checkbox" class="tag-option" id="t1" value="Ambush"><label for="t1">Ambush</label>
+        <input type="checkbox" class="tag-option" id="t2" value="Trapper"><label for="t2">Trapper</label>
+        <input type="checkbox" class="tag-option" id="t3" value="Chaser"><label for="t3">Chaser</label>
+        <input type="checkbox" class="tag-option" id="t4" value="Patrol"><label for="t4">Patrol</label>
+        <input type="checkbox" class="tag-option" id="t5" value="Area denial"><label for="t5">Area denial</label>
+        <input type="checkbox" class="tag-option" id="t6" value="Information"><label for="t6">Information</label>
+        <input type="checkbox" class="tag-option" id="t7" value="Temporal"><label for="t7">Temporal</label>
+        <input type="checkbox" class="tag-option" id="t8" value="Stealth"><label for="t8">Stealth</label>
+        <input type="checkbox" class="tag-option" id="t9" value="Psychological"><label for="t9">Psychological</label>
+        <input type="checkbox" class="tag-option" id="t10" value="Summoner"><label for="t10">Summoner</label>
+      </div>
+
+      <label for="killer-counter">How to counter this killer</label>
+      <textarea id="killer-counter" placeholder="What tactics work against them? What do survivors need to know?" rows="2"></textarea>
+
+      <label for="killer-difficulty">Difficulty to play</label>
+      <select id="killer-difficulty">
+        <option value="">Select difficulty...</option>
+        <option>Beginner -- forgiving, straightforward</option>
+        <option>Intermediate -- some learning required</option>
+        <option>Advanced -- high skill ceiling</option>
+        <option>Expert -- punishing, rewards mastery</option>
+      </select>
+    </div>
+
+    <!-- Lore -->
+    <div class="section-card">
+      <p class="section-title">Lore</p>
+
+      <label for="killer-lore">Backstory</label>
+      <textarea id="killer-lore" placeholder="Who were they before the seam? How did they end up here? What do they want?" rows="5"></textarea>
+
+      <label for="killer-motivation">What drives them</label>
+      <input type="text" id="killer-motivation" placeholder="e.g. They are not hunting survivors. They are correcting mistakes." maxlength="120">
+
+      <label for="killer-weakness">Weakness or flaw</label>
+      <input type="text" id="killer-weakness" placeholder="e.g. They cannot move backward -- only forward, always forward." maxlength="120">
+
+      <label for="killer-map">Associated map (optional)</label>
+      <input type="text" id="killer-map" placeholder="e.g. A half-demolished library where all the clocks have stopped" maxlength="100">
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Preview -->
+  <div class="preview-panel">
+    <div class="preview-card">
+      <div class="preview-header">
+        <span class="preview-eyebrow">Killer profile</span>
+        <span class="preview-eyebrow" id="preview-difficulty-badge"></span>
+      </div>
+      <div class="preview-body">
+        <div class="preview-symbol" id="preview-symbol">✦</div>
+        <div class="preview-name" id="preview-name">The Unnamed</div>
+        <div class="preview-title" id="preview-title">Entity of the seam</div>
+        <div class="preview-quote" id="preview-quote"><em>Something waits in the interval between moments.</em></div>
+
+        <div class="preview-stats">
+          <div class="preview-stat">
+            <div class="preview-stat-label">Speed</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-speed" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-speed">5</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Terror</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-terror" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-terror">5</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Echo sight</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-echo" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-echo">5</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Stealth</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-stealth" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-stealth">5</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Map control</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-map" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-map">5</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Lethality</div>
+            <div class="preview-stat-bar"><div class="preview-stat-fill" id="bar-lethality" style="width:50%"></div></div>
+            <div class="preview-stat-num" id="num-lethality">5</div>
+          </div>
+        </div>
+
+        <div id="preview-abilities-container"></div>
+
+        <div class="preview-tags" id="preview-tags"></div>
+        <div class="preview-lore" id="preview-lore" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="export-section">
+      <button class="export-btn" onclick="exportKiller()">Export killer profile</button>
+      <div class="share-output" id="share-output"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+  // Live preview updates
+  function live(id, previewId, transform) {
+    const el = document.getElementById(id);
+    const pr = document.getElementById(previewId);
+    if (!el || !pr) return;
+    el.addEventListener('input', () => {
+      const v = transform ? transform(el.value) : el.value;
+      pr.textContent = v || pr.dataset.default || '';
+    });
+  }
+
+  live('killer-name', 'preview-name');
+  live('killer-title', 'preview-title');
+  live('killer-symbol', 'preview-symbol');
+  live('killer-quote', 'preview-quote', v => v ? `"${v}"` : 'Something waits in the interval between moments.');
+
+  live('killer-lore', 'preview-lore');
+  document.getElementById('killer-lore').addEventListener('input', function() {
+    const el = document.getElementById('preview-lore');
+    el.style.display = this.value.trim() ? 'block' : 'none';
+    el.textContent = this.value;
+  });
+
+  document.getElementById('killer-difficulty').addEventListener('change', function() {
+    document.getElementById('preview-difficulty-badge').textContent = this.value.split(' --')[0] || '';
+  });
+
+  // Colour update
+  document.querySelectorAll('input[name="pcolor"]').forEach(r => {
+    r.addEventListener('change', () => applyColor(r.value));
+  });
+  document.getElementById('custom-pcolor').addEventListener('input', function() {
+    applyColor(this.value);
+  });
+
+  function applyColor(hex) {
+    document.querySelectorAll('.preview-stat-fill').forEach(el => {
+      el.style.background = `linear-gradient(to right, ${hex}88, ${hex})`;
+    });
+    document.querySelectorAll('.preview-ability-name').forEach(el => {
+      el.style.color = hex;
+    });
+    document.getElementById('preview-symbol').style.borderColor = hex;
+  }
+
+  // Stats
+  function updateStat(name, val) {
+    document.getElementById('val-' + name).textContent = val;
+    document.getElementById('num-' + name).textContent = val;
+    document.getElementById('bar-' + name).style.width = (val * 10) + '%';
+  }
+
+  // Tags
+  document.querySelectorAll('.tag-option').forEach(cb => {
+    cb.addEventListener('change', updateTags);
+  });
+
+  function updateTags() {
+    const container = document.getElementById('preview-tags');
+    container.innerHTML = '';
+    document.querySelectorAll('.tag-option:checked').forEach(cb => {
+      const tag = document.createElement('span');
+      tag.className = 'preview-tag';
+      tag.textContent = cb.value;
+      container.appendChild(tag);
+    });
+  }
+
+  // Abilities
+  let abilityCount = 0;
+
+  function addAbility() {
+    abilityCount++;
+    const id = 'ability-' + abilityCount;
+    const list = document.getElementById('abilities-list');
+    const block = document.createElement('div');
+    block.className = 'ability-block';
+    block.id = id;
+    block.innerHTML = `
+      <button class="remove-btn" onclick="removeAbility('${id}')">Remove</button>
+      <label>Ability name</label>
+      <input type="text" class="ab-name" placeholder="e.g. Notation" maxlength="50" oninput="updateAbilityPreview()">
+      <label>Type</label>
+      <select class="ab-type" onchange="updateAbilityPreview()">
+        <option value="">Select type...</option>
+        <option>Active -- triggered manually</option>
+        <option>Passive -- always active</option>
+        <option>Charged -- builds over time</option>
+        <option>Reaction -- triggered by survivor action</option>
+        <option>Toggle -- switched on/off</option>
+      </select>
+      <label>Description</label>
+      <textarea class="ab-desc" placeholder="What does this ability do? Be specific about conditions, cooldowns, range." rows="2" oninput="updateAbilityPreview()"></textarea>
+      <label>Cooldown / limitation</label>
+      <input type="text" class="ab-cool" placeholder="e.g. 30 second cooldown. Affects a 6m radius." maxlength="80" oninput="updateAbilityPreview()">
+    `;
+    list.appendChild(block);
+    updateAbilityPreview();
+  }
+
+  function removeAbility(id) {
+    document.getElementById(id).remove();
+    updateAbilityPreview();
+  }
+
+  function updateAbilityPreview() {
+    const container = document.getElementById('preview-abilities-container');
+    container.innerHTML = '';
+    document.querySelectorAll('.ability-block').forEach(block => {
+      const name = block.querySelector('.ab-name').value.trim();
+      const type = block.querySelector('.ab-type').value.split(' --')[0];
+      const desc = block.querySelector('.ab-desc').value.trim();
+      const cool = block.querySelector('.ab-cool').value.trim();
+      if (!name && !desc) return;
+      const div = document.createElement('div');
+      div.className = 'preview-ability';
+      div.innerHTML = `
+        <div class="preview-ability-name">${name || 'Unnamed ability'}${type ? ' <span style="opacity:0.5;font-size:9px;letter-spacing:0.1em">[${type}]</span>' : ''}</div>
+        <div class="preview-ability-desc">${desc || ''}${cool ? `<br><span style="opacity:0.6;font-size:11px">${cool}</span>` : ''}</div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // Add one ability by default
+  addAbility();
+
+  // Export
+  function exportKiller() {
+    const name = document.getElementById('killer-name').value.trim() || 'The Unnamed';
+    const title = document.getElementById('killer-title').value.trim() || 'Entity of the seam';
+    const quote = document.getElementById('killer-quote').value.trim();
+    const origin = document.getElementById('killer-origin').value;
+    const era = document.getElementById('killer-era').value;
+    const silhouette = document.getElementById('killer-silhouette').value.trim();
+    const mask = document.getElementById('killer-mask').value.trim();
+    const weapon = document.getElementById('killer-weapon').value.trim();
+    const lore = document.getElementById('killer-lore').value.trim();
+    const motivation = document.getElementById('killer-motivation').value.trim();
+    const weakness = document.getElementById('killer-weakness').value.trim();
+    const counter = document.getElementById('killer-counter').value.trim();
+    const difficulty = document.getElementById('killer-difficulty').value;
+    const map = document.getElementById('killer-map').value.trim();
+
+    const stats = ['speed','terror','echo','stealth','map','lethality'].map(s =>
+      `  ${s.charAt(0).toUpperCase()+s.slice(1).padEnd(12)}: ${document.getElementById('stat-'+s).value}/10`
+    ).join('\n');
+
+    const tags = Array.from(document.querySelectorAll('.tag-option:checked')).map(c => c.value).join(', ');
+
+    const abilities = Array.from(document.querySelectorAll('.ability-block')).map(b => {
+      const n = b.querySelector('.ab-name').value.trim();
+      const t = b.querySelector('.ab-type').value;
+      const d = b.querySelector('.ab-desc').value.trim();
+      const c = b.querySelector('.ab-cool').value.trim();
+      if (!n && !d) return null;
+      return `  ${n || 'Unnamed'}${t ? ` [${t.split(' --')[0]}]` : ''}\n  ${d}${c ? `\n  Cooldown: ${c}` : ''}`;
+    }).filter(Boolean).join('\n\n');
+
+    let out = `ECHOES OF THE HUNT — KILLER PROFILE\n${'='.repeat(38)}\n\n`;
+    out += `Name:       ${name}\n`;
+    out += `Title:      ${title}\n`;
+    if (quote) out += `\n"${quote}"\n`;
+    out += `\n--- ORIGIN ---\n`;
+    if (origin) out += `Origin:     ${origin}\n`;
+    if (era)    out += `Era:        ${era}\n`;
+    out += `\n--- APPEARANCE ---\n`;
+    if (silhouette) out += `Silhouette: ${silhouette}\n`;
+    if (mask)       out += `Face/Mask:  ${mask}\n`;
+    if (weapon)     out += `Weapon:     ${weapon}\n`;
+    out += `\n--- STATS ---\n${stats}\n`;
+    if (abilities) out += `\n--- ABILITIES ---\n${abilities}\n`;
+    out += `\n--- PLAYSTYLE ---\n`;
+    if (tags)       out += `Tags:       ${tags}\n`;
+    if (difficulty) out += `Difficulty: ${difficulty}\n`;
+    if (counter)    out += `Counter:    ${counter}\n`;
+    out += `\n--- LORE ---\n`;
+    if (lore)       out += `${lore}\n\n`;
+    if (motivation) out += `Motivation: ${motivation}\n`;
+    if (weakness)   out += `Weakness:   ${weakness}\n`;
+    if (map)        out += `\nAssociated map: ${map}\n`;
+
+    const el = document.getElementById('share-output');
+    el.textContent = out;
+    el.classList.add('visible');
+
+    navigator.clipboard.writeText(out).then(() => showToast('Copied to clipboard')).catch(() => showToast('Profile generated'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
