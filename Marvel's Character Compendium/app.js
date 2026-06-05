@@ -2,24 +2,29 @@
  * Marvel Character Compendium
  * Fetches live data from the Marvel Fandom wiki (MediaWiki API — no key required).
  *
- * Flow:
+ * Flow (browse mode):
  *  1. getCategoryMembers() → paginated list of character page titles
- *  2. getPageDetails()     → batch-fetches thumbnails + intro extracts (50 at a time)
- *  3. renderCards()        → builds DOM cards
- *  4. Modal on click       → shows image, extract, Fandom link
+ *  2. getPageDetails()     → batch-fetches thumbnails + raw wikitext lead section
+ *  3. parseLeadSection()   → strips wiki markup to get the real bio paragraph
+ *  4. renderCards()        → builds DOM cards
+ *
+ * Flow (search mode):
+ *  - searchFandom()        → queries Fandom's search API server-side (all 99K chars)
+ *  - renders results as cards, fully replacing the browse grid while query is active
  */
 
-const API = "https://marvel.fandom.com/api.php";
+const API      = "https://marvel.fandom.com/api.php";
+const FANDOM_SEARCH = "https://marvel.fandom.com/api/v1/Search/List";
 const CATEGORY = "Characters";
-const BATCH = 50;          // characters per load
-const CORS  = "https://corsproxy.io/?";  // free CORS proxy for GitHub Pages
+const BATCH    = 50;
 
 // ─── State ────────────────────────────────────────────────────
-let cmcontinue   = null;   // MediaWiki pagination token
-let isLoading    = false;
-let exhausted    = false;  // no more pages in category
-let totalLoaded  = 0;
-let allCards     = [];     // { title, pageId } for search
+let cmcontinue  = null;
+let isLoading   = false;
+let exhausted   = false;
+let totalLoaded = 0;
+let searchMode  = false;
+let searchTimer = null;
 
 // ─── DOM refs ─────────────────────────────────────────────────
 const grid          = document.getElementById("grid");
@@ -33,21 +38,16 @@ noResults.textContent = "NO CHARACTERS MATCH YOUR SEARCH";
 grid.after(noResults);
 
 // Modal
-const backdrop    = document.getElementById("modal-backdrop");
-const modal       = document.getElementById("modal");
-const modalClose  = document.getElementById("modal-close");
-const modalImg    = document.getElementById("modal-img");
-const modalName   = document.getElementById("modal-name");
-const modalReality= document.getElementById("modal-reality");
-const modalExtract= document.getElementById("modal-extract");
-const modalLink   = document.getElementById("modal-link");
+const backdrop     = document.getElementById("modal-backdrop");
+const modal        = document.getElementById("modal");
+const modalClose   = document.getElementById("modal-close");
+const modalImg     = document.getElementById("modal-img");
+const modalName    = document.getElementById("modal-name");
+const modalReality = document.getElementById("modal-reality");
+const modalExtract = document.getElementById("modal-extract");
+const modalLink    = document.getElementById("modal-link");
 
-// ─── API helpers ───────────────────────────────────────────────
-
-/**
- * Fetch JSON via the CORS proxy.
- * Falls back to direct fetch if proxy fails (works on localhost).
- */
+// ─── MediaWiki API fetch ───────────────────────────────────────
 async function apiFetch(params) {
   const url = `${API}?${new URLSearchParams({ ...params, format: "json", origin: "*" })}`;
   const res = await fetch(url);
@@ -55,10 +55,7 @@ async function apiFetch(params) {
   return res.json();
 }
 
-/**
- * Step 1 — Get a batch of character page titles from the category.
- * Returns { titles: [{title, pageId}], nextContinue }
- */
+// ─── Step 1: category members ─────────────────────────────────
 async function getCategoryMembers() {
   const params = {
     action: "query",
@@ -71,119 +68,156 @@ async function getCategoryMembers() {
   if (cmcontinue) params.cmcontinue = cmcontinue;
 
   const data = await apiFetch(params);
-
   const members = (data.query?.categorymembers ?? []).map(m => ({
     title: m.title,
     pageId: m.pageid,
   }));
-
-  // cmcontinue lives inside data.continue if it exists
-  const nextContinue = data.continue?.cmcontinue ?? null;
-
-  return { members, nextContinue };
+  return { members, nextContinue: data.continue?.cmcontinue ?? null };
 }
 
-/**
- * Step 2 — For a batch of pageIds, get thumbnail + plain-text intro extract.
- * Returns Map<pageId, { thumbnail, extract }>
- */
+// ─── Step 2: thumbnails + raw wikitext lead section ───────────
 async function getPageDetails(pageIds) {
   if (!pageIds.length) return new Map();
 
-  const params = {
-    action: "query",
-    pageids: pageIds.join("|"),
-    prop: "pageimages|extracts",
-    piprop: "thumbnail",
-    pithumbsize: 400,
-    exintro: "1",           // only intro section
-    explaintext: "1",       // plain text (no HTML)
-    exsentences: 4,         // first 4 sentences is plenty
-    exlimit: "max",
-  };
+  // Two parallel requests: images and wikitext section 0
+  const [imgData, wikiData] = await Promise.all([
+    apiFetch({
+      action: "query",
+      pageids: pageIds.join("|"),
+      prop: "pageimages",
+      piprop: "thumbnail",
+      pithumbsize: 400,
+    }),
+    apiFetch({
+      action: "query",
+      pageids: pageIds.join("|"),
+      prop: "revisions",
+      rvprop: "content",
+      rvsection: "0",   // lead section only — stops before ==History==
+    }),
+  ]);
 
-  const data = await apiFetch(params);
-  const pages = data.query?.pages ?? {};
+  const imgPages  = imgData.query?.pages  ?? {};
+  const wikiPages = wikiData.query?.pages ?? {};
   const result = new Map();
 
-  for (const [id, page] of Object.entries(pages)) {
-    result.set(Number(id), {
-      thumbnail: page.thumbnail?.source ?? null,
-      extract:   page.extract   ?? "",
-    });
+  for (const id of pageIds) {
+    const sid = String(id);
+    const thumbnail = imgPages[sid]?.thumbnail?.source ?? null;
+    const wikitext  = wikiPages[sid]?.revisions?.[0]?.["*"] ?? "";
+    const extract   = parseLeadSection(wikitext);
+    result.set(id, { thumbnail, extract });
   }
 
   return result;
 }
 
-// ─── Reality tag parser ────────────────────────────────────────
+// ─── Step 3: wikitext → clean bio paragraph ───────────────────
 /**
- * Splits "Spider-Man (Earth-616)" into { name: "Spider-Man", reality: "Earth-616" }
- * Falls back to the full title if no parenthesis found.
+ * Extracts the first real prose paragraph from the wikitext lead section.
+ * Marvel character pages structure:
+ *   {{CharacterInfo|...}}   ← infobox template (skip)
+ *   {{Quote|...}}           ← optional quote (skip)
+ *   First prose paragraph   ← THIS is the bio
+ *   [[Category:...]]        ← skip
  */
+function parseLeadSection(wikitext) {
+  if (!wikitext) return "";
+
+  // 1. Remove {{...}} templates (handles nesting up to 5 deep)
+  let text = wikitext;
+  for (let i = 0; i < 6; i++) {
+    text = text.replace(/\{\{[^{}]*\}\}/g, "");
+  }
+
+  // 2. Remove [[File:...]] and [[Image:...]] embeds
+  text = text.replace(/\[\[(File|Image):[^\]]*\]\]/gi, "");
+
+  // 3. Convert [[link|label]] → label, [[link]] → link
+  text = text.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
+
+  // 4. Remove HTML tags
+  text = text.replace(/<[^>]+>/g, "");
+
+  // 5. Remove bold/italic markup
+  text = text.replace(/'{2,3}/g, "");
+
+  // 6. Remove reference markers like [1] [note 2]
+  text = text.replace(/\[(?:note\s*)?\d+\]/g, "");
+
+  // 7. Remove category/interwiki lines
+  text = text.replace(/^\[\[(?:Category|[a-z]{2}):[^\]]*\]\]\s*$/gim, "");
+
+  // 8. Split into paragraphs, find the first non-empty prose one
+  const paragraphs = text.split(/\n{1,}/).map(p => p.trim()).filter(Boolean);
+
+  for (const p of paragraphs) {
+    // Skip lines that are remnants of templates, tables, or very short
+    if (p.startsWith("|") || p.startsWith("!") || p.startsWith("{") || p.startsWith("}")) continue;
+    if (p.startsWith("*") || p.startsWith("#") || p.startsWith(";") || p.startsWith(":")) continue;
+    if (p.length < 40) continue; // too short to be real prose
+
+    // Collapse internal whitespace
+    return p.replace(/\s+/g, " ").trim();
+  }
+
+  return "";
+}
+
+// ─── Reality tag parser ────────────────────────────────────────
 function parseTitle(title) {
   const match = title.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
   if (match) return { name: match[1].trim(), reality: match[2].trim() };
   return { name: title, reality: "" };
 }
 
-// ─── Render ────────────────────────────────────────────────────
+// ─── Render cards ─────────────────────────────────────────────
+function makeCard({ title, thumbnail, extract }) {
+  const { name, reality } = parseTitle(title);
+  const fandomUrl = `https://marvel.fandom.com/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.dataset.title = title.toLowerCase();
+
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      ${thumbnail
+        ? `<img src="${thumbnail}" alt="${escHtml(name)}" loading="lazy" />`
+        : `<div class="card-placeholder"><span class="card-placeholder-icon">M</span></div>`
+      }
+    </div>
+    <div class="card-gradient"></div>
+    <div class="card-body">
+      ${reality ? `<span class="card-reality">${escHtml(reality)}</span>` : ""}
+      <div class="card-name">${escHtml(name)}</div>
+    </div>
+    <div class="card-hover-indicator"></div>
+  `;
+
+  card.addEventListener("click", () => openModal({ name, reality, fandomUrl, thumbnail, extract }));
+  return card;
+}
+
 function renderCards(members, details) {
   const fragment = document.createDocumentFragment();
-
   for (const { title, pageId } of members) {
-    const { name, reality } = parseTitle(title);
     const info = details.get(pageId) ?? { thumbnail: null, extract: "" };
-    const fandomUrl = `https://marvel.fandom.com/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
-
-    // Store for search
-    allCards.push({ title, element: null });
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.title = title.toLowerCase();
-
-    card.innerHTML = `
-      <div class="card-img-wrap">
-        ${info.thumbnail
-          ? `<img src="${info.thumbnail}" alt="${name}" loading="lazy" />`
-          : `<div class="card-placeholder"><span class="card-placeholder-icon">M</span></div>`
-        }
-      </div>
-      <div class="card-gradient"></div>
-      <div class="card-body">
-        ${reality ? `<span class="card-reality">${reality}</span>` : ""}
-        <div class="card-name">${name}</div>
-      </div>
-      <div class="card-hover-indicator"></div>
-    `;
-
-    card.addEventListener("click", () => openModal({
-      name, reality, fandomUrl,
-      thumbnail: info.thumbnail,
-      extract: info.extract,
-    }));
-
-    allCards[allCards.length - 1].element = card;
-    fragment.appendChild(card);
+    fragment.appendChild(makeCard({ title, thumbnail: info.thumbnail, extract: info.extract }));
   }
-
   grid.appendChild(fragment);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
 // ─── Modal ─────────────────────────────────────────────────────
 function openModal({ name, reality, fandomUrl, thumbnail, extract }) {
   modalName.textContent    = name;
-  modalReality.textContent = reality ? reality : "";
+  modalReality.textContent = reality || "";
   modalLink.href           = fandomUrl;
-
-  // Clean up extract — trim whitespace, remove stray "== Heading ==" bits
-  const cleanExtract = extract
-    .replace(/==.+?==/g, "")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
-
-  modalExtract.textContent = cleanExtract || "No description available.";
+  modalExtract.textContent = extract || "No description available.";
 
   if (thumbnail) {
     modalImg.src = thumbnail;
@@ -207,27 +241,115 @@ modalClose.addEventListener("click", closeModal);
 backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-// ─── Search ────────────────────────────────────────────────────
-searchInput.addEventListener("input", () => {
-  const query = searchInput.value.toLowerCase().trim();
-  let visible = 0;
+// ─── Search (server-side via Fandom Search API) ───────────────
+/**
+ * Uses Fandom's /api/v1/Search/List endpoint which searches across ALL wiki
+ * content — not just what's been loaded — so Wolverine shows up even if
+ * you haven't scrolled to the W's yet.
+ *
+ * We restrict results to the "Characters" category via the namespaces filter
+ * (namespace 0 = articles) and do a post-filter to drop non-character pages.
+ */
+async function searchFandom(query) {
+  const url = `${FANDOM_SEARCH}?${new URLSearchParams({
+    query,
+    limit: 50,
+    namespaces: 0,
+  })}&origin=*`;
 
-  for (const { title, element } of allCards) {
-    if (!element) continue;
-    const match = !query || title.toLowerCase().includes(query);
-    element.classList.toggle("hidden-by-search", !match);
-    if (match) visible++;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Search HTTP ${res.status}`);
+  const data = await res.json();
+
+  // Each item has: id, title, url, snippet, quality
+  return (data.items ?? []);
+}
+
+async function runSearch(query) {
+  setSearchMode(true);
+  showSpinner(true);
+  noResults.style.display = "none";
+  grid.innerHTML = "";
+
+  try {
+    const items = await searchFandom(query);
+
+    // Fetch details for search results using page titles
+    const titles = items.map(i => i.title);
+    if (!titles.length) {
+      noResults.style.display = "block";
+      return;
+    }
+
+    const detailData = await apiFetch({
+      action: "query",
+      titles: titles.join("|"),
+      prop: "pageimages|revisions",
+      piprop: "thumbnail",
+      pithumbsize: 400,
+      rvprop: "content",
+      rvsection: "0",
+    });
+
+    const pages = detailData.query?.pages ?? {};
+    const fragment = document.createDocumentFragment();
+    let count = 0;
+
+    for (const page of Object.values(pages)) {
+      if (page.missing !== undefined) continue;
+      const thumbnail = page.thumbnail?.source ?? null;
+      const wikitext  = page.revisions?.[0]?.["*"] ?? "";
+      const extract   = parseLeadSection(wikitext);
+      fragment.appendChild(makeCard({ title: page.title, thumbnail, extract }));
+      count++;
+    }
+
+    grid.appendChild(fragment);
+    if (count === 0) noResults.style.display = "block";
+
+  } catch (err) {
+    console.error("Search error:", err);
+  } finally {
+    showSpinner(false);
+  }
+}
+
+function setSearchMode(on) {
+  searchMode = on;
+  loadMoreBtn.style.display = "none";
+  if (!on) {
+    // Restore the browse grid
+    grid.innerHTML = "";
+    // Re-render all previously loaded cards by reloading from scratch
+    cmcontinue  = null;
+    exhausted   = false;
+    totalLoaded = 0;
+    totalLoadedEl.textContent = "0";
+    loadBatch();
+  }
+}
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  const query = searchInput.value.trim();
+
+  if (!query) {
+    // Back to browse mode
+    noResults.style.display = "none";
+    if (searchMode) setSearchMode(false);
+    return;
   }
 
-  noResults.style.display = (query && visible === 0) ? "block" : "none";
+  // Debounce: wait 400ms after typing stops
+  searchTimer = setTimeout(() => runSearch(query), 400);
 });
 
-// ─── Load batch ────────────────────────────────────────────────
+// ─── Load batch (browse mode) ─────────────────────────────────
 async function loadBatch() {
-  if (isLoading || exhausted) return;
+  if (isLoading || exhausted || searchMode) return;
   isLoading = true;
 
-  spinner.classList.remove("hidden");
+  showSpinner(true);
   loadMoreBtn.style.display = "none";
 
   try {
@@ -235,7 +357,6 @@ async function loadBatch() {
 
     if (!members.length) {
       exhausted = true;
-      spinner.classList.add("hidden");
       return;
     }
 
@@ -256,15 +377,16 @@ async function loadBatch() {
       FETCH ERROR — check console</span>`;
   } finally {
     isLoading = false;
-    spinner.classList.add("hidden");
-
-    if (!exhausted) {
-      loadMoreBtn.style.display = "flex";
-    }
+    showSpinner(false);
+    if (!exhausted && !searchMode) loadMoreBtn.style.display = "flex";
   }
+}
+
+function showSpinner(on) {
+  spinner.classList.toggle("hidden", !on);
 }
 
 loadMoreBtn.addEventListener("click", loadBatch);
 
 // ─── Init ──────────────────────────────────────────────────────
-loadBatch(); // load first batch immediately on page load
+loadBatch();
