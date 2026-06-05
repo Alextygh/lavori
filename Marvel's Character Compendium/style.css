@@ -438,9 +438,10 @@ main {
   text-align: center;
   padding: 3rem 0;
   display: none;
+  grid-column: 1 / -1;
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────────── */
+.spinner.hidden { display: none; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--black); }
 ::-webkit-scrollbar-thumb { background: var(--red-dark); }
