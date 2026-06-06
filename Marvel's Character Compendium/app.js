@@ -118,21 +118,24 @@ async function getCategoryMembers() {
   };
 }
 
-// ─── Fetch wikitext for a page (CORS-safe via API) ────────────
-// Uses action=query&prop=revisions which supports origin=*
+// ─── Fetch wikitext for a page ───────────────────────────────
+// action=parse reliably returns wikitext on Fandom UCP. CORS-safe with origin=*.
 async function fetchWikitext(title) {
   const data = await apiFetch({
-    action:  "query",
-    titles:  title,
-    prop:    "revisions",
-    rvprop:  "content",
-    rvslots: "main",
+    action: "parse",
+    page:   title,
+    prop:   "wikitext",
   });
-  const pages = data.query?.pages ?? {};
-  const page  = Object.values(pages)[0];
-  // Wikitext can be in slots.main["*"] (newer) or directly in rev["*"] (older)
-  const rev = page?.revisions?.[0];
-  return rev?.slots?.main?.["*"] ?? rev?.["*"] ?? "";
+
+  const wikitext = data.parse?.wikitext?.["*"] ?? "";
+
+  if (wikitext) {
+    console.debug(`[${title}] wikitext OK (${wikitext.length} chars)`);
+  } else {
+    console.warn(`[${title}] no wikitext. Response:`, JSON.stringify(data).slice(0, 400));
+  }
+
+  return wikitext;
 }
 
 // ─── Extract and clean History section ───────────────────────
