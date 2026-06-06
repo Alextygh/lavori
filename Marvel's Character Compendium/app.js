@@ -122,59 +122,34 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    // list=prefixsearch finds pages whose title starts with the query — fast and
-    // reliable on Fandom. For mid-title matches we also run list=search in parallel.
-    const [prefixData, fullData] = await Promise.all([
-      apiFetch({
-        action:    "query",
-        list:      "prefixsearch",
-        pssearch:  searchQuery,
-        psnamespace: 0,
-        pslimit:   50,
-        psoffset:  searchOffset,
-      }),
-      searchOffset === 0 ? apiFetch({
-        action:      "query",
-        list:        "search",
-        srsearch:    searchQuery,
-        srnamespace: 0,
-        srlimit:     50,
-        srprop:      "",
-      }) : Promise.resolve(null),
-    ]);
+    const data = await apiFetch({
+      action:      "query",
+      list:        "search",
+      srsearch:    `${searchQuery} incategory:Characters`,
+      srnamespace: 0,
+      srlimit:     BATCH,
+      sroffset:    searchOffset,
+      srprop:      "size",
+    });
 
-    // Merge, deduplicate by pageId, keep only pages in the Characters category
-    const seen = new Set();
-    const raw = [
-      ...(prefixData.query?.prefixsearch ?? []),
-      ...(fullData?.query?.search ?? []),
-    ];
+    const hits = data.query?.search ?? [];
 
-    // Filter to Character pages by checking title has a reality suffix like (Earth-XXX)
-    // or just pass all and let the user see — filtering by category would need extra calls
-    const members = raw
-      .filter(h => {
-        if (seen.has(h.pageid)) return false;
-        seen.add(h.pageid);
-        return true;
-      })
-      .map(h => ({ title: h.title, pageId: h.pageid }));
-
-    if (!members.length && searchOffset === 0) {
+    if (!hits.length && searchOffset === 0) {
       exhausted = true;
       noResults.style.display = "block";
       return;
     }
 
+    const members = hits.map(h => ({ title: h.title, pageId: h.pageid }));
     const details = await getPageDetails(members);
     renderCards(members, details);
 
     totalLoaded += members.length;
     totalLoadedEl.textContent = totalLoaded.toLocaleString();
 
-    // prefixsearch doesn't give totalhits; exhaust after first combined batch
-    searchOffset += members.length;
-    if (members.length < 50) exhausted = true;
+    const totalHits = data.query?.searchinfo?.totalhits ?? 0;
+    searchOffset += hits.length;
+    if (hits.length < BATCH || searchOffset >= totalHits) exhausted = true;
 
   } catch (err) {
     console.error("Search error:", err);
