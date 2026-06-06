@@ -101,9 +101,11 @@ async function getCategoryMembers() {
 
   if (currentLetter) {
     if (currentLetter === "Other") {
-      // Accented/special Latin chars (Á, Ä, Æ, É, Ö, Ø, ¡ …) sort after "Z" in
-      // MediaWiki's collation. Start just past "Z" with no end cap to get them all.
-      params.cmstartsortkeyprefix = "["; // ASCII char immediately after "Z"
+      // Fandom's own category URL uses ?from=¡ for this section.
+      // Under UCA collation, accented/special chars (Á, Ä, Æ, É, Ö, Ø…) sort
+      // after all plain A-Z entries. We start at ¡ (U+00A1) which is where
+      // Fandom places these, and set no end cap so we get everything after.
+      params.cmstartsortkeyprefix = "\u00A1";
     } else if (currentLetter === "0–9") {
       params.cmstartsortkeyprefix = "0";
       params.cmendsortkey         = ":"; // ASCII just after "9"
