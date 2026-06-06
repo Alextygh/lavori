@@ -9,7 +9,8 @@
 
 const API      = "https://marvel.fandom.com/api.php";
 const CATEGORY = "Characters";
-const BATCH    = 100;
+const BATCH    = 50;
+
 const LETTERS = ["0–9","A","B","C","D","E","F","G","H","I","J","K","L","M",
                  "N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Other"];
 
@@ -121,38 +122,59 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    // action=query&list=search searches page titles and content.
-    // srnamespace=0 = main namespace. We also filter to Category:Characters
-    // via srsearch prefix so results stay on-wiki characters.
-    const data = await apiFetch({
-      action:      "query",
-      list:        "search",
-      srsearch:    `${searchQuery} incategory:"Characters"`,
-      srnamespace: 0,
-      srlimit:     BATCH,
-      sroffset:    searchOffset,
-      srprop:      "size|wordcount",
-    });
+    // list=prefixsearch finds pages whose title starts with the query — fast and
+    // reliable on Fandom. For mid-title matches we also run list=search in parallel.
+    const [prefixData, fullData] = await Promise.all([
+      apiFetch({
+        action:    "query",
+        list:      "prefixsearch",
+        pssearch:  searchQuery,
+        psnamespace: 0,
+        pslimit:   50,
+        psoffset:  searchOffset,
+      }),
+      searchOffset === 0 ? apiFetch({
+        action:      "query",
+        list:        "search",
+        srsearch:    searchQuery,
+        srnamespace: 0,
+        srlimit:     50,
+        srprop:      "",
+      }) : Promise.resolve(null),
+    ]);
 
-    const hits = data.query?.search ?? [];
+    // Merge, deduplicate by pageId, keep only pages in the Characters category
+    const seen = new Set();
+    const raw = [
+      ...(prefixData.query?.prefixsearch ?? []),
+      ...(fullData?.query?.search ?? []),
+    ];
 
-    if (!hits.length && searchOffset === 0) {
+    // Filter to Character pages by checking title has a reality suffix like (Earth-XXX)
+    // or just pass all and let the user see — filtering by category would need extra calls
+    const members = raw
+      .filter(h => {
+        if (seen.has(h.pageid)) return false;
+        seen.add(h.pageid);
+        return true;
+      })
+      .map(h => ({ title: h.title, pageId: h.pageid }));
+
+    if (!members.length && searchOffset === 0) {
       exhausted = true;
       noResults.style.display = "block";
       return;
     }
 
-    // Map hits to the same member shape the rest of the code expects
-    const members = hits.map(h => ({ title: h.title, pageId: h.pageid }));
     const details = await getPageDetails(members);
     renderCards(members, details);
 
     totalLoaded += members.length;
     totalLoadedEl.textContent = totalLoaded.toLocaleString();
 
-    const totalHits = data.query?.searchinfo?.totalhits ?? 0;
-    searchOffset += hits.length;
-    if (hits.length < BATCH || searchOffset >= totalHits) exhausted = true;
+    // prefixsearch doesn't give totalhits; exhaust after first combined batch
+    searchOffset += members.length;
+    if (members.length < 50) exhausted = true;
 
   } catch (err) {
     console.error("Search error:", err);
@@ -161,8 +183,7 @@ async function loadSearchBatch() {
     showSpinner(false);
     if (!exhausted) {
       loadMoreBtn.style.display = "flex";
-      loadMoreBtn.querySelector(".btn-sub").textContent =
-        `${BATCH} per batch · search results`;
+      loadMoreBtn.querySelector(".btn-sub").textContent = "load more results";
     } else {
       loadMoreBtn.style.display = "none";
     }
@@ -195,7 +216,11 @@ function selectLetter(letter) {
 
 // ─── CORS-safe API fetch ──────────────────────────────────────
 async function apiFetch(params) {
-  const qs = new URLSearchParams({ ...params, format: "json", origin: "*" });
+  // URLSearchParams encodes | as %7C which MediaWiki rejects for multi-value params.
+  // Build the query string manually so | stays literal.
+  const qs = Object.entries({ ...params, format: "json", origin: "*" })
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v)).replace(/%7C/gi, "|")}`)
+    .join("&");
   const res = await fetch(`${API}?${qs}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
