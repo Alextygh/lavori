@@ -101,9 +101,9 @@ async function getCategoryMembers() {
 
   if (currentLetter) {
     if (currentLetter === "Other") {
-      // Non-letter, non-digit entries sort before "0" in MediaWiki's collation.
-      // Set no start prefix (begin from top of category) and cap just before "0".
-      params.cmendsortkey = "0";
+      // Accented/special Latin chars (Á, Ä, Æ, É, Ö, Ø, ¡ …) sort after "Z" in
+      // MediaWiki's collation. Start just past "Z" with no end cap to get them all.
+      params.cmstartsortkeyprefix = "["; // ASCII char immediately after "Z"
     } else if (currentLetter === "0–9") {
       params.cmstartsortkeyprefix = "0";
       params.cmendsortkey         = ":"; // ASCII just after "9"
