@@ -99,14 +99,39 @@ async function getCategoryMembers() {
     cmprop:   "ids|title",
   };
 
+  if (currentLetter === "Other") {
+    // "Other" = titles not starting with plain A-Z or 0-9.
+    // These live in two small clusters in the category index:
+    //   • Before "0"  — symbols/punctuation like ', ", ¡
+    //   • After "Z"   — accented Latin: Á, Ä, Æ, É, Ö, Ø …
+    // Both clusters are tiny (~dozens of entries), so we fetch each fully
+    // in one shot (limit 500) and merge, filtering client-side.
+    const fetchAll = async (extra) => {
+      let all = [], cont = undefined;
+      do {
+        const p = { ...params, cmlimit: 500, ...extra };
+        if (cont) p.cmcontinue = cont;
+        const data = await apiFetch(p);
+        all.push(...(data.query?.categorymembers ?? []));
+        cont = data.continue?.cmcontinue;
+      } while (cont);
+      return all;
+    };
+
+    const [before, after] = await Promise.all([
+      fetchAll({ cmendsortkey: "0" }),
+      fetchAll({ cmstartsortkeyprefix: "\u00A1" }),
+    ]);
+
+    const members = [...before, ...after]
+      .map(m => ({ title: m.title, pageId: m.pageid }))
+      .filter(m => !/^[A-Za-z0-9]/.test(m.title));
+
+    return { members, nextContinue: null }; // exhausted in one shot
+  }
+
   if (currentLetter) {
-    if (currentLetter === "Other") {
-      // Fandom's own category URL uses ?from=¡ for this section.
-      // Under UCA collation, accented/special chars (Á, Ä, Æ, É, Ö, Ø…) sort
-      // after all plain A-Z entries. We start at ¡ (U+00A1) which is where
-      // Fandom places these, and set no end cap so we get everything after.
-      params.cmstartsortkeyprefix = "\u00A1";
-    } else if (currentLetter === "0–9") {
+    if (currentLetter === "0–9") {
       params.cmstartsortkeyprefix = "0";
       params.cmendsortkey         = ":"; // ASCII just after "9"
     } else {
@@ -119,7 +144,7 @@ async function getCategoryMembers() {
 
   const data = await apiFetch(params);
   return {
-    members:     (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
+    members:      (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
     nextContinue: data.continue?.cmcontinue ?? null,
   };
 }
