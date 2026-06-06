@@ -1,6 +1,6 @@
 /**
  * Marvel Character Compendium
- *
+ * 
  * Letter filter: ALL, 0-9, A-Z (from Category:Characters page)
  * History text: action=query&prop=revisions&rvprop=content with origin=* (CORS-safe)
  *   then split on ==History== and clean wikitext
