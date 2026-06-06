@@ -1,14 +1,14 @@
 /**
  * Marvel Character Compendium
- * Data source: marvel.fandom.com (MediaWiki API, no key required, CORS-safe)
+ * Data: marvel.fandom.com (MediaWiki API, no key, CORS-safe with origin=*)
  *
- * Browse mode:
- *   getCategoryMembers() → 50 titles at a time via cmcontinue pagination
- *   getPageDetails()     → thumbnail + History section text per batch
+ * Description strategy:
+ *   Fetch full page wikitext via action=query&prop=revisions&rvprop=content
+ *   Split on ==History== heading → take the text after it → strip markup → first paragraph
  *
- * Search mode:
- *   mediawiki list=search (srsearch) → works cross-origin with origin=*
- *   Falls back cleanly to browse when query is cleared
+ * Search strategy:
+ *   action=query&list=search&srsearch=...&srwhat=title (MediaWiki, CORS-safe)
+ *   Restores browse grid on clear
  */
 
 const API      = "https://marvel.fandom.com/api.php";
@@ -16,17 +16,15 @@ const CATEGORY = "Characters";
 const BATCH    = 50;
 
 // ─── State ────────────────────────────────────────────────────
-let cmcontinue = null;
-let isLoading  = false;
-let exhausted  = false;
+let cmcontinue  = null;
+let isLoading   = false;
+let exhausted   = false;
 let totalLoaded = 0;
 let searchMode  = false;
 let searchTimer = null;
+let browseCards = []; // saved DOM nodes so we can restore without re-fetching
 
-// Saved browse cards so we can restore them without re-fetching
-let browseCards = []; // Array of DOM nodes
-
-// ─── DOM refs ─────────────────────────────────────────────────
+// ─── DOM ──────────────────────────────────────────────────────
 const grid          = document.getElementById("grid");
 const loadMoreBtn   = document.getElementById("load-more-btn");
 const spinner       = document.getElementById("spinner");
@@ -38,7 +36,6 @@ noResults.id = "no-results";
 noResults.textContent = "NO CHARACTERS MATCH YOUR SEARCH";
 grid.after(noResults);
 
-// Modal
 const backdrop     = document.getElementById("modal-backdrop");
 const modal        = document.getElementById("modal");
 const modalClose   = document.getElementById("modal-close");
@@ -48,7 +45,7 @@ const modalReality = document.getElementById("modal-reality");
 const modalExtract = document.getElementById("modal-extract");
 const modalLink    = document.getElementById("modal-link");
 
-// ─── API helper ───────────────────────────────────────────────
+// ─── API fetch ────────────────────────────────────────────────
 async function apiFetch(params) {
   const qs = new URLSearchParams({ ...params, format: "json", origin: "*" });
   const res = await fetch(`${API}?${qs}`);
@@ -56,7 +53,7 @@ async function apiFetch(params) {
   return res.json();
 }
 
-// ─── Category members (browse) ────────────────────────────────
+// ─── Category members ─────────────────────────────────────────
 async function getCategoryMembers() {
   const params = {
     action: "query",
@@ -67,7 +64,6 @@ async function getCategoryMembers() {
     cmprop: "ids|title",
   };
   if (cmcontinue) params.cmcontinue = cmcontinue;
-
   const data = await apiFetch(params);
   return {
     members: (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
@@ -75,122 +71,140 @@ async function getCategoryMembers() {
   };
 }
 
-// ─── Page details: thumbnail + History section ────────────────
+// ─── Page details: thumbnail + History text ───────────────────
 /**
- * For each pageId we:
- * 1. Fetch the section list to find which section index is "History"
- * 2. Fetch that section's wikitext
- * 3. Strip wiki markup → first real paragraph
+ * Fetches the full wikitext for each page, then extracts the History section.
+ * We use rvslots=main&rvprop=content to get raw wikitext.
+ * The History section starts at the first ==History== heading.
+ * We grab just the first real paragraph after that heading.
  *
- * Steps 1+2 are combined into two batched calls per batch of 50.
- * Section lookup uses prop=sections which returns the TOC.
+ * Note: we batch the thumbnail call and the wikitext call in parallel.
  */
 async function getPageDetails(pageIds) {
   if (!pageIds.length) return new Map();
 
-  // Parallel: thumbnail + sections list for all pages
-  const [imgData, secData] = await Promise.all([
+  const idStr = pageIds.join("|");
+
+  const [imgData, wikiData] = await Promise.all([
     apiFetch({
       action: "query",
-      pageids: pageIds.join("|"),
+      pageids: idStr,
       prop: "pageimages",
       piprop: "thumbnail",
       pithumbsize: 400,
     }),
     apiFetch({
       action: "query",
-      pageids: pageIds.join("|"),
-      prop: "sections",
+      pageids: idStr,
+      prop: "revisions",
+      rvprop: "content",
+      rvslots: "main",
     }),
   ]);
 
-  const imgPages = imgData.query?.pages ?? {};
-  const secPages = secData.query?.pages ?? {};
+  const imgPages  = imgData.query?.pages  ?? {};
+  const wikiPages = wikiData.query?.pages ?? {};
 
-  // Build a map of pageId → History section index
-  const sectionIndexMap = new Map();
-  for (const [id, page] of Object.entries(secPages)) {
-    const sections = page.sections ?? [];
-    // Find the first section whose line matches "History" (case-insensitive)
-    const hist = sections.find(s =>
-      /^history$/i.test(s.line.trim()) ||
-      /^(early )?history$/i.test(s.line.trim())
-    );
-    if (hist) sectionIndexMap.set(Number(id), hist.index);
-  }
-
-  // For each page that has a History section, fetch its wikitext individually.
-  // We batch these with Promise.all (50 concurrent is fine for a wiki API).
-  const extractMap = new Map();
-  await Promise.all(
-    pageIds.map(async (pid) => {
-      const sectionIdx = sectionIndexMap.get(pid);
-      if (sectionIdx === undefined) {
-        extractMap.set(pid, "");
-        return;
-      }
-      try {
-        const data = await apiFetch({
-          action: "query",
-          pageids: pid,
-          prop: "revisions",
-          rvprop: "content",
-          rvsection: sectionIdx,
-        });
-        const pages = data.query?.pages ?? {};
-        const wikitext = Object.values(pages)[0]?.revisions?.[0]?.["*"] ?? "";
-        extractMap.set(pid, wikiToText(wikitext));
-      } catch {
-        extractMap.set(pid, "");
-      }
-    })
-  );
-
-  // Assemble result map
   const result = new Map();
   for (const id of pageIds) {
-    result.set(id, {
-      thumbnail: imgPages[String(id)]?.thumbnail?.source ?? null,
-      extract: extractMap.get(id) ?? "",
-    });
+    const sid = String(id);
+
+    const thumbnail = imgPages[sid]?.thumbnail?.source ?? null;
+
+    // wikitext can be in slots.main.* (newer API) or revisions[0]["*"] (older)
+    const rev = wikiPages[sid]?.revisions?.[0];
+    const wikitext = rev?.slots?.main?.["*"] ?? rev?.["*"] ?? "";
+
+    const extract = extractHistory(wikitext);
+    result.set(id, { thumbnail, extract });
   }
   return result;
 }
 
-// ─── Wikitext → plain text ────────────────────────────────────
-function wikiToText(wikitext) {
+// ─── Extract History section from wikitext ────────────────────
+/**
+ * Marvel wiki pages look like:
+ *
+ *   {{CharacterInfo|...}}
+ *   {{Quote|...}}
+ *   Lead paragraph...
+ *
+ *   ==History==
+ *   This is an abridged version...
+ *
+ *   ===Early Life===
+ *   Peter Benjamin Parker was born in Queens...  ← we want THIS
+ *
+ * Strategy:
+ *   1. Find the ==History== heading (any level, case-insensitive)
+ *   2. Take all text after it
+ *   3. Strip the first paragraph if it's a "This is an abridged version" notice
+ *   4. Strip wiki markup from the remainder
+ *   5. Return the first real prose paragraph
+ */
+function extractHistory(wikitext) {
   if (!wikitext) return "";
+
+  // Find ==History== (handles ==History==, === History ===, etc.)
+  const historyMatch = wikitext.match(/={2,}\s*History\s*={2,}/i);
+  if (!historyMatch) {
+    // No History section — fall back to lead paragraph
+    return extractLeadParagraph(wikitext);
+  }
+
+  const afterHistory = wikitext.slice(historyMatch.index + historyMatch[0].length);
+
+  // Clean and extract first real paragraph
+  return cleanWikitext(afterHistory);
+}
+
+function extractLeadParagraph(wikitext) {
+  // Remove leading infobox/template blocks and get first prose paragraph
   let t = wikitext;
+  // Strip top-level templates
+  for (let i = 0; i < 8; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
+  return cleanWikitext(t);
+}
 
-  // Strip {{templates}} (up to 6 nesting levels)
-  for (let i = 0; i < 6; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
+function cleanWikitext(raw) {
+  let t = raw;
 
-  // Strip [[File:...]] and [[Image:...]]
+  // Remove {{templates}} (iterative for nesting)
+  for (let i = 0; i < 8; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
+
+  // Remove [[File:...]] [[Image:...]] embeds
   t = t.replace(/\[\[(File|Image):[^\]]*\]\]/gi, "");
 
-  // Convert [[link|label]] → label, [[link]] → link
+  // Convert [[link|label]] → label, [[link]] → link text
   t = t.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
 
   // Strip HTML tags
   t = t.replace(/<[^>]+>/g, "");
 
-  // Strip bold/italic
-  t = t.replace(/'{2,3}/g, "");
+  // Strip bold/italic markup
+  t = t.replace(/'{2,5}/g, "");
 
-  // Strip reference markers [1], [note 2], etc.
+  // Strip reference markers like [1], [note 3]
   t = t.replace(/\[(?:note\s*)?\d+\]/g, "");
 
-  // Strip section headings
-  t = t.replace(/^=+[^=]+=+\s*$/gm, "");
+  // Strip section headings (==...==)
+  t = t.replace(/={2,}[^=\n]+=*\n?/g, "");
 
-  // Strip table syntax lines
+  // Strip table syntax
   t = t.replace(/^\s*[|!{}\-][^\n]*/gm, "");
 
-  // Find first real prose paragraph
+  // Split into paragraphs
   const paragraphs = t.split(/\n+/).map(p => p.trim()).filter(Boolean);
+
   for (const p of paragraphs) {
-    if (p.startsWith("*") || p.startsWith("#") || p.startsWith(":")) continue;
+    // Skip list items, template remnants, short lines
+    if (/^[*#:;|!{}]/.test(p)) continue;
     if (p.length < 40) continue;
+    // Skip "This is an abridged version" notices
+    if (/abridged/i.test(p)) continue;
+    // Skip lines that are just a name/label (all caps or very short)
+    if (/^[A-Z\s]+$/.test(p)) continue;
+
     return p.replace(/\s+/g, " ").trim();
   }
   return "";
@@ -203,7 +217,11 @@ function parseTitle(title) {
 }
 
 function esc(s) {
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
 
 // ─── Card factory ─────────────────────────────────────────────
@@ -232,13 +250,12 @@ function makeCard({ title, thumbnail, extract }) {
   return card;
 }
 
-// ─── Render helper ────────────────────────────────────────────
-function renderCards(members, details, saveToBrowse = false) {
+function renderCards(members, details, save = false) {
   const frag = document.createDocumentFragment();
   for (const { title, pageId } of members) {
-    const info = details.get(pageId) ?? { thumbnail: null, extract: "" };
-    const card = makeCard({ title, thumbnail: info.thumbnail, extract: info.extract });
-    if (saveToBrowse) browseCards.push(card);
+    const { thumbnail, extract } = details.get(pageId) ?? { thumbnail: null, extract: "" };
+    const card = makeCard({ title, thumbnail, extract });
+    if (save) browseCards.push(card);
     frag.appendChild(card);
   }
   grid.appendChild(frag);
@@ -247,7 +264,7 @@ function renderCards(members, details, saveToBrowse = false) {
 // ─── Modal ─────────────────────────────────────────────────────
 function openModal({ name, reality, url, thumbnail, extract }) {
   modalName.textContent    = name;
-  modalReality.textContent = reality;
+  modalReality.textContent = reality || "";
   modalLink.href           = url;
   modalExtract.textContent = extract || "No history excerpt available.";
 
@@ -273,7 +290,7 @@ modalClose.addEventListener("click", closeModal);
 backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-// ─── Search (MediaWiki list=search, CORS-safe) ────────────────
+// ─── Search ───────────────────────────────────────────────────
 async function runSearch(query) {
   showSpinner(true);
   loadMoreBtn.style.display = "none";
@@ -281,95 +298,39 @@ async function runSearch(query) {
   grid.innerHTML = "";
 
   try {
-    // 1. Full-text search across all wiki pages
+    // 1. Title search via MediaWiki (CORS-safe, searches all pages)
     const searchData = await apiFetch({
       action: "query",
       list: "search",
       srsearch: query,
       srnamespace: 0,
       srlimit: 30,
-      srwhat: "title",   // title search → character names, much cleaner results
+      srwhat: "title",
     });
 
     const hits = searchData.query?.search ?? [];
-    if (!hits.length) {
-      noResults.style.display = "block";
-      return;
-    }
+    if (!hits.length) { noResults.style.display = "block"; return; }
 
     const titles = hits.map(h => h.title);
 
-    // 2. Fetch thumbnail + History section for results
-    // Re-use getPageDetails but we need pageIds — fetch them via titles
-    const infoData = await apiFetch({
+    // 2. Resolve titles to pageIds
+    const pageData = await apiFetch({
       action: "query",
       titles: titles.join("|"),
-      prop: "pageimages|info",
-      piprop: "thumbnail",
-      pithumbsize: 400,
-      inprop: "",
+      prop: "info",
     });
+    const pages = Object.values(pageData.query?.pages ?? {}).filter(p => !p.missing);
+    // Preserve search-result order
+    const titleToId = Object.fromEntries(pages.map(p => [p.title, p.pageid]));
+    const members = titles
+      .filter(t => titleToId[t])
+      .map(t => ({ title: t, pageId: titleToId[t] }));
 
-    const pages = infoData.query?.pages ?? {};
-    // Build members array in search-result order
-    const titleToPage = {};
-    for (const page of Object.values(pages)) {
-      if (!page.missing) titleToPage[page.title] = page;
-    }
+    if (!members.length) { noResults.style.display = "block"; return; }
 
-    const members = [];
-    for (const title of titles) {
-      const page = titleToPage[title];
-      if (page) members.push({ title: page.title, pageId: page.pageid });
-    }
-
-    const pageIds = members.map(m => m.pageId);
-
-    // 3. Get History section for each result
-    const secData = await apiFetch({
-      action: "query",
-      pageids: pageIds.join("|"),
-      prop: "sections",
-    });
-    const secPages = secData.query?.pages ?? {};
-    const sectionIndexMap = new Map();
-    for (const [id, page] of Object.entries(secPages)) {
-      const hist = (page.sections ?? []).find(s => /^history$/i.test(s.line.trim()));
-      if (hist) sectionIndexMap.set(Number(id), hist.index);
-    }
-
-    // 4. Fetch History wikitext per result
-    const extractMap = new Map();
-    await Promise.all(pageIds.map(async pid => {
-      const idx = sectionIndexMap.get(pid);
-      if (idx === undefined) { extractMap.set(pid, ""); return; }
-      try {
-        const d = await apiFetch({ action: "query", pageids: pid, prop: "revisions", rvprop: "content", rvsection: idx });
-        const wt = Object.values(d.query?.pages ?? {})[0]?.revisions?.[0]?.["*"] ?? "";
-        extractMap.set(pid, wikiToText(wt));
-      } catch { extractMap.set(pid, ""); }
-    }));
-
-    // 5. Get thumbnails
-    const thumbData = await apiFetch({
-      action: "query",
-      pageids: pageIds.join("|"),
-      prop: "pageimages",
-      piprop: "thumbnail",
-      pithumbsize: 400,
-    });
-    const thumbPages = thumbData.query?.pages ?? {};
-
-    const details = new Map();
-    for (const pid of pageIds) {
-      details.set(pid, {
-        thumbnail: thumbPages[String(pid)]?.thumbnail?.source ?? null,
-        extract: extractMap.get(pid) ?? "",
-      });
-    }
-
+    // 3. Fetch details (thumbnail + history text)
+    const details = await getPageDetails(members.map(m => m.pageId));
     renderCards(members, details, false);
-    if (!members.length) noResults.style.display = "block";
 
   } catch (err) {
     console.error("Search error:", err);
@@ -379,18 +340,16 @@ async function runSearch(query) {
   }
 }
 
-// ─── Search input handler ─────────────────────────────────────
+// ─── Search input ─────────────────────────────────────────────
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimer);
   const query = searchInput.value.trim();
 
   if (!query) {
-    // Restore browse mode
     if (searchMode) {
       searchMode = false;
       noResults.style.display = "none";
       grid.innerHTML = "";
-      // Re-attach saved browse cards
       const frag = document.createDocumentFragment();
       browseCards.forEach(c => frag.appendChild(c));
       grid.appendChild(frag);
@@ -399,12 +358,11 @@ searchInput.addEventListener("input", () => {
     return;
   }
 
-  if (!searchMode) searchMode = true;
-  // Debounce 400ms
+  searchMode = true;
   searchTimer = setTimeout(() => runSearch(query), 400);
 });
 
-// ─── Browse: load batch ───────────────────────────────────────
+// ─── Browse load batch ────────────────────────────────────────
 async function loadBatch() {
   if (isLoading || exhausted || searchMode) return;
   isLoading = true;
@@ -415,10 +373,8 @@ async function loadBatch() {
     const { members, nextContinue } = await getCategoryMembers();
     if (!members.length) { exhausted = true; return; }
 
-    const pageIds = members.map(m => m.pageId);
-    const details = await getPageDetails(pageIds);
-
-    renderCards(members, details, true); // save to browseCards
+    const details = await getPageDetails(members.map(m => m.pageId));
+    renderCards(members, details, true);
 
     totalLoaded += members.length;
     totalLoadedEl.textContent = totalLoaded.toLocaleString();
