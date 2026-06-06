@@ -119,23 +119,41 @@ async function getCategoryMembers() {
 }
 
 // ─── Fetch wikitext for a page ───────────────────────────────
-// action=parse reliably returns wikitext on Fandom UCP. CORS-safe with origin=*.
+// Tries action=query&prop=revisions (no rvslots — widest Fandom compatibility).
+// Falls back to action=parse if that returns nothing.
 async function fetchWikitext(title) {
-  const data = await apiFetch({
+  // Attempt 1: action=query (CORS-safe, works on all Fandom wikis)
+  const qdata = await apiFetch({
+    action:  "query",
+    titles:  title,
+    prop:    "revisions",
+    rvprop:  "content",
+    // deliberately NO rvslots — older Fandom UCP returns content in rev["*"]
+  });
+  const page = Object.values(qdata.query?.pages ?? {})[0];
+  const rev  = page?.revisions?.[0];
+  const fromQuery = rev?.["*"] ?? rev?.slots?.main?.["*"] ?? "";
+
+  if (fromQuery) {
+    console.debug(`[${title}] wikitext via query (${fromQuery.length} chars)`);
+    return fromQuery;
+  }
+
+  // Attempt 2: action=parse
+  const pdata = await apiFetch({
     action: "parse",
     page:   title,
     prop:   "wikitext",
   });
+  const fromParse = pdata.parse?.wikitext?.["*"] ?? "";
 
-  const wikitext = data.parse?.wikitext?.["*"] ?? "";
-
-  if (wikitext) {
-    console.debug(`[${title}] wikitext OK (${wikitext.length} chars)`);
+  if (fromParse) {
+    console.debug(`[${title}] wikitext via parse (${fromParse.length} chars)`);
   } else {
-    console.warn(`[${title}] no wikitext. Response:`, JSON.stringify(data).slice(0, 400));
+    console.warn(`[${title}] BOTH methods returned empty. query rev:`, JSON.stringify(rev).slice(0,200), "parse:", JSON.stringify(pdata).slice(0,200));
   }
 
-  return wikitext;
+  return fromParse;
 }
 
 // ─── Extract and clean History section ───────────────────────
