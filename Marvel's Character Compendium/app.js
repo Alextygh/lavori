@@ -144,10 +144,14 @@ function getHistoryExcerpt(wikitext) {
 
   // Find ==History== at any heading level (==, ===, etc.)
   const match = wikitext.match(/={2,}\s*History\s*={2,}/i);
-  if (!match) return "";
+  if (!match) {
+    console.warn("NO ==History== heading found. First 500 chars:", wikitext.slice(0, 500));
+    return "";
+  }
 
   // Take everything after the History heading
   let text = wikitext.slice(match.index + match[0].length);
+  console.debug("After ==History==, first 600 chars of raw text:", text.slice(0, 600));
 
   // Remove nested {{templates}} (run multiple passes for nesting)
   for (let i = 0; i < 10; i++) text = text.replace(/\{\{[^{}]*\}\}/g, "");
