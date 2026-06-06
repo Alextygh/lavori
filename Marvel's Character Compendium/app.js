@@ -122,34 +122,83 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    const data = await apiFetch({
-      action:      "query",
-      list:        "search",
-      srsearch:    `${searchQuery} incategory:Characters`,
-      srnamespace: 0,
-      srlimit:     BATCH,
-      sroffset:    searchOffset,
-      srprop:      "size",
+    // Step 1: get title matches via prefixsearch (titles starting with query)
+    // and fulltext search in parallel
+    const [psData, srData] = await Promise.all([
+      apiFetch({
+        action:      "query",
+        list:        "prefixsearch",
+        pssearch:    searchQuery,
+        psnamespace: 0,
+        pslimit:     50,
+        psoffset:    searchOffset,
+      }),
+      apiFetch({
+        action:      "query",
+        list:        "search",
+        srsearch:    searchQuery,
+        srnamespace: 0,
+        srlimit:     50,
+        sroffset:    searchOffset,
+        srprop:      "",
+      }),
+    ]);
+
+    // Merge & deduplicate
+    const seen = new Set();
+    const candidates = [
+      ...(psData.query?.prefixsearch ?? []),
+      ...(srData.query?.search       ?? []),
+    ].filter(h => {
+      if (seen.has(h.pageid)) return false;
+      seen.add(h.pageid);
+      return true;
     });
 
-    const hits = data.query?.search ?? [];
-
-    if (!hits.length && searchOffset === 0) {
+    if (!candidates.length && searchOffset === 0) {
       exhausted = true;
       noResults.style.display = "block";
       return;
     }
 
-    const members = hits.map(h => ({ title: h.title, pageId: h.pageid }));
-    const details = await getPageDetails(members);
-    renderCards(members, details);
+    // Step 2: verify which candidates are actually in Category:Characters
+    // by fetching their categories in one batched call
+    const pageIds = candidates.map(h => h.pageid);
+    const catData = await apiFetch({
+      action:  "query",
+      pageids: pageIds.join("|"),
+      prop:    "categories",
+      clcategories: "Category:Characters",
+      cllimit: "max",
+    });
 
-    totalLoaded += members.length;
-    totalLoadedEl.textContent = totalLoaded.toLocaleString();
+    const catPages = catData.query?.pages ?? {};
+    const inCategory = new Set(
+      Object.values(catPages)
+        .filter(p => p.categories?.length > 0)
+        .map(p => p.pageid)
+    );
 
-    const totalHits = data.query?.searchinfo?.totalhits ?? 0;
-    searchOffset += hits.length;
-    if (hits.length < BATCH || searchOffset >= totalHits) exhausted = true;
+    const members = candidates
+      .filter(h => inCategory.has(h.pageid))
+      .map(h => ({ title: h.title, pageId: h.pageid }));
+
+    if (!members.length && searchOffset === 0) {
+      exhausted = true;
+      noResults.style.display = "block";
+      return;
+    }
+
+    if (members.length > 0) {
+      const details = await getPageDetails(members);
+      renderCards(members, details);
+      totalLoaded += members.length;
+      totalLoadedEl.textContent = totalLoaded.toLocaleString();
+    }
+
+    searchOffset += candidates.length;
+    const totalHits = srData.query?.searchinfo?.totalhits ?? 0;
+    if (candidates.length < 50 || searchOffset >= totalHits) exhausted = true;
 
   } catch (err) {
     console.error("Search error:", err);
