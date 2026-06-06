@@ -12,7 +12,7 @@ const CATEGORY = "Characters";
 const BATCH    = 50;
 
 const LETTERS = ["0–9","A","B","C","D","E","F","G","H","I","J","K","L","M",
-                 "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                 "N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Other"];
 
 // ─── State ────────────────────────────────────────────────────
 let currentLetter = null;
@@ -100,7 +100,11 @@ async function getCategoryMembers() {
   };
 
   if (currentLetter) {
-    if (currentLetter === "0–9") {
+    if (currentLetter === "Other") {
+      // Non-letter, non-digit entries sort before "0" in MediaWiki's collation.
+      // Set no start prefix (begin from top of category) and cap just before "0".
+      params.cmendsortkey = "0";
+    } else if (currentLetter === "0–9") {
       params.cmstartsortkeyprefix = "0";
       params.cmendsortkey         = ":"; // ASCII just after "9"
     } else {
