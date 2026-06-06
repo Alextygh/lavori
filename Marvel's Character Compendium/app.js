@@ -9,23 +9,29 @@
 
 const API      = "https://marvel.fandom.com/api.php";
 const CATEGORY = "Characters";
-const BATCH    = 450;
+const BATCH    = 100;
 
 const LETTERS = ["0–9","A","B","C","D","E","F","G","H","I","J","K","L","M",
                  "N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Other"];
 
 // ─── State ────────────────────────────────────────────────────
-let currentLetter = null;
-let cmcontinue    = null;
-let isLoading     = false;
-let exhausted     = false;
-let totalLoaded   = 0;
+let currentLetter  = null;
+let cmcontinue     = null;
+let isLoading      = false;
+let exhausted      = false;
+let totalLoaded    = 0;
+let searchQuery    = "";      // current search string
+let searchOffset   = 0;      // pagination offset for search results
+let isSearchMode   = false;  // true while a search is active
+let searchDebounce = null;
 
 // ─── DOM ──────────────────────────────────────────────────────
 const grid          = document.getElementById("grid");
 const loadMoreBtn   = document.getElementById("load-more-btn");
 const spinner       = document.getElementById("spinner");
 const totalLoadedEl = document.getElementById("total-loaded");
+const searchInput   = document.getElementById("search-input");
+const searchClear   = document.getElementById("search-clear");
 
 // Build letter bar (replaces the search bar div)
 const searchBar = document.querySelector(".search-bar");
@@ -48,8 +54,27 @@ LETTERS.forEach(letter => {
 
 const noResults = document.createElement("div");
 noResults.id = "no-results";
-noResults.textContent = "NO CHARACTERS FOR THIS LETTER";
+noResults.textContent = "NO CHARACTERS FOUND";
 grid.after(noResults);
+
+// ─── Search input handlers ────────────────────────────────────
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim();
+  searchClear.classList.toggle("visible", q.length > 0);
+  clearTimeout(searchDebounce);
+  if (q.length === 0) {
+    exitSearch();
+    return;
+  }
+  searchDebounce = setTimeout(() => startSearch(q), 350);
+});
+
+searchClear.addEventListener("click", () => {
+  searchInput.value = "";
+  searchClear.classList.remove("visible");
+  exitSearch();
+  searchInput.focus();
+});
 
 // Modal elements
 const backdrop     = document.getElementById("modal-backdrop");
@@ -61,9 +86,96 @@ const modalReality = document.getElementById("modal-reality");
 const modalExtract = document.getElementById("modal-extract");
 const modalLink    = document.getElementById("modal-link");
 
+// ─── Search mode ──────────────────────────────────────────────
+function startSearch(q) {
+  if (isLoading) return;
+  searchQuery  = q;
+  searchOffset = 0;
+  isSearchMode = true;
+  exhausted    = false;
+  totalLoaded  = 0;
+  totalLoadedEl.textContent = "0";
+  noResults.style.display   = "none";
+  grid.innerHTML            = "";
+  loadMoreBtn.style.display = "none";
+
+  // Dim letter buttons while searching
+  document.querySelectorAll(".letter-btn").forEach(b => b.classList.remove("active"));
+  searchBar.classList.add("search-active");
+
+  loadSearchBatch();
+}
+
+function exitSearch() {
+  isSearchMode = false;
+  searchQuery  = "";
+  searchOffset = 0;
+  searchBar.classList.remove("search-active");
+  // Restore the previously active letter (or ALL)
+  selectLetter(currentLetter);
+}
+
+async function loadSearchBatch() {
+  if (isLoading || exhausted) return;
+  isLoading = true;
+  showSpinner(true);
+  loadMoreBtn.style.display = "none";
+
+  try {
+    // action=query&list=search searches page titles and content.
+    // srnamespace=0 = main namespace. We also filter to Category:Characters
+    // via srsearch prefix so results stay on-wiki characters.
+    const data = await apiFetch({
+      action:      "query",
+      list:        "search",
+      srsearch:    `${searchQuery} incategory:"Characters"`,
+      srnamespace: 0,
+      srlimit:     BATCH,
+      sroffset:    searchOffset,
+      srprop:      "size|wordcount",
+    });
+
+    const hits = data.query?.search ?? [];
+
+    if (!hits.length && searchOffset === 0) {
+      exhausted = true;
+      noResults.style.display = "block";
+      return;
+    }
+
+    // Map hits to the same member shape the rest of the code expects
+    const members = hits.map(h => ({ title: h.title, pageId: h.pageid }));
+    const details = await getPageDetails(members);
+    renderCards(members, details);
+
+    totalLoaded += members.length;
+    totalLoadedEl.textContent = totalLoaded.toLocaleString();
+
+    const totalHits = data.query?.searchinfo?.totalhits ?? 0;
+    searchOffset += hits.length;
+    if (hits.length < BATCH || searchOffset >= totalHits) exhausted = true;
+
+  } catch (err) {
+    console.error("Search error:", err);
+  } finally {
+    isLoading = false;
+    showSpinner(false);
+    if (!exhausted) {
+      loadMoreBtn.style.display = "flex";
+      loadMoreBtn.querySelector(".btn-sub").textContent =
+        `${BATCH} per batch · search results`;
+    } else {
+      loadMoreBtn.style.display = "none";
+    }
+  }
+}
+
 // ─── Letter selection ─────────────────────────────────────────
 function selectLetter(letter) {
   if (isLoading) return;
+  isSearchMode  = false;
+  searchQuery   = "";
+  searchOffset  = 0;
   currentLetter = letter;
   cmcontinue    = null;
   exhausted     = false;
@@ -72,6 +184,8 @@ function selectLetter(letter) {
   noResults.style.display   = "none";
   grid.innerHTML            = "";
   loadMoreBtn.style.display = "none";
+  loadMoreBtn.querySelector(".btn-sub").textContent =
+    `${BATCH} per batch · live from Fandom`;
 
   document.querySelectorAll(".letter-btn").forEach(b => {
     b.classList.toggle("active", b.textContent === (letter ?? "ALL"));
@@ -350,5 +464,8 @@ function showSpinner(on) {
   spinner.classList.toggle("hidden", !on);
 }
 
-loadMoreBtn.addEventListener("click", loadBatch);
+loadMoreBtn.addEventListener("click", () => {
+  if (isSearchMode) loadSearchBatch();
+  else              loadBatch();
+});
 loadBatch();
