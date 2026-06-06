@@ -1,23 +1,30 @@
 /**
  * Marvel Character Compendium
- * - Letter filter buttons (0–9, A–Z) using cmstartsortkeyprefix + cmendsortkey
- * - History text: fetched via action=parse&prop=wikitext, split on ==History==
- * - Modal links to character page with #History anchor
+ *
+ * Letter filter: ALL, Others, 0–9, A–Z
+ * "Others" = sortkeys that don't start with 0-9 or A-Z (symbols, etc.)
+ *
+ * History text: fetched via ?action=raw on the wiki page (plain wikitext),
+ * then split on the ==History== heading and cleaned.
+ *
+ * Modal link: plain character page URL (no #History anchor).
  */
 
 const API      = "https://marvel.fandom.com/api.php";
+const WIKI     = "https://marvel.fandom.com/wiki/";
 const CATEGORY = "Characters";
 const BATCH    = 50;
 
+// Letters exactly as on marvel.fandom.com/wiki/Category:Characters
 const LETTERS = ["0–9","A","B","C","D","E","F","G","H","I","J","K","L","M",
                  "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 
 // ─── State ────────────────────────────────────────────────────
-let currentLetter  = null; // null = all
-let cmcontinue     = null;
-let isLoading      = false;
-let exhausted      = false;
-let totalLoaded    = 0;
+let currentLetter = null; // null = ALL, "!" = Others, else "A"–"Z" / "0–9"
+let cmcontinue    = null;
+let isLoading     = false;
+let exhausted     = false;
+let totalLoaded   = 0;
 
 // ─── DOM ──────────────────────────────────────────────────────
 const grid          = document.getElementById("grid");
@@ -25,35 +32,31 @@ const loadMoreBtn   = document.getElementById("load-more-btn");
 const spinner       = document.getElementById("spinner");
 const totalLoadedEl = document.getElementById("total-loaded");
 
-// Replace the search bar with letter buttons
-const searchBar = document.querySelector(".search-bar");
-searchBar.innerHTML = "";
-searchBar.classList.add("letter-bar");
+// Build letter bar from the existing .search-bar div
+const letterBar = document.querySelector(".search-bar");
+letterBar.innerHTML = "";
+letterBar.classList.add("letter-bar");
 
-LETTERS.forEach(letter => {
+function makeLetterBtn(label, value) {
   const btn = document.createElement("button");
-  btn.className = "letter-btn";
-  btn.textContent = letter;
-  btn.dataset.letter = letter;
-  btn.addEventListener("click", () => selectLetter(letter));
-  searchBar.appendChild(btn);
-});
+  btn.className = "letter-btn" + (value === null ? " active" : "");
+  btn.textContent = label;
+  btn.addEventListener("click", () => selectLetter(value));
+  letterBar.appendChild(btn);
+  return btn;
+}
 
-// "All" button prepended
-const allBtn = document.createElement("button");
-allBtn.className = "letter-btn active";
-allBtn.textContent = "ALL";
-allBtn.dataset.letter = "";
-allBtn.addEventListener("click", () => selectLetter(null));
-searchBar.prepend(allBtn);
+makeLetterBtn("ALL", null);
+makeLetterBtn("Others", "!");
+LETTERS.forEach(l => makeLetterBtn(l, l));
 
-// No-results message
+// No-results
 const noResults = document.createElement("div");
 noResults.id = "no-results";
 noResults.textContent = "NO CHARACTERS FOR THIS LETTER";
 grid.after(noResults);
 
-// Modal
+// Modal refs
 const backdrop     = document.getElementById("modal-backdrop");
 const modal        = document.getElementById("modal");
 const modalClose   = document.getElementById("modal-close");
@@ -64,21 +67,22 @@ const modalExtract = document.getElementById("modal-extract");
 const modalLink    = document.getElementById("modal-link");
 
 // ─── Letter selection ─────────────────────────────────────────
-function selectLetter(letter) {
+function selectLetter(value) {
   if (isLoading) return;
-  currentLetter = letter;
+  currentLetter = value;
   cmcontinue    = null;
   exhausted     = false;
   totalLoaded   = 0;
   totalLoadedEl.textContent = "0";
   noResults.style.display   = "none";
   grid.innerHTML            = "";
+  loadMoreBtn.style.display = "none";
 
-  // Update active button
   document.querySelectorAll(".letter-btn").forEach(b => {
-    b.classList.toggle("active",
-      letter === null ? b.dataset.letter === "" : b.dataset.letter === letter
-    );
+    const bv = b.textContent === "ALL" ? null
+             : b.textContent === "Others" ? "!"
+             : b.textContent;
+    b.classList.toggle("active", bv === value);
   });
 
   loadBatch();
@@ -100,126 +104,129 @@ async function getCategoryMembers() {
     cmtitle: `Category:${CATEGORY}`,
     cmtype: "page",
     cmlimit: BATCH,
-    cmprop: "ids|title|sortkey",
+    cmprop: "ids|title|sortkeyprefix",
   };
 
-  if (currentLetter) {
-    if (currentLetter === "0–9") {
-      params.cmstartsortkeyprefix = "0";
-      params.cmendsortkey        = ":"; // ASCII after "9", stops before "A"
-    } else {
-      params.cmstartsortkeyprefix = currentLetter.toUpperCase();
-      // Next letter in ASCII stops the range cleanly
-      const nextChar = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
-      params.cmstartsortkeyprefix = currentLetter.toUpperCase();
-      params.cmendsortkey         = nextChar.toUpperCase();
-    }
+  if (currentLetter === "!") {
+    // "Others": sortkeys before "0" in ASCII — symbols, empty, etc.
+    // Start from beginning, end before "0"
+    params.cmendsortkey = "0";
+  } else if (currentLetter === "0–9") {
+    params.cmstartsortkeyprefix = "0";
+    params.cmendsortkey         = ":"; // ASCII char after "9", before "A"
+  } else if (currentLetter) {
+    params.cmstartsortkeyprefix = currentLetter.toUpperCase();
+    // End before next letter
+    const next = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+    params.cmendsortkey         = next.toUpperCase();
   }
+  // null (ALL) = no filter
 
   if (cmcontinue) params.cmcontinue = cmcontinue;
 
   const data = await apiFetch(params);
   return {
-    members: (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
+    members:     (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
     nextContinue: data.continue?.cmcontinue ?? null,
   };
 }
 
-// ─── Fetch History text for a single page ────────────────────
+// ─── Fetch thumbnail batch ────────────────────────────────────
+async function fetchThumbnails(pageIds) {
+  const data = await apiFetch({
+    action:   "query",
+    pageids:  pageIds.join("|"),
+    prop:     "pageimages",
+    piprop:   "thumbnail",
+    pithumbsize: 400,
+  });
+  const pages = data.query?.pages ?? {};
+  return new Map(
+    Object.entries(pages).map(([id, p]) => [Number(id), p.thumbnail?.source ?? null])
+  );
+}
+
+// ─── Fetch History text for one character ────────────────────
 /**
- * Uses action=parse&page=TITLE&prop=wikitext to get the full page wikitext,
- * then splits on the first ==History== heading to extract just that section.
- * Returns the first clean prose paragraph.
+ * Fetches raw wikitext via ?action=raw (no API key, CORS-safe on Fandom).
+ * Splits on ==History== heading, cleans wiki markup, returns first paragraph.
  */
-async function fetchHistoryText(title) {
+async function fetchHistory(title) {
   try {
-    const data = await apiFetch({
-      action: "parse",
-      page: title,
-      prop: "wikitext",
-      // Don't expand templates — we just need raw text
-    });
-
-    const wikitext = data.parse?.wikitext?.["*"] ?? "";
-    if (!wikitext) return "";
-
-    // Find ==History== (any depth heading, case-insensitive)
-    const match = wikitext.match(/={2,}\s*History\s*={2,}/i);
-    if (!match) return "";
-
-    const afterHistory = wikitext.slice(match.index + match[0].length);
-    return cleanWikitext(afterHistory);
+    const url = `${WIKI}${encodeURIComponent(title.replace(/ /g, "_"))}?action=raw`;
+    const res = await fetch(url);
+    if (!res.ok) return "";
+    const wikitext = await res.text();
+    return parseHistory(wikitext);
   } catch {
     return "";
   }
 }
 
-// ─── Batch page details ───────────────────────────────────────
-async function getPageDetails(pageIds) {
-  if (!pageIds.length) return new Map();
+function parseHistory(wikitext) {
+  // Find ==History== at any heading depth
+  const match = wikitext.match(/\n={2,}\s*History\s*={2,}\n/i);
+  if (!match) return "";
 
-  // Thumbnails: single batched call
-  const imgData = await apiFetch({
-    action: "query",
-    pageids: pageIds.join("|"),
-    prop: "pageimages",
-    piprop: "thumbnail",
-    pithumbsize: 400,
-  });
-  const imgPages = imgData.query?.pages ?? {};
+  let text = wikitext.slice(match.index + match[0].length);
 
-  // History texts: individual parse calls (cannot be batched with action=parse)
-  // We need titles for action=parse — build a pageId→title map first
-  const titleData = await apiFetch({
-    action: "query",
-    pageids: pageIds.join("|"),
-    prop: "info",
-  });
-  const infoPages = titleData.query?.pages ?? {};
+  // Remove nested templates iteratively
+  for (let i = 0; i < 10; i++) text = text.replace(/\{\{[^{}]*\}\}/g, "");
 
-  // Fetch all history texts in parallel
-  const historyEntries = await Promise.all(
-    pageIds.map(async pid => {
-      const title = infoPages[String(pid)]?.title ?? "";
-      const text  = title ? await fetchHistoryText(title) : "";
-      return [pid, text];
-    })
-  );
-  const historyMap = new Map(historyEntries);
+  // Strip [[File:...]] and [[Image:...]]
+  text = text.replace(/\[\[(File|Image):[^\]]*\]\]/gi, "");
 
-  const result = new Map();
-  for (const pid of pageIds) {
-    result.set(pid, {
-      thumbnail: imgPages[String(pid)]?.thumbnail?.source ?? null,
-      extract:   historyMap.get(pid) ?? "",
-    });
-  }
-  return result;
-}
+  // [[link|label]] → label; [[link]] → link
+  text = text.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
 
-// ─── Wiki markup stripper ─────────────────────────────────────
-function cleanWikitext(raw) {
-  let t = raw;
-  for (let i = 0; i < 8; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
-  t = t.replace(/\[\[(File|Image):[^\]]*\]\]/gi, "");
-  t = t.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
-  t = t.replace(/<[^>]+>/g, "");
-  t = t.replace(/'{2,5}/g, "");
-  t = t.replace(/\[(?:note\s*)?\d+\]/g, "");
-  t = t.replace(/={2,}[^=\n]*={2,}/g, "");
-  t = t.replace(/^\s*[|!{}\-][^\n]*/gm, "");
+  // Strip HTML tags
+  text = text.replace(/<[^>]+>/g, "");
 
-  const paragraphs = t.split(/\n+/).map(p => p.trim()).filter(Boolean);
-  for (const p of paragraphs) {
+  // Strip bold/italic
+  text = text.replace(/'{2,5}/g, "");
+
+  // Strip reference numbers [1], [note 2]
+  text = text.replace(/\[(?:note\s*)?\d+\]/g, "");
+
+  // Strip section headings (==...==)
+  text = text.replace(/={2,}[^=\n]*={2,}/g, "");
+
+  // Strip table rows and template remnants
+  text = text.replace(/^\s*[|!{}\-][^\n]*/gm, "");
+
+  // Find first real prose paragraph
+  for (const para of text.split(/\n+/)) {
+    const p = para.trim();
+    if (!p) continue;
     if (/^[*#:;|!{}]/.test(p)) continue;
     if (p.length < 40) continue;
     if (/abridged|complete history/i.test(p)) continue;
-    return p.replace(/\s+/g, " ").trim();
+    return p.replace(/\s+/g, " ");
   }
   return "";
 }
 
-// ─── Title parser ─────────────────────────────────────────────
+// ─── Page details ─────────────────────────────────────────────
+async function getPageDetails(members) {
+  const pageIds = members.map(m => m.pageId);
+
+  // Thumbnails (one batched API call) + history texts (parallel fetches)
+  const [thumbMap, historyTexts] = await Promise.all([
+    fetchThumbnails(pageIds),
+    Promise.all(members.map(m => fetchHistory(m.title))),
+  ]);
+
+  const result = new Map();
+  members.forEach((m, i) => {
+    result.set(m.pageId, {
+      thumbnail: thumbMap.get(m.pageId) ?? null,
+      extract:   historyTexts[i] ?? "",
+    });
+  });
+  return result;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
 function parseTitle(title) {
   const m = title.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
   return m ? { name: m[1].trim(), reality: m[2].trim() } : { name: title, reality: "" };
@@ -228,11 +235,10 @@ function esc(s) {
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ─── Card factory ─────────────────────────────────────────────
+// ─── Card ─────────────────────────────────────────────────────
 function makeCard({ title, thumbnail, extract }) {
   const { name, reality } = parseTitle(title);
-  const slug = encodeURIComponent(title.replace(/ /g, "_"));
-  const url  = `https://marvel.fandom.com/wiki/${slug}#History`;
+  const url = `${WIKI}${encodeURIComponent(title.replace(/ /g, "_"))}`;
 
   const card = document.createElement("div");
   card.className = "card";
@@ -255,9 +261,9 @@ function makeCard({ title, thumbnail, extract }) {
 
 function renderCards(members, details) {
   const frag = document.createDocumentFragment();
-  for (const { title, pageId } of members) {
-    const { thumbnail, extract } = details.get(pageId) ?? {};
-    frag.appendChild(makeCard({ title, thumbnail: thumbnail ?? null, extract: extract ?? "" }));
+  for (const m of members) {
+    const { thumbnail, extract } = details.get(m.pageId) ?? {};
+    frag.appendChild(makeCard({ title: m.title, thumbnail: thumbnail ?? null, extract: extract ?? "" }));
   }
   grid.appendChild(frag);
 }
@@ -267,7 +273,7 @@ function openModal({ name, reality, url, thumbnail, extract }) {
   modalName.textContent    = name;
   modalReality.textContent = reality || "";
   modalLink.href           = url;
-  modalExtract.textContent = extract || "No history excerpt available.";
+  modalExtract.textContent = extract || "No history available for this character.";
 
   if (thumbnail) {
     modalImg.src = thumbnail;
@@ -305,7 +311,7 @@ async function loadBatch() {
       return;
     }
 
-    const details = await getPageDetails(members.map(m => m.pageId));
+    const details = await getPageDetails(members);
     renderCards(members, details);
 
     totalLoaded += members.length;
