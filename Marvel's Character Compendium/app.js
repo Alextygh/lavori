@@ -156,59 +156,53 @@ async function fetchWikitext(title) {
   return fromParse;
 }
 
-// ─── Extract and clean History section ───────────────────────
-function getHistoryExcerpt(wikitext) {
-  if (!wikitext) return "";
+// ─── Clean wikitext into plain prose ─────────────────────────
+function cleanToText(raw) {
+  let t = raw;
+  for (let i = 0; i < 10; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
+  t = t.replace(/\[\[(File|Image):[^\]|]*(?:\|[^\]]*)?\]\]/gi, "");
+  t = t.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
+  t = t.replace(/<[^>]+>/g, "");
+  t = t.replace(/'{2,5}/g, "");
+  t = t.replace(/\[[^\]]{0,30}\]/g, "");
+  t = t.replace(/={2,}[^
+]*={2,}/g, "");
+  t = t.replace(/^[ 	]*[|!{}\-][^
+]*/gm, "");
+  return t;
+}
 
-  // Find ==History== at any heading level (==, ===, etc.)
-  const match = wikitext.match(/={2,}\s*History\s*={2,}/i);
-  if (!match) {
-    console.warn("NO ==History== heading found. First 500 chars:", wikitext.slice(0, 500));
-    return "";
-  }
-
-  // Take everything after the History heading
-  let text = wikitext.slice(match.index + match[0].length);
-  console.debug("After ==History==, first 600 chars of raw text:", text.slice(0, 600));
-
-  // Remove nested {{templates}} (run multiple passes for nesting)
-  for (let i = 0; i < 10; i++) text = text.replace(/\{\{[^{}]*\}\}/g, "");
-
-  // Remove [[File:...]] and [[Image:...]]
-  text = text.replace(/\[\[(File|Image):[^\]|]*(?:\|[^\]]*)?\]\]/gi, "");
-
-  // Convert [[link|label]] → label, [[link]] → link text
-  text = text.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
-
-  // Strip HTML tags
-  text = text.replace(/<[^>]+>/g, "");
-
-  // Strip bold/italic ('' and ''')
-  text = text.replace(/'{2,5}/g, "");
-
-  // Strip citation refs like [1], [note 2], [citation needed]
-  text = text.replace(/\[[^\]]{0,30}\]/g, "");
-
-  // Strip all section headings (==Heading==)
-  text = text.replace(/={2,}[^\n]*={2,}/g, "");
-
-  // Strip table syntax (lines starting with |, !, {|, |}, -)
-  text = text.replace(/^[ \t]*[|!{}\-][^\n]*/gm, "");
-
-  // Split into paragraphs and find first real prose one
-  const paragraphs = text.split(/\n+/);
-  for (const para of paragraphs) {
+function firstProseParagraph(text) {
+  for (const para of text.split(/
++/)) {
     const p = para.trim();
     if (!p) continue;
-    if (/^[*#:;]/.test(p)) continue;              // list syntax
-    if (p.length < 50) continue;                   // too short to be real prose
-    if (/abridged|this is a/i.test(p)) continue;  // notice text
-    // Success — clean up spacing and return
+    if (/^[*#:;]/.test(p)) continue;
+    if (p.length < 50) continue;
+    if (/abridged|this is a/i.test(p)) continue;
     return p.replace(/\s+/g, " ").trim();
   }
   return "";
 }
 
+// ─── Extract History section (falls back to any prose) ───────
+function getHistoryExcerpt(wikitext) {
+  if (!wikitext) return "";
+
+  // Try ==History== first
+  const match = wikitext.match(/={2,}\s*History\s*={2,}/i);
+  if (match) {
+    const afterHistory = wikitext.slice(match.index + match[0].length);
+    const result = firstProseParagraph(cleanToText(afterHistory));
+    if (result) return result;
+  }
+
+  // No History section or it was empty — fall back to any prose on the page
+  // Strip the whole infobox block iteratively then grab first paragraph
+  let t = wikitext;
+  for (let i = 0; i < 15; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
+  return firstProseParagraph(cleanToText(t));
+}
 // ─── Fetch thumbnails for a batch of pageIds ─────────────────
 async function fetchThumbnails(pageIds) {
   const data = await apiFetch({
