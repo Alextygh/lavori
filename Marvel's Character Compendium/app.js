@@ -118,90 +118,50 @@ async function getCategoryMembers() {
   };
 }
 
-// ─── Fetch wikitext for a page ───────────────────────────────
-// Tries action=query&prop=revisions (no rvslots — widest Fandom compatibility).
-// Falls back to action=parse if that returns nothing.
-async function fetchWikitext(title) {
-  // Attempt 1: action=query (CORS-safe, works on all Fandom wikis)
-  const qdata = await apiFetch({
-    action:  "query",
-    titles:  title,
-    prop:    "revisions",
-    rvprop:  "content",
-    // deliberately NO rvslots — older Fandom UCP returns content in rev["*"]
+// ─── Fetch rendered HTML for a page and extract History text ──
+// Uses action=parse&prop=text which returns the full rendered HTML.
+// We then parse it in a detached DOM and grab the text inside the
+// marvel_database_section div that follows the #History headline.
+async function fetchHistoryExcerpt(title) {
+  const data = await apiFetch({
+    action:       "parse",
+    page:         title,
+    prop:         "text",
+    disableeditsection: "1",
   });
-  const page = Object.values(qdata.query?.pages ?? {})[0];
-  const rev  = page?.revisions?.[0];
-  const fromQuery = rev?.["*"] ?? rev?.slots?.main?.["*"] ?? "";
 
-  if (fromQuery) {
-    console.debug(`[${title}] wikitext via query (${fromQuery.length} chars)`);
-    return fromQuery;
+  const html = data?.parse?.text?.["*"] ?? "";
+  if (!html) return "";
+
+  // Parse into a detached document so we can use querySelector
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  // Find the History headline span, then its parent h2, then the next sibling div
+  const historySpan = doc.querySelector("#History");
+  if (!historySpan) {
+    // Fallback: grab first paragraph from mw-parser-output if no History section
+    const firstP = doc.querySelector(".mw-parser-output p");
+    return firstP ? firstP.textContent.trim().replace(/\s+/g, " ") : "";
   }
 
-  // Attempt 2: action=parse
-  const pdata = await apiFetch({
-    action: "parse",
-    page:   title,
-    prop:   "wikitext",
-  });
-  const fromParse = pdata.parse?.wikitext?.["*"] ?? "";
+  // The structure is: <h2><span id="History">…</span></h2><div class="marvel_database_section">…</div>
+  const h2 = historySpan.closest("h2");
+  const section = h2?.nextElementSibling;
+  if (!section) return "";
 
-  if (fromParse) {
-    console.debug(`[${title}] wikitext via parse (${fromParse.length} chars)`);
-  } else {
-    console.warn(`[${title}] BOTH methods returned empty. query rev:`, JSON.stringify(rev).slice(0,200), "parse:", JSON.stringify(pdata).slice(0,200));
+  // Get all text-bearing paragraphs from the section, skip citation brackets
+  const paragraphs = [...section.querySelectorAll("p")];
+  for (const p of paragraphs) {
+    // Remove citation superscripts
+    p.querySelectorAll("sup, .reference").forEach(el => el.remove());
+    const text = p.textContent.trim().replace(/\s+/g, " ");
+    if (text.length >= 40) return text;
   }
 
-  return fromParse;
-}
-
-// ─── Clean wikitext into plain prose ─────────────────────────
-function cleanToText(raw) {
-  let t = raw;
-  for (let i = 0; i < 10; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
-  t = t.replace(/\[\[(File|Image):[^\]|]*(?:\|[^\]]*)?\]\]/gi, "");
-  t = t.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, "$1");
-  t = t.replace(/<[^>]+>/g, "");
-  t = t.replace(/'{2,5}/g, "");
-  t = t.replace(/\[[^\]]{0,30}\]/g, "");
-  t = t.replace(/={2,}[^
-]*={2,}/g, "");
-  t = t.replace(/^[ 	]*[|!{}\-][^
-]*/gm, "");
-  return t;
-}
-
-function firstProseParagraph(text) {
-  for (const para of text.split(/
-+/)) {
-    const p = para.trim();
-    if (!p) continue;
-    if (/^[*#:;]/.test(p)) continue;
-    if (p.length < 50) continue;
-    if (/abridged|this is a/i.test(p)) continue;
-    return p.replace(/\s+/g, " ").trim();
-  }
-  return "";
-}
-
-// ─── Extract History section (falls back to any prose) ───────
-function getHistoryExcerpt(wikitext) {
-  if (!wikitext) return "";
-
-  // Try ==History== first
-  const match = wikitext.match(/={2,}\s*History\s*={2,}/i);
-  if (match) {
-    const afterHistory = wikitext.slice(match.index + match[0].length);
-    const result = firstProseParagraph(cleanToText(afterHistory));
-    if (result) return result;
-  }
-
-  // No History section or it was empty — fall back to any prose on the page
-  // Strip the whole infobox block iteratively then grab first paragraph
-  let t = wikitext;
-  for (let i = 0; i < 15; i++) t = t.replace(/\{\{[^{}]*\}\}/g, "");
-  return firstProseParagraph(cleanToText(t));
+  // No <p> tags — just grab raw text of the whole section
+  section.querySelectorAll("sup, .reference").forEach(el => el.remove());
+  const raw = section.textContent.trim().replace(/\s+/g, " ");
+  return raw.length >= 40 ? raw : "";
 }
 // ─── Fetch thumbnails for a batch of pageIds ─────────────────
 async function fetchThumbnails(pageIds) {
@@ -231,8 +191,7 @@ async function getPageDetails(members) {
   const historyResults = await Promise.all(
     members.map(async ({ title, pageId }) => {
       try {
-        const wikitext = await fetchWikitext(title);
-        return [pageId, getHistoryExcerpt(wikitext)];
+        return [pageId, await fetchHistoryExcerpt(title)];
       } catch {
         return [pageId, ""];
       }
