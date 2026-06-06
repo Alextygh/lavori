@@ -122,72 +122,28 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    // Step 1: get title matches via prefixsearch (titles starting with query)
-    // and fulltext search in parallel
-    const [psData, srData] = await Promise.all([
-      apiFetch({
-        action:      "query",
-        list:        "prefixsearch",
-        pssearch:    searchQuery,
-        psnamespace: 0,
-        pslimit:     50,
-        psoffset:    searchOffset,
-      }),
-      apiFetch({
-        action:      "query",
-        list:        "search",
-        srsearch:    searchQuery,
-        srnamespace: 0,
-        srlimit:     50,
-        sroffset:    searchOffset,
-        srprop:      "",
-      }),
-    ]);
-
-    // Merge & deduplicate
-    const seen = new Set();
-    const candidates = [
-      ...(psData.query?.prefixsearch ?? []),
-      ...(srData.query?.search       ?? []),
-    ].filter(h => {
-      if (seen.has(h.pageid)) return false;
-      seen.add(h.pageid);
-      return true;
-    });
-
-    if (!candidates.length && searchOffset === 0) {
-      exhausted = true;
-      noResults.style.display = "block";
-      return;
-    }
-
-    // Step 2: verify which candidates are actually in Category:Characters
-    // by fetching their categories in one batched call
-    const pageIds = candidates.map(h => h.pageid);
-    const catData = await apiFetch({
-      action:  "query",
-      pageids: pageIds.join("|"),
-      prop:    "categories",
+    // generator=search runs a fulltext search; prop=categories with clcategories
+    // lets us confirm each result is actually in Category:Characters in one call.
+    const data = await apiFetch({
+      action:       "query",
+      generator:    "search",
+      gsrsearch:    searchQuery,
+      gsrnamespace: 0,
+      gsrlimit:     50,
+      gsroffset:    searchOffset,
+      prop:         "categories",
       clcategories: "Category:Characters",
-      cllimit: "max",
     });
 
-    const catPages = catData.query?.pages ?? {};
-    const inCategory = new Set(
-      Object.values(catPages)
-        .filter(p => p.categories?.length > 0)
-        .map(p => p.pageid)
-    );
+    const pages = Object.values(data.query?.pages ?? {});
 
-    const members = candidates
-      .filter(h => inCategory.has(h.pageid))
-      .map(h => ({ title: h.title, pageId: h.pageid }));
+    // Only keep pages where Category:Characters was returned
+    const members = pages
+      .filter(p => p.categories?.length > 0)
+      .map(p => ({ title: p.title, pageId: p.pageid }));
 
-    if (!members.length && searchOffset === 0) {
-      exhausted = true;
-      noResults.style.display = "block";
-      return;
-    }
+    searchOffset += 50;
+    if (!data.continue) exhausted = true;
 
     if (members.length > 0) {
       const details = await getPageDetails(members);
@@ -196,9 +152,17 @@ async function loadSearchBatch() {
       totalLoadedEl.textContent = totalLoaded.toLocaleString();
     }
 
-    searchOffset += candidates.length;
-    const totalHits = srData.query?.searchinfo?.totalhits ?? 0;
-    if (candidates.length < 50 || searchOffset >= totalHits) exhausted = true;
+    // If this batch had no character matches but there are more search results,
+    // automatically fetch the next batch rather than showing Load More with 0 cards
+    if (members.length === 0 && !exhausted) {
+      isLoading = false;
+      await loadSearchBatch();
+      return;
+    }
+
+    if (exhausted && totalLoaded === 0) {
+      noResults.style.display = "block";
+    }
 
   } catch (err) {
     console.error("Search error:", err);
