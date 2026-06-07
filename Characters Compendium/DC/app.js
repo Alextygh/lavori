@@ -61,12 +61,14 @@ grid.after(noResults);
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.trim();
   searchClear.classList.toggle("visible", q.length > 0);
-  clearTimeout(searchDebounce);
-  if (q.length === 0) {
-    exitSearch();
-    return;
-  }
-  searchDebounce = setTimeout(() => startSearch(q), 350);
+  if (q.length === 0) exitSearch();
+});
+
+searchInput.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const q = searchInput.value.trim();
+  if (q.length === 0) { exitSearch(); return; }
+  startSearch(q);
 });
 
 searchClear.addEventListener("click", () => {
@@ -120,39 +122,35 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    // generator=search with prop=categories+clcategories confirms category membership
-    const data = await apiFetch({
-      action:       "query",
-      generator:    "search",
-      gsrsearch:    searchQuery,
-      gsrnamespace: 0,
-      gsrlimit:     50,
-      gsroffset:    searchOffset,
-      prop:         "categories",
-      clcategories: "Category:Characters",
-    });
+    const allMembers = [];
 
-    const pages = Object.values(data.query?.pages ?? {});
+    while (allMembers.length < 50 && !exhausted) {
+      const data = await apiFetch({
+        action:       "query",
+        generator:    "search",
+        gsrsearch:    searchQuery,
+        gsrnamespace: 0,
+        gsrlimit:     50,
+        gsroffset:    searchOffset,
+        prop:         "categories",
+        clcategories: "Category:Characters",
+      });
 
-    const members = pages
-      .filter(p => p.categories?.length > 0)
-      .map(p => ({ title: p.title, pageId: p.pageid }));
+      const pages = Object.values(data.query?.pages ?? {});
+      const members = pages
+        .filter(p => p.categories?.length > 0)
+        .map(p => ({ title: p.title, pageId: p.pageid }));
 
-    searchOffset += 50;
-    if (!data.continue) exhausted = true;
-
-    if (members.length > 0) {
-      const details = await getPageDetails(members);
-      renderCards(members, details);
-      totalLoaded += members.length;
-      totalLoadedEl.textContent = totalLoaded.toLocaleString();
+      allMembers.push(...members);
+      searchOffset += 50;
+      if (!data.continue) { exhausted = true; break; }
     }
 
-    // If batch had no character matches but more results exist, auto-fetch next
-    if (members.length === 0 && !exhausted) {
-      isLoading = false;
-      await loadSearchBatch();
-      return;
+    if (allMembers.length > 0) {
+      const details = await getPageDetails(allMembers);
+      renderCards(allMembers, details);
+      totalLoaded += allMembers.length;
+      totalLoadedEl.textContent = totalLoaded.toLocaleString();
     }
 
     if (exhausted && totalLoaded === 0) {
@@ -161,6 +159,8 @@ async function loadSearchBatch() {
 
   } catch (err) {
     console.error("Search error:", err);
+    noResults.textContent = `Error loading characters: ${err.message}`;
+    noResults.style.display = "block";
   } finally {
     isLoading = false;
     showSpinner(false);
@@ -241,13 +241,17 @@ async function getCategoryMembers() {
     };
 
     const [before, after] = await Promise.all([
-      fetchAll({ cmendsortkey: "0" }),
+      // Catch everything before "A": symbols (!, ", @, etc.), digits aren't
+      // wanted but we filter them client-side anyway
+      fetchAll({ cmendsortkey: "A" }),
       fetchAll({ cmstartsortkeyprefix: "\u00A1" }),
     ]);
 
     const members = [...before, ...after]
       .map(m => ({ title: m.title, pageId: m.pageid }))
-      .filter(m => !/^[A-Za-z0-9]/.test(m.title));
+      // Deduplicate (digits 0-9 may appear in both fetches, filter them out)
+      .filter((m, i, arr) => !/^[A-Za-z0-9]/.test(m.title) &&
+        arr.findIndex(x => x.pageId === m.pageId) === i);
 
     return { members, nextContinue: null };
   }
