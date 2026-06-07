@@ -61,12 +61,14 @@ grid.after(noResults);
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.trim();
   searchClear.classList.toggle("visible", q.length > 0);
-  clearTimeout(searchDebounce);
-  if (q.length === 0) {
-    exitSearch();
-    return;
-  }
-  searchDebounce = setTimeout(() => startSearch(q), 350);
+  if (q.length === 0) exitSearch();
+});
+
+searchInput.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const q = searchInput.value.trim();
+  if (q.length === 0) { exitSearch(); return; }
+  startSearch(q);
 });
 
 searchClear.addEventListener("click", () => {
@@ -122,42 +124,37 @@ async function loadSearchBatch() {
   loadMoreBtn.style.display = "none";
 
   try {
-    // generator=search runs a fulltext search; prop=categories with clcategories
-    // lets us confirm each result is actually in Category:Characters in one call.
-    const data = await apiFetch({
-      action:       "query",
-      generator:    "search",
-      gsrsearch:    searchQuery,
-      gsrnamespace: 0,
-      gsrlimit:     50,
-      gsroffset:    searchOffset,
-      prop:         "categories",
-      clcategories: "Category:Characters",
-    });
+    const allMembers = [];
 
-    const pages = Object.values(data.query?.pages ?? {});
+    // Keep fetching batches of 50 search results until we have 50 character
+    // cards or we run out of search results entirely.
+    while (allMembers.length < 50 && !exhausted) {
+      const data = await apiFetch({
+        action:       "query",
+        generator:    "search",
+        gsrsearch:    searchQuery,
+        gsrnamespace: 0,
+        gsrlimit:     50,
+        gsroffset:    searchOffset,
+        prop:         "categories",
+        clcategories: "Category:Characters",
+      });
 
-    // Only keep pages where Category:Characters was returned
-    const members = pages
-      .filter(p => p.categories?.length > 0)
-      .map(p => ({ title: p.title, pageId: p.pageid }));
+      const pages = Object.values(data.query?.pages ?? {});
+      const members = pages
+        .filter(p => p.categories?.length > 0)
+        .map(p => ({ title: p.title, pageId: p.pageid }));
 
-    searchOffset += 50;
-    if (!data.continue) exhausted = true;
-
-    if (members.length > 0) {
-      const details = await getPageDetails(members);
-      renderCards(members, details);
-      totalLoaded += members.length;
-      totalLoadedEl.textContent = totalLoaded.toLocaleString();
+      allMembers.push(...members);
+      searchOffset += 50;
+      if (!data.continue) { exhausted = true; break; }
     }
 
-    // If this batch had no character matches but there are more search results,
-    // automatically fetch the next batch rather than showing Load More with 0 cards
-    if (members.length === 0 && !exhausted) {
-      isLoading = false;
-      await loadSearchBatch();
-      return;
+    if (allMembers.length > 0) {
+      const details = await getPageDetails(allMembers);
+      renderCards(allMembers, details);
+      totalLoaded += allMembers.length;
+      totalLoadedEl.textContent = totalLoaded.toLocaleString();
     }
 
     if (exhausted && totalLoaded === 0) {
