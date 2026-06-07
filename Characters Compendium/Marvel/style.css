@@ -1,6 +1,6 @@
 /* ─── Reset & Base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 :root {
   --red:       #e5181b;
   --red-dark:  #a00e10;
@@ -453,6 +453,7 @@ main {
   color: #bbb;
   margin-top: 0.5rem;
   flex: 1;
+  white-space: pre-wrap;
 }
 
 .modal-link {
