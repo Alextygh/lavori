@@ -5,217 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>π</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  html, body {
+    height: 100%;
     background: #000;
-    color: #e8e8e8;
-    font-family: Georgia, serif;
+    color: #d8d8d8;
+    font-family: Georgia, 'Times New Roman', serif;
     font-size: 18px;
-    line-height: 1.8;
-    padding: 60px 40px 200px;
-    max-width: 900px;
+    line-height: 1.85;
+    overflow-x: hidden;
+  }
+
+  #viewport {
+    padding: 48px 44px 48px;
+    max-width: 940px;
     margin: 0 auto;
-    user-select: none;
   }
 
-  #pi-text {
+  /* Each chunk is a <p> of inline spans */
+  .chunk {
     word-break: break-all;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
 
-  #pi-text span {
+  .d {
     cursor: default;
     border-radius: 2px;
-    transition: background 0.1s;
+    transition: background 0.08s;
   }
 
-  #pi-text span:hover {
-    background: rgba(255,255,255,0.12);
-  }
-
-  #pi-text span.selected {
-    background: rgba(255,255,255,0.22);
+  .d:hover {
+    background: rgba(255,255,255,0.1);
     color: #fff;
   }
 
-  #tooltip {
+  .d.active {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+
+  /* Floating tooltip pinned to bottom center */
+  #tip {
     position: fixed;
-    bottom: 28px;
+    bottom: 32px;
     left: 50%;
-    transform: translateX(-50%);
-    background: #111;
-    border: 1px solid #333;
-    color: #ccc;
-    font-size: 14px;
-    padding: 8px 18px;
-    border-radius: 4px;
+    transform: translateX(-50%) translateY(8px);
+    background: #0e0e0e;
+    border: 1px solid #2a2a2a;
+    color: #aaa;
+    font-size: 13px;
+    font-family: Georgia, serif;
+    letter-spacing: 0.04em;
+    padding: 7px 20px;
+    border-radius: 3px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.18s, transform 0.18s;
     white-space: nowrap;
+    z-index: 100;
   }
 
-  #tooltip.visible {
+  #tip.show {
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
-  #loader {
-    color: #444;
-    font-size: 14px;
-    margin-top: 20px;
+  /* Sentinel at the bottom — invisible, just for IntersectionObserver */
+  #sentinel {
+    height: 1px;
+    width: 100%;
   }
 </style>
 </head>
 <body>
 
-<div id="pi-text"></div>
-<div id="loader">scroll for more…</div>
-<div id="tooltip"></div>
+<div id="viewport"></div>
+<div id="sentinel"></div>
+<div id="tip"></div>
 
 <script>
-// 10,000 digits of pi (after decimal point)
-// We'll store the full string and render chunks as user scrolls
-const PI_PREFIX = "3.";
+// ─── Web Worker source (inlined as blob) ───────────────────────────────────
+const WORKER_SRC = `
+// Compute pi decimal digits using Machin's formula with BigInt
+// pi/4 = 4*arctan(1/5) - arctan(1/239)
+function arctan(x, prec) {
+  const xn = BigInt(x);
+  let sum = prec / xn;
+  let term = prec / xn;
+  let n = 1n;
+  let sign = -1n;
+  while (true) {
+    n += 2n;
+    term = term / (xn * xn);
+    const next = term / n;
+    if (next === 0n) break;
+    sum += sign * next;
+    sign = -sign;
+  }
+  return sum;
+}
 
-// Digits of pi after the decimal — stored as a long string
-// Generated from a known-accurate source
-const PI_DIGITS =
-"14159265358979323846264338327950288419716939937510" +
-"58209749445923078164062862089986280348253421170679" +
-"82148086513282306647093844609550582231725359408128" +
-"48111745028410270193852110555964462294895493038196" +
-"44288109756659334461284756482337867831652712019091" +
-"45648566923460348610454326648213393607260249141273" +
-"72458700660631558817488152092096282925409171536436" +
-"78925903600113305305488204665213841469519415116094" +
-"33057270365759591953092186117381932611793105118548" +
-"07446237996274956735188575272489122793818301194912" +
-"98336733624406566430860213949463952247371907021798" +
-"60943702770539217176293176752384674818467669405132" +
-"00056812714526356082778577134275778960917363717872" +
-"14684409012249534301465495853710507922796892589235" +
-"42019956112129021960864034418159813629774771309960" +
-"51870721134999999837297804995105973173281609631859" +
-"50244594553469083026425223082533446850352619311881" +
-"71010003137838752886587533208381420617177669147303" +
-"59825349042875546873115956286388235378759375195778" +
-"18577805321712268066130019278766111959092164201989" +
-"38095257201065485863278865936153381827968230301952" +
-"03530185296899577362259941389124972177528347913151" +
-"55748572424541506959508295331168617278558890750983" +
-"81754637464939319255060400927701671139009848824012" +
-"85836160356370766010471018194295559619894676783744" +
-"94482553797747268471040475346462080466842590694912" +
-"93313677028989152104752162056966024058038150193511" +
-"25338243003558764024749647326391419927260426992279" +
-"67823547816360093417216412199245863150302861829745" +
-"55706749838505494588586926995690927210797509302955" +
-"32116534498720275596023648066549911988183479775356" +
-"63698074265425278625518184175746728909777727938000" +
-"81647060016145249192173217214772350141441973568548" +
-"16136115735255213347574184946843852332390739414333" +
-"45477624168625189835694855620992192221842725502542" +
-"56887671790494601653466804988627232791786085784383" +
-"82796797668145410095388378636095068006422512520511" +
-"73929848960841284886269456042419652850222106611863" +
-"06744278622039194945047123713786960956364371917287" +
-"46776465757396241389086583264599581339047802759010" +
-"09455072638491137975198793066131764901994211399435" +
-"55137144895050455816539618060108485705888568467438" +
-"60213923548086792987590104768014866047250917966569" +
-"63941898244768338613684673518865437718840361970898" +
-"63361503030041538773994534009712262934872168716120" +
-"17649573706878613989834013566285590381386064701543" +
-"24868992264467462843522648780682085823052963389416" +
-"47792418517490003";
+let computed = ''; // full digit string (without '3.')
+let upTo = 0;      // how many decimal digits we have
 
-const CHUNK = 200; // digits to add per scroll trigger
-let rendered = 0;
-let totalDigits = PI_DIGITS.length;
-let allSpans = []; // flat array of span elements, index = digit position (1-based)
+function ensureDigits(need) {
+  if (need <= upTo) return;
+  const target = need + 200; // compute a bit ahead
+  const PREC = 10n ** BigInt(target + 20);
+  const pi = 4n * (4n * arctan(5, PREC) - arctan(239, PREC));
+  const s = pi.toString(); // e.g. "314159..."
+  computed = s.slice(1); // drop leading "3", keep all decimal digits
+  upTo = target;
+}
 
-const container = document.getElementById('pi-text');
-const loader = document.getElementById('loader');
-const tooltip = document.getElementById('tooltip');
+self.onmessage = function(e) {
+  const { from, to } = e.data; // digit positions (1-based, after decimal)
+  ensureDigits(to);
+  const chunk = computed.slice(from - 1, to);
+  self.postMessage({ from, to, digits: chunk });
+};
+`;
 
+const workerBlob = new Blob([WORKER_SRC], { type: 'application/javascript' });
+const worker = new Worker(URL.createObjectURL(workerBlob));
+
+// ─── State ─────────────────────────────────────────────────────────────────
+const CHUNK_SIZE = 300;  // digits per DOM paragraph
+const PRELOAD    = 4;    // chunks to keep ahead of sentinel
+
+let nextChunkStart = 1;  // next digit position to request (1-based)
+let pending        = 0;  // requests in flight
+let activeSpan     = null;
+
+const viewport  = document.getElementById('viewport');
+const sentinel  = document.getElementById('sentinel');
+const tip       = document.getElementById('tip');
+
+// ─── Ordinal helper ────────────────────────────────────────────────────────
 function ordinal(n) {
-  const s = ["th","st","nd","rd"];
+  const s = ['th','st','nd','rd'];
   const v = n % 100;
-  return n + (s[(v-20)%10] || s[v] || s[0]);
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-function renderMore() {
-  const end = Math.min(rendered + CHUNK, totalDigits);
-  const fragment = document.createDocumentFragment();
+// ─── Tooltip ───────────────────────────────────────────────────────────────
+let tipTimer = null;
+function showTip(text) {
+  clearTimeout(tipTimer);
+  tip.textContent = text;
+  tip.classList.add('show');
+  tipTimer = setTimeout(hideTip, 2800);
+}
+function hideTip() {
+  tip.classList.remove('show');
+}
 
-  for (let i = rendered; i < end; i++) {
-    const span = document.createElement('span');
-    span.textContent = PI_DIGITS[i];
-    const pos = i + 1; // 1-based digit position (after decimal)
-    span.dataset.pos = pos;
-    fragment.appendChild(span);
-    allSpans.push(span);
+// ─── Click handler (delegated) ─────────────────────────────────────────────
+viewport.addEventListener('click', e => {
+  const span = e.target.closest('.d');
+  if (activeSpan) activeSpan.classList.remove('active');
+  if (!span) { activeSpan = null; hideTip(); return; }
+  activeSpan = span;
+  span.classList.add('active');
+  const pos = parseInt(span.dataset.p, 10);
+  if (pos === 0) {
+    showTip('integer part (3)');
+  } else {
+    showTip(ordinal(pos) + ' decimal digit');
+  }
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#viewport')) {
+    if (activeSpan) { activeSpan.classList.remove('active'); activeSpan = null; }
+    hideTip();
+  }
+});
+
+// ─── Render a received chunk ───────────────────────────────────────────────
+function renderChunk(from, digits) {
+  const p = document.createElement('p');
+  p.className = 'chunk';
+
+  // First chunk: prepend "3."
+  if (from === 1) {
+    const s = document.createElement('span');
+    s.className = 'd';
+    s.dataset.p = '0';
+    s.textContent = '3.';
+    p.appendChild(s);
   }
 
-  // Insert before loader
-  container.appendChild(fragment);
-  rendered = end;
+  for (let i = 0; i < digits.length; i++) {
+    const s = document.createElement('span');
+    s.className = 'd';
+    s.dataset.p = String(from + i);
+    s.textContent = digits[i];
+    p.appendChild(s);
+  }
 
-  if (rendered >= totalDigits) {
-    loader.textContent = '';
+  viewport.appendChild(p);
+  pending--;
+  maybeRequest();
+}
+
+// ─── Worker response ───────────────────────────────────────────────────────
+worker.onmessage = e => {
+  const { from, digits } = e.data;
+  renderChunk(from, digits);
+};
+
+// ─── Request next chunk ────────────────────────────────────────────────────
+function requestChunk() {
+  const from = nextChunkStart;
+  const to   = from + CHUNK_SIZE - 1;
+  nextChunkStart = to + 1;
+  pending++;
+  worker.postMessage({ from, to });
+}
+
+function maybeRequest() {
+  while (pending < PRELOAD) {
+    requestChunk();
   }
 }
 
-// Initial prefix "3."
-const prefix = document.createElement('span');
-prefix.textContent = '3.';
-prefix.style.color = '#fff';
-container.appendChild(prefix);
-
-renderMore();
-
-// Infinite scroll
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting && rendered < totalDigits) {
-    renderMore();
+// ─── IntersectionObserver to trigger more loads ────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    maybeRequest();
   }
-}, { rootMargin: '200px' });
+}, { rootMargin: '800px' });
 
-observer.observe(loader);
+observer.observe(sentinel);
 
-// Selection / click tooltip
-let selected = null;
-
-container.addEventListener('mousedown', (e) => {
-  // clear previous
-  if (selected) {
-    selected.classList.remove('selected');
-    selected = null;
-  }
-  tooltip.classList.remove('visible');
-});
-
-container.addEventListener('click', (e) => {
-  const span = e.target.closest('span[data-pos]');
-  if (!span) return;
-  e.stopPropagation();
-
-  if (selected) selected.classList.remove('selected');
-  selected = span;
-  span.classList.add('selected');
-
-  const pos = parseInt(span.dataset.pos);
-  tooltip.textContent = `${ordinal(pos)} decimal digit`;
-  tooltip.classList.add('visible');
-});
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#pi-text')) {
-    if (selected) { selected.classList.remove('selected'); selected = null; }
-    tooltip.classList.remove('visible');
-  }
-});
+// ─── Boot ──────────────────────────────────────────────────────────────────
+maybeRequest();
 </script>
 </body>
 </html>
