@@ -278,9 +278,9 @@ async function fetchHistoryExcerpt(title) {
 
   const doc = new DOMParser().parseFromString(html, "text/html");
 
-  // DC Database uses the same MediaWiki structure as Marvel:
-  // <h2><span id="History">…</span></h2> followed by a section div
-  const historySpan = doc.querySelector("#History");
+  // DC Database uses #History-Header as the section anchor
+  // Try that first, fall back to #History just in case
+  const historySpan = doc.querySelector("#History-Header") ?? doc.querySelector("#History");
   if (!historySpan) {
     const firstP = doc.querySelector(".mw-parser-output p");
     return firstP ? firstP.textContent.trim().replace(/\s+/g, " ") : "";
@@ -359,7 +359,7 @@ function esc(s) {
 function makeCard({ title, thumbnail, extract }) {
   const { name, reality } = parseTitle(title);
   const slug = encodeURIComponent(title.replace(/ /g, "_"));
-  const url  = `https://dc.fandom.com/wiki/${slug}#History`;
+  const url  = `https://dc.fandom.com/wiki/${slug}#History-Header`;
 
   const card = document.createElement("div");
   card.className = "card";
