@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marvel Character Compendium</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" href="https://static.wikia.nocookie.net/marveldatabase/images/4/4a/Site-favicon.ico/revision/latest?cb=20210614031532">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600&family=Barlow:wght@300;400&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-title">
+        <span class="title-eyebrow">MARVEL DATABASE</span>
+        <h1>CHARACTER<br>COMPENDIUM</h1>
+      </div>
+      <div class="header-meta">
+        <div class="stat-block">
+          <span class="stat-value" id="total-loaded">0</span>
+          <span class="stat-label">LOADED</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-value" id="total-count">~99K</span>
+          <span class="stat-label">TOTAL</span>
+        </div>
+      </div>
+    </div>
+    <div class="search-input-wrap">
+      <input id="search-input" class="search-input" type="text" placeholder="SEARCH CHARACTERS…" autocomplete="off" spellcheck="false" />
+      <button id="search-clear" class="search-clear" aria-label="Clear search">✕</button>
+    </div>
+    <div class="search-bar"></div>
+  </header>
+
+  <main>
+    <div id="grid" class="card-grid"></div>
+
+    <div id="load-more-wrapper">
+      <button id="load-more-btn" class="load-more-btn" style="display:none">
+        <span class="btn-label">LOAD MORE</span>
+        <span class="btn-sub">50 per batch · live from Fandom</span>
+      </button>
+      <div id="spinner" class="spinner">
+        <div class="spinner-ring"></div>
+        <span>FETCHING FROM FANDOM</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div id="modal" class="modal">
+      <button id="modal-close" class="modal-close">✕</button>
+      <div class="modal-image-wrap">
+        <img id="modal-img" src="" alt="" />
+        <div class="modal-image-fade"></div>
+      </div>
+      <div class="modal-body">
+        <span class="modal-eyebrow" id="modal-reality"></span>
+        <h2 id="modal-name"></h2>
+        <p id="modal-extract" class="modal-extract"></p>
+        <a id="modal-link" href="#" target="_blank" rel="noopener" class="modal-link">
+          VIEW FULL ARTICLE →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
