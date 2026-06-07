@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character Compendium Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════
+       GLOBAL COLORS — tweak these to retheme the whole page
+    ═══════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:     #080808;   /* page background          */
+      --text:   #c8c8c8;   /* body text                */
+      --muted:  #444;      /* secondary / dim text     */
+      --white:  #ffffff;   /* headings                 */
+      --accent: #ffffff;   /* hub title underline rule */
+
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-ui:      'Barlow Condensed', sans-serif;
+      --font-body:    'Barlow', sans-serif;
+    }
+
+    /* ─── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      overflow-x: hidden;
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Header ──────────────────────────────────────────────── */
+    .hub-header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .hub-eyebrow {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .hub-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      line-height: 0.88;
+      color: var(--white);
+      letter-spacing: 0.01em;
+    }
+
+    .hub-title-line {
+      display: block;
+      overflow: hidden;
+    }
+    .hub-title-line span {
+      display: inline-block;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .hub-title-line:nth-child(1) span { animation-delay: 0.05s; }
+    .hub-title-line:nth-child(2) span { animation-delay: 0.15s; }
+
+    @keyframes slideUp {
+      from { transform: translateY(110%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .hub-rule {
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      margin: 1.2rem auto 0;
+      animation: expandRule 0.6s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes expandRule {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    /* ─── Card list ───────────────────────────────────────────── */
+    .card-grid {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* ─── Entry card ──────────────────────────────────────────── */
+    .entry {
+      /* Per-entry colors injected via inline style */
+      --color:   #fff;
+      --dim:     #333;
+      --card-bg: #111;
+
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.6rem 2rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-left: 3px solid var(--color);
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+
+      opacity: 0;
+      transform: translateX(-24px);
+      animation: slideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .entry:nth-child(1) { animation-delay: 0.35s; }
+    .entry:nth-child(2) { animation-delay: 0.45s; }
+    .entry:nth-child(3) { animation-delay: 0.55s; }
+    .entry:nth-child(4) { animation-delay: 0.65s; }
+    .entry:nth-child(5) { animation-delay: 0.75s; }
+
+    @keyframes slideIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Hover glow sweep */
+    .entry::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color) 7%, transparent));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .entry:hover::before  { opacity: 1; }
+    .entry:hover { transform: translateX(6px); }
+
+    /* Corner dot */
+    .entry::after {
+      content: "";
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--color);
+      opacity: 0.3;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .entry:hover::after { opacity: 1; transform: scale(1.4); }
+
+    .entry-left { display: flex; flex-direction: column; gap: 0.2rem; }
+
+    .entry-index {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: var(--color);
+      opacity: 0.7;
+    }
+
+    .entry-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      line-height: 1;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .entry-sub {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .entry-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.15rem;
+      flex-shrink: 0;
+      margin-left: 2rem;
+    }
+
+    .entry-count {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--color);
+      opacity: 0.25;
+      transition: opacity 0.2s;
+    }
+    .entry:hover .entry-count { opacity: 0.7; }
+
+    .entry-count-label {
+      font-family: var(--font-ui);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
+    .entry-arrow {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--color);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      margin-top: 0.4rem;
+    }
+    .entry:hover .entry-arrow { opacity: 1; transform: translateX(4px); }
+
+    /* ─── Footer ──────────────────────────────────────────────── */
+    .hub-footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 3rem;
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ─── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 500px) {
+      .entry { padding: 1.2rem; }
+      .entry-right { margin-left: 1rem; }
+      .entry-count { font-size: 1.5rem; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header class="hub-header">
+    <span class="hub-eyebrow">WIKI COMPENDIUM HUB</span>
+    <h1 class="hub-title">
+      <span class="hub-title-line"><span>CHARACTER</span></span>
+      <span class="hub-title-line"><span>DATABASE</span></span>
+    </h1>
+    <div class="hub-rule"></div>
+  </header>
+
+  <nav class="card-grid" id="card-grid"></nav>
+
+  <footer class="hub-footer">
+    DATA SOURCED LIVE FROM FANDOM WIKIS · ALL RIGHTS BELONG TO RESPECTIVE OWNERS
+  </footer>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════════
+       ✏️  EDIT THIS ARRAY TO ADD, REMOVE, OR MODIFY ENTRIES
+       ═══════════════════════════════════════════════════════════════
+
+       Each entry has these fields:
+
+         index   — small number label above the title  (e.g. "01")
+         title   — big display text                    (e.g. "MARVEL")
+         sub     — source wiki shown below title       (e.g. "MARVEL DATABASE · FANDOM")
+         href    — path to the compendium HTML file    (e.g. "index.html")
+         count   — approx character count              (e.g. "~99K")
+         label   — unit label below count              (e.g. "CHARACTERS")
+         color   — main accent color                   (hex string)
+         dim     — darker shade of color               (hex string, used for bg tint calc)
+         bg      — card background tint                (hex string)
+
+       To add a new universe, just copy one object, paste it at the
+       end of the array, and update the fields. The page will render
+       it automatically with the correct animation delay.
+    ═══════════════════════════════════════════════════════════════ */
+    const ENTRIES = [
+      {
+        index: "01",
+        title: "MARVEL",
+        sub:   "MARVEL DATABASE · FANDOM",
+        href:  "/Marvel/index.html",         // ← rename your Marvel file if needed
+        count: "~99K",
+        label: "CHARACTERS",
+        color: "#e5181b",
+        dim:   "#6b0809",
+        bg:    "#130303",
+      },
+      {
+        index: "02",
+        title: "DC",
+        sub:   "DC DATABASE · FANDOM",
+        href:  "/DC/index.html",
+        count: "~100K",
+        label: "CHARACTERS",
+        color: "#0074e8",
+        dim:   "#003a74",
+        bg:    "#010a13",
+      },
+      {
+        index: "03",
+        title: "STAR WARS",
+        sub:   "WOOKIEEPEDIA · FANDOM",
+        href:  "/Star Wars/index.html",
+        count: "~180K",
+        label: "CHARACTERS",
+        color: "#ffe81f",
+        dim:   "#7a6f00",
+        bg:    "#0f0e00",
+      },
+    ];
+    /* ════════════════════════════════════════════════════════════ */
+
+    const grid = document.getElementById("card-grid");
+
+    ENTRIES.forEach((e, i) => {
+      const a = document.createElement("a");
+      a.href = e.href;
+      a.className = "entry";
+      a.style.setProperty("--color",   e.color);
+      a.style.setProperty("--dim",     e.dim);
+      a.style.setProperty("--card-bg", e.bg);
+      // Override animation delay for dynamically added entries beyond 3
+      if (i >= 3) a.style.animationDelay = `${0.35 + i * 0.1}s`;
+      a.innerHTML = `
+        <div class="entry-left">
+          <span class="entry-index">${e.index}</span>
+          <span class="entry-title">${e.title}</span>
+          <span class="entry-sub">${e.sub}</span>
+        </div>
+        <div class="entry-right">
+          <span class="entry-count">${e.count}</span>
+          <span class="entry-count-label">${e.label}</span>
+          <span class="entry-arrow">OPEN →</span>
+        </div>
+      `;
+      grid.appendChild(a);
+    });
+  </script>
+
+</body>
+</html>
