@@ -278,30 +278,29 @@ async function fetchHistoryExcerpt(title) {
 
   const doc = new DOMParser().parseFromString(html, "text/html");
 
-  // DC Database uses #History-Header as the section anchor
-  // Try that first, fall back to #History just in case
-  const historySpan = doc.querySelector("#History-Header") ?? doc.querySelector("#History");
-  if (!historySpan) {
+  // DC Database: id="History-Header" is on the <h2> itself (not a child span).
+  // Content is loose siblings (h3, h4, p…) directly under mw-parser-output,
+  // not wrapped in a section div. Walk next siblings until the next <h2>.
+  const historyH2 = doc.querySelector("h2#History-Header");
+  if (!historyH2) {
+    // Fallback: grab first paragraph from mw-parser-output if no History section
     const firstP = doc.querySelector(".mw-parser-output p");
     return firstP ? firstP.textContent.trim().replace(/\s+/g, " ") : "";
   }
 
-  const h2      = historySpan.closest("h2");
-  const section = h2?.nextElementSibling;
-  if (!section) return "";
-
-  const paragraphs = [...section.querySelectorAll("p")];
   const parts = [];
-  for (const p of paragraphs) {
-    p.querySelectorAll("sup, .reference").forEach(el => el.remove());
-    const text = p.textContent.trim().replace(/\s+/g, " ");
-    if (text.length >= 40 && !/stub/i.test(text)) parts.push(text);
+  let el = historyH2.nextElementSibling;
+  while (el && el.tagName !== "H2") {
+    if (el.tagName === "P") {
+      el.querySelectorAll("sup, .reference").forEach(n => n.remove());
+      const text = el.textContent.trim().replace(/\s+/g, " ");
+      if (text.length >= 40 && !/stub/i.test(text)) parts.push(text);
+    }
+    el = el.nextElementSibling;
   }
-  if (parts.length) return parts.join("\n\n");
 
-  section.querySelectorAll("sup, .reference").forEach(el => el.remove());
-  const raw = section.textContent.trim().replace(/\s+/g, " ");
-  return (raw.length >= 40 && !/stub/i.test(raw)) ? raw : "";
+  return parts.join("\n\n");
+}
 }
 
 // ─── Fetch thumbnails ─────────────────────────────────────────
