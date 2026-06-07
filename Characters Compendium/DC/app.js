@@ -308,7 +308,6 @@ async function fetchHistoryExcerpt(title) {
 
   return parts.join("\n\n");
 }
-}
 
 // ─── Fetch thumbnails ─────────────────────────────────────────
 async function fetchThumbnails(pageIds) {
