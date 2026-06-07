@@ -291,15 +291,17 @@ async function fetchHistoryExcerpt(title) {
   if (!section) return "";
 
   const paragraphs = [...section.querySelectorAll("p")];
+  const parts = [];
   for (const p of paragraphs) {
     p.querySelectorAll("sup, .reference").forEach(el => el.remove());
     const text = p.textContent.trim().replace(/\s+/g, " ");
-    if (text.length >= 40) return text;
+    if (text.length >= 40 && !/stub/i.test(text)) parts.push(text);
   }
+  if (parts.length) return parts.join("\n\n");
 
   section.querySelectorAll("sup, .reference").forEach(el => el.remove());
   const raw = section.textContent.trim().replace(/\s+/g, " ");
-  return raw.length >= 40 ? raw : "";
+  return (raw.length >= 40 && !/stub/i.test(raw)) ? raw : "";
 }
 
 // ─── Fetch thumbnails ─────────────────────────────────────────
