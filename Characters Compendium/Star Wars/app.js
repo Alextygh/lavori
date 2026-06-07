@@ -226,13 +226,13 @@ async function getCategoryMembers() {
   // Update continues
   results.forEach(({ cat, next }) => { catContinues[cat] = next; });
 
-  // Merge and deduplicate across all categories
+  // Merge and deduplicate across all categories, cap at BATCH
   const seen = new Set();
   const members = results.flatMap(r => r.members).filter(m => {
     if (seen.has(m.pageId)) return false;
     seen.add(m.pageId);
     return true;
-  });
+  }).slice(0, BATCH);
 
   const stillActive = SOURCE_CATEGORIES.some(cat => catContinues[cat] !== "done");
   return { members, nextContinue: stillActive ? "active" : null };
@@ -283,19 +283,30 @@ async function fetchBiographyExcerpt(title) {
 
 // ─── Fetch thumbnails ─────────────────────────────────────────
 async function fetchThumbnails(pageIds) {
-  const data = await apiFetch({
-    action:      "query",
-    pageids:     pageIds.join("|"),
-    prop:        "pageimages",
-    piprop:      "thumbnail",
-    pithumbsize: 400,
-  });
-  const pages = data.query?.pages ?? {};
-  const map = new Map();
-  for (const [id, page] of Object.entries(pages)) {
-    map.set(Number(id), page.thumbnail?.source ?? null);
-  }
-  return map;
+  // MediaWiki API accepts max 50 pageids per request
+  const chunks = [];
+  for (let i = 0; i < pageIds.length; i += 50) chunks.push(pageIds.slice(i, i + 50));
+
+  const maps = await Promise.all(chunks.map(async chunk => {
+    const data = await apiFetch({
+      action:      "query",
+      pageids:     chunk.join("|"),
+      prop:        "pageimages",
+      piprop:      "thumbnail",
+      pithumbsize: 400,
+    });
+    const pages = data.query?.pages ?? {};
+    const map = new Map();
+    for (const [id, page] of Object.entries(pages)) {
+      map.set(Number(id), page.thumbnail?.source ?? null);
+    }
+    return map;
+  }));
+
+  // Merge all chunk maps into one
+  const result = new Map();
+  maps.forEach(m => m.forEach((v, k) => result.set(k, v)));
+  return result;
 }
 
 // ─── Load details for a batch ─────────────────────────────────
