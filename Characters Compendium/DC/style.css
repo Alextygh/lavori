@@ -413,6 +413,7 @@ main {
   color: #8899bb;
   margin-top: 0.5rem;
   flex: 1;
+  white-space: pre-wrap;
 }
 
 .modal-link {
