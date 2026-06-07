@@ -7,7 +7,7 @@
  * Canon vs Legends: determined by page title.
  *   - Titles ending with "/Legends" → LEGENDS
  *   - Everything else              → CANON
- *
+ * 
  * Biography section: #Biography heading, walk next siblings until next h2.
  */
 
