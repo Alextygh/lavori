@@ -23,8 +23,8 @@
     margin: 0 auto;
   }
 
-  /* Each chunk is a <p> of inline spans */
-  .chunk {
+  /* Single continuous text block — no chunk breaks */
+  #pitext {
     word-break: break-all;
     letter-spacing: 0.3px;
   }
@@ -45,7 +45,6 @@
     color: #fff;
   }
 
-  /* Floating tooltip pinned to bottom center */
   #tip {
     position: fixed;
     bottom: 32px;
@@ -71,7 +70,6 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Sentinel at the bottom — invisible, just for IntersectionObserver */
   #sentinel {
     height: 1px;
     width: 100%;
@@ -80,15 +78,15 @@
 </head>
 <body>
 
-<div id="viewport"></div>
+<div id="viewport">
+  <div id="pitext"></div>
+</div>
 <div id="sentinel"></div>
 <div id="tip"></div>
 
 <script>
-// ─── Web Worker source (inlined as blob) ───────────────────────────────────
+// ─── Web Worker (inlined) ──────────────────────────────────────────────────
 const WORKER_SRC = `
-// Compute pi decimal digits using Machin's formula with BigInt
-// pi/4 = 4*arctan(1/5) - arctan(1/239)
 function arctan(x, prec) {
   const xn = BigInt(x);
   let sum = prec / xn;
@@ -106,43 +104,44 @@ function arctan(x, prec) {
   return sum;
 }
 
-let computed = ''; // full digit string (without '3.')
-let upTo = 0;      // how many decimal digits we have
+let computed = '';
+let upTo = 0;
 
 function ensureDigits(need) {
   if (need <= upTo) return;
-  const target = need + 200; // compute a bit ahead
+  const target = need + 500;
   const PREC = 10n ** BigInt(target + 20);
   const pi = 4n * (4n * arctan(5, PREC) - arctan(239, PREC));
-  const s = pi.toString(); // e.g. "314159..."
-  computed = s.slice(1); // drop leading "3", keep all decimal digits
+  const s = pi.toString();
+  computed = s.slice(1); // drop leading '3', keep decimal digits
   upTo = target;
 }
 
 self.onmessage = function(e) {
-  const { from, to } = e.data; // digit positions (1-based, after decimal)
+  const { from, to } = e.data;
   ensureDigits(to);
   const chunk = computed.slice(from - 1, to);
-  self.postMessage({ from, to, digits: chunk });
+  self.postMessage({ from, digits: chunk });
 };
 `;
 
-const workerBlob = new Blob([WORKER_SRC], { type: 'application/javascript' });
-const worker = new Worker(URL.createObjectURL(workerBlob));
+const worker = new Worker(
+  URL.createObjectURL(new Blob([WORKER_SRC], { type: 'application/javascript' }))
+);
 
 // ─── State ─────────────────────────────────────────────────────────────────
-const CHUNK_SIZE = 300;  // digits per DOM paragraph
-const PRELOAD    = 4;    // chunks to keep ahead of sentinel
+const CHUNK_SIZE = 400;
+const PRELOAD    = 4;
 
-let nextChunkStart = 1;  // next digit position to request (1-based)
-let pending        = 0;  // requests in flight
+let nextChunkStart = 1;
+let pending        = 0;
 let activeSpan     = null;
 
-const viewport  = document.getElementById('viewport');
-const sentinel  = document.getElementById('sentinel');
-const tip       = document.getElementById('tip');
+const pitext   = document.getElementById('pitext');
+const sentinel = document.getElementById('sentinel');
+const tip      = document.getElementById('tip');
 
-// ─── Ordinal helper ────────────────────────────────────────────────────────
+// ─── Ordinal ───────────────────────────────────────────────────────────────
 function ordinal(n) {
   const s = ['th','st','nd','rd'];
   const v = n % 100;
@@ -155,46 +154,39 @@ function showTip(text) {
   clearTimeout(tipTimer);
   tip.textContent = text;
   tip.classList.add('show');
-  tipTimer = setTimeout(hideTip, 2800);
-}
-function hideTip() {
-  tip.classList.remove('show');
+  tipTimer = setTimeout(() => tip.classList.remove('show'), 2800);
 }
 
-// ─── Click handler (delegated) ─────────────────────────────────────────────
-viewport.addEventListener('click', e => {
+// ─── Click (delegated) ────────────────────────────────────────────────────
+pitext.addEventListener('click', e => {
   const span = e.target.closest('.d');
   if (activeSpan) activeSpan.classList.remove('active');
-  if (!span) { activeSpan = null; hideTip(); return; }
+  if (!span) { activeSpan = null; tip.classList.remove('show'); return; }
   activeSpan = span;
   span.classList.add('active');
   const pos = parseInt(span.dataset.p, 10);
-  if (pos === 0) {
-    showTip('integer part (3)');
-  } else {
-    showTip(ordinal(pos) + ' decimal digit');
-  }
+  showTip(pos === 0 ? 'integer part (3)' : ordinal(pos) + ' decimal digit');
 });
 
 document.addEventListener('click', e => {
   if (!e.target.closest('#viewport')) {
     if (activeSpan) { activeSpan.classList.remove('active'); activeSpan = null; }
-    hideTip();
+    tip.classList.remove('show');
   }
 });
 
-// ─── Render a received chunk ───────────────────────────────────────────────
-function renderChunk(from, digits) {
-  const p = document.createElement('p');
-  p.className = 'chunk';
+// ─── Render ────────────────────────────────────────────────────────────────
+worker.onmessage = e => {
+  const { from, digits } = e.data;
+  const frag = document.createDocumentFragment();
 
-  // First chunk: prepend "3."
+  // On very first chunk, prepend "3."
   if (from === 1) {
     const s = document.createElement('span');
     s.className = 'd';
     s.dataset.p = '0';
     s.textContent = '3.';
-    p.appendChild(s);
+    frag.appendChild(s);
   }
 
   for (let i = 0; i < digits.length; i++) {
@@ -202,21 +194,16 @@ function renderChunk(from, digits) {
     s.className = 'd';
     s.dataset.p = String(from + i);
     s.textContent = digits[i];
-    p.appendChild(s);
+    frag.appendChild(s);
   }
 
-  viewport.appendChild(p);
+  // Append directly into the single #pitext — no wrapping element
+  pitext.appendChild(frag);
   pending--;
   maybeRequest();
-}
-
-// ─── Worker response ───────────────────────────────────────────────────────
-worker.onmessage = e => {
-  const { from, digits } = e.data;
-  renderChunk(from, digits);
 };
 
-// ─── Request next chunk ────────────────────────────────────────────────────
+// ─── Request ───────────────────────────────────────────────────────────────
 function requestChunk() {
   const from = nextChunkStart;
   const to   = from + CHUNK_SIZE - 1;
@@ -226,19 +213,13 @@ function requestChunk() {
 }
 
 function maybeRequest() {
-  while (pending < PRELOAD) {
-    requestChunk();
-  }
+  while (pending < PRELOAD) requestChunk();
 }
 
-// ─── IntersectionObserver to trigger more loads ────────────────────────────
-const observer = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) {
-    maybeRequest();
-  }
-}, { rootMargin: '800px' });
-
-observer.observe(sentinel);
+// ─── Sentinel observer ────────────────────────────────────────────────────
+new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) maybeRequest();
+}, { rootMargin: '1000px' }).observe(sentinel);
 
 // ─── Boot ──────────────────────────────────────────────────────────────────
 maybeRequest();
