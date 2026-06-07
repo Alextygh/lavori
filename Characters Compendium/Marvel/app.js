@@ -1,448 +1,484 @@
-/* ─── Reset & Base ───────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/**
+ * Marvel Character Compendium
+ *
+ * Letter filter: ALL, 0-9, A-Z (from Category:Characters page)
+ * History text: action=query&prop=revisions&rvprop=content with origin=* (CORS-safe)
+ *   then split on ==History== and clean wikitext
+ * Modal link: character page URL + #History anchor
+ */
 
-:root {
-  --blue:      #0074e8;
-  --blue-dark: #0055aa;
-  --black:     #06080f;
-  --dark:      #0d1117;
-  --card-bg:   #111620;
-  --border:    #1e2535;
-  --text:      #e0e6f0;
-  --muted:     #4a5570;
-  --white:     #ffffff;
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-ui:      'Barlow Condensed', sans-serif;
-  --font-body:    'Barlow', sans-serif;
-}
+const API      = "https://marvel.fandom.com/api.php";
+const CATEGORY = "Characters";
+const BATCH    = 50;
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--black);
-  color: var(--text);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+const LETTERS = ["0–9","A","B","C","D","E","F","G","H","I","J","K","L","M",
+                 "N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Other"];
 
-/* ─── Header ─────────────────────────────────────────────────── */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--black);
-  border-bottom: 2px solid var(--blue);
-  padding: 0 2rem;
-}
+// ─── State ────────────────────────────────────────────────────
+let currentLetter  = null;
+let cmcontinue     = null;
+let isLoading      = false;
+let exhausted      = false;
+let totalLoaded    = 0;
+let searchQuery    = "";      // current search string
+let searchOffset   = 0;      // pagination offset for search results
+let isSearchMode   = false;  // true while a search is active
+let searchDebounce = null;
 
-.header-inner {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 1.2rem 0 0.8rem;
-}
+// ─── DOM ──────────────────────────────────────────────────────
+const grid          = document.getElementById("grid");
+const loadMoreBtn   = document.getElementById("load-more-btn");
+const spinner       = document.getElementById("spinner");
+const totalLoadedEl = document.getElementById("total-loaded");
+const searchInput   = document.getElementById("search-input");
+const searchClear   = document.getElementById("search-clear");
 
-.title-eyebrow {
-  display: block;
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  color: var(--blue);
-  margin-bottom: 0.1rem;
-}
+// Build letter bar (replaces the search bar div)
+const searchBar = document.querySelector(".search-bar");
+searchBar.innerHTML = "";
+searchBar.classList.add("letter-bar");
 
-h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 0.9;
-  color: var(--white);
-  letter-spacing: 0.02em;
-}
+const allBtn = document.createElement("button");
+allBtn.className = "letter-btn active";
+allBtn.textContent = "ALL";
+allBtn.addEventListener("click", () => selectLetter(null));
+searchBar.appendChild(allBtn);
 
-.header-meta {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-end;
-}
-.stat-block { text-align: right; display: flex; flex-direction: column; }
-.stat-value {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  line-height: 1;
-  color: var(--blue);
-}
-.stat-label {
-  font-family: var(--font-ui);
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-}
+LETTERS.forEach(letter => {
+  const btn = document.createElement("button");
+  btn.className = "letter-btn";
+  btn.textContent = letter;
+  btn.addEventListener("click", () => selectLetter(letter));
+  searchBar.appendChild(btn);
+});
 
-/* ─── Search input ───────────────────────────────────────────── */
-.search-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border-top: 1px solid var(--border);
-  padding: 0.5rem 0;
-}
+const noResults = document.createElement("div");
+noResults.id = "no-results";
+noResults.textContent = "NO CHARACTERS FOUND";
+grid.after(noResults);
 
-.search-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--white);
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
-  padding: 0.4rem 2.5rem 0.4rem 0;
-  caret-color: var(--blue);
-}
+// ─── Search input handlers ────────────────────────────────────
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim();
+  searchClear.classList.toggle("visible", q.length > 0);
+  clearTimeout(searchDebounce);
+  if (q.length === 0) {
+    exitSearch();
+    return;
+  }
+  searchDebounce = setTimeout(() => startSearch(q), 350);
+});
 
-.search-input::placeholder {
-  color: var(--muted);
-}
+searchClear.addEventListener("click", () => {
+  searchInput.value = "";
+  searchClear.classList.remove("visible");
+  exitSearch();
+  searchInput.focus();
+});
 
-.search-clear {
-  position: absolute;
-  right: 0;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 0.7rem;
-  cursor: pointer;
-  padding: 0.4rem;
-  line-height: 1;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s, color 0.15s;
-}
-.search-clear.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-.search-clear:hover { color: var(--blue); }
+// Modal elements
+const backdrop     = document.getElementById("modal-backdrop");
+const modal        = document.getElementById("modal");
+const modalClose   = document.getElementById("modal-close");
+const modalImg     = document.getElementById("modal-img");
+const modalName    = document.getElementById("modal-name");
+const modalReality = document.getElementById("modal-reality");
+const modalExtract = document.getElementById("modal-extract");
+const modalLink    = document.getElementById("modal-link");
 
-/* Dim letter bar while searching */
-.letter-bar.search-active .letter-btn {
-  opacity: 0.35;
-  pointer-events: none;
+// ─── Search mode ──────────────────────────────────────────────
+function startSearch(q) {
+  if (isLoading) return;
+  searchQuery  = q;
+  searchOffset = 0;
+  isSearchMode = true;
+  exhausted    = false;
+  totalLoaded  = 0;
+  totalLoadedEl.textContent = "0";
+  noResults.style.display   = "none";
+  grid.innerHTML            = "";
+  loadMoreBtn.style.display = "none";
+
+  // Dim letter buttons while searching
+  document.querySelectorAll(".letter-btn").forEach(b => b.classList.remove("active"));
+  searchBar.classList.add("search-active");
+
+  loadSearchBatch();
 }
 
-/* ─── Letter Bar ─────────────────────────────────────────────── */
-.letter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 0.5rem 0;
-  border-top: 1px solid var(--border);
+function exitSearch() {
+  isSearchMode = false;
+  searchQuery  = "";
+  searchOffset = 0;
+  searchBar.classList.remove("search-active");
+  // Restore the previously active letter (or ALL)
+  selectLetter(currentLetter);
 }
 
-.letter-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  padding: 0.3rem 0.5rem;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-  line-height: 1;
-  border-radius: 2px;
+async function loadSearchBatch() {
+  if (isLoading || exhausted) return;
+  isLoading = true;
+  showSpinner(true);
+  loadMoreBtn.style.display = "none";
+
+  try {
+    // generator=search runs a fulltext search; prop=categories with clcategories
+    // lets us confirm each result is actually in Category:Characters in one call.
+    const data = await apiFetch({
+      action:       "query",
+      generator:    "search",
+      gsrsearch:    searchQuery,
+      gsrnamespace: 0,
+      gsrlimit:     50,
+      gsroffset:    searchOffset,
+      prop:         "categories",
+      clcategories: "Category:Characters",
+    });
+
+    const pages = Object.values(data.query?.pages ?? {});
+
+    // Only keep pages where Category:Characters was returned
+    const members = pages
+      .filter(p => p.categories?.length > 0)
+      .map(p => ({ title: p.title, pageId: p.pageid }));
+
+    searchOffset += 50;
+    if (!data.continue) exhausted = true;
+
+    if (members.length > 0) {
+      const details = await getPageDetails(members);
+      renderCards(members, details);
+      totalLoaded += members.length;
+      totalLoadedEl.textContent = totalLoaded.toLocaleString();
+    }
+
+    // If this batch had no character matches but there are more search results,
+    // automatically fetch the next batch rather than showing Load More with 0 cards
+    if (members.length === 0 && !exhausted) {
+      isLoading = false;
+      await loadSearchBatch();
+      return;
+    }
+
+    if (exhausted && totalLoaded === 0) {
+      noResults.style.display = "block";
+    }
+
+  } catch (err) {
+    console.error("Search error:", err);
+  } finally {
+    isLoading = false;
+    showSpinner(false);
+    if (!exhausted) {
+      loadMoreBtn.style.display = "flex";
+      loadMoreBtn.querySelector(".btn-sub").textContent = "load more results";
+    } else {
+      loadMoreBtn.style.display = "none";
+    }
+  }
 }
 
-.letter-btn:hover {
-  color: var(--white);
-  background: rgba(255,255,255,0.07);
+// ─── Letter selection ─────────────────────────────────────────
+function selectLetter(letter) {
+  if (isLoading) return;
+  isSearchMode  = false;
+  searchQuery   = "";
+  searchOffset  = 0;
+  currentLetter = letter;
+  cmcontinue    = null;
+  exhausted     = false;
+  totalLoaded   = 0;
+  totalLoadedEl.textContent = "0";
+  noResults.style.display   = "none";
+  grid.innerHTML            = "";
+  loadMoreBtn.style.display = "none";
+  loadMoreBtn.querySelector(".btn-sub").textContent =
+    `${BATCH} per batch · live from Fandom`;
+
+  document.querySelectorAll(".letter-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent === (letter ?? "ALL"));
+  });
+
+  loadBatch();
 }
 
-.letter-btn.active {
-  color: var(--white);
-  background: var(--blue);
+// ─── CORS-safe API fetch ──────────────────────────────────────
+async function apiFetch(params) {
+  // URLSearchParams encodes | as %7C which MediaWiki rejects for multi-value params.
+  // Build the query string manually so | stays literal.
+  const qs = Object.entries({ ...params, format: "json", origin: "*" })
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v)).replace(/%7C/gi, "|")}`)
+    .join("&");
+  const res = await fetch(`${API}?${qs}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-/* ─── Grid ───────────────────────────────────────────────────── */
-main {
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
+// ─── Category members ─────────────────────────────────────────
+async function getCategoryMembers() {
+  const params = {
+    action:   "query",
+    list:     "categorymembers",
+    cmtitle:  `Category:${CATEGORY}`,
+    cmtype:   "page",
+    cmlimit:  BATCH,
+    cmprop:   "ids|title",
+  };
+
+  if (currentLetter === "Other") {
+    // "Other" = titles not starting with plain A-Z or 0-9.
+    // These live in two small clusters in the category index:
+    //   • Before "0"  — symbols/punctuation like ', ", ¡
+    //   • After "Z"   — accented Latin: Á, Ä, Æ, É, Ö, Ø …
+    // Both clusters are tiny (~dozens of entries), so we fetch each fully
+    // in one shot (limit 500) and merge, filtering client-side.
+    const fetchAll = async (extra) => {
+      let all = [], cont = undefined;
+      do {
+        const p = { ...params, cmlimit: 500, ...extra };
+        if (cont) p.cmcontinue = cont;
+        const data = await apiFetch(p);
+        all.push(...(data.query?.categorymembers ?? []));
+        cont = data.continue?.cmcontinue;
+      } while (cont);
+      return all;
+    };
+
+    const [before, after] = await Promise.all([
+      fetchAll({ cmendsortkey: "0" }),
+      fetchAll({ cmstartsortkeyprefix: "\u00A1" }),
+    ]);
+
+    const members = [...before, ...after]
+      .map(m => ({ title: m.title, pageId: m.pageid }))
+      .filter(m => !/^[A-Za-z0-9]/.test(m.title));
+
+    return { members, nextContinue: null }; // exhausted in one shot
+  }
+
+  if (currentLetter) {
+    if (currentLetter === "0–9") {
+      params.cmstartsortkeyprefix = "0";
+      params.cmendsortkey         = ":"; // ASCII just after "9"
+    } else {
+      params.cmstartsortkeyprefix = currentLetter;
+      params.cmendsortkey         = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+    }
+  }
+
+  if (cmcontinue) params.cmcontinue = cmcontinue;
+
+  const data = await apiFetch(params);
+  return {
+    members:      (data.query?.categorymembers ?? []).map(m => ({ title: m.title, pageId: m.pageid })),
+    nextContinue: data.continue?.cmcontinue ?? null,
+  };
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1px;
-  background: var(--border);
+// ─── Fetch rendered HTML for a page and extract History text ──
+// Uses action=parse&prop=text which returns the full rendered HTML.
+// We then parse it in a detached DOM and grab the text inside the
+// marvel_database_section div that follows the #History headline.
+async function fetchHistoryExcerpt(title) {
+  const data = await apiFetch({
+    action:       "parse",
+    page:         title,
+    prop:         "text",
+    disableeditsection: "1",
+  });
+
+  const html = data?.parse?.text?.["*"] ?? "";
+  if (!html) return "";
+
+  // Parse into a detached document so we can use querySelector
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  // Find the History headline span, then its parent h2, then the next sibling div
+  const historySpan = doc.querySelector("#History");
+  if (!historySpan) {
+    // Fallback: grab first paragraph from mw-parser-output if no History section
+    const firstP = doc.querySelector(".mw-parser-output p");
+    return firstP ? firstP.textContent.trim().replace(/\s+/g, " ") : "";
+  }
+
+  // The structure is: <h2><span id="History">…</span></h2><div class="marvel_database_section">…</div>
+  const h2 = historySpan.closest("h2");
+  const section = h2?.nextElementSibling;
+  if (!section) return "";
+
+  // Get all text-bearing paragraphs from the section
+  const paragraphs = [...section.querySelectorAll("p")];
+  const parts = [];
+  for (const p of paragraphs) {
+    p.querySelectorAll("sup, .reference").forEach(el => el.remove());
+    const text = p.textContent.trim().replace(/\s+/g, " ");
+    if (text.length >= 40) parts.push(text);
+  }
+  if (parts.length) return parts.join("\n\n");
+
+  // No <p> tags — just grab raw text of the whole section
+  section.querySelectorAll("sup, .reference").forEach(el => el.remove());
+  const raw = section.textContent.trim().replace(/\s+/g, " ");
+  return raw.length >= 40 ? raw : "";
+}
+// ─── Fetch thumbnails for a batch of pageIds ─────────────────
+async function fetchThumbnails(pageIds) {
+  const data = await apiFetch({
+    action:      "query",
+    pageids:     pageIds.join("|"),
+    prop:        "pageimages",
+    piprop:      "thumbnail",
+    pithumbsize: 400,
+  });
+  const pages = data.query?.pages ?? {};
+  const map = new Map();
+  for (const [id, page] of Object.entries(pages)) {
+    map.set(Number(id), page.thumbnail?.source ?? null);
+  }
+  return map;
 }
 
-/* ─── Card ───────────────────────────────────────────────────── */
-.card {
-  background: var(--card-bg);
-  cursor: pointer;
-  overflow: hidden;
-  position: relative;
-  aspect-ratio: 2/3;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  transition: transform 0.18s ease;
-}
-.card:hover { transform: scale(1.04); z-index: 2; }
+// ─── Load details for a batch of members ─────────────────────
+async function getPageDetails(members) {
+  const pageIds = members.map(m => m.pageId);
 
-.card-img-wrap { position: absolute; inset: 0; }
-.card-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-  transition: transform 0.4s ease;
-}
-.card:hover .card-img-wrap img { transform: scale(1.06); }
+  // Thumbnails in one batched call
+  const thumbs = await fetchThumbnails(pageIds);
 
-.card-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(160deg, #111928 0%, #070c14 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card-placeholder-icon {
-  font-size: 3rem;
-  opacity: 0.12;
-  font-family: var(--font-display);
-  color: var(--blue);
+  // History text: one call per page, all in parallel
+  const historyResults = await Promise.all(
+    members.map(async ({ title, pageId }) => {
+      try {
+        return [pageId, await fetchHistoryExcerpt(title)];
+      } catch {
+        return [pageId, ""];
+      }
+    })
+  );
+  const historyMap = new Map(historyResults);
+
+  return new Map(
+    members.map(({ pageId }) => [pageId, {
+      thumbnail: thumbs.get(pageId) ?? null,
+      extract:   historyMap.get(pageId) ?? "",
+    }])
+  );
 }
 
-.card-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 75%);
+// ─── Title parser ─────────────────────────────────────────────
+function parseTitle(title) {
+  const m = title.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return m ? { name: m[1].trim(), reality: m[2].trim() } : { name: title, reality: "" };
 }
 
-.card-body {
-  position: relative;
-  z-index: 1;
-  padding: 0.75rem;
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-.card-reality {
-  display: block;
-  font-family: var(--font-ui);
-  font-size: 0.58rem;
-  letter-spacing: 0.15em;
-  color: var(--blue);
-  margin-bottom: 0.15rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+// ─── Card ─────────────────────────────────────────────────────
+function makeCard({ title, thumbnail, extract }) {
+  const { name, reality } = parseTitle(title);
+  const slug = encodeURIComponent(title.replace(/ /g, "_"));
+  const url  = `https://marvel.fandom.com/wiki/${slug}#History`;
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      ${thumbnail
+        ? `<img src="${esc(thumbnail)}" alt="${esc(name)}" loading="lazy">`
+        : `<div class="card-placeholder"><span class="card-placeholder-icon">M</span></div>`}
+    </div>
+    <div class="card-gradient"></div>
+    <div class="card-body">
+      ${reality ? `<span class="card-reality">${esc(reality)}</span>` : ""}
+      <div class="card-name">${esc(name)}</div>
+    </div>
+    <div class="card-hover-indicator"></div>
+  `;
+  card.addEventListener("click", () => openModal({ name, reality, url, thumbnail, extract }));
+  return card;
 }
 
-.card-name {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  line-height: 1.1;
-  color: var(--white);
+function renderCards(members, details) {
+  const frag = document.createDocumentFragment();
+  for (const { title, pageId } of members) {
+    const { thumbnail, extract } = details.get(pageId) ?? {};
+    frag.appendChild(makeCard({ title, thumbnail: thumbnail ?? null, extract: extract ?? "" }));
+  }
+  grid.appendChild(frag);
 }
 
-.card-hover-indicator {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--blue);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.card:hover .card-hover-indicator { opacity: 1; }
+// ─── Modal ────────────────────────────────────────────────────
+function openModal({ name, reality, url, thumbnail, extract }) {
+  modalName.textContent    = name;
+  modalReality.textContent = reality || "";
+  modalLink.href           = url;
+  modalExtract.textContent = extract || "No history excerpt available.";
 
-/* ─── Load More ──────────────────────────────────────────────── */
-#load-more-wrapper {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-  min-height: 80px;
-  align-items: center;
+  if (thumbnail) {
+    modalImg.src = thumbnail; modalImg.alt = name;
+    modal.classList.remove("no-image");
+  } else {
+    modalImg.src = "";
+    modal.classList.add("no-image");
+  }
+
+  backdrop.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
-.load-more-btn {
-  background: transparent;
-  border: 1px solid var(--blue);
-  color: var(--white);
-  padding: 1rem 3rem;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  letter-spacing: 0.15em;
-  transition: background 0.2s, transform 0.15s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-.load-more-btn:hover { background: var(--blue); transform: translateY(-2px); }
-.btn-label { font-size: 1rem; }
-.btn-sub { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
-.load-more-btn:hover .btn-sub { color: rgba(255,255,255,0.7); }
-
-/* ─── Spinner ────────────────────────────────────────────────── */
-.spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-}
-.spinner-ring {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.spinner.hidden { display: none; }
-
-/* ─── Empty state ────────────────────────────────────────────── */
-#no-results {
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
-  color: var(--muted);
-  text-align: center;
-  padding: 3rem 0;
-  display: none;
+function closeModal() {
+  backdrop.classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
-/* ─── Modal ──────────────────────────────────────────────────── */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  backdrop-filter: blur(4px);
-}
-.modal-backdrop.hidden { display: none; }
+modalClose.addEventListener("click", closeModal);
+backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-.modal {
-  position: relative;
-  background: var(--dark);
-  border: 1px solid var(--border);
-  max-width: 520px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: grid;
-  grid-template-rows: 280px 1fr;
-}
+// ─── Load batch ───────────────────────────────────────────────
+async function loadBatch() {
+  if (isLoading || exhausted) return;
+  isLoading = true;
+  showSpinner(true);
+  loadMoreBtn.style.display = "none";
 
-.modal-close {
-  position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
-  z-index: 10;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid var(--border);
-  color: var(--text);
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
-}
-.modal-close:hover { background: var(--blue); border-color: var(--blue); }
+  try {
+    const { members, nextContinue } = await getCategoryMembers();
 
-.modal-image-wrap {
-  position: relative;
-  overflow: hidden;
-}
-.modal-image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-}
-.modal-image-fade {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 60%;
-  background: linear-gradient(to top, var(--dark), transparent);
+    if (!members.length) {
+      exhausted = true;
+      noResults.style.display = "block";
+      return;
+    }
+
+    const details = await getPageDetails(members);
+    renderCards(members, details);
+
+    totalLoaded += members.length;
+    totalLoadedEl.textContent = totalLoaded.toLocaleString();
+    cmcontinue = nextContinue;
+    if (!nextContinue) exhausted = true;
+
+  } catch (err) {
+    console.error("Load error:", err);
+  } finally {
+    isLoading = false;
+    showSpinner(false);
+    if (!exhausted) loadMoreBtn.style.display = "flex";
+    else            loadMoreBtn.style.display = "none";
+  }
 }
 
-.modal-body {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+function showSpinner(on) {
+  spinner.classList.toggle("hidden", !on);
 }
 
-.modal-eyebrow {
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--blue);
-}
-
-.modal h2 {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  line-height: 1;
-  color: var(--white);
-}
-
-.modal-extract {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #8899bb;
-  margin-top: 0.5rem;
-  flex: 1;
-  white-space: pre-wrap;
-}
-
-.modal-link {
-  display: inline-block;
-  margin-top: 1rem;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  color: var(--blue);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.15s;
-  width: fit-content;
-}
-.modal-link:hover { border-bottom-color: var(--blue); }
-
-.modal.no-image { grid-template-rows: 1fr; }
-.modal.no-image .modal-image-wrap { display: none; }
-
-/* ─── Scrollbar ──────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--black); }
-::-webkit-scrollbar-thumb { background: var(--blue-dark); }
-
-/* ─── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  main { padding: 1rem; }
-  header { padding: 0 1rem; }
-  .card-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .modal { grid-template-rows: 220px 1fr; }
-  .letter-btn { font-size: 0.7rem; padding: 0.25rem 0.35rem; }
-}
+loadMoreBtn.addEventListener("click", () => {
+  if (isSearchMode) loadSearchBatch();
+  else              loadBatch();
+});
+loadBatch();
