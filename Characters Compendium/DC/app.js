@@ -1,6 +1,6 @@
 /**
  * DC Character Compendium
- *
+ * 
  * Data source: dc.fandom.com (DC Database wiki)
  * Category: Category:Characters
  * History section: parsed from rendered HTML via action=parse&prop=text
