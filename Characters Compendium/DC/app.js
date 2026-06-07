@@ -1,6 +1,6 @@
 /**
  * DC Character Compendium
- * 
+ *
  * Data source: dc.fandom.com (DC Database wiki)
  * Category: Category:Characters
  * History section: parsed from rendered HTML via action=parse&prop=text
@@ -199,13 +199,20 @@ function selectLetter(letter) {
 
 // ─── CORS-safe API fetch ──────────────────────────────────────
 async function apiFetch(params) {
-  // Build query string manually so | stays literal (not encoded as %7C)
   const qs = Object.entries({ ...params, format: "json", origin: "*" })
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v)).replace(/%7C/gi, "|")}`)
     .join("&");
-  const res = await fetch(`${API}?${qs}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await fetch(`${API}?${qs}`, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 // ─── Category members ─────────────────────────────────────────
@@ -445,6 +452,8 @@ async function loadBatch() {
 
   } catch (err) {
     console.error("Load error:", err);
+    noResults.textContent = `Error loading characters: ${err.message}`;
+    noResults.style.display = "block";
   } finally {
     isLoading = false;
     showSpinner(false);
