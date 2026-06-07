@@ -315,19 +315,29 @@ async function fetchHistoryExcerpt(title) {
 
 // ─── Fetch thumbnails ─────────────────────────────────────────
 async function fetchThumbnails(pageIds) {
-  const data = await apiFetch({
-    action:      "query",
-    pageids:     pageIds.join("|"),
-    prop:        "pageimages",
-    piprop:      "thumbnail",
-    pithumbsize: 400,
-  });
-  const pages = data.query?.pages ?? {};
-  const map = new Map();
-  for (const [id, page] of Object.entries(pages)) {
-    map.set(Number(id), page.thumbnail?.source ?? null);
-  }
-  return map;
+  // MediaWiki API accepts max 50 pageids per request
+  const chunks = [];
+  for (let i = 0; i < pageIds.length; i += 50) chunks.push(pageIds.slice(i, i + 50));
+
+  const maps = await Promise.all(chunks.map(async chunk => {
+    const data = await apiFetch({
+      action:      "query",
+      pageids:     chunk.join("|"),
+      prop:        "pageimages",
+      piprop:      "thumbnail",
+      pithumbsize: 400,
+    });
+    const pages = data.query?.pages ?? {};
+    const map = new Map();
+    for (const [id, page] of Object.entries(pages)) {
+      map.set(Number(id), page.thumbnail?.source ?? null);
+    }
+    return map;
+  }));
+
+  const result = new Map();
+  maps.forEach(m => m.forEach((v, k) => result.set(k, v)));
+  return result;
 }
 
 // ─── Load details for a batch ─────────────────────────────────
