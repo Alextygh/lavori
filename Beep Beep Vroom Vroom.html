@@ -15,9 +15,9 @@
     body { background: var(--bg); color: var(--text); font-family: 'Syne', system-ui, sans-serif; min-height: 100vh; }
     header { padding: 3rem 2rem 2rem; max-width: 960px; margin: 0 auto; }
     .eyebrow { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
-    h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.05; color: var(--text); }
+    h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.05; }
     h1 span { color: var(--accent); }
-    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--label); font-weight: 400; max-width: 540px; line-height: 1.6; }
+    .subtitle { margin-top: 0.75rem; font-size: 0.95rem; color: var(--label); max-width: 560px; line-height: 1.6; }
     .rule { max-width: 960px; margin: 0 auto 1.5rem; padding: 0 2rem; }
     .rule hr { border: none; border-top: 1px solid var(--border); }
     .controls { max-width: 960px; margin: 0 auto 1.5rem; padding: 0 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
@@ -28,12 +28,14 @@
     input[type="search"]::placeholder { color: var(--muted); }
     .count-badge { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
     .count-badge strong { color: var(--accent2); }
-    #status { max-width: 960px; margin: 0 auto 1.5rem; padding: 0 2rem; }
-    .status-msg { display: flex; align-items: center; gap: 0.6rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--label); }
+    #status-bar { max-width: 960px; margin: 0 auto 1.5rem; padding: 0 2rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+    .status-row { display: flex; align-items: center; gap: 0.6rem; color: var(--label); margin-bottom: 0.5rem; }
     .spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .error-msg { color: var(--danger); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
-    .error-msg a { color: var(--accent2); }
+    .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+    .error-box { color: var(--danger); line-height: 1.6; }
+    .error-box a { color: var(--accent2); }
     .grid-wrap { max-width: 960px; margin: 0 auto; padding: 0 2rem 4rem; }
     #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.6rem; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1rem; text-decoration: none; display: flex; flex-direction: column; gap: 0.25rem; transition: border-color 0.15s, transform 0.15s; }
@@ -44,11 +46,9 @@
     #load-more-wrap { text-align: center; margin-top: 1.5rem; }
     #load-more { padding: 0.7rem 2rem; background: transparent; border: 1px solid var(--accent); border-radius: var(--radius); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: background 0.2s, color 0.2s; letter-spacing: 0.05em; }
     #load-more:hover { background: var(--accent); color: var(--bg); }
-    #load-more:disabled { opacity: 0.4; cursor: default; }
     #empty { text-align: center; padding: 4rem 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.85rem; display: none; }
     @media (max-width: 500px) {
-      header { padding: 2rem 1.25rem 1.5rem; }
-      .controls, #status, .grid-wrap, .rule { padding-left: 1.25rem; padding-right: 1.25rem; }
+      header, .controls, #status-bar, .grid-wrap, .rule { padding-left: 1.25rem; padding-right: 1.25rem; }
       #grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -58,15 +58,18 @@
 <header>
   <p class="eyebrow">Wikidata · Q106839123</p>
   <h1>Means of <span>Transport</span></h1>
-  <p class="subtitle">Every item that is an instance or subclass of <em>means of transport</em>, fetched live from Wikidata.</p>
+  <p class="subtitle">Every item that is a subclass of <em>means of transport</em>, fetched live from Wikidata.</p>
 </header>
 
 <div class="rule"><hr></div>
 
-<div id="status">
-  <div class="status-msg" id="status-msg">
-    <div class="spinner"></div>
-    Querying Wikidata SPARQL…
+<div id="status-bar">
+  <div class="status-row" id="status-row">
+    <div class="spinner" id="spinner"></div>
+    <span id="status-text">Starting…</span>
+  </div>
+  <div class="progress-track" id="progress-track" style="display:none">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
   </div>
 </div>
 
@@ -87,32 +90,41 @@
 </div>
 
 <script>
-  const PAGE_SIZE = 50;
-  let allItems = [];
+  const PAGE_SIZE = 50;       // cards shown per "load more"
+  const BATCH    = 500;       // results per SPARQL request
+  const ENDPOINT = 'https://query.wikidata.org/sparql';
+  const ROOT     = 'Q106839123';
+
+  let allItems = [];   // fully loaded & sorted
   let filtered = [];
-  let shown = 0;
+  let shown    = 0;
+  let loading  = false;
 
-  const QUERY = `SELECT DISTINCT ?item ?itemLabel ?itemDescription WHERE {
-  { ?item wdt:P279* wd:Q106839123 . }
-  UNION
-  { ?sub wdt:P279* wd:Q106839123 . ?item wdt:P31 ?sub . }
+  // ── SPARQL: only direct subclasses (P279, no star) — fast & reliable ──
+  // We do NOT include instances (P31) as that makes it time out.
+  function buildQuery(offset) {
+    return `SELECT DISTINCT ?item ?itemLabel ?itemDescription WHERE {
+  ?item wdt:P279* wd:${ROOT} .
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en,it". }
-} ORDER BY ?itemLabel LIMIT 5000`;
+}
+ORDER BY ?itemLabel
+LIMIT ${BATCH}
+OFFSET ${offset}`;
+  }
 
-  // Try multiple CORS proxies in sequence
-  const PROXIES = [
-    q => `https://corsproxy.io/?${encodeURIComponent('https://query.wikidata.org/sparql?query=' + encodeURIComponent(q) + '&format=json')}`,
-    q => `https://api.allorigins.win/get?url=${encodeURIComponent('https://query.wikidata.org/sparql?query=' + encodeURIComponent(q) + '&format=json')}`,
-  ];
-
-  async function fetchViaProxy(proxyFn, query) {
-    const url = proxyFn(query);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const outer = await res.json();
-    // allorigins wraps in { contents: "..." }
-    const raw = outer.contents !== undefined ? JSON.parse(outer.contents) : outer;
-    return raw.results.bindings.map(b => ({
+  async function sparqlFetch(query) {
+    const url = ENDPOINT + '?query=' + encodeURIComponent(query) + '&format=json';
+    // Direct fetch — works from any web server (GitHub Pages, etc.)
+    // Wikidata sets Access-Control-Allow-Origin: * so this is fine.
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/sparql-results+json',
+        'User-Agent': 'WikidataTransportExplorer/2.0'
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} from Wikidata`);
+    const json = await res.json();
+    return json.results.bindings.map(b => ({
       qid:   b.item.value.replace('http://www.wikidata.org/entity/', ''),
       label: b.itemLabel?.value || '(no label)',
       desc:  b.itemDescription?.value || '',
@@ -120,22 +132,20 @@
     }));
   }
 
-  async function fetchData() {
-    for (const proxy of PROXIES) {
-      try {
-        return await fetchViaProxy(proxy, QUERY);
-      } catch(e) {
-        console.warn('Proxy failed:', e);
-      }
-    }
-    throw new Error('All proxies failed. Try opening the page from a web server instead of file://');
+  function setStatus(msg) {
+    document.getElementById('status-text').textContent = msg;
+  }
+  function setProgress(pct) {
+    const track = document.getElementById('progress-track');
+    track.style.display = 'block';
+    document.getElementById('progress-fill').style.width = pct + '%';
   }
 
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function renderCards(items) {
+  function appendCards(items) {
     const frag = document.createDocumentFragment();
     items.forEach(item => {
       const a = document.createElement('a');
@@ -154,9 +164,9 @@
   }
 
   function updateBadge() {
+    const q = document.getElementById('search').value.trim();
     const badge = document.getElementById('count-badge');
-    const filterActive = document.getElementById('search').value.trim() !== '';
-    if (filterActive) {
+    if (q) {
       badge.innerHTML = `<strong>${filtered.length.toLocaleString()}</strong> of <strong>${allItems.length.toLocaleString()}</strong> entries`;
     } else {
       badge.innerHTML = `<strong>${allItems.length.toLocaleString()}</strong> entries`;
@@ -165,15 +175,15 @@
 
   function showMore() {
     const batch = filtered.slice(shown, shown + PAGE_SIZE);
-    renderCards(batch);
+    appendCards(batch);
     shown += batch.length;
     const wrap = document.getElementById('load-more-wrap');
-    const btn = document.getElementById('load-more');
+    const btn  = document.getElementById('load-more');
     if (shown >= filtered.length) {
       wrap.style.display = 'none';
     } else {
       wrap.style.display = 'block';
-      btn.textContent = `Load more (${filtered.length - shown} remaining)`;
+      btn.textContent = `Load more (${(filtered.length - shown).toLocaleString()} remaining)`;
     }
   }
 
@@ -183,14 +193,12 @@
       ? allItems.filter(it =>
           it.label.toLowerCase().includes(q) ||
           it.desc.toLowerCase().includes(q) ||
-          it.qid.toLowerCase().includes(q)
-        )
+          it.qid.toLowerCase().includes(q))
       : allItems;
 
     document.getElementById('grid').innerHTML = '';
     shown = 0;
     updateBadge();
-
     const empty = document.getElementById('empty');
     if (!filtered.length) {
       empty.style.display = 'block';
@@ -201,11 +209,55 @@
     }
   }
 
+  async function loadAll() {
+    let offset = 0;
+    let total  = 0;
+    const seen = new Set();
+
+    setStatus('Fetching from Wikidata…');
+
+    while (true) {
+      setStatus(`Fetching items ${offset + 1}…`);
+      if (offset > 0) setProgress(Math.min(95, (offset / (total || offset + BATCH)) * 100));
+
+      let batch;
+      try {
+        batch = await sparqlFetch(buildQuery(offset));
+      } catch (err) {
+        // If we already have some items, show them with a warning
+        if (allItems.length > 0) {
+          setStatus(`Loaded ${allItems.length} items (fetch stopped: ${err.message})`);
+          document.getElementById('spinner').style.display = 'none';
+          break;
+        }
+        throw err;
+      }
+
+      // Deduplicate
+      const fresh = batch.filter(it => !seen.has(it.qid));
+      fresh.forEach(it => seen.add(it.qid));
+      allItems.push(...fresh);
+      total += fresh.length;
+
+      if (batch.length < BATCH) {
+        // Last page
+        break;
+      }
+      offset += BATCH;
+      // Small pause to be polite to Wikidata
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Final sort
+    allItems.sort((a, b) => a.label.localeCompare(b.label, 'en', { sensitivity: 'base' }));
+  }
+
   (async () => {
     try {
-      allItems = await fetchData();
+      await loadAll();
 
-      document.getElementById('status').style.display = 'none';
+      // Hide status, show controls
+      document.getElementById('status-bar').style.display = 'none';
       document.getElementById('controls').style.display = 'flex';
 
       filtered = allItems;
@@ -216,9 +268,15 @@
       document.getElementById('load-more').addEventListener('click', showMore);
 
     } catch (err) {
-      document.getElementById('status-msg').outerHTML =
-        `<div class="error-msg">⚠ ${escHtml(err.message)}<br><br>
-        You can also <a href="https://query.wikidata.org/#${encodeURIComponent(QUERY)}" target="_blank">run the query directly on Wikidata</a>.</div>`;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('status-text').textContent = '';
+      document.getElementById('status-bar').innerHTML = `
+        <div class="error-box">
+          ⚠ Failed to load: <strong>${escHtml(err.message)}</strong><br><br>
+          Wikidata's SPARQL endpoint requires the page to be served over HTTP/S (not <code>file://</code>)
+          and sometimes rate-limits large queries.<br><br>
+          → <a href="https://query.wikidata.org/#${encodeURIComponent(buildQuery(0))}" target="_blank">Try the query directly on Wikidata Query Service</a>
+        </div>`;
     }
   })();
 </script>
