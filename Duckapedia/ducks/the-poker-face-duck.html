@@ -463,29 +463,35 @@
         </div>
       </div>
 	  
-	        <!-- ── TYPE 2: DLC ────────────────────────────────────────────────
-           Set data-appid to the numeric App ID from the SteamDB URL.
-           e.g. https://www.steamdb.info/app/1659040/ → data-appid="1659040"
-           The script below will fetch the live price automatically.
-           Set data-steamdb to the full SteamDB URL for the "View on SteamDB" link.
+      <!-- ── TYPE 2: DLC ────────────────────────────────────────────────
+           Fill in each data-price-XX attribute with the price string for
+           that currency (e.g. data-price-us="$4.99"). Leave an attribute
+           empty or remove it to show "N/A" for that currency.
+           Set data-steam  to the Steam store URL for the item.
+           Set data-steamdb to the SteamDB URL for the item.
       -->
       <div class="acq-block">
         <div class="acq-label">DLC</div>
         <div class="acq-dlc"
-             data-appid="3711140"
+             data-price-us="$4.99"
+             data-price-gb="£3.99"
+             data-price-eu="€4.99"
+             data-price-au="A$7.50"
+             data-price-ca="C$6.49"
+             data-price-br="R$16.99"
+             data-price-jp="¥580"
+             data-steam="https://store.steampowered.com/app/3711140/"
              data-steamdb="https://www.steamdb.info/app/3711140/">
 
           <div class="dlc-name">The Banker Pack</div>
 
           <div class="dlc-price-row">
-            <span class="dlc-price-amount loading">Loading price...</span>
-            <!-- discount badge and original price are injected by script when on sale -->
+            <span class="dlc-price-amount"></span>
           </div>
 
           <div class="dlc-currency-row">
-            <label for="dlc-currency-3711140">Currency:</label>
-            <select class="dlc-currency-select" id="dlc-currency-3711140"
-                    data-target="3711140">
+            <label>Currency:</label>
+            <select class="dlc-currency-select">
               <option value="us">USD $</option>
               <option value="gb">GBP £</option>
               <option value="eu">EUR €</option>
@@ -497,9 +503,9 @@
           </div>
 
           <div class="dlc-source">
-            Price from Steam &nbsp;·&nbsp;
-            <a class="dlc-steamdb-link" href="https://www.steamdb.info/app/3711140/"
-               target="_blank" rel="noopener">View on SteamDB</a>
+            <a class="dlc-steam-link" href="#" target="_blank" rel="noopener">View on Steam</a>
+            &nbsp;·&nbsp;
+            <a class="dlc-steamdb-link" href="#" target="_blank" rel="noopener">View on SteamDB</a>
           </div>
         </div>
       </div>
