@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duckapedia</title>
+  <link rel="icon" type="image/x-icon" href="https://static.wikia.nocookie.net/hitman/images/3/37/Rubberduckymodel.PNG/revision/latest?cb=20200329154620">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      background: #1a1a1a;
+      color: #c6c6c6;
+      line-height: 1.6;
+    }
+
+    nav {
+      background: #111;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      height: 48px;
+    }
+    nav .site-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    nav .site-name:hover { color: #c3000d; }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    h1.page-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid #c3000d;
+      padding-bottom: 8px;
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      color: #777;
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+    }
+
+    h2.section-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid #444;
+      padding-bottom: 4px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      padding: 12px 14px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .filter-select {
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      color: #ccc;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      cursor: pointer;
+      outline: none;
+      min-width: 130px;
+    }
+    .filter-select:hover { border-color: #555; }
+    .filter-select:focus { border-color: #c3000d; }
+
+    .filter-divider {
+      width: 1px;
+      height: 24px;
+      background: #333;
+      margin: 0 2px;
+    }
+
+    .filter-reset {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #3a3a3a;
+      color: #888;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .filter-reset:hover { border-color: #c3000d; color: #fff; }
+
+    /* RESULTS COUNT */
+    .results-info {
+      font-size: 0.78rem;
+      color: #555;
+      margin-bottom: 14px;
+    }
+
+    /* DUCK GRID */
+    .duck-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    /* DUCK CARD */
+    .duck-card {
+      background: #242424;
+      border: 1px solid #333;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.15s;
+      position: relative;
+    }
+    .duck-card:hover { border-color: #c3000d; }
+    .duck-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #2e2e2e;
+      display: block;
+    }
+    .duck-card .card-label {
+      padding: 8px 10px;
+      border-top: 1px solid #333;
+      font-size: 0.82rem;
+      color: #ddd;
+      text-align: center;
+    }
+
+    /* TIME LIMITED BADGE */
+    .badge-time-limited {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #c3000d;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 6px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 0;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      border-top: 1px solid #2a2a2a;
+      margin-top: 64px;
+      padding-top: 20px;
+      color: #555;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="site-name" href="index.html">Duckapedia</a>
+  </nav>
+
+  <div class="page">
+
+    <h1 class="page-title">Duckapedia</h1>
+    <p class="page-subtitle">Ducks.</p>
+
+    <h2 class="section-heading">All Ducks</h2>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+
+      <div class="filter-group">
+        <label for="f-sort">Sort</label>
+        <select class="filter-select" id="f-sort">
+          <option value="time-first">Time Limited First</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+        </select>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <label for="f-type">Type</label>
+        <select class="filter-select" id="f-type">
+          <option value="">All Types</option>
+			   <option value="Distraction">Distraction</option>
+		       <option value="Explosive">Explosive</option>
+               <option value="Tool">Tool</option>
+        </select>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <label for="f-lethal">Lethal</label>
+        <select class="filter-select" id="f-lethal">
+          <option value="">Any</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <label for="f-avail">Availability</label>
+        <select class="filter-select" id="f-avail">
+          <option value="">All</option>
+          <option value="Available">Available</option>
+          <option value="Time Limited">Time Limited</option>
+          <option value="Not Available">Not Available</option>
+        </select>
+      </div>
+
+      <button class="filter-reset" id="btn-reset">Reset</button>
+    </div>
+
+    <div class="results-info" id="results-info"></div>
+
+    <div class="duck-grid" id="duck-grid"></div>
+
+  </div>
+
+  <footer>
+    Duckapedia is a fan-made wiki. Not affiliated with IO Interactive.
+    Content is available under CC-BY-SA unless otherwise noted.
+  </footer>
+
+  <script>
+  /* ================================================================
+     DUCK DATA
+     ----------------------------------------------------------------
+     Add one object per duck to the DUCKS array below.
+
+     Fields:
+       name         — Display name (string)
+       href         — Path to the duck's HTML page (string)
+       img          — Image URL or "" for placeholder (string)
+       type         — Must match an <option> in #f-type (string)
+       lethal       — "yes" or "no" (string)
+       availability — "Available" | "Time Limited" | "Not Available"
+       expires      — ISO date string "YYYY-MM-DD", only used when
+                      availability is "Time Limited". Leave "" otherwise.
+
+     Example time-limited duck:
+     {
+       name: "Golden Duck",
+       href: "ducks/golden-duck.html",
+       img:  "",
+       type: "Tool",
+       lethal: "no",
+       availability: "Time Limited",
+       expires: "2025-02-14"
+     }
+  ================================================================ */
+  const DUCKS = [
+
+    {
+      name: "Proximity Explosive Duck",
+      href: "ducks/proximity-explosive-duck.html",
+      img:  "https://static.wikia.nocookie.net/hitman/images/1/18/Proximity_Explosive_Duck_HITMAN2021.jpg/revision/latest?cb=20210302180643",
+      type: "Explosive",
+      lethal: "yes",
+      availability: "Available",
+      expires: ""
+    },
+
+    {
+      name: "Proximity Explosive Rubber Duck Mk II",
+      href: "ducks/proximity-explosive-rubber-duck-mk-ii.html",
+      img:  "https://static.wikia.nocookie.net/hitman/images/7/7f/Proximity_Explosive_Rubber_Duck_Mk_II_HITMAN2021.jpeg/revision/latest?cb=20210303075101",
+      type: "Explosive",
+      lethal: "yes",
+      availability: "Available",
+      expires: ""
+    },
+
+    {
+      name: "Remote Concussion Collectors Rubber Duck",
+      href: "ducks/remote-concussion-collectors-rubber-duck.html",
+      img:  "https://static.wikia.nocookie.net/hitman/images/0/05/Remote_Concussion_Collectors_Rubber_Duck_HITMAN2021.jpeg/revision/latest?cb=20210304144247",
+      type: "Explosive",
+      lethal: "no",
+      availability: "Available",
+      expires: ""
+    },
+	
+	{
+       name: "Remote Concussion Rubber Duck",
+       href: "ducks/remote-concussion-rubber-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/2/21/Remote_Concussion_Rubber_Duck_HITMAN2021.jpeg/revision/latest?cb=20210303085630",
+       type: "Explosive",
+       lethal: "no",
+       availability: "Available",
+       expires: ""
+    },
+	
+	{
+       name: "Remote Explosive Classic Rubber Duck",
+       href: "ducks/remote-explosive-classic-rubber-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/e/ef/Remote_Explosive_Classic_Rubber_Duck.jpeg/revision/latest?cb=20210303092429",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	
+	{
+       name: "Remote Explosive Devil Rubber Duck",
+       href: "ducks/remote-explosive-devil-rubber-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/5/5d/Remote_Explosive_Devil_Rubber_Duck.jpeg/revision/latest?cb=20210302174530",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Remote Explosive Duck",
+       href: "ducks/remote-explosive-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/a/ac/Remote_Explosive_Duck_HITMAN3.jpeg/revision/latest?cb=20210130140924",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Remote Explosive Rubber Duck Mk II",
+       href: "ducks/remote-explosive-rubber-duck-mk-ii.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/9/94/Remote_Explosive_Rubber_Duck_Mk_II_HITMAN2021.jpeg/revision/latest?cb=20210303091536",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Sunset Rubber Duck",
+       href: "ducks/sunset-rubber-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/8/8d/Sunset_Rubber_Duck.jpeg/revision/latest?cb=20210304175824",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Bowtie Duck",
+       href: "ducks/the-bowtie-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/c/c7/The_Bowtie_Duck.png/revision/latest?cb=20260610151400",
+       type: "Distraction",
+       lethal: "no",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Chainsaw Duck",
+       href: "ducks/the-chainsaw-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/c/ca/The_Chainsaw_Duck.png/revision/latest?cb=20251202174222",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },
+	{
+       name: "Creator Duck",
+       href: "ducks/the-creator-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/1/19/The_Creator_Duck.png/revision/latest?cb=20260315000132",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Dino Duck",
+       href: "ducks//the-dino-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/8/8d/Dino_Duck.png/revision/latest?cb=20250612165631",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Dragon Duck",
+       href: "ducks/the-dragon-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/d/d5/The_Dragon_Duck.png/revision/latest?cb=20250926182908",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "In-flu-ential Duck",
+       href: "ducks//the-in-flu-ential-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/2/28/The_In-flu-ential_Duck.webp/revision/latest?cb=20260303220811",
+       type: "Tool",
+       lethal: "no",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "IOI Showcase Duck",
+       href: "ducks/the-ioi-showcase-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/3/3a/IOI_Showcase_Duck.png/revision/latest?cb=20250610044305",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Muay Thai Duck",
+       href: "ducks/the-muay-thai-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/0/0a/The_Muay_Thai_Duck.png/revision/latest?cb=20260610152409",
+       type: "Explosive",
+       lethal: "no",
+       availability: "Time Limited",
+       expires: "2026-07-05"
+    },	
+	{
+       name: "Neon Duck",
+       href: "ducks//the-neon-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/c/cb/Neon_Duck.png/revision/latest?cb=20250612153707",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Pale Duck",
+       href: "ducks/the-pale-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/8/86/The_Pale_Duck_HITMAN2021.jpeg/revision/latest?cb=20210303152625",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Poker Face Duck",
+       href: "ducks/the-poker-face-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/4/44/The_Poker_Face_Duck.png/revision/latest?cb=20260428230152",
+       type: "Distraction",
+       lethal: "no",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Purple Streak Explosive Duck",
+       href: "ducks/the-purple-streak-explosive-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/3/38/Remote_Explosive_Purple_Duck.png/revision/latest?cb=20240325064736",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Tracksuit Duck",
+       href: "ducks/the-tracksuit-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/b/b6/The_Tracksuit_Duck.webp/revision/latest?cb=20260304215346",
+       type: "Explosive",
+       lethal: "no",
+       availability: "Not Available",
+       expires: ""
+    },	
+	{
+       name: "Trickshot Duck",
+       href: "ducks/the-trickshot-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/3/3d/The_Trickshot_Duck.png/revision/latest?cb=20260610153530",
+       type: "Explosive",
+       lethal: "no",
+       availability: "Available",
+       expires: ""
+    },	
+	{
+       name: "Trophy Duck",
+       href: "ducks/the-trophy-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/9/9b/The_Trophy_Duck.png/revision/latest?cb=20260315000203",
+       type: "Explosive",
+       lethal: "no",
+       availability: "Time Limited",
+       expires: "2026-06-30"
+    },	
+	{
+       name: "Vuvuzela Duck",
+       href: "ducks/the-vuvuzela-duck.html",
+       img:  "https://static.wikia.nocookie.net/hitman/images/e/e3/The_Vuvuzela_Duck.png/revision/latest?cb=20260612175017",
+       type: "Explosive",
+       lethal: "yes",
+       availability: "Time Limited",
+       expires: "2026-06-18"
+    },	
+    /* ★ ADD MORE DUCKS ABOVE THIS LINE */
+
+  ];
+
+  /* ================================================================
+     RENDERING & FILTERING — no need to edit below this line
+  ================================================================ */
+
+  const grid       = document.getElementById('duck-grid');
+  const info       = document.getElementById('results-info');
+  const fSort      = document.getElementById('f-sort');
+  const fType      = document.getElementById('f-type');
+  const fLethal    = document.getElementById('f-lethal');
+  const fAvail     = document.getElementById('f-avail');
+  const btnReset   = document.getElementById('btn-reset');
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  function daysUntil(isoDate) {
+    if (!isoDate) return Infinity;
+    const d = new Date(isoDate);
+    d.setHours(0, 0, 0, 0);
+    return Math.ceil((d - today) / 86400000);
+  }
+
+  function formatExpiry(isoDate) {
+    if (!isoDate) return '';
+    const d = new Date(isoDate);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function render() {
+    const sortVal   = fSort.value;
+    const typeVal   = fType.value;
+    const lethalVal = fLethal.value;
+    const availVal  = fAvail.value;
+
+    let list = DUCKS.filter(d => {
+      if (typeVal   && d.type         !== typeVal)   return false;
+      if (lethalVal && d.lethal       !== lethalVal) return false;
+      if (availVal  && d.availability !== availVal)  return false;
+      return true;
+    });
+
+    list.sort((a, b) => {
+      if (sortVal === 'time-first') {
+        const aIsT = a.availability === 'Time Limited';
+        const bIsT = b.availability === 'Time Limited';
+        if (aIsT && !bIsT) return -1;
+        if (!aIsT && bIsT) return  1;
+        if (aIsT && bIsT) return daysUntil(a.expires) - daysUntil(b.expires);
+        return a.name.localeCompare(b.name);
+      }
+      if (sortVal === 'az') return a.name.localeCompare(b.name);
+      if (sortVal === 'za') return b.name.localeCompare(a.name);
+      return 0;
+    });
+
+    grid.innerHTML = '';
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-state">No ducks match the current filters.</div>';
+      info.textContent = 'Showing 0 ducks';
+      return;
+    }
+
+    info.textContent = `Showing ${list.length} of ${DUCKS.length} duck${DUCKS.length !== 1 ? 's' : ''}`;
+
+    list.forEach(duck => {
+      const a = document.createElement('a');
+      a.className = 'duck-card';
+      a.href = duck.href;
+
+      const isTimeLimited = duck.availability === 'Time Limited';
+      const days = isTimeLimited ? daysUntil(duck.expires) : Infinity;
+      const expLabel = isTimeLimited ? formatExpiry(duck.expires) : '';
+
+      a.innerHTML = `
+        ${isTimeLimited ? `<div class="badge-time-limited">TIME LIMITED${expLabel ? ' · ' + expLabel : ''}</div>` : ''}
+        <img src="${duck.img}" alt="${duck.name}" ${isTimeLimited ? 'style="padding-top:22px"' : ''} />
+        <div class="card-label">${duck.name}</div>
+      `;
+
+      grid.appendChild(a);
+    });
+  }
+
+  [fSort, fType, fLethal, fAvail].forEach(el => el.addEventListener('change', render));
+
+  btnReset.addEventListener('click', () => {
+    fSort.value   = 'time-first';
+    fType.value   = '';
+    fLethal.value = '';
+    fAvail.value  = '';
+    render();
+  });
+
+  render();
+  </script>
+
+</body>
+</html>

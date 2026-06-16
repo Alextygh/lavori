@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Remote Explosive Duck - Duckapedia</title>
+  <link rel="icon" type="image/x-icon" href="https://static.wikia.nocookie.net/hitman/images/3/37/Rubberduckymodel.PNG/revision/latest?cb=20200329154620">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      background: #1a1a1a;
+      color: #c6c6c6;
+      line-height: 1.6;
+    }
+
+    /* NAV BAR */
+    nav {
+      background: #111;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      height: 48px;
+    }
+    nav .site-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    nav .site-name:hover { color: #c3000d; }
+
+    /* BREADCRUMB */
+    .breadcrumb {
+      padding: 10px 24px;
+      font-size: 0.8rem;
+      color: #555;
+      border-bottom: 1px solid #222;
+    }
+    .breadcrumb a { color: #888; text-decoration: none; }
+    .breadcrumb a:hover { color: #c3000d; }
+    .breadcrumb span { margin: 0 6px; }
+
+    /* PAGE WRAPPER */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* LEFT: article */
+    h1.page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid #c3000d;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    h2.section-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid #444;
+      padding-bottom: 4px;
+      margin: 24px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    article p {
+      color: #c0c0c0;
+      margin-bottom: 12px;
+    }
+
+    /* PERKS */
+    .perks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .perk-row {
+      display: grid;
+      grid-template-columns: 48px 130px 1fr;
+      align-items: center;
+      gap: 0;
+      background: #202020;
+      border: 1px solid #2e2e2e;
+    }
+
+    .perk-icon {
+      width: 48px;
+      height: 48px;
+      background: #2a2a2a;
+      border-right: 1px solid #2e2e2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .perk-icon img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .perk-icon-placeholder {
+      width: 32px;
+      height: 32px;
+      background: #3a3a3a;
+      border: 1px dashed #555;
+    }
+
+    .perk-name {
+      padding: 8px 12px;
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.82rem;
+      border-right: 1px solid #2e2e2e;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+
+    .perk-desc {
+      padding: 8px 14px;
+      color: #bbb;
+      font-size: 0.82rem;
+    }
+
+    /* =====================
+       ACQUISITION BLOCKS
+       ===================== */
+
+    .acq-block {
+      margin-bottom: 18px;
+    }
+
+    .acq-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    /* --- Challenge --- */
+    .acq-challenge {
+      background: #202020;
+      border-left: 3px solid #c3000d;
+      padding: 10px 14px;
+      color: #c0c0c0;
+      font-size: 0.85rem;
+    }
+
+    /* --- DLC --- */
+    .acq-dlc {
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dlc-name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .dlc-price-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dlc-price-amount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #5ba3d9;
+    }
+
+    .dlc-price-amount.loading { color: #666; font-size: 0.85rem; font-weight: 400; font-style: italic; }
+    .dlc-price-amount.error   { color: #c3000d; font-size: 0.82rem; font-weight: 400; font-style: italic; }
+
+    .dlc-discount {
+      background: #4a7c2f;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 6px;
+    }
+
+    .dlc-original {
+      color: #666;
+      text-decoration: line-through;
+      font-size: 0.82rem;
+    }
+
+    .dlc-source {
+      font-size: 0.72rem;
+      color: #555;
+    }
+
+    .dlc-source a {
+      color: #5ba3d9;
+      text-decoration: none;
+    }
+    .dlc-source a:hover { text-decoration: underline; }
+
+    /* Currency selector */
+    .dlc-currency-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .dlc-currency-row label {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+    .dlc-currency-select {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #ccc;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .dlc-currency-select:hover { border-color: #666; }
+
+    /* --- Drops --- */
+    .drops-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .drops-table th {
+      background: #222;
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 12px;
+      border-bottom: 1px solid #3a3a3a;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .drops-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #252525;
+      color: #bbb;
+      vertical-align: middle;
+    }
+
+    .drops-table tr:last-child td { border-bottom: none; }
+
+    .drop-platform-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .drop-twitch  { background: #6441a5; }
+    .drop-tiktok  { background: #010101; border: 1px solid #333; }
+    .drop-youtube { background: #c4302b; }
+    .drop-other   { background: #3a3a3a; }
+
+    /* --- Other --- */
+    .acq-other {
+      background: #202020;
+      border: 1px solid #2e2e2e;
+      padding: 10px 14px;
+      color: #c0c0c0;
+      font-size: 0.85rem;
+    }
+
+    /* FREELANCER SECTION */
+    .freelancer-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .freelancer-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #2a2a2a;
+      vertical-align: middle;
+    }
+
+    .freelancer-table td:first-child {
+      color: #fff;
+      font-weight: 600;
+      width: 130px;
+      white-space: nowrap;
+    }
+
+    .freelancer-table td:last-child { color: #bbb; }
+
+    .rarity-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .rarity-common    { background: #4a4a4a; }
+    .rarity-uncommon  { background: #1a6b3a; }
+    .rarity-rare      { background: #1a3f7a; }
+    .rarity-epic      { background: #6b1a7a; }
+    .rarity-legendary { background: #8b5e00; }
+
+    /* RIGHT: infobox */
+    .infobox {
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      font-size: 0.82rem;
+    }
+
+    .infobox .infobox-title {
+      background: #c3000d;
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+    }
+
+    .infobox img.infobox-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #2e2e2e;
+      display: block;
+      border-bottom: 1px solid #3a3a3a;
+    }
+
+    .infobox table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .infobox td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #2a2a2a;
+      vertical-align: middle;
+    }
+
+    .infobox td:first-child {
+      color: #fff;
+      font-weight: 600;
+      width: 95px;
+      white-space: nowrap;
+    }
+
+    .infobox td:last-child { color: #bbb; }
+
+    .avail-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: #fff;
+      background: #66ff00;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid #2a2a2a;
+      margin-top: 64px;
+      padding-top: 20px;
+      color: #555;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="site-name" href="../index.html">Duckapedia</a>
+  </nav>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Duckapedia</a>
+    <span>/</span>
+    Remote Explosive Duck
+  </div>
+
+  <div class="page">
+
+    <!-- LEFT COLUMN: Article -->
+    <article>
+      <h1 class="page-title">Remote Explosive Duck</h1>
+
+      <!-- DESCRIPTION -->
+      <h2 class="section-heading">Description</h2>
+      <p>
+      <i>"A medium explosive device designed to resemble a rubber duck. Detonated remotely. Exercise caution when placing. Will attract casual attention if spotted."</i>
+      </p>
+
+      <!-- PERKS -->
+      <h2 class="section-heading">Perks</h2>
+      <div class="perks-list">
+
+        <!-- Perk row — duplicate as needed -->
+        <div class="perk-row">
+          <div class="perk-icon">
+		    <img src="https://static.wikia.nocookie.net/hitman/images/e/ef/Icon-Explosive.png/revision/latest?cb=20210131171244" alt="Explosive Device" />
+          </div>
+          <div class="perk-name">Explosive Device</div>
+          <div class="perk-desc">A device capable of emitting an explosive blast.</div>
+        </div>
+
+        <!-- More perk rows here -->
+
+      </div>
+
+      <!-- ========================
+           ACQUISITION
+           ========================
+           Use one or more of the blocks below. Delete any that don't apply.
+      -->
+      <h2 class="section-heading">Acquisition</h2>
+
+
+      <!-- ── TYPE 1: CHALLENGE ─────────────────────────────────────────
+           Just describe the challenge required to unlock the item.
+      -->
+      <div class="acq-block">
+        <div class="acq-label">Mastery</div>
+        <div class="acq-challenge">
+          Level 10 in <strong>Marrakesh</strong>:
+          Reach Mastery level 10 in Marrakesh.
+        </div>
+      </div>
+
+    </article>
+
+    <!-- RIGHT COLUMN: Infobox -->
+    <aside>
+      <div class="infobox">
+        <div class="infobox-title">Remote Explosive Duck</div>
+        <img class="infobox-img" src="https://static.wikia.nocookie.net/hitman/images/a/ac/Remote_Explosive_Duck_HITMAN3.jpeg/revision/latest?cb=20210130140924" alt="Remote Explosive Duck" />
+        <table>
+          <tr>
+            <td>Type</td>
+            <td>Explosive</td>
+          </tr>
+          <tr>
+            <td>Lethal</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Availability</td>
+            <td>
+              <!-- Change label text and color via inline style if needed -->
+              <span class="avail-badge">Available</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer>
+    Duckapedia is a fan-made wiki. Not affiliated with IO Interactive.
+    Content is available under CC-BY-SA unless otherwise noted.
+  </footer>
+
+  <!-- ================================================================
+       STEAM PRICE FETCHER
+       Reads every .acq-dlc[data-appid] block on the page and fetches
+       live pricing from the Steam store API.
+       Currency selector updates the price without a page reload.
+  ================================================================ -->
+  <script>
+    (function () {
+      // Currency code → symbol prefix
+      const SYMBOLS = {
+        us: '$', gb: '£', eu: '€', au: 'A$', ca: 'C$', br: 'R$', jp: '¥'
+      };
+
+      // Country code → Steam cc parameter
+      // (Steam uses ISO 3166-1 alpha-2 for most, but EUR uses a specific country)
+      const CC_MAP = {
+        us: 'us', gb: 'gb', eu: 'de', au: 'au', ca: 'ca', br: 'br', jp: 'jp'
+      };
+
+      /**
+       * Fetch price for a given appId and country code.
+       * Returns { final, initial, discount, currency } or throws.
+       */
+      async function fetchPrice(appId, cc) {
+        const url =
+          `https://store.steampowered.com/api/appdetails` +
+          `?appids=${appId}&cc=${CC_MAP[cc]}&filters=price_overview`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Network error');
+
+        const json = await res.json();
+        const appData = json[appId];
+
+        if (!appData || !appData.success) throw new Error('App not found');
+
+        const po = appData.data?.price_overview;
+        if (!po) {
+          // Free to play
+          return { free: true };
+        }
+
+        return {
+          final:    po.final / 100,
+          initial:  po.initial / 100,
+          discount: po.discount_percent,
+          currency: po.currency
+        };
+      }
+
+      /**
+       * Render a price result into the price row of a .acq-dlc block.
+       */
+      function renderPrice(block, price, cc) {
+        const row   = block.querySelector('.dlc-price-row');
+        const sym   = SYMBOLS[cc] ?? '';
+
+        if (price.free) {
+          row.innerHTML = `<span class="dlc-price-amount" style="color:#4a7c2f">Free</span>`;
+          return;
+        }
+
+        const finalStr = `${sym}${price.final.toFixed(2)}`;
+
+        if (price.discount > 0) {
+          const origStr = `${sym}${price.initial.toFixed(2)}`;
+          row.innerHTML =
+            `<span class="dlc-price-amount">${finalStr}</span>` +
+            `<span class="dlc-discount">-${price.discount}%</span>` +
+            `<span class="dlc-original">${origStr}</span>`;
+        } else {
+          row.innerHTML = `<span class="dlc-price-amount">${finalStr}</span>`;
+        }
+      }
+
+      /**
+       * Show an error state in the price row.
+       */
+      function renderError(block) {
+        const row = block.querySelector('.dlc-price-row');
+        row.innerHTML =
+          `<span class="dlc-price-amount error">Price unavailable</span>`;
+      }
+
+      /**
+       * Load and render price for a single block.
+       */
+      async function loadBlock(block, cc) {
+        const appId = block.dataset.appid;
+        if (!appId || appId === 'REPLACE_WITH_APP_ID') return;
+
+        const row = block.querySelector('.dlc-price-row');
+        row.innerHTML = `<span class="dlc-price-amount loading">Loading price...</span>`;
+
+        try {
+          const price = await fetchPrice(appId, cc);
+          renderPrice(block, price, cc);
+        } catch (e) {
+          renderError(block);
+        }
+      }
+
+      // Initialise all DLC blocks on page load
+      document.querySelectorAll('.acq-dlc[data-appid]').forEach(block => {
+        loadBlock(block, 'us');
+      });
+
+      // Currency selector change handler
+      document.querySelectorAll('.dlc-currency-select').forEach(select => {
+        select.addEventListener('change', function () {
+          const appId = this.dataset.target;
+          const cc    = this.value;
+          const block = document.querySelector(`.acq-dlc[data-appid="${appId}"]`);
+          if (block) loadBlock(block, cc);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
