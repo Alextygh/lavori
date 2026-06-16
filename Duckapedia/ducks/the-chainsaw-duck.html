@@ -463,29 +463,35 @@
         </div>
       </div>
 	  
-	        <!-- ── TYPE 2: DLC ────────────────────────────────────────────────
-           Set data-appid to the numeric App ID from the SteamDB URL.
-           e.g. https://www.steamdb.info/app/1659040/ → data-appid="1659040"
-           The script below will fetch the live price automatically.
-           Set data-steamdb to the full SteamDB URL for the "View on SteamDB" link.
+      <!-- ── TYPE 2: DLC ────────────────────────────────────────────────
+           Fill in each data-price-XX attribute with the price string for
+           that currency (e.g. data-price-us="$4.99"). Leave an attribute
+           empty or remove it to show "N/A" for that currency.
+           Set data-steam  to the Steam store URL for the item.
+           Set data-steamdb to the SteamDB URL for the item.
       -->
       <div class="acq-block">
         <div class="acq-label">DLC</div>
         <div class="acq-dlc"
-             data-appid="4097630"
+             data-price-us="$4.99"
+             data-price-gb="£3.99"
+             data-price-eu="€4.99"
+             data-price-au="A$7.50"
+             data-price-ca="C$6.49"
+             data-price-br="R$16.99"
+             data-price-jp="¥580"
+             data-steam="https://store.steampowered.com/app/4097630/"
              data-steamdb="https://www.steamdb.info/app/4097630/">
 
           <div class="dlc-name">The Eminem vs. Slim Shady Pack</div>
 
           <div class="dlc-price-row">
-            <span class="dlc-price-amount loading">Loading price...</span>
-            <!-- discount badge and original price are injected by script when on sale -->
+            <span class="dlc-price-amount"></span>
           </div>
 
           <div class="dlc-currency-row">
-            <label for="dlc-currency-4097630">Currency:</label>
-            <select class="dlc-currency-select" id="dlc-currency-4097630"
-                    data-target="4097630">
+            <label>Currency:</label>
+            <select class="dlc-currency-select">
               <option value="us">USD $</option>
               <option value="gb">GBP £</option>
               <option value="eu">EUR €</option>
@@ -497,9 +503,9 @@
           </div>
 
           <div class="dlc-source">
-            Price from Steam &nbsp;·&nbsp;
-            <a class="dlc-steamdb-link" href="https://www.steamdb.info/app/4097630/"
-               target="_blank" rel="noopener">View on SteamDB</a>
+            <a class="dlc-steam-link" href="#" target="_blank" rel="noopener">View on Steam</a>
+            &nbsp;·&nbsp;
+            <a class="dlc-steamdb-link" href="#" target="_blank" rel="noopener">View on SteamDB</a>
           </div>
         </div>
       </div>
@@ -546,113 +552,34 @@
   ================================================================ -->
   <script>
     (function () {
-      // Currency code → symbol prefix
-      const SYMBOLS = {
-        us: '$', gb: '£', eu: '€', au: 'A$', ca: 'C$', br: 'R$', jp: '¥'
-      };
+      function updateBlock(block, cc) {
+        const price = block.dataset['price' + cc.charAt(0).toUpperCase() + cc.slice(1)]
+                   || block.dataset['price-' + cc];
 
-      // Country code → Steam cc parameter
-      // (Steam uses ISO 3166-1 alpha-2 for most, but EUR uses a specific country)
-      const CC_MAP = {
-        us: 'us', gb: 'gb', eu: 'de', au: 'au', ca: 'ca', br: 'br', jp: 'jp'
-      };
+        // Fallback: try lowercased key directly (data-price-us → dataset.priceUs)
+        const key = 'price' + cc.charAt(0).toUpperCase() + cc.slice(1);
+        const val = block.dataset[key] || 'N/A';
 
-      /**
-       * Fetch price for a given appId and country code.
-       * Returns { final, initial, discount, currency } or throws.
-       */
-      async function fetchPrice(appId, cc) {
-        const url =
-          `https://store.steampowered.com/api/appdetails` +
-          `?appids=${appId}&cc=${CC_MAP[cc]}&filters=price_overview`;
+        const priceEl = block.querySelector('.dlc-price-amount');
+        if (priceEl) priceEl.textContent = val;
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Network error');
-
-        const json = await res.json();
-        const appData = json[appId];
-
-        if (!appData || !appData.success) throw new Error('App not found');
-
-        const po = appData.data?.price_overview;
-        if (!po) {
-          // Free to play
-          return { free: true };
-        }
-
-        return {
-          final:    po.final / 100,
-          initial:  po.initial / 100,
-          discount: po.discount_percent,
-          currency: po.currency
-        };
+        // Update store links
+        const steamLink   = block.querySelector('.dlc-steam-link');
+        const steamdbLink = block.querySelector('.dlc-steamdb-link');
+        if (steamLink   && block.dataset.steam)   steamLink.href   = block.dataset.steam;
+        if (steamdbLink && block.dataset.steamdb) steamdbLink.href = block.dataset.steamdb;
       }
 
-      /**
-       * Render a price result into the price row of a .acq-dlc block.
-       */
-      function renderPrice(block, price, cc) {
-        const row   = block.querySelector('.dlc-price-row');
-        const sym   = SYMBOLS[cc] ?? '';
+      document.querySelectorAll('.acq-dlc[data-price-us], .acq-dlc[data-priceUs]').forEach(block => {
+        // Show default (USD) on load
+        updateBlock(block, 'us');
 
-        if (price.free) {
-          row.innerHTML = `<span class="dlc-price-amount" style="color:#4a7c2f">Free</span>`;
-          return;
+        const select = block.querySelector('.dlc-currency-select');
+        if (select) {
+          select.addEventListener('change', function () {
+            updateBlock(block, this.value);
+          });
         }
-
-        const finalStr = `${sym}${price.final.toFixed(2)}`;
-
-        if (price.discount > 0) {
-          const origStr = `${sym}${price.initial.toFixed(2)}`;
-          row.innerHTML =
-            `<span class="dlc-price-amount">${finalStr}</span>` +
-            `<span class="dlc-discount">-${price.discount}%</span>` +
-            `<span class="dlc-original">${origStr}</span>`;
-        } else {
-          row.innerHTML = `<span class="dlc-price-amount">${finalStr}</span>`;
-        }
-      }
-
-      /**
-       * Show an error state in the price row.
-       */
-      function renderError(block) {
-        const row = block.querySelector('.dlc-price-row');
-        row.innerHTML =
-          `<span class="dlc-price-amount error">Price unavailable</span>`;
-      }
-
-      /**
-       * Load and render price for a single block.
-       */
-      async function loadBlock(block, cc) {
-        const appId = block.dataset.appid;
-        if (!appId || appId === 'REPLACE_WITH_APP_ID') return;
-
-        const row = block.querySelector('.dlc-price-row');
-        row.innerHTML = `<span class="dlc-price-amount loading">Loading price...</span>`;
-
-        try {
-          const price = await fetchPrice(appId, cc);
-          renderPrice(block, price, cc);
-        } catch (e) {
-          renderError(block);
-        }
-      }
-
-      // Initialise all DLC blocks on page load
-      document.querySelectorAll('.acq-dlc[data-appid]').forEach(block => {
-        loadBlock(block, 'us');
-      });
-
-      // Currency selector change handler
-      document.querySelectorAll('.dlc-currency-select').forEach(select => {
-        select.addEventListener('change', function () {
-          const appId = this.dataset.target;
-          const cc    = this.value;
-          const block = document.querySelector(`.acq-dlc[data-appid="${appId}"]`);
-          if (block) loadBlock(block, cc);
-        });
       });
     })();
   </script>
