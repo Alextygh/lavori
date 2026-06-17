@@ -1,0 +1,191 @@
+ <head>
+   <link rel="icon" type="image/x-icon" href="https://github.com/Alextygh/lavori/blob/main/ditto.jpg?raw=true">
+ </head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; }
+  .page {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    font-family: var(--font-sans);
+    text-align: center;
+  }
+  .ditto-wrap {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin-bottom: 1.5rem;
+  }
+  .ditto-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 120px;
+    background: #b09aee;
+    border-radius: 70px 70px 55px 55px;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .ditto-body::before {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 28px;
+    background: #b09aee;
+    border-radius: 0 0 40px 40px;
+  }
+  .ditto-face {
+    position: absolute;
+    top: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .ditto-eyes {
+    display: flex;
+    gap: 22px;
+  }
+  .eye {
+    width: 10px;
+    height: 6px;
+    background: #3c2c6e;
+    border-radius: 50%;
+  }
+  .ditto-mouth {
+    width: 36px;
+    height: 14px;
+    border: 3.5px solid #3c2c6e;
+    border-top: none;
+    border-radius: 0 0 20px 20px;
+  }
+  .ditto-arm-l, .ditto-arm-r {
+    position: absolute;
+    bottom: 36px;
+    width: 32px;
+    height: 14px;
+    background: #b09aee;
+    border-radius: 10px;
+  }
+  .ditto-arm-l {
+    left: 4px;
+    transform: rotate(-20deg);
+    transform-origin: right center;
+    animation: waveL 2.4s ease-in-out infinite;
+  }
+  .ditto-arm-r {
+    right: 4px;
+    transform: rotate(20deg);
+    transform-origin: left center;
+    animation: waveR 2.4s ease-in-out infinite;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.18;
+    background: #b09aee;
+  }
+  .blob-1 { width: 60px; height: 60px; top: 0; left: 10px; animation: blobF 3s ease-in-out infinite; }
+  .blob-2 { width: 40px; height: 40px; top: 20px; right: 5px; animation: blobF 3.6s ease-in-out infinite 0.5s; }
+  .blob-3 { width: 28px; height: 28px; top: 60px; left: 0; animation: blobF 2.8s ease-in-out infinite 1s; }
+
+  @keyframes bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+  }
+  @keyframes waveL {
+    0%, 100% { transform: rotate(-20deg); }
+    50% { transform: rotate(-38deg); }
+  }
+  @keyframes waveR {
+    0%, 100% { transform: rotate(20deg); }
+    50% { transform: rotate(38deg); }
+  }
+  @keyframes blobF {
+    0%, 100% { transform: scale(1); opacity: 0.18; }
+    50% { transform: scale(1.15); opacity: 0.26; }
+  }
+
+  .error-code {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 52px;
+    color: #b09aee;
+    line-height: 1;
+    margin-bottom: 0.6rem;
+    letter-spacing: -2px;
+  }
+  .tagline {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .sub {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    max-width: 320px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  .btn {
+    display: inline-block;
+    padding: 10px 28px;
+    border-radius: var(--border-radius-md);
+    border: 1.5px solid #b09aee;
+    color: #7c5cbf;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    background: transparent;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn:hover {
+    background: #b09aee22;
+  }
+  .poketext {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 2rem;
+    opacity: 0.6;
+    font-style: italic;
+  }
+</style>
+
+<div class="page">
+  <div class="ditto-wrap">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="ditto-body">
+      <div class="ditto-arm-l"></div>
+      <div class="ditto-arm-r"></div>
+    </div>
+    <div class="ditto-face">
+      <div class="ditto-eyes">
+        <div class="eye"></div>
+        <div class="eye"></div>
+      </div>
+      <div class="ditto-mouth"></div>
+    </div>
+  </div>
+
+  <div class="error-code">404</div>
+  <p class="tagline">Ditto couldn't transform into this page.</p>
+  <p class="sub">The page you're looking for doesn't exist or maybe it transformed into something else entirely.</p>
+  <a class="btn" href="https://alextygh.github.io/lavori/" onclick="return false;">Go back home</a>
+  <p class="poketext">Ditto used Transform… but it failed!</p>
+</div>
