@@ -19,25 +19,37 @@
         --accent: #4b0082;
       }
 
-      body {
-        background-color: var(--bg);
-        font-family: 'Inter', sans-serif;
-        font-weight: 400;
-        color: var(--text-primary);
-        min-height: 100vh;
-        padding: 80px 24px 100px;
-        transition: background-color 1.4s ease;
-      }
+body {
+  /* Layering: image first, then the background color fallback */
+  background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=trueE');
+  background-color: var(--bg);
+  background-repeat: no-repeat;
+  /* Positions the image on the right side, centered vertically */
+  background-position: right 40px center; 
+  /* Controls the size so it doesn't bleed into the center */
+  background-size: 300px auto; 
+  background-attachment: fixed; /* Keeps the image in place while scrolling */
+  
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 80px 24px 100px;
+  transition: background-color 1.4s ease;
+}
 
-      body.shiny {
-        --bg: #64ccf3;
-        --surface: rgba(255,255,255,0.45);
-        --border: rgba(255,255,255,0.5);
-        --border-hover: rgba(255,255,255,0.85);
-        --text-primary: #002f44;
-        --text-secondary: #1a6a8a;
-        --accent: #004e72;
-      }
+body.shiny {
+  --bg: #64ccf3;
+  --surface: rgba(255,255,255,0.45);
+  --border: rgba(255,255,255,0.5);
+  --border-hover: rgba(255,255,255,0.85);
+  --text-primary: #002f44;
+  --text-secondary: #1a6a8a;
+  --accent: #004e72;
+  
+  /* Changes the image to a "shiny" version if the 1/4096 easter egg triggers! */
+  background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=true');
+}
 
       .flash {
         position: fixed; inset: 0;
