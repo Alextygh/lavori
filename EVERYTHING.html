@@ -6,283 +6,80 @@
 <title>EVERY.THING</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#080c14;--surface:#0d1220;--border:rgba(100,140,220,0.15);--border-bright:rgba(100,160,255,0.3);--text:#e2e8f4;--muted:#5a6a8a;--mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:20px;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9999}
+  header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  header h1{font-family:var(--mono);font-size:clamp(1.4rem,4vw,2.2rem);letter-spacing:.35em;color:#fff}
+  header p{font-size:11px;letter-spacing:.2em;color:var(--muted);margin-top:6px;font-family:var(--mono);text-transform:uppercase}
+  .reload-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 18px;background:transparent;border:1px solid var(--border-bright);color:#7eb4ff;font-family:var(--mono);font-size:11px;letter-spacing:.15em;cursor:pointer;border-radius:3px;transition:background .2s,color .2s;text-transform:uppercase}
+  .reload-btn:hover{background:rgba(100,160,255,0.08);color:#aad0ff}
+  .reload-btn svg{width:13px;height:13px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 22px 22px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:border-color .3s;min-height:190px}
+  .card:hover{border-color:var(--border-bright)}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:6px 6px 0 0}
+  .card.accent-blue::before{background:#3b82f6}.card.accent-teal::before{background:#14b8a6}
+  .card.accent-amber::before{background:#f59e0b}.card.accent-pink::before{background:#ec4899}
+  .card.accent-green::before{background:#22c55e}.card.accent-violet::before{background:#8b5cf6}
+  .card.accent-red::before{background:#ef4444}.card.accent-cyan::before{background:#06b6d4}
+  .card.accent-orange::before{background:#f97316}.card.accent-lime::before{background:#84cc16}
+  .card-label{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+  .card-label .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7;flex-shrink:0}
+  .card-main{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .big-value{font-family:var(--mono);font-size:clamp(2rem,5vw,3rem);font-weight:700;line-height:1;color:#fff}
+  .big-label{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .sub-info{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+  .card-footer{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:10px;border-top:1px solid var(--border);letter-spacing:.08em}
+  .weather-icon{font-size:2.4rem;line-height:1;margin-bottom:4px}
+  .flag-big{font-size:3rem;line-height:1}
+  .loading{font-family:var(--mono);font-size:11px;color:var(--muted);animation:pulse 1.2s infinite;letter-spacing:.1em}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .fact-text{font-size:14px;line-height:1.7;color:var(--text)}
+  .tag{display:inline-block;padding:2px 8px;font-family:var(--mono);font-size:10px;border-radius:3px;border:1px solid var(--border-bright);color:#7eb4ff;letter-spacing:.08em;margin-top:6px}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .bar-track{flex:1;height:4px;background:var(--border);border-radius:2px}
+  .bar-fill{height:100%;border-radius:2px}
+  .bar-label{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:28px;text-align:right}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  .colon{animation:blink 1s step-start infinite}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* RUBIK NET */
+  .cube-net-wrap{display:flex;justify-content:center}
+  .cube-net{display:inline-grid;grid-template-columns:repeat(4,auto);grid-template-rows:repeat(3,auto);gap:4px}
+  .cube-face{display:grid;grid-template-columns:repeat(3,20px);grid-template-rows:repeat(3,20px);gap:2px;padding:3px;background:rgba(255,255,255,0.06);border-radius:3px}
+  .cube-face.hidden{visibility:hidden}
+  .cs{width:20px;height:20px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.4)}
 
-  :root {
-    --bg: #080c14;
-    --surface: #0d1220;
-    --border: rgba(100,140,220,0.15);
-    --border-bright: rgba(100,160,255,0.3);
-    --text: #e2e8f4;
-    --muted: #5a6a8a;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Space Grotesk', sans-serif;
-  }
+  /* PALETTE */
+  .palette-row{display:flex;height:52px;border-radius:4px;overflow:hidden;margin-bottom:10px}
+  .palette-swatch{flex:1;position:relative}
+  .palette-swatch:hover .swatch-hex{opacity:1}
+  .swatch-hex{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:7px;color:rgba(255,255,255,.9);opacity:0;transition:opacity .15s;white-space:nowrap;text-shadow:0 0 4px rgba(0,0,0,.9)}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    padding: 20px;
-    position: relative;
-    overflow-x: hidden;
-  }
+  /* ASCII */
+  .ascii-art{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--text);white-space:pre}
 
-  /* CRT scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.04) 2px,
-      rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 9999;
-  }
+  /* TYPING */
+  .typing-target{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);border-left:2px solid #3b82f6;padding-left:10px;margin-bottom:8px}
+  .typing-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border-bright);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;outline:none;transition:border-color .2s}
+  .typing-input:focus{border-color:#3b82f6}
+  .typing-input.correct{border-color:#22c55e}
+  .typing-input.wrong{border-color:#ef4444}
+  .typing-stat{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
 
-  header {
-    text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
+  /* BINARY */
+  .binary-row{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0}
+  .bit{width:24px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:3px;border:1px solid var(--border)}
+  .bit.one{color:#7eb4ff;border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08)}
+  .bit.zero{color:var(--muted)}
 
-  header h1 {
-    font-family: var(--mono);
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
-    letter-spacing: 0.35em;
-    color: #fff;
-  }
+  /* MOON */
+  .moon-display{font-size:3.5rem;line-height:1}
 
-  header p {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    margin-top: 6px;
-    font-family: var(--mono);
-    text-transform: uppercase;
-  }
-
-  .reload-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 14px;
-    padding: 7px 18px;
-    background: transparent;
-    border: 1px solid var(--border-bright);
-    color: #7eb4ff;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background 0.2s, color 0.2s;
-    text-transform: uppercase;
-  }
-  .reload-btn:hover { background: rgba(100,160,255,0.08); color: #aad0ff; }
-  .reload-btn svg { width: 13px; height: 13px; }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px 22px 22px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: border-color 0.3s;
-    min-height: 180px;
-  }
-  .card:hover { border-color: var(--border-bright); }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 6px 6px 0 0;
-  }
-
-  .card.accent-blue::before  { background: #3b82f6; }
-  .card.accent-teal::before  { background: #14b8a6; }
-  .card.accent-amber::before { background: #f59e0b; }
-  .card.accent-pink::before  { background: #ec4899; }
-  .card.accent-green::before { background: #22c55e; }
-  .card.accent-violet::before { background: #8b5cf6; }
-  .card.accent-red::before   { background: #ef4444; }
-  .card.accent-cyan::before  { background: #06b6d4; }
-
-  .card-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .card-label .dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.7;
-    flex-shrink: 0;
-  }
-
-  .card-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .big-value {
-    font-family: var(--mono);
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    line-height: 1;
-    color: #fff;
-  }
-
-  .big-label {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 6px;
-    line-height: 1.4;
-  }
-
-  .sub-info {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  .card-footer {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-    letter-spacing: 0.08em;
-  }
-
-  /* Weather icon */
-  .weather-icon {
-    font-size: 2.4rem;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  /* Rubik cube */
-  .cube-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
-    width: 90px;
-  }
-  .cube-face {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-  }
-  .cube-sticker {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 2px;
-  }
-  .cube-layout {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .cube-face-wrap { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-  .cube-face-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
-
-  /* Country flag */
-  .flag-big { font-size: 3rem; line-height: 1; }
-
-  /* Loading state */
-  .loading {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    animation: pulse 1.2s infinite;
-    letter-spacing: 0.1em;
-  }
-  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
-
-  .fact-text {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text);
-  }
-
-  .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    font-family: var(--mono);
-    font-size: 10px;
-    border-radius: 3px;
-    border: 1px solid var(--border-bright);
-    color: #7eb4ff;
-    letter-spacing: 0.08em;
-    margin-top: 6px;
-  }
-
-  /* Two-column tall card */
-  .card.tall { grid-row: span 2; }
-
-  /* countdown numbers */
-  .countdown-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-  .countdown-unit { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .countdown-num {
-    font-family: var(--mono);
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-  }
-  .countdown-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
-
-  /* bar chart for law */
-  .bar-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-  .bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
-  .bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
-  .bar-label { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 28px; text-align: right; }
-
-  .constellation-svg text { fill: var(--muted); }
-
-  /* Rubik scramble notation */
-  .scramble { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; letter-spacing: 0.05em; }
-  .scramble span { color: #7eb4ff; font-weight: 700; }
-
-  .hello-big { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: #fff; }
-
-  /* Live clock tick */
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .colon { animation: blink 1s step-start infinite; }
+  /* ON THIS DAY */
+  .year-badge{font-family:var(--mono);font-size:2rem;font-weight:700;color:#fff;line-height:1}
 </style>
 </head>
 <body>
@@ -299,426 +96,679 @@
 <div class="grid" id="grid"></div>
 
 <script>
-const ACCENTS = ['blue','teal','amber','pink','green','violet','red','cyan'];
+const ACCENTS=['blue','teal','amber','pink','green','violet','red','cyan','orange','lime'];
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
 
-const TIMEZONES = [
-  { city: 'Tokyo', tz: 'Asia/Tokyo', flag: '🇯🇵', country: 'Japan' },
-  { city: 'Reykjavik', tz: 'Atlantic/Reykjavik', flag: '🇮🇸', country: 'Iceland' },
-  { city: 'São Paulo', tz: 'America/Sao_Paulo', flag: '🇧🇷', country: 'Brazil' },
-  { city: 'Nairobi', tz: 'Africa/Nairobi', flag: '🇰🇪', country: 'Kenya' },
-  { city: 'Sydney', tz: 'Australia/Sydney', flag: '🇦🇺', country: 'Australia' },
-  { city: 'Mumbai', tz: 'Asia/Kolkata', flag: '🇮🇳', country: 'India' },
-  { city: 'Anchorage', tz: 'America/Anchorage', flag: '🇺🇸', country: 'USA (Alaska)' },
-  { city: 'Cairo', tz: 'Africa/Cairo', flag: '🇪🇬', country: 'Egypt' },
-  { city: 'Seoul', tz: 'Asia/Seoul', flag: '🇰🇷', country: 'South Korea' },
-  { city: 'Buenos Aires', tz: 'America/Argentina/Buenos_Aires', flag: '🇦🇷', country: 'Argentina' },
-  { city: 'Oslo', tz: 'Europe/Oslo', flag: '🇳🇴', country: 'Norway' },
-  { city: 'Bangkok', tz: 'Asia/Bangkok', flag: '🇹🇭', country: 'Thailand' },
-  { city: 'Lagos', tz: 'Africa/Lagos', flag: '🇳🇬', country: 'Nigeria' },
-  { city: 'Vancouver', tz: 'America/Vancouver', flag: '🇨🇦', country: 'Canada' },
-  { city: 'Tehran', tz: 'Asia/Tehran', flag: '🇮🇷', country: 'Iran' },
-  { city: 'Honolulu', tz: 'Pacific/Honolulu', flag: '🇺🇸', country: 'USA (Hawaii)' },
-];
-
-const WEATHER_CITIES = [
-  { name: 'Nuuk', lat: 64.18, lon: -51.72, country: 'Greenland' },
-  { name: 'Ulaanbaatar', lat: 47.90, lon: 106.88, country: 'Mongolia' },
-  { name: 'Ushuaia', lat: -54.80, lon: -68.30, country: 'Argentina' },
-  { name: 'Longyearbyen', lat: 78.22, lon: 15.64, country: 'Svalbard' },
-  { name: 'Djibouti', lat: 11.59, lon: 43.14, country: 'Djibouti' },
-  { name: 'Ulan Bator', lat: 47.90, lon: 106.88, country: 'Mongolia' },
-  { name: 'Tromsø', lat: 69.65, lon: 18.95, country: 'Norway' },
-  { name: 'Darwin', lat: -12.46, lon: 130.84, country: 'Australia' },
-  { name: 'Yakutsk', lat: 62.03, lon: 129.73, country: 'Russia' },
-  { name: 'Medellin', lat: 6.24, lon: -75.57, country: 'Colombia' },
-  { name: 'Accra', lat: 5.55, lon: -0.20, country: 'Ghana' },
-  { name: 'Vladivostok', lat: 43.10, lon: 131.87, country: 'Russia' },
-  { name: 'Queenstown', lat: -45.03, lon: 168.66, country: 'New Zealand' },
-  { name: 'Kathmandu', lat: 27.70, lon: 85.31, country: 'Nepal' },
-  { name: 'Casablanca', lat: 33.57, lon: -7.58, country: 'Morocco' },
-  { name: 'Abuja', lat: 9.07, lon: 7.39, country: 'Nigeria' },
-];
-
-const CUBE_COLORS = {
-  W: '#f8fafc', Y: '#fbbf24', R: '#ef4444',
-  O: '#f97316', B: '#3b82f6', G: '#22c55e'
-};
-
-const SCRAMBLE_MOVES = ['U','U\'','U2','D','D\'','D2','R','R\'','R2','L','L\'','L2','F','F\'','F2','B','B\'','B2'];
-
-const WEIRD_LAWS = [
-  { law: 'It is illegal to run out of petrol on the Autobahn.', country: '🇩🇪 Germany' },
-  { law: 'Feeding pigeons on the street is banned in Venice.', country: '🇮🇹 Italy' },
-  { law: 'Frowning at a police officer can result in a fine.', country: '🇷🇺 Russia' },
-  { law: 'Chewing gum is illegal to buy or sell.', country: '🇸🇬 Singapore' },
-  { law: 'You may not wear a suit of armour inside Parliament.', country: '🇬🇧 UK (since 1313)' },
-  { law: 'It\'s illegal to name a pig Napoleon.', country: '🇫🇷 France' },
-  { law: 'Stepping on money is a criminal offence.', country: '🇹🇭 Thailand' },
-  { law: 'Flushing the toilet after 10 pm in an apartment is banned.', country: '🇨🇭 Switzerland' },
-  { law: 'You must smile in public places at all times.', country: '🇿🇦 Milan (SA history)' },
-  { law: 'Keeping a fish you\'ve caught without talking to it first is forbidden in some counties.', country: '🇺🇸 Pennsylvania' },
-  { law: 'It\'s illegal to die in the Houses of Parliament.', country: '🇬🇧 UK' },
-  { law: 'Wearing high heels at historical sites is banned.', country: '🇬🇷 Greece' },
-  { law: 'Bears may not be used to hunt for fish.', country: '🇺🇸 Michigan' },
-  { law: 'It is illegal to carry salmon suspiciously.', country: '🇬🇧 UK (Salmon Act 1986)' },
-  { law: 'Citizens must own a gun unless they are a pauper or conscientiously opposed.', country: '🇺🇸 Kennesaw, Georgia' },
-  { law: 'You cannot whistle in a park on a Sunday.', country: '🇨🇦 Petrolia, Canada' },
-];
-
-const GREETINGS = [
-  { lang: 'Japanese', word: 'こんにちは', roman: 'Konnichiwa', flag: '🇯🇵' },
-  { lang: 'Swahili', word: 'Jambo', roman: 'Jambo', flag: '🇰🇪' },
-  { lang: 'Icelandic', word: 'Halló', roman: 'Halló', flag: '🇮🇸' },
-  { lang: 'Arabic', word: 'مرحبا', roman: 'Marhaba', flag: '🇸🇦' },
-  { lang: 'Thai', word: 'สวัสดี', roman: 'Sawasdee', flag: '🇹🇭' },
-  { lang: 'Zulu', word: 'Sawubona', roman: 'Sawubona', flag: '🇿🇦' },
-  { lang: 'Finnish', word: 'Hei', roman: 'Hei', flag: '🇫🇮' },
-  { lang: 'Mongolian', word: 'Сайн байна уу', roman: 'Sain baina uu', flag: '🇲🇳' },
-  { lang: 'Amharic', word: 'ሰላም', roman: 'Selam', flag: '🇪🇹' },
-  { lang: 'Georgian', word: 'გამარჯობა', roman: 'Gamarjoba', flag: '🇬🇪' },
-  { lang: 'Basque', word: 'Kaixo', roman: 'Kaixo', flag: '🏴' },
-  { lang: 'Vietnamese', word: 'Xin chào', roman: 'Xin chào', flag: '🇻🇳' },
-  { lang: 'Nahuatl', word: 'Niltze', roman: 'Niltze', flag: '🇲🇽' },
-  { lang: 'Welsh', word: 'Shwmae', roman: 'Shwmae', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
-  { lang: 'Hindi', word: 'नमस्ते', roman: 'Namaste', flag: '🇮🇳' },
-  { lang: 'Kazakh', word: 'Сәлем', roman: 'Sälem', flag: '🇰🇿' },
-];
-
-const COUNTRIES = [
-  { name: 'Bhutan', flag: '🇧🇹', capital: 'Thimphu', pop: '787,424', fact: 'Measures happiness as a national metric (GNH).' },
-  { name: 'Palau', flag: '🇵🇼', capital: 'Ngerulmud', pop: '18,008', fact: 'One of the world\'s first shark sanctuaries.' },
-  { name: 'San Marino', flag: '🇸🇲', capital: 'City of San Marino', pop: '34,010', fact: 'Oldest republic in the world, founded in 301 AD.' },
-  { name: 'Tonga', flag: '🇹🇴', capital: 'Nukuʻalofa', pop: '100,651', fact: 'Last Polynesian monarchy.' },
-  { name: 'Djibouti', flag: '🇩🇯', capital: 'Djibouti City', pop: '1,078,373', fact: 'Sits on the Great Rift Valley.' },
-  { name: 'Liechtenstein', flag: '🇱🇮', capital: 'Vaduz', pop: '38,749', fact: 'One of only two doubly landlocked countries.' },
-  { name: 'Vanuatu', flag: '🇻🇺', capital: 'Port Vila', pop: '332,212', fact: 'Home to the world\'s most accessible active volcano.' },
-  { name: 'Suriname', flag: '🇸🇷', capital: 'Paramaribo', pop: '623,236', fact: '90% of the country is covered by rainforest.' },
-  { name: 'Eswatini', flag: '🇸🇿', capital: 'Mbabane', pop: '1,210,822', fact: 'Renamed from Swaziland in 2018 by the king.' },
-  { name: 'Kyrgyzstan', flag: '🇰🇬', capital: 'Bishkek', pop: '6,735,347', fact: 'The Epic of Manas is 20x longer than the Iliad and Odyssey combined.' },
-  { name: 'São Tomé and Príncipe', flag: '🇸🇹', capital: 'São Tomé', pop: '227,380', fact: 'Closest country to the centre of Earth\'s surface.' },
-  { name: 'Nauru', flag: '🇳🇷', capital: 'Yaren (de facto)', pop: '10,084', fact: 'The world\'s smallest island nation.' },
-  { name: 'Comoros', flag: '🇰🇲', capital: 'Moroni', pop: '888,451', fact: 'Has experienced over 20 coups or attempted coups since independence.' },
-];
-
-const RECORDS = [
-  { record: 'Longest fingernails ever on a pair of hands', holder: 'Lee Redmond (USA)', value: '8.65 m', unit: 'total length' },
-  { record: 'Most languages spoken by one person', holder: 'Ziad Fazah (Lebanon)', value: '58', unit: 'languages' },
-  { record: 'Longest time holding breath underwater', holder: 'Budimir Šobat (Croatia)', value: '24 min 37 sec', unit: 'static apnea' },
-  { record: 'Heaviest pumpkin', holder: 'Travis Gienger (USA)', value: '1,247 kg', unit: 'weight' },
-  { record: 'Most Rubik\'s cubes solved underwater', holder: 'Various attempts', value: '8', unit: 'cubes in one breath' },
-  { record: 'Loudest burp', holder: 'Neville Sharp (Australia)', value: '112.4 dB', unit: 'decibels' },
-  { record: 'Fastest time to eat a 30 cm pizza', holder: 'Tom Waes (Belgium)', value: '32.28 sec', unit: 'no hands' },
-  { record: 'Most hot dogs eaten in 10 minutes', holder: 'Joey Chestnut (USA)', value: '76', unit: 'hot dogs' },
-  { record: 'Largest collection of rubber ducks', holder: 'Charlotte Lee (USA)', value: '9,000+', unit: 'ducks' },
-  { record: 'Longest distance flown by a pumpkin', holder: 'Various', value: '1,690 m', unit: 'via trebuchet' },
-];
-
-const HOLIDAYS = [
-  { name: 'New Year\'s Day', date: new Date(new Date().getFullYear()+1, 0, 1) },
-  { name: 'International Cat Day', date: new Date(new Date().getFullYear(), 7, 8) },
-  { name: 'Pi Day', date: new Date(new Date().getFullYear(), 2, 14) },
-  { name: 'World Sleep Day', date: new Date(new Date().getFullYear(), 2, 15) },
-  { name: 'International Talk Like a Pirate Day', date: new Date(new Date().getFullYear(), 8, 19) },
-  { name: 'World Emoji Day', date: new Date(new Date().getFullYear(), 6, 17) },
-  { name: 'Towel Day (Hitchhiker\'s Guide)', date: new Date(new Date().getFullYear(), 4, 25) },
-  { name: 'International Day of Awesomeness', date: new Date(new Date().getFullYear(), 2, 10) },
-];
-
-const CONSTELLATIONS = [
-  {
-    name: 'Orion', stars: [
-      [120,60],[140,100],[100,100],[120,140],[105,170],[135,170],
-      [80,60],[160,60],[100,120],[140,120]
-    ],
-    lines: [[0,2],[0,1],[2,4],[1,3],[4,5],[2,6],[1,7],[2,8],[1,9],[8,9],[8,4],[9,5]]
-  },
-  {
-    name: 'Ursa Major', stars: [
-      [60,120],[90,100],[120,90],[150,100],[170,130],[150,160],[120,160],
-      [80,60],[50,50],[30,30]
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3],[1,7],[7,8],[8,9]]
-  },
-  {
-    name: 'Cassiopeia', stars: [
-      [40,80],[80,50],[120,80],[160,50],[200,80]
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4]]
-  },
-  {
-    name: 'Leo', stars: [
-      [100,140],[80,110],[70,80],[90,60],[120,70],[140,90],[130,130],[100,140],[160,150]
-    ],
-    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[0,8]]
-  },
-];
-
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
-
-function card(accent, label, html, footer='') {
-  return `<div class="card accent-${accent}">
-    <div class="card-label"><span class="dot"></span>${label}</div>
-    <div class="card-main">${html}</div>
-    ${footer ? `<div class="card-footer">${footer}</div>` : ''}
-  </div>`;
+function card(accent,label,html,footer){
+  return '<div class="card accent-'+accent+'">'+
+    '<div class="card-label"><span class="dot"></span>'+label+'</div>'+
+    '<div class="card-main">'+html+'</div>'+
+    (footer?'<div class="card-footer">'+footer+'</div>':'')+
+  '</div>';
 }
 
-function widgetTime() {
-  const place = pick(TIMEZONES);
-  const now = new Date();
-  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
-  const parts = fmt.formatToParts(now);
-  const h = parts.find(p=>p.type==='hour').value;
-  const m = parts.find(p=>p.type==='minute').value;
-  const s = parts.find(p=>p.type==='second').value;
+/* ── DATA ─────────────────────────────────── */
+const TIMEZONES=[
+  {city:'Tokyo',tz:'Asia/Tokyo',flag:'🇯🇵',country:'Japan'},
+  {city:'Reykjavik',tz:'Atlantic/Reykjavik',flag:'🇮🇸',country:'Iceland'},
+  {city:'São Paulo',tz:'America/Sao_Paulo',flag:'🇧🇷',country:'Brazil'},
+  {city:'Nairobi',tz:'Africa/Nairobi',flag:'🇰🇪',country:'Kenya'},
+  {city:'Sydney',tz:'Australia/Sydney',flag:'🇦🇺',country:'Australia'},
+  {city:'Mumbai',tz:'Asia/Kolkata',flag:'🇮🇳',country:'India'},
+  {city:'Anchorage',tz:'America/Anchorage',flag:'🇺🇸',country:'USA (Alaska)'},
+  {city:'Cairo',tz:'Africa/Cairo',flag:'🇪🇬',country:'Egypt'},
+  {city:'Seoul',tz:'Asia/Seoul',flag:'🇰🇷',country:'South Korea'},
+  {city:'Buenos Aires',tz:'America/Argentina/Buenos_Aires',flag:'🇦🇷',country:'Argentina'},
+  {city:'Oslo',tz:'Europe/Oslo',flag:'🇳🇴',country:'Norway'},
+  {city:'Bangkok',tz:'Asia/Bangkok',flag:'🇹🇭',country:'Thailand'},
+  {city:'Lagos',tz:'Africa/Lagos',flag:'🇳🇬',country:'Nigeria'},
+  {city:'Vancouver',tz:'America/Vancouver',flag:'🇨🇦',country:'Canada'},
+  {city:'Tehran',tz:'Asia/Tehran',flag:'🇮🇷',country:'Iran'},
+  {city:'Honolulu',tz:'Pacific/Honolulu',flag:'🇺🇸',country:'USA (Hawaii)'},
+  {city:'Ulaanbaatar',tz:'Asia/Ulaanbaatar',flag:'🇲🇳',country:'Mongolia'},
+  {city:'Kathmandu',tz:'Asia/Kathmandu',flag:'🇳🇵',country:'Nepal'},
+];
 
-  const fmtDate = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, weekday: 'long', day: 'numeric', month: 'short' });
+const WEATHER_CITIES=[
+  {name:'Nuuk',lat:64.18,lon:-51.72,country:'Greenland',flag:'🇬🇱'},
+  {name:'Ulaanbaatar',lat:47.90,lon:106.88,country:'Mongolia',flag:'🇲🇳'},
+  {name:'Ushuaia',lat:-54.80,lon:-68.30,country:'Argentina',flag:'🇦🇷'},
+  {name:'Longyearbyen',lat:78.22,lon:15.64,country:'Svalbard',flag:'🇸🇯'},
+  {name:'Tromsø',lat:69.65,lon:18.95,country:'Norway',flag:'🇳🇴'},
+  {name:'Darwin',lat:-12.46,lon:130.84,country:'Australia',flag:'🇦🇺'},
+  {name:'Yakutsk',lat:62.03,lon:129.73,country:'Russia',flag:'🇷🇺'},
+  {name:'Medellin',lat:6.24,lon:-75.57,country:'Colombia',flag:'🇨🇴'},
+  {name:'Accra',lat:5.55,lon:-0.20,country:'Ghana',flag:'🇬🇭'},
+  {name:'Queenstown',lat:-45.03,lon:168.66,country:'New Zealand',flag:'🇳🇿'},
+  {name:'Kathmandu',lat:27.70,lon:85.31,country:'Nepal',flag:'🇳🇵'},
+  {name:'Reykjavik',lat:64.13,lon:-21.82,country:'Iceland',flag:'🇮🇸'},
+  {name:'Nairobi',lat:-1.29,lon:36.82,country:'Kenya',flag:'🇰🇪'},
+  {name:'Djibouti',lat:11.59,lon:43.14,country:'Djibouti',flag:'🇩🇯'},
+];
+const WX_ICONS={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌊',71:'🌨',73:'🌨',80:'🌦',81:'🌧',95:'⛈',99:'⛈'};
+const WX_DESC={0:'Clear skies',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Snow',73:'Heavy snow',80:'Rain showers',81:'Heavy showers',95:'Thunderstorm',99:'Thunderstorm + hail'};
 
-  const id = 'clock_s_' + Math.random().toString(36).slice(2);
-  setTimeout(() => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    setInterval(() => {
-      const n = new Date();
-      const p2 = fmt.formatToParts(n);
-      el.textContent = p2.find(x=>x.type==='second').value;
-    }, 1000);
-  }, 100);
+const WEIRD_LAWS=[
+  {law:'It is illegal to run out of petrol on the Autobahn.',country:'🇩🇪 Germany'},
+  {law:'Feeding pigeons on the street is banned.',country:'🇮🇹 Venice, Italy'},
+  {law:'Chewing gum is illegal to buy or sell.',country:'🇸🇬 Singapore'},
+  {law:'You may not wear a suit of armour inside Parliament.',country:'🇬🇧 UK (since 1313)'},
+  {law:"It's illegal to name a pig Napoleon.",country:'🇫🇷 France'},
+  {law:'Stepping on money is a criminal offence.',country:'🇹🇭 Thailand'},
+  {law:'Flushing the toilet after 10 pm in an apartment is banned.',country:'🇨🇭 Switzerland'},
+  {law:"It's illegal to die in the Houses of Parliament.",country:'🇬🇧 UK'},
+  {law:'Wearing high heels at historical sites is banned.',country:'🇬🇷 Greece'},
+  {law:"Bears may not be used to hunt for fish.",country:'🇺🇸 Michigan'},
+  {law:'It is illegal to carry salmon suspiciously.',country:'🇬🇧 UK (Salmon Act 1986)'},
+  {law:'You cannot whistle in a park on a Sunday.',country:'🇨🇦 Petrolia, Canada'},
+  {law:'You must not wear camouflage clothing.',country:'🇧🇧 Barbados'},
+  {law:'Ketchup is banned from school cafeterias.',country:'🇫🇷 France'},
+  {law:"Owning a pet hamster is illegal.",country:'🇩🇿 Algeria'},
+];
 
-  return card('blue', '⏱ LOCAL TIME',
-    `<div class="big-value">${h}<span class="colon">:</span>${m}<span style="font-size:1.4rem;color:var(--muted)">:<span id="${id}">${s}</span></span></div>
-     <div class="big-label">${place.flag} ${place.city}, ${place.country}</div>
-     <div class="sub-info">${fmtDate.format(now)}</div>`,
-    'Live clock — local solar time'
+const GREETINGS=[
+  {lang:'Japanese',word:'こんにちは',roman:'Konnichiwa',flag:'🇯🇵'},
+  {lang:'Swahili',word:'Jambo',roman:'Jambo',flag:'🇰🇪'},
+  {lang:'Icelandic',word:'Halló',roman:'Halló',flag:'🇮🇸'},
+  {lang:'Arabic',word:'مرحبا',roman:'Marhaba',flag:'🇸🇦'},
+  {lang:'Thai',word:'สวัสดี',roman:'Sawasdee',flag:'🇹🇭'},
+  {lang:'Zulu',word:'Sawubona',roman:'Sawubona',flag:'🇿🇦'},
+  {lang:'Finnish',word:'Hei',roman:'Hei',flag:'🇫🇮'},
+  {lang:'Mongolian',word:'Сайн байна уу',roman:'Sain baina uu',flag:'🇲🇳'},
+  {lang:'Amharic',word:'ሰላም',roman:'Selam',flag:'🇪🇹'},
+  {lang:'Georgian',word:'გამარჯობა',roman:'Gamarjoba',flag:'🇬🇪'},
+  {lang:'Vietnamese',word:'Xin chào',roman:'Xin chào',flag:'🇻🇳'},
+  {lang:'Welsh',word:'Shwmae',roman:'Shwmae',flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿'},
+  {lang:'Hindi',word:'नमस्ते',roman:'Namaste',flag:'🇮🇳'},
+  {lang:'Hawaiian',word:'Aloha',roman:'Aloha',flag:'🌺'},
+  {lang:'Māori',word:'Kia ora',roman:'Kia ora',flag:'🇳🇿'},
+];
+
+const COUNTRIES=[
+  {name:'Bhutan',flag:'🇧🇹',capital:'Thimphu',pop:'787,424',fact:'Measures Gross National Happiness as a national policy metric.'},
+  {name:'Palau',flag:'🇵🇼',capital:'Ngerulmud',pop:'18,008',fact:'One of the world\'s first shark sanctuaries.'},
+  {name:'San Marino',flag:'🇸🇲',capital:'City of San Marino',pop:'34,010',fact:'Oldest republic in the world, founded in 301 AD.'},
+  {name:'Liechtenstein',flag:'🇱🇮',capital:'Vaduz',pop:'38,749',fact:'One of only two doubly landlocked countries in the world.'},
+  {name:'Vanuatu',flag:'🇻🇺',capital:'Port Vila',pop:'332,212',fact:'Home to the world\'s most accessible active volcano.'},
+  {name:'Suriname',flag:'🇸🇷',capital:'Paramaribo',pop:'623,236',fact:'90% of the country is covered by tropical rainforest.'},
+  {name:'Kyrgyzstan',flag:'🇰🇬',capital:'Bishkek',pop:'6,735,347',fact:'The Epic of Manas is 20× longer than the Iliad and Odyssey combined.'},
+  {name:'Nauru',flag:'🇳🇷',capital:'Yaren (de facto)',pop:'10,084',fact:'The world\'s smallest island nation.'},
+  {name:'Tuvalu',flag:'🇹🇻',capital:'Funafuti',pop:'11,204',fact:'Fourth smallest country — may be largely submerged by 2100.'},
+  {name:'Andorra',flag:'🇦🇩',capital:'Andorra la Vella',pop:'77,543',fact:'Has no standing army and relies on France and Spain for defence.'},
+  {name:'Eswatini',flag:'🇸🇿',capital:'Mbabane',pop:'1,210,822',fact:'Renamed from Swaziland in 2018 by royal decree.'},
+  {name:'Djibouti',flag:'🇩🇯',capital:'Djibouti City',pop:'1,078,373',fact:'Sits on the Great Rift Valley where the African continent is slowly splitting.'},
+];
+
+const RECORDS=[
+  {record:'Longest fingernails on a pair of hands (ever)',holder:'Lee Redmond, USA',value:'8.65 m',unit:'total length'},
+  {record:'Most languages spoken by one person',holder:'Ziad Fazah, Lebanon',value:'58',unit:'languages'},
+  {record:'Longest time holding breath underwater',holder:'Budimir Šobat, Croatia',value:'24:37',unit:'min:sec'},
+  {record:'Heaviest pumpkin ever grown',holder:'Travis Gienger, USA',value:'1,247 kg',unit:'weight'},
+  {record:'Loudest burp ever recorded',holder:'Neville Sharp, Australia',value:'112.4 dB',unit:'decibels'},
+  {record:'Most hot dogs eaten in 10 minutes',holder:'Joey Chestnut, USA',value:'76',unit:'hot dogs'},
+  {record:'Largest collection of rubber ducks',holder:'Charlotte Lee, USA',value:'9,000+',unit:'ducks'},
+  {record:'Longest distance flown by a pumpkin',holder:'Various trebuchet teams',value:'1,690 m',unit:'trebuchet'},
+  {record:'Most T-shirts worn at once',holder:'Ted Hastings, USA',value:'260',unit:'T-shirts'},
+  {record:'Fastest time to eat a 30 cm pizza (no hands)',holder:'Tom Waes, Belgium',value:'32.28 s',unit:'seconds'},
+];
+
+const HOLIDAYS=[
+  {name:"New Year's Day",month:0,day:1},
+  {name:'International Cat Day',month:7,day:8},
+  {name:'Pi Day',month:2,day:14},
+  {name:'World Sleep Day',month:2,day:15},
+  {name:'International Talk Like a Pirate Day',month:8,day:19},
+  {name:'World Emoji Day',month:6,day:17},
+  {name:"Towel Day (Hitchhiker's Guide)",month:4,day:25},
+  {name:'World Octopus Day',month:9,day:8},
+  {name:'Pretend to Be a Time Traveller Day',month:11,day:8},
+  {name:'World Penguin Day',month:3,day:25},
+  {name:'Ask a Stupid Question Day',month:8,day:30},
+  {name:'International Day of Awesomeness',month:2,day:10},
+];
+
+const CONSTELLATIONS=[
+  {name:'Orion',stars:[[120,60],[140,100],[100,100],[120,140],[105,170],[135,170],[80,60],[160,60],[100,120],[140,120]],lines:[[0,2],[0,1],[2,4],[1,3],[4,5],[2,6],[1,7],[2,8],[1,9],[8,9],[8,4],[9,5]]},
+  {name:'Ursa Major',stars:[[60,120],[90,100],[120,90],[150,100],[170,130],[150,160],[120,160],[80,60],[50,50],[30,30]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3],[1,7],[7,8],[8,9]]},
+  {name:'Cassiopeia',stars:[[40,80],[80,50],[120,80],[160,50],[200,80]],lines:[[0,1],[1,2],[2,3],[3,4]]},
+  {name:'Scorpius',stars:[[120,40],[120,70],[130,100],[120,130],[100,150],[80,170],[90,190],[110,200],[100,120],[80,110],[60,90]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[3,8],[8,9],[9,10]]},
+  {name:'Leo',stars:[[100,140],[80,110],[70,80],[90,60],[120,70],[140,90],[130,130],[160,150]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[0,7]]},
+];
+
+const ASCII_CREATURES=[
+  {name:'Sleepy Cat',art:'  /\\_/\\  \n ( -.- ) \n  > ^ <  '},
+  {name:'Wise Owl',art:'  ,___,  \n  (O,O)  \n  /)  (\\  \n --"--"--'},
+  {name:'Derpy Penguin',art:'  _\\_/_  \n (•_• ) \n  \\| |/  '},
+  {name:'Grumpy Bear',art:' ʕ•ᴥ•ʔ  \n (     ) \n  |___|  '},
+  {name:'Sneaky Fox',art:'  ^   ^  \n (>   <) \n  \\_v_/  '},
+  {name:'Friendly Robot',art:' [_____] \n |o | o| \n |_____|  '},
+  {name:'Spooky Ghost',art:'   _____  \n  / 0 0 \\ \n |  ___| \n  \\_____/ '},
+  {name:'Tiny Dragon',art:'  ^   ^  \n<( o o )>\n  \\___/  '},
+  {name:'Lazy Sloth',art:' ( . . ) \n  ( oo ) \n --|--|-- '},
+  {name:'Bold Crab',art:'  \\  /  \n  (o o) \n  /  \\  '},
+];
+
+const TYPING_SENTENCES=[
+  'The quick brown fox jumps over the lazy dog.',
+  'Pack my box with five dozen liquor jugs.',
+  'How vexingly quick daft zebras jump.',
+  'Sphinx of black quartz, judge my vow.',
+  'Waltz, bad nymph, for quick jigs vex.',
+  'The five boxing wizards jump quickly.',
+  'Sixty zippers were quickly picked from the woven jute bag.',
+  'We promptly judged antique ivory buckles for the next prize.',
+  'A very bad quack might jinx zippy fowls.',
+  'Two driven jocks help fax my big quiz.',
+];
+
+const ON_THIS_DAY=[
+  {year:1969,event:'Apollo 11 lands on the Moon — the first crewed lunar landing in history.'},
+  {year:1990,event:'The Hubble Space Telescope is deployed from the Space Shuttle Discovery.'},
+  {year:1928,event:'Alexander Fleming notices a mould killing bacteria in his lab, discovering penicillin.'},
+  {year:1957,event:'Sputnik 1 becomes the first artificial satellite to orbit Earth.'},
+  {year:1953,event:'Crick and Watson describe the double-helix structure of DNA in Nature.'},
+  {year:1989,event:'Tim Berners-Lee proposes a system of linked documents — the World Wide Web.'},
+  {year:1977,event:'Voyager 1 is launched on its journey to the outer solar system and beyond.'},
+  {year:1905,event:'Einstein publishes his special theory of relativity, upending classical physics.'},
+  {year:1974,event:"The Rubik's Cube is invented by Hungarian sculptor Ernő Rubik in Budapest."},
+  {year:1981,event:'The first IBM Personal Computer goes on sale for $1,565.'},
+  {year:2007,event:'Steve Jobs unveils the first iPhone at Macworld — "an iPod, a phone, and the internet."'},
+  {year:2004,event:'Facebook launches from a Harvard dorm room as "thefacebook.com".'},
+  {year:1976,event:'Apple Computer Company is founded by Jobs, Wozniak, and Wayne.'},
+  {year:1969,event:'Woodstock music festival begins in Bethel, New York, drawing 400,000 people.'},
+  {year:1962,event:'The first Walmart store opens in Rogers, Arkansas.'},
+];
+
+const COLOR_PALETTES=[
+  {name:'Nordic Dusk',colors:['#2d3047','#419d78','#e0a458','#ffddd2','#e4b7a0']},
+  {name:'Deep Ocean',colors:['#03045e','#0077b6','#00b4d8','#90e0ef','#caf0f8']},
+  {name:'Desert Bloom',colors:['#c9184a','#ff4d6d','#ff758f','#ffb3c1','#fff0f3']},
+  {name:'Forest Floor',colors:['#1b4332','#2d6a4f','#52b788','#b7e4c7','#d8f3dc']},
+  {name:'Volcanic',colors:['#03071e','#370617','#6a040f','#d00000','#ffba08']},
+  {name:'Cotton Candy',colors:['#f72585','#b5179e','#7209b7','#560bad','#480ca8']},
+  {name:'Sahara',colors:['#7f5539','#9c6644','#b08968','#ddb892','#e9c46a']},
+  {name:'Midnight Neon',colors:['#10002b','#240046','#3c096c','#7b2d8b','#e040fb']},
+  {name:'Rust and Slate',colors:['#1d3557','#457b9d','#a8dadc','#f1faee','#e63946']},
+  {name:'Peach Blossom',colors:['#ffcdb2','#ffb4a2','#e5989b','#b5838d','#6d6875']},
+  {name:'Matcha Latte',colors:['#606c38','#283618','#fefae0','#dda15e','#bc6c25']},
+  {name:'Arctic Lichen',colors:['#caf0f8','#90e0ef','#00b4d8','#0077b6','#03045e']},
+];
+
+const MOON_PHASES=[
+  {name:'New Moon',symbol:'🌑',illumination:0},
+  {name:'Waxing Crescent',symbol:'🌒',illumination:25},
+  {name:'First Quarter',symbol:'🌓',illumination:50},
+  {name:'Waxing Gibbous',symbol:'🌔',illumination:75},
+  {name:'Full Moon',symbol:'🌕',illumination:100},
+  {name:'Waning Gibbous',symbol:'🌖',illumination:75},
+  {name:'Last Quarter',symbol:'🌗',illumination:50},
+  {name:'Waning Crescent',symbol:'🌘',illumination:25},
+];
+
+/* ── RUBIK ─────────────────────────────────── */
+const FACE_COLORS={U:'#f8fafc',D:'#fbbf24',F:'#ef4444',B:'#f97316',R:'#3b82f6',L:'#22c55e'};
+const FACE_KEYS=['U','F','R','L','B','D'];
+const SMOVES=['U',"U'","U2",'D',"D'","D2",'R',"R'","R2",'L',"L'","L2",'F',"F'","F2",'B',"B'","B2"];
+
+function genScramble(){
+  const mv=[];let last='';
+  for(let i=0;i<20;i++){let m;do{m=pick(SMOVES)}while(m[0]===last);last=m[0];mv.push(m)}
+  return mv;
+}
+
+function randomFace(faceIdx,seed){
+  const keys=FACE_KEYS;
+  const out=[];
+  for(let i=0;i<9;i++){
+    const idx=(seed*7+faceIdx*13+i*3)%6;
+    out.push(FACE_COLORS[keys[idx]]);
+  }
+  out[4]=FACE_COLORS[keys[faceIdx]]; // center stays correct
+  return out;
+}
+
+function renderFace(stickers){
+  return '<div class="cube-face">'+
+    stickers.map(c=>'<div class="cs" style="background:'+c+'"></div>').join('')+
+  '</div>';
+}
+
+function widgetRubik(){
+  const seed=rnd(1,9999);
+  const faceStickers={};
+  FACE_KEYS.forEach((k,i)=>faceStickers[k]=randomFace(i,seed));
+
+  // Cross-net layout (4 cols × 3 rows):
+  //  col1    col2    col3    col4
+  //  [gap]   [U]     [gap]   [gap]    row1
+  //  [L]     [F]     [R]     [B]      row2
+  //  [gap]   [D]     [gap]   [gap]    row3
+  function gapCell(){return '<div class="cube-face hidden"></div>'}
+
+  const net=
+    gapCell()+renderFace(faceStickers.U)+gapCell()+gapCell()+
+    renderFace(faceStickers.L)+renderFace(faceStickers.F)+renderFace(faceStickers.R)+renderFace(faceStickers.B)+
+    gapCell()+renderFace(faceStickers.D)+gapCell()+gapCell();
+
+  const sc=genScramble();
+  const scHtml=sc.map(m=>'<span style="color:'+(m.includes("'")?'#f97316':m.includes('2')?'#a78bfa':'#7eb4ff')+'">'+m+'</span>').join(' ');
+
+  return card('violet','🧩 RUBIK\'S CUBE',
+    '<div class="cube-net-wrap"><div class="cube-net">'+net+'</div></div>'+
+    '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:2;letter-spacing:.02em">'+scHtml+'</div>',
+    'All 6 faces shown · random state · 20-move scramble'
   );
 }
 
-function widgetWeather() {
-  const city = pick(WEATHER_CITIES);
-  const div = document.createElement('div');
-  div.innerHTML = card('teal', '🌡 WEATHER SOMEWHERE',
-    `<div class="loading">Fetching atmospheric data…</div>`,
-    `${city.name}, ${city.country}`
+/* ── TIME ──────────────────────────────────── */
+function widgetTime(){
+  const place=pick(TIMEZONES);
+  const now=new Date();
+  const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:place.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const parts=fmt.formatToParts(now);
+  const h=parts.find(p=>p.type==='hour').value;
+  const m=parts.find(p=>p.type==='minute').value;
+  const s=parts.find(p=>p.type==='second').value;
+  const fmtD=new Intl.DateTimeFormat('en-GB',{timeZone:place.tz,weekday:'long',day:'numeric',month:'short'});
+  const id='ck'+Math.random().toString(36).slice(2);
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    setInterval(()=>{const p2=fmt.formatToParts(new Date());el.textContent=p2.find(x=>x.type==='second').value},1000);
+  },100);
+  return card('blue','⏱ LOCAL TIME',
+    '<div class="big-value">'+h+'<span class="colon">:</span>'+m+'<span style="font-size:1.4rem;color:var(--muted)">:<span id="'+id+'">'+s+'</span></span></div>'+
+    '<div class="big-label">'+place.flag+' '+place.city+', '+place.country+'</div>'+
+    '<div class="sub-info">'+fmtD.format(now)+'</div>',
+    'Live clock — ticking in real time'
   );
+}
 
-  const icons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌊',71:'🌨',73:'🌨',80:'🌦',81:'🌧',95:'⛈',99:'⛈'};
-  const descs = {0:'Clear skies',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Snow',73:'Heavy snow',80:'Rain showers',81:'Heavy showers',95:'Thunderstorm',99:'Thunderstorm + hail'};
-
-  setTimeout(async () => {
-    try {
-      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&hourly=relative_humidity_2m&timezone=auto`);
-      const d = await r.json();
-      const cw = d.current_weather;
-      const code = cw.weathercode;
-      const icon = icons[code] || '🌡';
-      const desc = descs[code] || 'Unknown';
-      const windDir = ['N','NE','E','SE','S','SW','W','NW'][Math.round(cw.winddirection/45)%8];
-      div.innerHTML = card('teal', '🌡 WEATHER SOMEWHERE',
-        `<div class="weather-icon">${icon}</div>
-         <div class="big-value">${Math.round(cw.temperature)}°C</div>
-         <div class="big-label">${city.flag||'📍'} ${city.name}, ${city.country}</div>
-         <div class="sub-info">${desc} · Wind ${Math.round(cw.windspeed)} km/h ${windDir}</div>`,
-        `Data: Open-Meteo · WMO code ${code}`
+/* ── WEATHER ───────────────────────────────── */
+function widgetWeather(){
+  const city=pick(WEATHER_CITIES);
+  const div=document.createElement('div');
+  div.innerHTML=card('teal','🌡 WEATHER SOMEWHERE','<div class="loading">Fetching atmospheric data…</div>',city.name+', '+city.country);
+  setTimeout(async()=>{
+    try{
+      const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+city.lat+'&longitude='+city.lon+'&current_weather=true&timezone=auto');
+      const d=await r.json();const cw=d.current_weather;const code=cw.weathercode;
+      const windDir=['N','NE','E','SE','S','SW','W','NW'][Math.round(cw.winddirection/45)%8];
+      div.innerHTML=card('teal','🌡 WEATHER SOMEWHERE',
+        '<div class="weather-icon">'+(WX_ICONS[code]||'🌡')+'</div>'+
+        '<div class="big-value">'+Math.round(cw.temperature)+'°C</div>'+
+        '<div class="big-label">'+city.flag+' '+city.name+', '+city.country+'</div>'+
+        '<div class="sub-info">'+(WX_DESC[code]||'Unknown')+' · Wind '+Math.round(cw.windspeed)+' km/h '+windDir+'</div>',
+        'Data: Open-Meteo · WMO code '+code
       );
-    } catch {
-      div.innerHTML = card('teal','🌡 WEATHER SOMEWHERE',
-        `<div class="big-label">Could not reach weather API</div><div class="sub-info">Try reloading</div>`,
-        city.name + ', ' + city.country
-      );
-    }
-  }, 50);
+    }catch{div.innerHTML=card('teal','🌡 WEATHER SOMEWHERE','<div class="big-label">Could not reach weather API</div>',city.name)}
+  },50);
   return div;
 }
 
-function generateScramble() {
-  const moves = [];
-  let last = '';
-  for (let i = 0; i < 20; i++) {
-    let m;
-    do { m = pick(SCRAMBLE_MOVES); } while (m[0] === last);
-    last = m[0];
-    moves.push(m);
-  }
-  return moves;
-}
-
-function randomCubeFace(seed) {
-  const colors = ['W','Y','R','O','B','G'];
-  const face = [];
-  for (let i = 0; i < 9; i++) face.push(colors[(seed + i * 3) % 6]);
-  face[4] = colors[seed % 6];
-  return face;
-}
-
-function renderFace(stickers, label) {
-  const cells = stickers.map(c =>
-    `<div class="cube-sticker" style="background:${CUBE_COLORS[c]}"></div>`
-  ).join('');
-  return `<div class="cube-face-wrap">
-    <div class="cube-face">${cells}</div>
-    <div class="cube-face-label">${label}</div>
-  </div>`;
-}
-
-function widgetRubik() {
-  const seed = Math.floor(Math.random() * 100);
-  const faces = ['U','F','R'].map((l, i) => renderFace(randomCubeFace((seed + i * 17) % 6), l));
-  const scramble = generateScramble();
-  const scrambleHtml = scramble.map(m =>
-    `<span style="color:${m.includes("'")?'#f97316':m.includes('2')?'#a78bfa':'#7eb4ff'}">${m}</span>`
-  ).join(' ');
-
-  return card('violet', '🧩 RUBIK\'S CUBE PATTERN',
-    `<div class="cube-layout">${faces.join('')}</div>
-     <div class="scramble" style="margin-top:10px">Scramble: ${scrambleHtml}</div>`,
-    'Random state · 3 of 6 faces shown'
-  );
-}
-
-function widgetLaw() {
-  const law = pick(WEIRD_LAWS);
-  const absurdity = Math.floor(Math.random() * 60) + 40;
-  return card('amber', '⚖️ WEIRD LAW',
-    `<div class="fact-text">"${law.law}"</div>
-     <div class="tag">${law.country}</div>
-     <div style="margin-top:14px">
-       <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ABSURDITY RATING</div>
-       <div class="bar-row">
-         <div class="bar-track"><div class="bar-fill" style="width:${absurdity}%;background:#f59e0b"></div></div>
-         <div class="bar-label">${absurdity}%</div>
-       </div>
-     </div>`,
+/* ── WEIRD LAW ─────────────────────────────── */
+function widgetLaw(){
+  const law=pick(WEIRD_LAWS);const ab=rnd(42,98);
+  return card('amber','⚖️ WEIRD LAW',
+    '<div class="fact-text">"'+law.law+'"</div>'+
+    '<div class="tag">'+law.country+'</div>'+
+    '<div style="margin-top:14px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ABSURDITY RATING</div>'+
+    '<div class="bar-row"><div class="bar-track"><div class="bar-fill" style="width:'+ab+'%;background:#f59e0b"></div></div><div class="bar-label">'+ab+'%</div></div></div>',
     'Still technically on the books'
   );
 }
 
-function widgetCountry() {
-  const c = pick(COUNTRIES);
-  return card('coral', '🌍 RANDOM COUNTRY',
-    `<div class="flag-big">${c.flag}</div>
-     <div class="big-value" style="font-size:1.6rem;margin-top:6px">${c.name}</div>
-     <div class="big-label" style="margin-top:4px">Capital: ${c.capital}</div>
-     <div class="sub-info">Population: ${c.pop}</div>
-     <div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">${c.fact}</div>`,
+/* ── COUNTRY ───────────────────────────────── */
+function widgetCountry(){
+  const c=pick(COUNTRIES);
+  return card('orange','🌍 RANDOM COUNTRY',
+    '<div class="flag-big">'+c.flag+'</div>'+
+    '<div class="big-value" style="font-size:1.6rem;margin-top:6px">'+c.name+'</div>'+
+    '<div class="big-label" style="margin-top:4px">Capital: '+c.capital+'</div>'+
+    '<div class="sub-info">Population: '+c.pop+'</div>'+
+    '<div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">'+c.fact+'</div>',
     'One of 195 countries · reload for another'
   );
 }
 
-function widgetGreeting() {
-  const g = pick(GREETINGS);
-  return card('green', '👋 HELLO IN ANOTHER LANGUAGE',
-    `<div class="hello-big">${g.word}</div>
-     <div style="font-family:var(--mono);font-size:1rem;color:var(--muted);margin-top:4px">${g.roman !== g.word ? g.roman : ''}</div>
-     <div class="tag">${g.flag} ${g.lang}</div>`,
+/* ── GREETING ──────────────────────────────── */
+function widgetGreeting(){
+  const g=pick(GREETINGS);
+  return card('green','👋 HELLO IN ANOTHER LANGUAGE',
+    '<div style="font-family:var(--mono);font-size:2.2rem;font-weight:700;color:#fff;line-height:1">'+g.word+'</div>'+
+    '<div style="font-family:var(--mono);font-size:.95rem;color:var(--muted);margin-top:6px">'+(g.roman!==g.word?g.roman:'\u00a0')+'</div>'+
+    '<div class="tag">'+g.flag+' '+g.lang+'</div>',
     'Say it out loud'
   );
 }
 
-function widgetRecord() {
-  const r = pick(RECORDS);
-  return card('pink', '🏆 WORLD RECORD',
-    `<div class="big-value" style="font-size:1.8rem">${r.value}</div>
-     <div class="big-label" style="margin-top:6px">${r.record}</div>
-     <div class="sub-info" style="margin-top:4px">${r.holder}</div>
-     <div class="tag">${r.unit}</div>`,
+/* ── WORLD RECORD ──────────────────────────── */
+function widgetRecord(){
+  const r=pick(RECORDS);
+  return card('pink','🏆 WORLD RECORD',
+    '<div class="big-value" style="font-size:1.8rem">'+r.value+'</div>'+
+    '<div class="big-label" style="margin-top:6px">'+r.record+'</div>'+
+    '<div class="sub-info" style="margin-top:4px">'+r.holder+'</div>'+
+    '<div class="tag">'+r.unit+'</div>',
     'Guinness World Records'
   );
 }
 
-function widgetHoliday() {
-  const now = new Date();
-  const upcoming = HOLIDAYS
-    .map(h => {
-      let d = new Date(h.date);
-      if (d < now) d.setFullYear(d.getFullYear()+1);
-      const diff = Math.ceil((d - now) / (1000*60*60*24));
-      return { ...h, date: d, diff };
-    })
-    .sort((a,b) => a.diff - b.diff);
-
-  const h = pick(upcoming.slice(0, 4));
-  const days = h.diff;
-  const weeks = Math.floor(days / 7);
-  const rem = days % 7;
-
-  return card('cyan', '📅 DAYS UNTIL…',
-    `<div class="big-value">${days}</div>
-     <div class="big-label" style="margin-top:6px">${h.name}</div>
-     <div class="sub-info">${h.date.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}</div>
-     <div class="sub-info" style="margin-top:4px">${weeks}w ${rem}d away</div>`,
+/* ── HOLIDAY ───────────────────────────────── */
+function widgetHoliday(){
+  const now=new Date();
+  const up=HOLIDAYS.map(h=>{
+    let d=new Date(now.getFullYear(),h.month,h.day);
+    if(d<=now)d.setFullYear(d.getFullYear()+1);
+    const diff=Math.ceil((d-now)/(864e5));
+    return{...h,date:d,diff};
+  }).sort((a,b)=>a.diff-b.diff);
+  const h=pick(up.slice(0,5));
+  return card('cyan','📅 DAYS UNTIL…',
+    '<div class="big-value">'+h.diff+'</div>'+
+    '<div class="big-label" style="margin-top:6px">'+h.name+'</div>'+
+    '<div class="sub-info">'+h.date.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
+    '<div class="sub-info" style="margin-top:4px">'+Math.floor(h.diff/7)+'w '+h.diff%7+'d away</div>',
     'Calendar is a social construct'
   );
 }
 
-function widgetConstellation() {
-  const c = pick(CONSTELLATIONS);
-  const W = 240, H = 200;
-  const allX = c.stars.map(s=>s[0]);
-  const allY = c.stars.map(s=>s[1]);
-  const minX = Math.min(...allX), maxX = Math.max(...allX);
-  const minY = Math.min(...allY), maxY = Math.max(...allY);
-  const scaleX = (W-40)/(maxX-minX||1);
-  const scaleY = (H-40)/(maxY-minY||1);
-  const scale = Math.min(scaleX, scaleY);
-  const ox = (W - (maxX-minX)*scale)/2 - minX*scale;
-  const oy = (H - (maxY-minY)*scale)/2 - minY*scale;
-  const pts = c.stars.map(([x,y]) => [x*scale+ox, y*scale+oy]);
-
-  const lines = c.lines.map(([a,b]) =>
-    `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="rgba(100,160,255,0.2)" stroke-width="1"/>`
-  ).join('');
-  const stars = pts.map(([x,y],i) =>
-    `<circle cx="${x}" cy="${y}" r="${i===0?4:2.5}" fill="${i===0?'#7eb4ff':'#a5c4fa'}" opacity="0.9"/>`
-  ).join('');
-
-  const bg = Array.from({length:40}, () => {
-    const bx = Math.random()*W, by = Math.random()*H;
-    const op = (0.1+Math.random()*0.25).toFixed(2);
-    return `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="0.8" fill="#ffffff" opacity="${op}"/>`;
-  }).join('');
-
-  return card('blue', '✨ CONSTELLATION',
-    `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;display:block">
-      ${bg}${lines}${stars}
-    </svg>
-    <div class="big-label" style="text-align:center">${c.name}</div>`,
-    'Northern hemisphere, not to scale'
+/* ── CONSTELLATION ─────────────────────────── */
+function widgetConstellation(){
+  const c=pick(CONSTELLATIONS);const W=240,H=200;
+  const aX=c.stars.map(s=>s[0]),aY=c.stars.map(s=>s[1]);
+  const minX=Math.min(...aX),maxX=Math.max(...aX),minY=Math.min(...aY),maxY=Math.max(...aY);
+  const sc=Math.min((W-40)/(maxX-minX||1),(H-40)/(maxY-minY||1));
+  const ox=(W-(maxX-minX)*sc)/2-minX*sc,oy=(H-(maxY-minY)*sc)/2-minY*sc;
+  const pts=c.stars.map(([x,y])=>[x*sc+ox,y*sc+oy]);
+  const lines=c.lines.map(([a,b])=>'<line x1="'+pts[a][0].toFixed(1)+'" y1="'+pts[a][1].toFixed(1)+'" x2="'+pts[b][0].toFixed(1)+'" y2="'+pts[b][1].toFixed(1)+'" stroke="rgba(100,160,255,0.2)" stroke-width="1"/>').join('');
+  const stars=pts.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(i===0?4:2.5)+'" fill="'+(i===0?'#7eb4ff':'#a5c4fa')+'" opacity="0.9"/>').join('');
+  const bg=Array.from({length:40},()=>'<circle cx="'+(Math.random()*W).toFixed(1)+'" cy="'+(Math.random()*H).toFixed(1)+'" r="0.8" fill="#fff" opacity="'+(0.1+Math.random()*0.25).toFixed(2)+'"/>').join('');
+  return card('blue','✨ CONSTELLATION',
+    '<svg viewBox="0 0 '+W+' '+H+'" style="max-width:100%;display:block">'+bg+lines+stars+'</svg>'+
+    '<div class="big-label" style="text-align:center">'+c.name+'</div>',
+    'Not to scale · reload for another'
   );
 }
 
-const ALL_WIDGETS = [
-  widgetTime,
-  widgetWeather,
-  widgetRubik,
-  widgetLaw,
-  widgetCountry,
-  widgetGreeting,
-  widgetRecord,
-  widgetHoliday,
-  widgetConstellation,
-];
-
-function init() {
-  const ts = document.getElementById('ts');
-  ts.textContent = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' local';
-
-  const chosen = shuffle(ALL_WIDGETS).slice(0, 6);
-  const accents = shuffle(ACCENTS);
-  const grid = document.getElementById('grid');
-
-  chosen.forEach((fn, i) => {
-    const result = fn(accents[i]);
-    if (typeof result === 'string') {
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = result;
-      grid.appendChild(wrapper.firstElementChild);
-    } else {
-      grid.appendChild(result);
-    }
-  });
+/* ── COLOR PALETTE ─────────────────────────── */
+function widgetPalette(){
+  const p=pick(COLOR_PALETTES);
+  const sw=p.colors.map(c=>'<div class="palette-swatch" style="background:'+c+'"><div class="swatch-hex">'+c+'</div></div>').join('');
+  const dots=p.colors.map(c=>'<div style="display:inline-flex;align-items:center;gap:5px;margin:3px 6px 0 0"><div style="width:10px;height:10px;border-radius:2px;background:'+c+';flex-shrink:0"></div><span style="font-family:var(--mono);font-size:10px;color:var(--muted)">'+c+'</span></div>').join('');
+  return card('pink','🎨 COLOR PALETTE',
+    '<div class="palette-row">'+sw+'</div>'+
+    '<div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">'+p.name+'</div>'+
+    '<div style="display:flex;flex-wrap:wrap">'+dots+'</div>',
+    'Hover swatches for hex · reload for new palette'
+  );
 }
 
+/* ── ASCII CREATURE ────────────────────────── */
+function widgetAscii(){
+  const c=pick(ASCII_CREATURES);
+  return card('lime','👾 ASCII CREATURE',
+    '<div style="display:flex;align-items:center;gap:20px">'+
+      '<pre class="ascii-art">'+c.art+'</pre>'+
+      '<div><div class="big-label" style="font-size:16px;font-weight:600;color:var(--text)">'+c.name+'</div>'+
+      '<div class="sub-info" style="margin-top:4px">Specimen #'+rnd(1000,9999)+'</div>'+
+      '<div class="tag">/ascii/creature</div></div>'+
+    '</div>',
+    'Handcrafted from punctuation since the 1970s'
+  );
+}
+
+/* ── BINARY NUMBER ─────────────────────────── */
+function widgetBinary(){
+  const n=rnd(0,255);
+  const bin=n.toString(2).padStart(8,'0');
+  const hex=n.toString(16).toUpperCase().padStart(2,'0');
+  const bits=bin.split('').map(b=>'<div class="bit '+(b==='1'?'one':'zero')+'">'+b+'</div>').join('');
+  return card('cyan','💻 BINARY NUMBER',
+    '<div class="binary-row">'+bits+'</div>'+
+    '<div class="big-value" style="font-size:2.4rem;margin-top:8px">'+n+'</div>'+
+    '<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">'+
+      '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">BINARY</div><div style="font-family:var(--mono);font-size:13px;color:#7eb4ff">'+bin+'</div></div>'+
+      '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">HEX</div><div style="font-family:var(--mono);font-size:13px;color:#a78bfa">0x'+hex+'</div></div>'+
+      '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">OCTAL</div><div style="font-family:var(--mono);font-size:13px;color:#34d399">'+n.toString(8)+'</div></div>'+
+    '</div>',
+    'Same number, four different masks'
+  );
+}
+
+/* ── ISS POSITION ──────────────────────────── */
+function widgetISS(){
+  const div=document.createElement('div');
+  div.innerHTML=card('teal','🛸 ISS LIVE POSITION','<div class="loading">Pinging the space station…</div>','wheretheiss.at · ~408 km altitude');
+  setTimeout(async()=>{
+    try{
+      const iss=await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+      const d=await iss.json();
+      const lat=parseFloat(d.latitude).toFixed(2);
+      const lon=parseFloat(d.longitude).toFixed(2);
+      const spd=Math.round(d.velocity);
+      const alt=Math.round(d.altitude);
+      const x=((parseFloat(d.longitude)+180)/360*220+10).toFixed(1);
+      const y=((90-parseFloat(d.latitude))/180*110+10).toFixed(1);
+      const mapSvg='<svg viewBox="0 0 240 130" style="width:100%;display:block;border-radius:3px;border:1px solid var(--border)">'+
+        '<rect width="240" height="130" fill="#0a1628"/>'+
+        '<ellipse cx="60" cy="55" rx="30" ry="18" fill="#1a2f4a" opacity=".8"/>'+
+        '<ellipse cx="120" cy="60" rx="25" ry="20" fill="#1a2f4a" opacity=".8"/>'+
+        '<ellipse cx="160" cy="50" rx="28" ry="22" fill="#1a2f4a" opacity=".8"/>'+
+        '<ellipse cx="195" cy="55" rx="18" ry="14" fill="#1a2f4a" opacity=".8"/>'+
+        '<ellipse cx="75" cy="80" rx="20" ry="12" fill="#1a2f4a" opacity=".8"/>'+
+        '<ellipse cx="130" cy="85" rx="14" ry="10" fill="#1a2f4a" opacity=".8"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="10" fill="rgba(245,158,11,0.15)"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="5" fill="#f59e0b"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="7" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>'+
+      '</svg>';
+      div.innerHTML=card('teal','🛸 ISS LIVE POSITION',
+        mapSvg+
+        '<div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">'+
+          '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">LAT</div><div style="font-family:var(--mono);font-size:14px;color:#fff">'+lat+'°</div></div>'+
+          '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">LON</div><div style="font-family:var(--mono);font-size:14px;color:#fff">'+lon+'°</div></div>'+
+          '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">ALT</div><div style="font-family:var(--mono);font-size:14px;color:#fff">'+alt+' km</div></div>'+
+          '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">SPEED</div><div style="font-family:var(--mono);font-size:14px;color:#fff">'+spd.toLocaleString()+' km/h</div></div>'+
+        '</div>',
+        'wheretheiss.at · position at time of load'
+      );
+    }catch{div.innerHTML=card('teal','🛸 ISS LIVE POSITION','<div class="big-label">Could not reach ISS API</div><div class="sub-info">It\'s still up there though</div>','wheretheiss.at')}
+  },50);
+  return div;
+}
+
+/* ── ON THIS DAY ───────────────────────────── */
+function widgetOnThisDay(){
+  const e=pick(ON_THIS_DAY);
+  const yearsAgo=new Date().getFullYear()-e.year;
+  return card('red','📜 ON THIS DAY',
+    '<div class="year-badge">'+e.year+'</div>'+
+    '<div class="fact-text" style="margin-top:10px">'+e.event+'</div>'+
+    '<div class="sub-info" style="margin-top:8px">'+yearsAgo+' years ago</div>',
+    'History refusing to stay quiet'
+  );
+}
+
+/* ── TYPING CHALLENGE ──────────────────────── */
+function widgetTyping(){
+  const sentence=pick(TYPING_SENTENCES);
+  const id='ty'+Math.random().toString(36).slice(2);
+  const sid='ts'+Math.random().toString(36).slice(2);
+  const html=card('green','⌨️ TYPING CHALLENGE',
+    '<div class="typing-target">'+sentence+'</div>'+
+    '<input class="typing-input" id="'+id+'" placeholder="Start typing…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">'+
+    '<div class="typing-stat" id="'+sid+'">Type the sentence exactly · case-sensitive</div>',
+    'Tests accuracy · WPM calculated on completion'
+  );
+  setTimeout(()=>{
+    const inp=document.getElementById(id);const stat=document.getElementById(sid);
+    if(!inp)return;
+    let startTime=null;
+    inp.addEventListener('input',()=>{
+      if(!startTime&&inp.value.length>0)startTime=Date.now();
+      const val=inp.value;const correct=sentence.startsWith(val);
+      inp.classList.toggle('correct',val===sentence);
+      inp.classList.toggle('wrong',!correct&&val.length>0);
+      if(val===sentence){
+        const el=((Date.now()-startTime)/1000).toFixed(1);
+        const wpm=Math.round((sentence.split(' ').length/el)*60);
+        stat.textContent='✓ Done in '+el+'s · ~'+wpm+' WPM';stat.style.color='#22c55e';
+      }else if(!correct){
+        stat.textContent='✗ Error at position '+val.length;stat.style.color='#ef4444';
+      }else{
+        const pct=Math.round((val.length/sentence.length)*100);
+        stat.textContent=pct+'% · '+(sentence.length-val.length)+' chars remaining';stat.style.color='';
+      }
+    });
+  },100);
+  return html;
+}
+
+/* ── MOON PHASE ────────────────────────────── */
+function widgetMoon(){
+  const now=new Date();
+  const knownNew=new Date('2024-01-11');
+  const daysSince=(now-knownNew)/(864e5);
+  const lunarDay=((daysSince%29.53)+29.53)%29.53;
+  const idx=Math.floor((lunarDay/29.53)*8)%8;
+  const phase=MOON_PHASES[idx];
+  const nextFull=14.77-(lunarDay%29.53);
+  const daysToFull=nextFull>0?Math.ceil(nextFull):Math.ceil(nextFull+29.53);
+  return card('violet','🌙 MOON PHASE',
+    '<div class="moon-display">'+phase.symbol+'</div>'+
+    '<div class="big-value" style="font-size:1.4rem;margin-top:6px">'+phase.name+'</div>'+
+    '<div class="sub-info" style="margin-top:6px">Lunar day '+Math.floor(lunarDay+1)+' of 29.5</div>'+
+    '<div style="margin-top:10px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ILLUMINATION</div>'+
+    '<div class="bar-row"><div class="bar-track"><div class="bar-fill" style="width:'+phase.illumination+'%;background:#a78bfa"></div></div><div class="bar-label">'+phase.illumination+'%</div></div></div>'+
+    '<div class="sub-info" style="margin-top:4px">Next full moon in ~'+daysToFull+' days</div>',
+    'Calculated from lunar cycle · not location-specific'
+  );
+}
+
+/* ── RANDOM YEAR ───────────────────────────── */
+function widgetRandomYear(){
+  const year=rnd(1700,2024);
+  const facts=[
+    [2023,'The first artificial kidney powered by living human cells enters clinical trials.'],
+    [2020,'A pandemic reshapes daily life globally for over two years.'],
+    [2012,'The Higgs boson is confirmed at CERN, completing the Standard Model.'],
+    [2001,'Wikipedia launches with a single stub article about the letter U.'],
+    [1997,'Deep Blue defeats Garry Kasparov — the first time a computer beats a chess world champion in match play.'],
+    [1991,'The Soviet Union dissolves, ending the Cold War.'],
+    [1983,'The Internet is born — ARPANET switches to TCP/IP on January 1st.'],
+    [1969,'Humans walk on the Moon for the first time.'],
+    [1953,'The structure of DNA is described — the blueprint for all life.'],
+    [1945,'World War II ends after six years.'],
+    [1929,'The Wall Street Crash triggers the Great Depression.'],
+    [1903,'The Wright Brothers fly for 12 seconds — the first powered aircraft flight.'],
+    [1889,'The Eiffel Tower opens, briefly the world\'s tallest structure.'],
+    [1859,'Darwin publishes On the Origin of Species.'],
+    [1815,'Napoleon is defeated at Waterloo.'],
+    [1776,'The United States declares independence.'],
+    [1687,'Newton publishes Principia Mathematica, founding classical mechanics.'],
+    [1440,'Gutenberg invents the printing press, revolutionising the spread of knowledge.'],
+  ];
+  const closest=facts.reduce((prev,curr)=>Math.abs(curr[0]-year)<Math.abs(prev[0]-year)?curr:prev);
+  const dist=Math.abs(closest[0]-year);
+  return card('red','🎲 RANDOM YEAR',
+    '<div class="year-badge">'+year+'</div>'+
+    '<div style="margin-top:10px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">'+(dist===0?'THAT YEAR':'NEARBY IN '+closest[0])+'</div>'+
+    '<div class="fact-text" style="font-size:13px">'+closest[1]+'</div></div>',
+    'A random year from 1700 to 2024'
+  );
+}
+
+/* ── ELEMENT ───────────────────────────────── */
+function widgetElement(){
+  const elements=[
+    {n:1,sym:'H',name:'Hydrogen',cat:'Nonmetal',mass:'1.008',fact:'Makes up 75% of the observable universe by mass.'},
+    {n:2,sym:'He',name:'Helium',cat:'Noble Gas',mass:'4.003',fact:'The only element first discovered in the Sun before Earth.'},
+    {n:6,sym:'C',name:'Carbon',cat:'Nonmetal',mass:'12.011',fact:'Forms more compounds than any other element — the basis of all life.'},
+    {n:8,sym:'O',name:'Oxygen',cat:'Nonmetal',mass:'15.999',fact:'Makes up 21% of Earth\'s atmosphere and 65% of the human body.'},
+    {n:11,sym:'Na',name:'Sodium',cat:'Alkali Metal',mass:'22.990',fact:'So reactive it catches fire in water.'},
+    {n:14,sym:'Si',name:'Silicon',cat:'Metalloid',mass:'28.086',fact:'Powers virtually every computer chip on Earth.'},
+    {n:26,sym:'Fe',name:'Iron',cat:'Transition Metal',mass:'55.845',fact:'Earth\'s core is mostly iron — it\'s what makes us magnetic.'},
+    {n:29,sym:'Cu',name:'Copper',cat:'Transition Metal',mass:'63.546',fact:'One of the first metals ever used by humans, ~10,000 years ago.'},
+    {n:47,sym:'Ag',name:'Silver',cat:'Transition Metal',mass:'107.868',fact:'Has the highest electrical and thermal conductivity of all metals.'},
+    {n:79,sym:'Au',name:'Gold',cat:'Transition Metal',mass:'196.967',fact:'One of the few metals that can be found in pure form in nature.'},
+    {n:80,sym:'Hg',name:'Mercury',cat:'Transition Metal',mass:'200.592',fact:'The only metal that is liquid at room temperature.'},
+    {n:88,sym:'Ra',name:'Radium',cat:'Alkaline Earth',mass:'226',fact:'Marie Curie carried it in her pocket — her notebooks are still radioactive.'},
+    {n:86,sym:'Rn',name:'Radon',cat:'Noble Gas',mass:'222',fact:'Seeps from bedrock and is the second leading cause of lung cancer.'},
+    {n:118,sym:'Og',name:'Oganesson',cat:'Unknown',mass:'294',fact:'The heaviest known element — only 5 atoms have ever been created.'},
+    {n:36,sym:'Kr',name:'Krypton',cat:'Noble Gas',mass:'83.798',fact:'Named before Superman — from the Greek for "hidden".'},
+  ];
+  const CAT_COLORS={
+    'Nonmetal':'#22c55e','Noble Gas':'#8b5cf6','Alkali Metal':'#ef4444',
+    'Transition Metal':'#f59e0b','Metalloid':'#14b8a6','Alkaline Earth':'#3b82f6','Unknown':'#6b7280'
+  };
+  const el=pick(elements);
+  const col=CAT_COLORS[el.cat]||'#7eb4ff';
+  return card('amber','⚗️ RANDOM ELEMENT',
+    '<div style="display:flex;align-items:flex-start;gap:16px">'+
+      '<div style="border:2px solid '+col+';border-radius:5px;padding:8px 14px;text-align:center;flex-shrink:0">'+
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--muted)">'+el.n+'</div>'+
+        '<div style="font-family:var(--mono);font-size:2rem;font-weight:700;color:#fff;line-height:1">'+el.sym+'</div>'+
+        '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px">'+el.mass+'</div>'+
+      '</div>'+
+      '<div>'+
+        '<div style="font-size:16px;font-weight:600;color:var(--text)">'+el.name+'</div>'+
+        '<div style="font-family:var(--mono);font-size:10px;color:'+col+';margin:3px 0 8px;letter-spacing:.1em">'+el.cat.toUpperCase()+'</div>'+
+        '<div class="fact-text" style="font-size:12px;color:var(--muted)">'+el.fact+'</div>'+
+      '</div>'+
+    '</div>',
+    'Periodic table · element '+el.n+' of 118'
+  );
+}
+
+/* ── SPEED OF LIGHT QUIZ ───────────────────── */
+function widgetSpeedFact(){
+  const facts=[
+    {val:'299,792',unit:'km/s',label:'Speed of light in vacuum',sub:'Fast enough to circle Earth 7.5× per second'},
+    {val:'1,234',unit:'km/h',label:'Speed of sound at sea level',sub:'That\'s Mach 1 — the sound barrier'},
+    {val:'107,200',unit:'km/h',label:'Earth\'s orbital speed around the Sun',sub:'We\'re hurtling through space right now'},
+    {val:'220',unit:'km/s',label:'Speed of the Solar System around the Milky Way',sub:'A full orbit takes ~225 million years'},
+    {val:'~600',unit:'km/h',label:'Cruising speed of a commercial aircraft',sub:'About half the speed of a rifle bullet'},
+    {val:'28,000',unit:'km/h',label:'Orbital speed of the ISS',sub:'It completes a full orbit every 92 minutes'},
+    {val:'0.000001',unit:'mm/s',label:'Speed at which your nails grow',sub:'Slightly faster on your dominant hand'},
+    {val:'50',unit:'km/h',label:'Top speed of a Usain Bolt sprint',sub:'The fastest human ever recorded'},
+    {val:'3,500',unit:'km/h',label:'Speed of a rifle bullet (approx)',sub:'Reaches its target before the sound does'},
+    {val:'40,000',unit:'km',label:'Earth\'s circumference at the equator',sub:'If you walked it non-stop, it would take ~1 year'},
+  ];
+  const f=pick(facts);
+  return card('blue','⚡ SPACE & SPEED',
+    '<div class="big-value" style="font-size:1.6rem">'+f.val+'</div>'+
+    '<div class="sub-info" style="font-size:14px;color:#7eb4ff;margin-top:2px">'+f.unit+'</div>'+
+    '<div class="big-label" style="margin-top:8px;font-size:14px;color:var(--text)">'+f.label+'</div>'+
+    '<div class="sub-info" style="margin-top:6px;font-style:italic">'+f.sub+'</div>',
+    'Physics is wild'
+  );
+}
+
+/* ── ALL WIDGETS ───────────────────────────── */
+const ALL_WIDGETS=[
+  widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
+  widgetGreeting, widgetRecord, widgetHoliday, widgetConstellation,
+  widgetPalette, widgetAscii, widgetBinary, widgetISS,
+  widgetOnThisDay, widgetTyping, widgetMoon, widgetRandomYear,
+  widgetElement, widgetSpeedFact,
+];
+
+/* ── INIT ──────────────────────────────────── */
+function init(){
+  document.getElementById('ts').textContent=
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' local';
+  const chosen=shuffle(ALL_WIDGETS).slice(0,6);
+  const accents=shuffle(ACCENTS);
+  const grid=document.getElementById('grid');
+  chosen.forEach((fn,i)=>{
+    const result=fn(accents[i]);
+    if(typeof result==='string'){
+      const w=document.createElement('div');w.innerHTML=result;grid.appendChild(w.firstElementChild);
+    }else{grid.appendChild(result)}
+  });
+}
 init();
 </script>
 </body>
