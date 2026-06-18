@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVERY.THING</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080c14;
+    --surface: #0d1220;
+    --border: rgba(100,140,220,0.15);
+    --border-bright: rgba(100,160,255,0.3);
+    --text: #e2e8f4;
+    --muted: #5a6a8a;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    letter-spacing: 0.35em;
+    color: #fff;
+  }
+
+  header p {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+  }
+
+  .reload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 7px 18px;
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: #7eb4ff;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s, color 0.2s;
+    text-transform: uppercase;
+  }
+  .reload-btn:hover { background: rgba(100,160,255,0.08); color: #aad0ff; }
+  .reload-btn svg { width: 13px; height: 13px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 22px 22px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.3s;
+    min-height: 180px;
+  }
+  .card:hover { border-color: var(--border-bright); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .card.accent-blue::before  { background: #3b82f6; }
+  .card.accent-teal::before  { background: #14b8a6; }
+  .card.accent-amber::before { background: #f59e0b; }
+  .card.accent-pink::before  { background: #ec4899; }
+  .card.accent-green::before { background: #22c55e; }
+  .card.accent-violet::before { background: #8b5cf6; }
+  .card.accent-red::before   { background: #ef4444; }
+  .card.accent-cyan::before  { background: #06b6d4; }
+
+  .card-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-label .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  .card-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .big-value {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .big-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .sub-info {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .card-footer {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.08em;
+  }
+
+  /* Weather icon */
+  .weather-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  /* Rubik cube */
+  .cube-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    width: 90px;
+  }
+  .cube-face {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .cube-sticker {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 2px;
+  }
+  .cube-layout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .cube-face-wrap { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .cube-face-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* Country flag */
+  .flag-big { font-size: 3rem; line-height: 1; }
+
+  /* Loading state */
+  .loading {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    animation: pulse 1.2s infinite;
+    letter-spacing: 0.1em;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  .fact-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    border-radius: 3px;
+    border: 1px solid var(--border-bright);
+    color: #7eb4ff;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+
+  /* Two-column tall card */
+  .card.tall { grid-row: span 2; }
+
+  /* countdown numbers */
+  .countdown-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .countdown-unit { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .countdown-num {
+    font-family: var(--mono);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .countdown-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* bar chart for law */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+  .bar-label { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 28px; text-align: right; }
+
+  .constellation-svg text { fill: var(--muted); }
+
+  /* Rubik scramble notation */
+  .scramble { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; letter-spacing: 0.05em; }
+  .scramble span { color: #7eb4ff; font-weight: 700; }
+
+  .hello-big { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: #fff; }
+
+  /* Live clock tick */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .colon { animation: blink 1s step-start infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EVERY.THING</h1>
+  <p>Reload for a new universe &nbsp;/&nbsp; <span id="ts"></span></p>
+  <button class="reload-btn" onclick="location.reload()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+    Shuffle
+  </button>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const ACCENTS = ['blue','teal','amber','pink','green','violet','red','cyan'];
+
+const TIMEZONES = [
+  { city: 'Tokyo', tz: 'Asia/Tokyo', flag: '🇯🇵', country: 'Japan' },
+  { city: 'Reykjavik', tz: 'Atlantic/Reykjavik', flag: '🇮🇸', country: 'Iceland' },
+  { city: 'São Paulo', tz: 'America/Sao_Paulo', flag: '🇧🇷', country: 'Brazil' },
+  { city: 'Nairobi', tz: 'Africa/Nairobi', flag: '🇰🇪', country: 'Kenya' },
+  { city: 'Sydney', tz: 'Australia/Sydney', flag: '🇦🇺', country: 'Australia' },
+  { city: 'Mumbai', tz: 'Asia/Kolkata', flag: '🇮🇳', country: 'India' },
+  { city: 'Anchorage', tz: 'America/Anchorage', flag: '🇺🇸', country: 'USA (Alaska)' },
+  { city: 'Cairo', tz: 'Africa/Cairo', flag: '🇪🇬', country: 'Egypt' },
+  { city: 'Seoul', tz: 'Asia/Seoul', flag: '🇰🇷', country: 'South Korea' },
+  { city: 'Buenos Aires', tz: 'America/Argentina/Buenos_Aires', flag: '🇦🇷', country: 'Argentina' },
+  { city: 'Oslo', tz: 'Europe/Oslo', flag: '🇳🇴', country: 'Norway' },
+  { city: 'Bangkok', tz: 'Asia/Bangkok', flag: '🇹🇭', country: 'Thailand' },
+  { city: 'Lagos', tz: 'Africa/Lagos', flag: '🇳🇬', country: 'Nigeria' },
+  { city: 'Vancouver', tz: 'America/Vancouver', flag: '🇨🇦', country: 'Canada' },
+  { city: 'Tehran', tz: 'Asia/Tehran', flag: '🇮🇷', country: 'Iran' },
+  { city: 'Honolulu', tz: 'Pacific/Honolulu', flag: '🇺🇸', country: 'USA (Hawaii)' },
+];
+
+const WEATHER_CITIES = [
+  { name: 'Nuuk', lat: 64.18, lon: -51.72, country: 'Greenland' },
+  { name: 'Ulaanbaatar', lat: 47.90, lon: 106.88, country: 'Mongolia' },
+  { name: 'Ushuaia', lat: -54.80, lon: -68.30, country: 'Argentina' },
+  { name: 'Longyearbyen', lat: 78.22, lon: 15.64, country: 'Svalbard' },
+  { name: 'Djibouti', lat: 11.59, lon: 43.14, country: 'Djibouti' },
+  { name: 'Ulan Bator', lat: 47.90, lon: 106.88, country: 'Mongolia' },
+  { name: 'Tromsø', lat: 69.65, lon: 18.95, country: 'Norway' },
+  { name: 'Darwin', lat: -12.46, lon: 130.84, country: 'Australia' },
+  { name: 'Yakutsk', lat: 62.03, lon: 129.73, country: 'Russia' },
+  { name: 'Medellin', lat: 6.24, lon: -75.57, country: 'Colombia' },
+  { name: 'Accra', lat: 5.55, lon: -0.20, country: 'Ghana' },
+  { name: 'Vladivostok', lat: 43.10, lon: 131.87, country: 'Russia' },
+  { name: 'Queenstown', lat: -45.03, lon: 168.66, country: 'New Zealand' },
+  { name: 'Kathmandu', lat: 27.70, lon: 85.31, country: 'Nepal' },
+  { name: 'Casablanca', lat: 33.57, lon: -7.58, country: 'Morocco' },
+  { name: 'Abuja', lat: 9.07, lon: 7.39, country: 'Nigeria' },
+];
+
+const CUBE_COLORS = {
+  W: '#f8fafc', Y: '#fbbf24', R: '#ef4444',
+  O: '#f97316', B: '#3b82f6', G: '#22c55e'
+};
+
+const SCRAMBLE_MOVES = ['U','U\'','U2','D','D\'','D2','R','R\'','R2','L','L\'','L2','F','F\'','F2','B','B\'','B2'];
+
+const WEIRD_LAWS = [
+  { law: 'It is illegal to run out of petrol on the Autobahn.', country: '🇩🇪 Germany' },
+  { law: 'Feeding pigeons on the street is banned in Venice.', country: '🇮🇹 Italy' },
+  { law: 'Frowning at a police officer can result in a fine.', country: '🇷🇺 Russia' },
+  { law: 'Chewing gum is illegal to buy or sell.', country: '🇸🇬 Singapore' },
+  { law: 'You may not wear a suit of armour inside Parliament.', country: '🇬🇧 UK (since 1313)' },
+  { law: 'It\'s illegal to name a pig Napoleon.', country: '🇫🇷 France' },
+  { law: 'Stepping on money is a criminal offence.', country: '🇹🇭 Thailand' },
+  { law: 'Flushing the toilet after 10 pm in an apartment is banned.', country: '🇨🇭 Switzerland' },
+  { law: 'You must smile in public places at all times.', country: '🇿🇦 Milan (SA history)' },
+  { law: 'Keeping a fish you\'ve caught without talking to it first is forbidden in some counties.', country: '🇺🇸 Pennsylvania' },
+  { law: 'It\'s illegal to die in the Houses of Parliament.', country: '🇬🇧 UK' },
+  { law: 'Wearing high heels at historical sites is banned.', country: '🇬🇷 Greece' },
+  { law: 'Bears may not be used to hunt for fish.', country: '🇺🇸 Michigan' },
+  { law: 'It is illegal to carry salmon suspiciously.', country: '🇬🇧 UK (Salmon Act 1986)' },
+  { law: 'Citizens must own a gun unless they are a pauper or conscientiously opposed.', country: '🇺🇸 Kennesaw, Georgia' },
+  { law: 'You cannot whistle in a park on a Sunday.', country: '🇨🇦 Petrolia, Canada' },
+];
+
+const GREETINGS = [
+  { lang: 'Japanese', word: 'こんにちは', roman: 'Konnichiwa', flag: '🇯🇵' },
+  { lang: 'Swahili', word: 'Jambo', roman: 'Jambo', flag: '🇰🇪' },
+  { lang: 'Icelandic', word: 'Halló', roman: 'Halló', flag: '🇮🇸' },
+  { lang: 'Arabic', word: 'مرحبا', roman: 'Marhaba', flag: '🇸🇦' },
+  { lang: 'Thai', word: 'สวัสดี', roman: 'Sawasdee', flag: '🇹🇭' },
+  { lang: 'Zulu', word: 'Sawubona', roman: 'Sawubona', flag: '🇿🇦' },
+  { lang: 'Finnish', word: 'Hei', roman: 'Hei', flag: '🇫🇮' },
+  { lang: 'Mongolian', word: 'Сайн байна уу', roman: 'Sain baina uu', flag: '🇲🇳' },
+  { lang: 'Amharic', word: 'ሰላም', roman: 'Selam', flag: '🇪🇹' },
+  { lang: 'Georgian', word: 'გამარჯობა', roman: 'Gamarjoba', flag: '🇬🇪' },
+  { lang: 'Basque', word: 'Kaixo', roman: 'Kaixo', flag: '🏴' },
+  { lang: 'Vietnamese', word: 'Xin chào', roman: 'Xin chào', flag: '🇻🇳' },
+  { lang: 'Nahuatl', word: 'Niltze', roman: 'Niltze', flag: '🇲🇽' },
+  { lang: 'Welsh', word: 'Shwmae', roman: 'Shwmae', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { lang: 'Hindi', word: 'नमस्ते', roman: 'Namaste', flag: '🇮🇳' },
+  { lang: 'Kazakh', word: 'Сәлем', roman: 'Sälem', flag: '🇰🇿' },
+];
+
+const COUNTRIES = [
+  { name: 'Bhutan', flag: '🇧🇹', capital: 'Thimphu', pop: '787,424', fact: 'Measures happiness as a national metric (GNH).' },
+  { name: 'Palau', flag: '🇵🇼', capital: 'Ngerulmud', pop: '18,008', fact: 'One of the world\'s first shark sanctuaries.' },
+  { name: 'San Marino', flag: '🇸🇲', capital: 'City of San Marino', pop: '34,010', fact: 'Oldest republic in the world, founded in 301 AD.' },
+  { name: 'Tonga', flag: '🇹🇴', capital: 'Nukuʻalofa', pop: '100,651', fact: 'Last Polynesian monarchy.' },
+  { name: 'Djibouti', flag: '🇩🇯', capital: 'Djibouti City', pop: '1,078,373', fact: 'Sits on the Great Rift Valley.' },
+  { name: 'Liechtenstein', flag: '🇱🇮', capital: 'Vaduz', pop: '38,749', fact: 'One of only two doubly landlocked countries.' },
+  { name: 'Vanuatu', flag: '🇻🇺', capital: 'Port Vila', pop: '332,212', fact: 'Home to the world\'s most accessible active volcano.' },
+  { name: 'Suriname', flag: '🇸🇷', capital: 'Paramaribo', pop: '623,236', fact: '90% of the country is covered by rainforest.' },
+  { name: 'Eswatini', flag: '🇸🇿', capital: 'Mbabane', pop: '1,210,822', fact: 'Renamed from Swaziland in 2018 by the king.' },
+  { name: 'Kyrgyzstan', flag: '🇰🇬', capital: 'Bishkek', pop: '6,735,347', fact: 'The Epic of Manas is 20x longer than the Iliad and Odyssey combined.' },
+  { name: 'São Tomé and Príncipe', flag: '🇸🇹', capital: 'São Tomé', pop: '227,380', fact: 'Closest country to the centre of Earth\'s surface.' },
+  { name: 'Nauru', flag: '🇳🇷', capital: 'Yaren (de facto)', pop: '10,084', fact: 'The world\'s smallest island nation.' },
+  { name: 'Comoros', flag: '🇰🇲', capital: 'Moroni', pop: '888,451', fact: 'Has experienced over 20 coups or attempted coups since independence.' },
+];
+
+const RECORDS = [
+  { record: 'Longest fingernails ever on a pair of hands', holder: 'Lee Redmond (USA)', value: '8.65 m', unit: 'total length' },
+  { record: 'Most languages spoken by one person', holder: 'Ziad Fazah (Lebanon)', value: '58', unit: 'languages' },
+  { record: 'Longest time holding breath underwater', holder: 'Budimir Šobat (Croatia)', value: '24 min 37 sec', unit: 'static apnea' },
+  { record: 'Heaviest pumpkin', holder: 'Travis Gienger (USA)', value: '1,247 kg', unit: 'weight' },
+  { record: 'Most Rubik\'s cubes solved underwater', holder: 'Various attempts', value: '8', unit: 'cubes in one breath' },
+  { record: 'Loudest burp', holder: 'Neville Sharp (Australia)', value: '112.4 dB', unit: 'decibels' },
+  { record: 'Fastest time to eat a 30 cm pizza', holder: 'Tom Waes (Belgium)', value: '32.28 sec', unit: 'no hands' },
+  { record: 'Most hot dogs eaten in 10 minutes', holder: 'Joey Chestnut (USA)', value: '76', unit: 'hot dogs' },
+  { record: 'Largest collection of rubber ducks', holder: 'Charlotte Lee (USA)', value: '9,000+', unit: 'ducks' },
+  { record: 'Longest distance flown by a pumpkin', holder: 'Various', value: '1,690 m', unit: 'via trebuchet' },
+];
+
+const HOLIDAYS = [
+  { name: 'New Year\'s Day', date: new Date(new Date().getFullYear()+1, 0, 1) },
+  { name: 'International Cat Day', date: new Date(new Date().getFullYear(), 7, 8) },
+  { name: 'Pi Day', date: new Date(new Date().getFullYear(), 2, 14) },
+  { name: 'World Sleep Day', date: new Date(new Date().getFullYear(), 2, 15) },
+  { name: 'International Talk Like a Pirate Day', date: new Date(new Date().getFullYear(), 8, 19) },
+  { name: 'World Emoji Day', date: new Date(new Date().getFullYear(), 6, 17) },
+  { name: 'Towel Day (Hitchhiker\'s Guide)', date: new Date(new Date().getFullYear(), 4, 25) },
+  { name: 'International Day of Awesomeness', date: new Date(new Date().getFullYear(), 2, 10) },
+];
+
+const CONSTELLATIONS = [
+  {
+    name: 'Orion', stars: [
+      [120,60],[140,100],[100,100],[120,140],[105,170],[135,170],
+      [80,60],[160,60],[100,120],[140,120]
+    ],
+    lines: [[0,2],[0,1],[2,4],[1,3],[4,5],[2,6],[1,7],[2,8],[1,9],[8,9],[8,4],[9,5]]
+  },
+  {
+    name: 'Ursa Major', stars: [
+      [60,120],[90,100],[120,90],[150,100],[170,130],[150,160],[120,160],
+      [80,60],[50,50],[30,30]
+    ],
+    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3],[1,7],[7,8],[8,9]]
+  },
+  {
+    name: 'Cassiopeia', stars: [
+      [40,80],[80,50],[120,80],[160,50],[200,80]
+    ],
+    lines: [[0,1],[1,2],[2,3],[3,4]]
+  },
+  {
+    name: 'Leo', stars: [
+      [100,140],[80,110],[70,80],[90,60],[120,70],[140,90],[130,130],[100,140],[160,150]
+    ],
+    lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[0,8]]
+  },
+];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+
+function card(accent, label, html, footer='') {
+  return `<div class="card accent-${accent}">
+    <div class="card-label"><span class="dot"></span>${label}</div>
+    <div class="card-main">${html}</div>
+    ${footer ? `<div class="card-footer">${footer}</div>` : ''}
+  </div>`;
+}
+
+function widgetTime() {
+  const place = pick(TIMEZONES);
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
+  const parts = fmt.formatToParts(now);
+  const h = parts.find(p=>p.type==='hour').value;
+  const m = parts.find(p=>p.type==='minute').value;
+  const s = parts.find(p=>p.type==='second').value;
+
+  const fmtDate = new Intl.DateTimeFormat('en-GB', { timeZone: place.tz, weekday: 'long', day: 'numeric', month: 'short' });
+
+  const id = 'clock_s_' + Math.random().toString(36).slice(2);
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    setInterval(() => {
+      const n = new Date();
+      const p2 = fmt.formatToParts(n);
+      el.textContent = p2.find(x=>x.type==='second').value;
+    }, 1000);
+  }, 100);
+
+  return card('blue', '⏱ LOCAL TIME',
+    `<div class="big-value">${h}<span class="colon">:</span>${m}<span style="font-size:1.4rem;color:var(--muted)">:<span id="${id}">${s}</span></span></div>
+     <div class="big-label">${place.flag} ${place.city}, ${place.country}</div>
+     <div class="sub-info">${fmtDate.format(now)}</div>`,
+    'Live clock — local solar time'
+  );
+}
+
+function widgetWeather() {
+  const city = pick(WEATHER_CITIES);
+  const div = document.createElement('div');
+  div.innerHTML = card('teal', '🌡 WEATHER SOMEWHERE',
+    `<div class="loading">Fetching atmospheric data…</div>`,
+    `${city.name}, ${city.country}`
+  );
+
+  const icons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌊',71:'🌨',73:'🌨',80:'🌦',81:'🌧',95:'⛈',99:'⛈'};
+  const descs = {0:'Clear skies',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Snow',73:'Heavy snow',80:'Rain showers',81:'Heavy showers',95:'Thunderstorm',99:'Thunderstorm + hail'};
+
+  setTimeout(async () => {
+    try {
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&hourly=relative_humidity_2m&timezone=auto`);
+      const d = await r.json();
+      const cw = d.current_weather;
+      const code = cw.weathercode;
+      const icon = icons[code] || '🌡';
+      const desc = descs[code] || 'Unknown';
+      const windDir = ['N','NE','E','SE','S','SW','W','NW'][Math.round(cw.winddirection/45)%8];
+      div.innerHTML = card('teal', '🌡 WEATHER SOMEWHERE',
+        `<div class="weather-icon">${icon}</div>
+         <div class="big-value">${Math.round(cw.temperature)}°C</div>
+         <div class="big-label">${city.flag||'📍'} ${city.name}, ${city.country}</div>
+         <div class="sub-info">${desc} · Wind ${Math.round(cw.windspeed)} km/h ${windDir}</div>`,
+        `Data: Open-Meteo · WMO code ${code}`
+      );
+    } catch {
+      div.innerHTML = card('teal','🌡 WEATHER SOMEWHERE',
+        `<div class="big-label">Could not reach weather API</div><div class="sub-info">Try reloading</div>`,
+        city.name + ', ' + city.country
+      );
+    }
+  }, 50);
+  return div;
+}
+
+function generateScramble() {
+  const moves = [];
+  let last = '';
+  for (let i = 0; i < 20; i++) {
+    let m;
+    do { m = pick(SCRAMBLE_MOVES); } while (m[0] === last);
+    last = m[0];
+    moves.push(m);
+  }
+  return moves;
+}
+
+function randomCubeFace(seed) {
+  const colors = ['W','Y','R','O','B','G'];
+  const face = [];
+  for (let i = 0; i < 9; i++) face.push(colors[(seed + i * 3) % 6]);
+  face[4] = colors[seed % 6];
+  return face;
+}
+
+function renderFace(stickers, label) {
+  const cells = stickers.map(c =>
+    `<div class="cube-sticker" style="background:${CUBE_COLORS[c]}"></div>`
+  ).join('');
+  return `<div class="cube-face-wrap">
+    <div class="cube-face">${cells}</div>
+    <div class="cube-face-label">${label}</div>
+  </div>`;
+}
+
+function widgetRubik() {
+  const seed = Math.floor(Math.random() * 100);
+  const faces = ['U','F','R'].map((l, i) => renderFace(randomCubeFace((seed + i * 17) % 6), l));
+  const scramble = generateScramble();
+  const scrambleHtml = scramble.map(m =>
+    `<span style="color:${m.includes("'")?'#f97316':m.includes('2')?'#a78bfa':'#7eb4ff'}">${m}</span>`
+  ).join(' ');
+
+  return card('violet', '🧩 RUBIK\'S CUBE PATTERN',
+    `<div class="cube-layout">${faces.join('')}</div>
+     <div class="scramble" style="margin-top:10px">Scramble: ${scrambleHtml}</div>`,
+    'Random state · 3 of 6 faces shown'
+  );
+}
+
+function widgetLaw() {
+  const law = pick(WEIRD_LAWS);
+  const absurdity = Math.floor(Math.random() * 60) + 40;
+  return card('amber', '⚖️ WEIRD LAW',
+    `<div class="fact-text">"${law.law}"</div>
+     <div class="tag">${law.country}</div>
+     <div style="margin-top:14px">
+       <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ABSURDITY RATING</div>
+       <div class="bar-row">
+         <div class="bar-track"><div class="bar-fill" style="width:${absurdity}%;background:#f59e0b"></div></div>
+         <div class="bar-label">${absurdity}%</div>
+       </div>
+     </div>`,
+    'Still technically on the books'
+  );
+}
+
+function widgetCountry() {
+  const c = pick(COUNTRIES);
+  return card('coral', '🌍 RANDOM COUNTRY',
+    `<div class="flag-big">${c.flag}</div>
+     <div class="big-value" style="font-size:1.6rem;margin-top:6px">${c.name}</div>
+     <div class="big-label" style="margin-top:4px">Capital: ${c.capital}</div>
+     <div class="sub-info">Population: ${c.pop}</div>
+     <div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">${c.fact}</div>`,
+    'One of 195 countries · reload for another'
+  );
+}
+
+function widgetGreeting() {
+  const g = pick(GREETINGS);
+  return card('green', '👋 HELLO IN ANOTHER LANGUAGE',
+    `<div class="hello-big">${g.word}</div>
+     <div style="font-family:var(--mono);font-size:1rem;color:var(--muted);margin-top:4px">${g.roman !== g.word ? g.roman : ''}</div>
+     <div class="tag">${g.flag} ${g.lang}</div>`,
+    'Say it out loud'
+  );
+}
+
+function widgetRecord() {
+  const r = pick(RECORDS);
+  return card('pink', '🏆 WORLD RECORD',
+    `<div class="big-value" style="font-size:1.8rem">${r.value}</div>
+     <div class="big-label" style="margin-top:6px">${r.record}</div>
+     <div class="sub-info" style="margin-top:4px">${r.holder}</div>
+     <div class="tag">${r.unit}</div>`,
+    'Guinness World Records'
+  );
+}
+
+function widgetHoliday() {
+  const now = new Date();
+  const upcoming = HOLIDAYS
+    .map(h => {
+      let d = new Date(h.date);
+      if (d < now) d.setFullYear(d.getFullYear()+1);
+      const diff = Math.ceil((d - now) / (1000*60*60*24));
+      return { ...h, date: d, diff };
+    })
+    .sort((a,b) => a.diff - b.diff);
+
+  const h = pick(upcoming.slice(0, 4));
+  const days = h.diff;
+  const weeks = Math.floor(days / 7);
+  const rem = days % 7;
+
+  return card('cyan', '📅 DAYS UNTIL…',
+    `<div class="big-value">${days}</div>
+     <div class="big-label" style="margin-top:6px">${h.name}</div>
+     <div class="sub-info">${h.date.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}</div>
+     <div class="sub-info" style="margin-top:4px">${weeks}w ${rem}d away</div>`,
+    'Calendar is a social construct'
+  );
+}
+
+function widgetConstellation() {
+  const c = pick(CONSTELLATIONS);
+  const W = 240, H = 200;
+  const allX = c.stars.map(s=>s[0]);
+  const allY = c.stars.map(s=>s[1]);
+  const minX = Math.min(...allX), maxX = Math.max(...allX);
+  const minY = Math.min(...allY), maxY = Math.max(...allY);
+  const scaleX = (W-40)/(maxX-minX||1);
+  const scaleY = (H-40)/(maxY-minY||1);
+  const scale = Math.min(scaleX, scaleY);
+  const ox = (W - (maxX-minX)*scale)/2 - minX*scale;
+  const oy = (H - (maxY-minY)*scale)/2 - minY*scale;
+  const pts = c.stars.map(([x,y]) => [x*scale+ox, y*scale+oy]);
+
+  const lines = c.lines.map(([a,b]) =>
+    `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="rgba(100,160,255,0.2)" stroke-width="1"/>`
+  ).join('');
+  const stars = pts.map(([x,y],i) =>
+    `<circle cx="${x}" cy="${y}" r="${i===0?4:2.5}" fill="${i===0?'#7eb4ff':'#a5c4fa'}" opacity="0.9"/>`
+  ).join('');
+
+  const bg = Array.from({length:40}, () => {
+    const bx = Math.random()*W, by = Math.random()*H;
+    const op = (0.1+Math.random()*0.25).toFixed(2);
+    return `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="0.8" fill="#ffffff" opacity="${op}"/>`;
+  }).join('');
+
+  return card('blue', '✨ CONSTELLATION',
+    `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;display:block">
+      ${bg}${lines}${stars}
+    </svg>
+    <div class="big-label" style="text-align:center">${c.name}</div>`,
+    'Northern hemisphere, not to scale'
+  );
+}
+
+const ALL_WIDGETS = [
+  widgetTime,
+  widgetWeather,
+  widgetRubik,
+  widgetLaw,
+  widgetCountry,
+  widgetGreeting,
+  widgetRecord,
+  widgetHoliday,
+  widgetConstellation,
+];
+
+function init() {
+  const ts = document.getElementById('ts');
+  ts.textContent = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' local';
+
+  const chosen = shuffle(ALL_WIDGETS).slice(0, 6);
+  const accents = shuffle(ACCENTS);
+  const grid = document.getElementById('grid');
+
+  chosen.forEach((fn, i) => {
+    const result = fn(accents[i]);
+    if (typeof result === 'string') {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = result;
+      grid.appendChild(wrapper.firstElementChild);
+    } else {
+      grid.appendChild(result);
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
