@@ -150,7 +150,7 @@ const WEATHER_CITIES=[
 const WX_ICONS={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌊',71:'🌨',73:'🌨',80:'🌦',81:'🌧',95:'⛈',99:'⛈'};
 const WX_DESC={0:'Clear skies',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Snow',73:'Heavy snow',80:'Rain showers',81:'Heavy showers',95:'Thunderstorm',99:'Thunderstorm + hail'};
 
-const WEIRD_LAWS=[
+const WEIRD_LAWS = [
   {law:'It is illegal to run out of petrol on the Autobahn.',country:'🇩🇪 Germany'},
   {law:'Feeding pigeons on the street is banned.',country:'🇮🇹 Venice, Italy'},
   {law:'Chewing gum is illegal to buy or sell.',country:'🇸🇬 Singapore'},
@@ -166,27 +166,167 @@ const WEIRD_LAWS=[
   {law:'You must not wear camouflage clothing.',country:'🇧🇧 Barbados'},
   {law:'Ketchup is banned from school cafeterias.',country:'🇫🇷 France'},
   {law:"Owning a pet hamster is illegal.",country:'🇩🇿 Algeria'},
+  {law:'It is illegal to be sad in public.',country:'🇮🇹 Italy'},
+  {law:'You must not name your child "Nutella".',country:'🇫🇷 France'},
+  {law:'It is forbidden to feed stray animals.',country:'🇪🇸 Spain'},
+  {law:'You may not wear a mask in public (except for health reasons).',country:'🇸🇦 Saudi Arabia'},
+  {law:'Spitting on the sidewalk is punishable by death.',country:'🇰🇵 North Korea'},
+  {law:'It is illegal to eat oranges while bathing.',country:'🇨🇦 Canada'},
+  {law:'You cannot sing "Happy Birthday" in public without a license.',country:'🇺🇸 USA'},
+  {law:'It is forbidden to die without paying taxes.',country:'🇯🇵 Japan'},
+  {law:'You must not wear socks with sandals.',country:'🇩🇪 Germany'},
+  {law:'It is illegal to own only one guinea pig.',country:'🇨🇭 Switzerland'},
+  {law:'You cannot walk your pet giraffe on the street.',country:'🇰🇪 Kenya'},
+  {law:'It is forbidden to play video games on a Monday.',country:'🇨🇳 China'},
+  {law:'You must not name your child "Mickey Mouse".',country:'🇦🇺 Australia'},
+  {law:'It is illegal to use a vacuum cleaner after 9 pm.',country:'🇩🇪 Germany'},
+  {law:'You cannot wear yellow in public.',country:'🇵🇭 Philippines'},
+  {law:'It is forbidden to fall asleep in a public place.',country:'🇮🇳 India'},
+  {law:'You must not feed your pet to wild animals.',country:'🇧🇷 Brazil'},
+  {law:'It is illegal to wear a hat in a cinema.',country:'🇲🇽 Mexico'},
+  {law:'You cannot take a selfie with a penguin.',country:'🇦🇶 Antarctica (research stations)'},
+  {law:'It is forbidden to use an umbrella on a sunny day.',country:'🇯🇵 Japan'},
+  {law:'You must not name your child "Adolf".',country:'🇩🇪 Germany'},
+  {law:'It is illegal to honk your horn in a silent zone.',country:'🇦🇺 Australia'},
+  {law:'You cannot dance in a cemetery.',country:'🇳🇱 Netherlands'},
 ];
 
-const GREETINGS=[
+const GREETINGS = [
+  // EAST ASIA
   {lang:'Japanese',word:'こんにちは',roman:'Konnichiwa',flag:'🇯🇵'},
-  {lang:'Swahili',word:'Jambo',roman:'Jambo',flag:'🇰🇪'},
-  {lang:'Icelandic',word:'Halló',roman:'Halló',flag:'🇮🇸'},
-  {lang:'Arabic',word:'مرحبا',roman:'Marhaba',flag:'🇸🇦'},
-  {lang:'Thai',word:'สวัสดี',roman:'Sawasdee',flag:'🇹🇭'},
-  {lang:'Zulu',word:'Sawubona',roman:'Sawubona',flag:'🇿🇦'},
-  {lang:'Finnish',word:'Hei',roman:'Hei',flag:'🇫🇮'},
+  {lang:'Korean',word:'안녕하세요',roman:'Annyeonghaseyo',flag:'🇰🇷'},
+  {lang:'Mandarin Chinese',word:'你好',roman:'Nǐ hǎo',flag:'🇨🇳'},
+  {lang:'Cantonese Chinese',word:'你好',roman:'Neih hou',flag:'🇭🇰'},
   {lang:'Mongolian',word:'Сайн байна уу',roman:'Sain baina uu',flag:'🇲🇳'},
-  {lang:'Amharic',word:'ሰላም',roman:'Selam',flag:'🇪🇹'},
-  {lang:'Georgian',word:'გამარჯობა',roman:'Gamarjoba',flag:'🇬🇪'},
+  {lang:'Tibetan',word:'བཀྲ་ཤིས་བདེ་ལེགས',roman:'Tashi delek',flag:'🇨🇳'},
+  
+  // SOUTHEAST ASIA
+  {lang:'Thai',word:'สวัสดี',roman:'Sawasdee',flag:'🇹🇭'},
   {lang:'Vietnamese',word:'Xin chào',roman:'Xin chào',flag:'🇻🇳'},
-  {lang:'Welsh',word:'Shwmae',roman:'Shwmae',flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿'},
+  {lang:'Indonesian',word:'Selamat pagi',roman:'Selamat pagi',flag:'🇮🇩'},
+  {lang:'Malay',word:'Selamat sejahtera',roman:'Selamat sejahtera',flag:'🇲🇾'},
+  {lang:'Filipino',word:'Kumusta',roman:'Kumusta',flag:'🇵🇭'},
+  {lang:'Burmese',word:'မင်္ဂလာပါ',roman:'Mingalaba',flag:'🇲🇲'},
+  {lang:'Khmer',word:'សួស្តី',roman:'Sous-dey',flag:'🇰🇭'},
+  {lang:'Lao',word:'ສະບາຍດີ',roman:'Sabaidee',flag:'🇱🇦'},
+  
+  // SOUTH ASIA
   {lang:'Hindi',word:'नमस्ते',roman:'Namaste',flag:'🇮🇳'},
+  {lang:'Urdu',word:'السلام علیکم',roman:'Assalam-o-Alaikum',flag:'🇵🇰'},
+  {lang:'Bengali',word:'নমস্কার',roman:'Nomoshkar',flag:'🇧🇩'},
+  {lang:'Tamil',word:'வணக்கம்',roman:'Vanakkam',flag:'🇮🇳'},
+  {lang:'Telugu',word:'నమస్కారం',roman:'Namaskaram',flag:'🇮🇳'},
+  {lang:'Kannada',word:'ನಮಸ್ಕಾರ',roman:'Namaskara',flag:'🇮🇳'},
+  {lang:'Malayalam',word:'നമസ്കാരം',roman:'Namaskaram',flag:'🇮🇳'},
+  {lang:'Sinhala',word:'ආයුබෝවන්',roman:'Ayubowan',flag:'🇱🇰'},
+  {lang:'Nepali',word:'नमस्ते',roman:'Namaste',flag:'🇳🇵'},
+  {lang:'Dzongkha',word:'བཀྲ་ཤིས་བདེ་ལེགས',roman:'Kuzuzangpo',flag:'🇧🇹'},
+  
+  // MIDDLE EAST & CENTRAL ASIA
+  {lang:'Arabic',word:'مرحبا',roman:'Marhaba',flag:'🇸🇦'},
+  {lang:'Persian (Farsi)',word:'سلام',roman:'Salam',flag:'🇮🇷'},
+  {lang:'Hebrew',word:'שלום',roman:'Shalom',flag:'🇮🇱'},
+  {lang:'Turkish',word:'Merhaba',roman:'Merhaba',flag:'🇹🇷'},
+  {lang:'Kurdish',word:'Silaw',roman:'Silaw',flag:'🇮🇶'},
+  {lang:'Pashto',word:'سلام',roman:'Salam',flag:'🇦🇫'},
+  {lang:'Uzbek',word:'Salom',roman:'Salom',flag:'🇺🇿'},
+  {lang:'Kazakh',word:'Сәлем',roman:'Salem',flag:'🇰🇿'},
+  {lang:'Azerbaijani',word:'Salam',roman:'Salam',flag:'🇦🇿'},
+  
+  // EUROPE
+  {lang:'English',word:'Hello',roman:'Hello',flag:'🇬🇧'},
+  {lang:'Spanish',word:'Hola',roman:'Hola',flag:'🇪🇸'},
+  {lang:'French',word:'Bonjour',roman:'Bonjour',flag:'🇫🇷'},
+  {lang:'German',word:'Hallo',roman:'Hallo',flag:'🇩🇪'},
+  {lang:'Italian',word:'Ciao',roman:'Ciao',flag:'🇮🇹'},
+  {lang:'Portuguese',word:'Olá',roman:'Olá',flag:'🇵🇹'},
+  {lang:'Dutch',word:'Hallo',roman:'Hallo',flag:'🇳🇱'},
+  {lang:'Swedish',word:'Hej',roman:'Hej',flag:'🇸🇪'},
+  {lang:'Norwegian',word:'Hei',roman:'Hei',flag:'🇳🇴'},
+  {lang:'Danish',word:'Hej',roman:'Hej',flag:'🇩🇰'},
+  {lang:'Finnish',word:'Hei',roman:'Hei',flag:'🇫🇮'},
+  {lang:'Icelandic',word:'Halló',roman:'Halló',flag:'🇮🇸'},
+  {lang:'Polish',word:'Cześć',roman:'Cześć',flag:'🇵🇱'},
+  {lang:'Czech',word:'Ahoj',roman:'Ahoj',flag:'🇨🇿'},
+  {lang:'Slovak',word:'Ahoj',roman:'Ahoj',flag:'🇸🇰'},
+  {lang:'Hungarian',word:'Szia',roman:'Szia',flag:'🇭🇺'},
+  {lang:'Romanian',word:'Bună',roman:'Bună',flag:'🇷🇴'},
+  {lang:'Bulgarian',word:'Здравей',roman:'Zdravey',flag:'🇧🇬'},
+  {lang:'Serbian',word:'Здраво',roman:'Zdravo',flag:'🇷🇸'},
+  {lang:'Croatian',word:'Bok',roman:'Bok',flag:'🇭🇷'},
+  {lang:'Slovenian',word:'Živjo',roman:'Živjo',flag:'🇸🇮'},
+  {lang:'Greek',word:'Γεια σας',roman:'Yasas',flag:'🇬🇷'},
+  {lang:'Albanian',word:'Përshëndetje',roman:'Përshëndetje',flag:'🇦🇱'},
+  {lang:'Macedonian',word:'Здраво',roman:'Zdravo',flag:'🇲🇰'},
+  {lang:'Bosnian',word:'Zdravo',roman:'Zdravo',flag:'🇧🇦'},
+  {lang:'Maltese',word:'Ħelow',roman:'Ħelow',flag:'🇲🇹'},
+  {lang:'Irish',word:'Dia dhuit',roman:'Dia dhuit',flag:'🇮🇪'},
+  {lang:'Welsh',word:'Shwmae',roman:'Shwmae',flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿'},
+  {lang:'Gaelic (Scottish)',word:'Halo',roman:'Halo',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿'},
+  {lang:'Basque',word:'Kaixo',roman:'Kaixo',flag:'🇪🇸'},
+  {lang:'Catalan',word:'Hola',roman:'Hola',flag:'🇪🇸'},
+  {lang:'Galician',word:'Ola',roman:'Ola',flag:'🇪🇸'},
+  
+  // RUSSIA & EASTERN EUROPE
+  {lang:'Russian',word:'Здравствуйте',roman:'Zdravstvuyte',flag:'🇷🇺'},
+  {lang:'Ukrainian',word:'Привіт',roman:'Pryvit',flag:'🇺🇦'},
+  {lang:'Belarusian',word:'Прывітанне',roman:'Pryvitannie',flag:'🇧🇾'},
+  {lang:'Lithuanian',word:'Sveiki',roman:'Sveiki',flag:'🇱🇹'},
+  {lang:'Latvian',word:'Sveiki',roman:'Sveiki',flag:'🇱🇻'},
+  {lang:'Estonian',word:'Tere',roman:'Tere',flag:'🇪🇪'},
+  
+  // AFRICA
+  {lang:'Swahili',word:'Jambo',roman:'Jambo',flag:'🇰🇪'},
+  {lang:'Zulu',word:'Sawubona',roman:'Sawubona',flag:'🇿🇦'},
+  {lang:'Xhosa',word:'Molo',roman:'Molo',flag:'🇿🇦'},
+  {lang:'Afrikaans',word:'Hallo',roman:'Hallo',flag:'🇿🇦'},
+  {lang:'Amharic',word:'ሰላም',roman:'Selam',flag:'🇪🇹'},
+  {lang:'Hausa',word:'Sannu',roman:'Sannu',flag:'🇳🇬'},
+  {lang:'Yoruba',word:'Bawo ni',roman:'Bawo ni',flag:'🇳🇬'},
+  {lang:'Igbo',word:'Ndewo',roman:'Ndewo',flag:'🇳🇬'},
+  {lang:'Somali',word:'Salaan',roman:'Salaan',flag:'🇸🇴'},
+  {lang:'Oromo',word:'Akkam',roman:'Akkam',flag:'🇪🇹'},
+  {lang:'Tigrinya',word:'ሰላም',roman:'Selam',flag:'🇪🇷'},
+  {lang:'Akan (Twi)',word:'Ɛte sεn?',roman:'Ete sen?',flag:'🇬🇭'},
+  {lang:'Malagasy',word:'Salama',roman:'Salama',flag:'🇲🇬'},
+  {lang:'Shona',word:'Mhoro',roman:'Mhoro',flag:'🇿🇼'},
+  {lang:'Kinyarwanda',word:'Muraho',roman:'Muraho',flag:'🇷🇼'},
+  
+  // THE AMERICAS
+  {lang:'English (American)',word:'Hello',roman:'Hello',flag:'🇺🇸'},
+  {lang:'Spanish (Latin American)',word:'Hola',roman:'Hola',flag:'🇲🇽'},
+  {lang:'Portuguese (Brazilian)',word:'Olá',roman:'Olá',flag:'🇧🇷'},
+  {lang:'French (Canadian)',word:'Bonjour',roman:'Bonjour',flag:'🇨🇦'},
+  {lang:'Quechua',word:'Allin punchaw',roman:'Allin punchaw',flag:'🇵🇪'},
+  {lang:'Guarani',word:'Mba\'éichapa',roman:'Mba\'éichapa',flag:'🇵🇾'},
+  {lang:'Nahuatl',word:'Niltze',roman:'Niltze',flag:'🇲🇽'},
+  {lang:'Mayan (Yucatec)',word:'Bix a beel?',roman:'Bix a beel?',flag:'🇲🇽'},
+  {lang:'Inuktitut',word:'ᐊᐃᓐᖓᐃ',roman:'Ainngai',flag:'🇨🇦'},
+  {lang:'Greenlandic',word:'Aluu',roman:'Aluu',flag:'🇬🇱'},
   {lang:'Hawaiian',word:'Aloha',roman:'Aloha',flag:'🌺'},
+  
+  // OCEANIA & PACIFIC
   {lang:'Māori',word:'Kia ora',roman:'Kia ora',flag:'🇳🇿'},
+  {lang:'Samoan',word:'Talofa',roman:'Talofa',flag:'🇼🇸'},
+  {lang:'Tongan',word:'Mālō e lelei',roman:'Mālō e lelei',flag:'🇹🇴'},
+  {lang:'Fijian',word:'Bula',roman:'Bula',flag:'🇫🇯'},
+  {lang:'Hawaiian (Pacific)',word:'Aloha',roman:'Aloha',flag:'🇺🇸'},
+  {lang:'Tahitian',word:'Ia ora na',roman:'Ia ora na',flag:'🇵🇫'},
+  {lang:'Māori (Cook Islands)',word:'Kia orana',roman:'Kia orana',flag:'🇨🇰'},
+  {lang:'Tokelauan',word:'Taloha',roman:'Taloha',flag:'🇹🇰'},
+  {lang:'Niuean',word:'Fakaalofa atu',roman:'Fakaalofa atu',flag:'🇳🇺'},
+  {lang:'Palauan',word:'Alii',roman:'Alii',flag:'🇵🇼'},
+  {lang:'Chamorro',word:'Håfa adai',roman:'Håfa adai',flag:'🇬🇺'},
+  
+  // INDIGENOUS & OTHER
+  {lang:'Esperanto',word:'Saluton',roman:'Saluton',flag:'🌍'},
+  {lang:'Latin',word:'Salve',roman:'Salve',flag:'🏛️'},
+  {lang:'Sanskrit',word:'नमः',roman:'Namah',flag:'🇮🇳'},
+  {lang:'Pali',word:'Namo',roman:'Namo',flag:'🇮🇳'},
 ];
 
-const COUNTRIES=[
+const COUNTRIES = [
+  // ORIGINAL COUNTRIES
   {name:'Bhutan',flag:'🇧🇹',capital:'Thimphu',pop:'787,424',fact:'Measures Gross National Happiness as a national policy metric.'},
   {name:'Palau',flag:'🇵🇼',capital:'Ngerulmud',pop:'18,008',fact:'One of the world\'s first shark sanctuaries.'},
   {name:'San Marino',flag:'🇸🇲',capital:'City of San Marino',pop:'34,010',fact:'Oldest republic in the world, founded in 301 AD.'},
@@ -195,13 +335,112 @@ const COUNTRIES=[
   {name:'Suriname',flag:'🇸🇷',capital:'Paramaribo',pop:'623,236',fact:'90% of the country is covered by tropical rainforest.'},
   {name:'Kyrgyzstan',flag:'🇰🇬',capital:'Bishkek',pop:'6,735,347',fact:'The Epic of Manas is 20× longer than the Iliad and Odyssey combined.'},
   {name:'Nauru',flag:'🇳🇷',capital:'Yaren (de facto)',pop:'10,084',fact:'The world\'s smallest island nation.'},
-  {name:'Tuvalu',flag:'🇹🇻',capital:'Funafuti',pop:'11,204',fact:'Fourth smallest country — may be largely submerged by 2100.'},
+  {name:'Tuvalu',flag:'🇹🇻',capital:'Funafuti',pop:'11,204',fact:'Fourth smallest country, may be largely submerged by 2100.'},
   {name:'Andorra',flag:'🇦🇩',capital:'Andorra la Vella',pop:'77,543',fact:'Has no standing army and relies on France and Spain for defence.'},
   {name:'Eswatini',flag:'🇸🇿',capital:'Mbabane',pop:'1,210,822',fact:'Renamed from Swaziland in 2018 by royal decree.'},
   {name:'Djibouti',flag:'🇩🇯',capital:'Djibouti City',pop:'1,078,373',fact:'Sits on the Great Rift Valley where the African continent is slowly splitting.'},
+
+  // ADDED COUNTRIES - AFRICA
+  {name:'Nigeria',flag:'🇳🇬',capital:'Abuja',pop:'223,804,632',fact:'Home to over 500 languages, the most of any country in Africa.'},
+  {name:'Kenya',flag:'🇰🇪',capital:'Nairobi',pop:'54,985,698',fact:'The Great Rift Valley runs through the country from north to south.'},
+  {name:'Egypt',flag:'🇪🇬',capital:'Cairo',pop:'110,990,103',fact:'Home to the only remaining Ancient Wonder of the World - the Great Pyramid.'},
+  {name:'South Africa',flag:'🇿🇦',capital:'Pretoria (executive), Cape Town (legislative), Bloemfontein (judicial)',pop:'60,414,495',fact:'Has 12 official languages, the 3rd most in the world.'},
+  {name:'Ghana',flag:'🇬🇭',capital:'Accra',pop:'33,846,114',fact:'The first sub-Saharan African country to gain independence from colonial rule (1957).'},
+  {name:'Morocco',flag:'🇲🇦',capital:'Rabat',pop:'37,772,756',fact:'The oldest university in the world, University of Al Quaraouiyine, was founded here in 859 AD.'},
+  {name:'Ethiopia',flag:'🇪🇹',capital:'Addis Ababa',pop:'126,527,060',fact:'Never colonized by European powers, except for a brief Italian occupation (1936-1941).'},
+  {name:'Tanzania',flag:'🇹🇿',capital:'Dodoma',pop:'67,438,106',fact:'Home to the famous Serengeti National Park and the annual Great Migration.'},
+  {name:'Uganda',flag:'🇺🇬',capital:'Kampala',pop:'48,582,334',fact:'The source of the River Nile is in Uganda at Lake Victoria.'},
+  {name:'Senegal',flag:'🇸🇳',capital:'Dakar',pop:'18,384,660',fact:'The westernmost point of mainland Africa - Dakar is the closest African city to the Americas.'},
+  {name:'Zimbabwe',flag:'🇿🇼',capital:'Harare',pop:'16,634,373',fact:'Home to Victoria Falls, one of the world\'s largest waterfalls.'},
+  {name:'Namibia',flag:'🇳🇦',capital:'Windhoek',pop:'2,604,172',fact:'Has the world\'s oldest desert - the Namib Desert at 55 million years old.'},
+  {name:'Botswana',flag:'🇧🇼',capital:'Gaborone',pop:'2,675,352',fact:'Has the world\'s largest population of African elephants (over 130,000).'},
+  {name:'Algeria',flag:'🇩🇿',capital:'Algiers',pop:'46,278,751',fact:'The largest country in Africa by area.'},
+  {name:'Cameroon',flag:'🇨🇲',capital:'Yaoundé',pop:'29,123,744',fact:'Often called "Africa in miniature" for its cultural and geographical diversity.'},
+
+  // ADDED COUNTRIES - ASIA
+  {name:'Japan',flag:'🇯🇵',capital:'Tokyo',pop:'123,951,692',fact:'Has over 100,000 shrines and temples, many dating back centuries.'},
+  {name:'South Korea',flag:'🇰🇷',capital:'Seoul',pop:'51,717,590',fact:'Has the world\'s fastest average internet speed.'},
+  {name:'China',flag:'🇨🇳',capital:'Beijing',pop:'1,425,671,352',fact:'Has the world\'s largest population and a continuous civilization over 4,000 years old.'},
+  {name:'Mongolia',flag:'🇲🇳',capital:'Ulaanbaatar',pop:'3,469,657',fact:'Has only 2 people per square kilometer - the lowest population density of any sovereign state.'},
+  {name:'India',flag:'🇮🇳',capital:'New Delhi',pop:'1,428,627,663',fact:'The world\'s largest democracy and the birthplace of four major religions.'},
+  {name:'Thailand',flag:'🇹🇭',capital:'Bangkok',pop:'71,697,030',fact:'Never colonized by European powers - its name means "Land of the Free".'},
+  {name:'Singapore',flag:'🇸🇬',capital:'Singapore City',pop:'5,637,022',fact:'One of only three city-states in the world (along with Monaco and the Vatican).'},
+  {name:'Vietnam',flag:'🇻🇳',capital:'Hanoi',pop:'100,352,192',fact:'Home to the world\'s largest cave - Son Doong Cave is big enough to fit a skyscraper.'},
+  {name:'Philippines',flag:'🇵🇭',capital:'Manila',pop:'115,559,009',fact:'Has over 7,600 islands, making it one of the world\'s largest archipelagos.'},
+  {name:'Indonesia',flag:'🇮🇩',capital:'Jakarta',pop:'277,534,122',fact:'The world\'s largest Muslim-majority country with over 17,000 islands.'},
+  {name:'Malaysia',flag:'🇲🇾',capital:'Kuala Lumpur',pop:'34,219,975',fact:'The Petronas Twin Towers were the tallest buildings in the world from 1998-2004.'},
+  {name:'Sri Lanka',flag:'🇱🇰',capital:'Sri Jayawardenepura Kotte',pop:'22,156,000',fact:'The only country in the world that exports all its tea (Ceylon Tea).'},
+  {name:'Nepal',flag:'🇳🇵',capital:'Kathmandu',pop:'31,122,387',fact:'Has the highest point on Earth (Mount Everest) and the deepest gorge (Kali Gandaki).'},
+  {name:'Iran',flag:'🇮🇷',capital:'Tehran',pop:'88,550,570',fact:'Persian civilization is over 2,500 years old.'},
+  {name:'Turkey',flag:'🇹🇷',capital:'Ankara',pop:'85,816,199',fact:'The only country that straddles both Europe and Asia.'},
+  {name:'Israel',flag:'🇮🇱',capital:'Jerusalem',pop:'9,558,100',fact:'The only country in the world with a mandatory military service for both men and women.'},
+  {name:'Saudi Arabia',flag:'🇸🇦',capital:'Riyadh',pop:'37,473,929',fact:'The world\'s largest exporter of oil and the birthplace of Islam.'},
+  {name:'United Arab Emirates',flag:'🇦🇪',capital:'Abu Dhabi',pop:'10,642,081',fact:'Has the tallest building in the world - the Burj Khalifa (828 meters).'},
+
+  // ADDED COUNTRIES - EUROPE
+  {name:'Germany',flag:'🇩🇪',capital:'Berlin',pop:'83,408,554',fact:'The first country to adopt daylight saving time (in 1916).'},
+  {name:'France',flag:'🇫🇷',capital:'Paris',pop:'68,084,217',fact:'The most visited country in the world, with over 89 million tourists annually.'},
+  {name:'United Kingdom',flag:'🇬🇧',capital:'London',pop:'68,682,962',fact:'The only country with no written constitution.'},
+  {name:'Italy',flag:'🇮🇹',capital:'Rome',pop:'59,030,133',fact:'Has 58 UNESCO World Heritage Sites - the most in the world.'},
+  {name:'Spain',flag:'🇪🇸',capital:'Madrid',pop:'47,473,373',fact:'The world\'s largest producer of olive oil.'},
+  {name:'Portugal',flag:'🇵🇹',capital:'Lisbon',pop:'10,247,605',fact:'The oldest country in Europe with the same borders since 1139.'},
+  {name:'Netherlands',flag:'🇳🇱',capital:'Amsterdam',pop:'17,700,000',fact:'Almost 1/3 of the country is below sea level.'},
+  {name:'Belgium',flag:'🇧🇪',capital:'Brussels',pop:'11,686,140',fact:'Has the highest density of castles in the world (over 3,000).'},
+  {name:'Switzerland',flag:'🇨🇭',capital:'Bern',pop:'8,776,760',fact:'Has the world\'s longest tunnel - the Gotthard Base Tunnel (57.1 km).'},
+  {name:'Austria',flag:'🇦🇹',capital:'Vienna',pop:'9,104,772',fact:'Vienna has topped the Global Liveability Index multiple times.'},
+  {name:'Sweden',flag:'🇸🇪',capital:'Stockholm',pop:'10,612,086',fact:'Has the world\'s oldest surviving newspaper (Post-och Inrikes Tidningar, 1645).'},
+  {name:'Norway',flag:'🇳🇴',capital:'Oslo',pop:'5,474,360',fact:'The country that invented the cheese slicer and the modern ski binding.'},
+  {name:'Denmark',flag:'🇩🇰',capital:'Copenhagen',pop:'5,946,984',fact:'The oldest monarchy in the world, founded in 935 AD.'},
+  {name:'Finland',flag:'🇫🇮',capital:'Helsinki',pop:'5,569,299',fact:'Ranked the world\'s happiest country for 6 consecutive years (2018-2023).'},
+  {name:'Iceland',flag:'🇮🇸',capital:'Reykjavik',pop:'375,318',fact:'No mosquitoes in the entire country.'},
+  {name:'Greece',flag:'🇬🇷',capital:'Athens',pop:'10,394,055',fact:'The birthplace of democracy, Western philosophy, and the Olympic Games.'},
+  {name:'Poland',flag:'🇵🇱',capital:'Warsaw',pop:'37,739,785',fact:'The European bison, Europe\'s heaviest land animal, survives here.'},
+  {name:'Czech Republic',flag:'🇨🇿',capital:'Prague',pop:'10,705,384',fact:'Beer is cheaper than water in many restaurants.'},
+  {name:'Hungary',flag:'🇭🇺',capital:'Budapest',pop:'9,606,000',fact:'The Hungarian language has 14 vowels and is not related to any major European language.'},
+  {name:'Romania',flag:'🇷🇴',capital:'Bucharest',pop:'19,053,815',fact:'Home to the world\'s heaviest building (the Palace of the Parliament).'},
+  {name:'Ukraine',flag:'🇺🇦',capital:'Kyiv',pop:'36,744,636',fact:'The motherland monument in Kyiv is one of the tallest statues in the world (102 m).'},
+
+  // ADDED COUNTRIES - THE AMERICAS
+  {name:'United States',flag:'🇺🇸',capital:'Washington D.C.',pop:'339,996,563',fact:'Has the largest economy in the world and the most Olympic medals.'},
+  {name:'Canada',flag:'🇨🇦',capital:'Ottawa',pop:'38,781,291',fact:'Has the longest coastline in the world (202,080 km).'},
+  {name:'Mexico',flag:'🇲🇽',capital:'Mexico City',pop:'128,455,567',fact:'The world\'s largest Spanish-speaking country.'},
+  {name:'Brazil',flag:'🇧🇷',capital:'Brasília',pop:'216,422,446',fact:'Has the world\'s largest rainforest - the Amazon.'},
+  {name:'Argentina',flag:'🇦🇷',capital:'Buenos Aires',pop:'45,808,747',fact:'The first country in Latin America to legalize same-sex marriage (2010).'},
+  {name:'Chile',flag:'🇨🇱',capital:'Santiago',pop:'19,629,590',fact:'The longest country in the world from north to south (4,300 km).'},
+  {name:'Colombia',flag:'🇨🇴',capital:'Bogotá',pop:'52,085,168',fact:'The world\'s largest producer of emeralds and its coffee is globally famous.'},
+  {name:'Peru',flag:'🇵🇪',capital:'Lima',pop:'34,352,720',fact:'Home to Machu Picchu, one of the New Seven Wonders of the World.'},
+  {name:'Venezuela',flag:'🇻🇪',capital:'Caracas',pop:'28,838,499',fact:'Has the world\'s largest proven oil reserves.'},
+  {name:'Costa Rica',flag:'🇨🇷',capital:'San José',pop:'5,212,173',fact:'No military since 1949 and has the highest happiness index in Latin America.'},
+  {name:'Panama',flag:'🇵🇦',capital:'Panama City',pop:'4,468,087',fact:'The Panama Canal connects the Atlantic and Pacific Oceans.'},
+  {name:'Jamaica',flag:'🇯🇲',capital:'Kingston',pop:'2,825,544',fact:'The first Caribbean country to gain independence (1962).'},
+  {name:'Trinidad and Tobago',flag:'🇹🇹',capital:'Port of Spain',pop:'1,534,937',fact:'The birthplace of the steelpan drum and calypso music.'},
+
+  // ADDED COUNTRIES - OCEANIA
+  {name:'Australia',flag:'🇦🇺',capital:'Canberra',pop:'26,461,166',fact:'Has the world\'s oldest continuous culture (Aboriginal Australians, over 60,000 years).'},
+  {name:'New Zealand',flag:'🇳🇿',capital:'Wellington',pop:'5,223,100',fact:'The first country to give women the right to vote (1893).'},
+  {name:'Fiji',flag:'🇫🇯',capital:'Suva',pop:'936,375',fact:'The only country in the world with a national rugby anthem.'},
+  {name:'Samoa',flag:'🇼🇸',capital:'Apia',pop:'225,681',fact:'The first country to see the new day (along with Kiribati).'},
+  {name:'Papua New Guinea',flag:'🇵🇬',capital:'Port Moresby',pop:'10,329,931',fact:'Has over 800 languages, more than any other country.'},
+  {name:'Solomon Islands',flag:'🇸🇧',capital:'Honiara',pop:'740,424',fact:'Has the world\'s most linguistically diverse island (over 70 languages).'},
+
+  // ADDED SMALL/UNIQUE COUNTRIES
+  {name:'Monaco',flag:'🇲🇨',capital:'Monaco City',pop:'36,297',fact:'The world\'s smallest monarchy and 2nd smallest country by area.'},
+  {name:'Vatican City',flag:'🇻🇦',capital:'Vatican City',pop:'825',fact:'The smallest country in the world, with its own postal service and railway station.'},
+  {name:'Luxembourg',flag:'🇱🇺',capital:'Luxembourg City',pop:'653,103',fact:'One of the richest countries in the world (GDP per capita).'},
+  {name:'Brunei',flag:'🇧🇳',capital:'Bandar Seri Begawan',pop:'452,524',fact:'Has one of the world\'s largest oil reserves per capita.'},
+  {name:'Qatar',flag:'🇶🇦',capital:'Doha',pop:'2,716,391',fact:'The richest country in the world per capita.'},
+  {name:'Kuwait',flag:'🇰🇼',capital:'Kuwait City',pop:'4,310,108',fact:'Has the world\'s largest per capita reserve of oil.'},
+  {name:'Bahrain',flag:'🇧🇭',capital:'Manama',pop:'1,485,509',fact:'The first country in the Persian Gulf to discover oil (1932).'},
+  {name:'Malta',flag:'🇲🇹',capital:'Valletta',pop:'535,064',fact:'The smallest EU country and has the highest density of historical sites.'},
+  {name:'Cyprus',flag:'🇨🇾',capital:'Nicosia',pop:'1,260,138',fact:'The last divided capital city in the world (Nicosia).'},
+  {name:'Estonia',flag:'🇪🇪',capital:'Tallinn',pop:'1,366,491',fact:'The first country to implement e-residency for non-citizens.'},
+  {name:'Slovenia',flag:'🇸🇮',capital:'Ljubljana',pop:'2,119,844',fact:'Has over 10,000 caves, including the famous Postojna Cave.'},
+  {name:'Latvia',flag:'🇱🇻',capital:'Riga',pop:'1,862,647',fact:'Has one of the world\'s oldest national flags (dating back to 1279).'},
+  {name:'Lithuania',flag:'🇱🇹',capital:'Vilnius',pop:'2,718,352',fact:'The first country to declare independence from the Soviet Union (1990).'},
 ];
 
-const RECORDS=[
+const RECORDS = [
+  // ORIGINAL RECORDS
   {record:'Longest fingernails on a pair of hands (ever)',holder:'Lee Redmond, USA',value:'8.65 m',unit:'total length'},
   {record:'Most languages spoken by one person',holder:'Ziad Fazah, Lebanon',value:'58',unit:'languages'},
   {record:'Longest time holding breath underwater',holder:'Budimir Šobat, Croatia',value:'24:37',unit:'min:sec'},
@@ -212,9 +451,122 @@ const RECORDS=[
   {record:'Longest distance flown by a pumpkin',holder:'Various trebuchet teams',value:'1,690 m',unit:'trebuchet'},
   {record:'Most T-shirts worn at once',holder:'Ted Hastings, USA',value:'260',unit:'T-shirts'},
   {record:'Fastest time to eat a 30 cm pizza (no hands)',holder:'Tom Waes, Belgium',value:'32.28 s',unit:'seconds'},
+
+  // ADDED RECORDS - HUMAN BODY
+  {record:'Tallest living person',holder:'Sultan Kösen, Turkey',value:'251 cm',unit:'height'},
+  {record:'Shortest living person',holder:'Jyoti Amge, India',value:'62.8 cm',unit:'height'},
+  {record:'Longest tongue',holder:'Nick Stoeberl, USA',value:'10.1 cm',unit:'length'},
+  {record:'Longest ear hair',holder:'Dennis Hart, USA',value:'18.1 cm',unit:'length'},
+  {record:'Most piercings on one body',holder:'Elaine Davidson, Brazil',value:'9,000+',unit:'piercings'},
+  {record:'Most tattoos on one body',holder:'Gregory Paul McLaren, UK',value:'99.9%',unit:'body coverage'},
+  {record:'Longest nose',holder:'Mehmet Özyürek, Turkey',value:'8.8 cm',unit:'length'},
+  {record:'Widest mouth',holder:'Francisco Domingo Joaquim, Angola',value:'17 cm',unit:'width'},
+  {record:'Longest moustache',holder:'Ram Singh Chauhan, India',value:'4.29 m',unit:'length'},
+  {record:'Longest beard',holder:'Sarwan Singh, Canada',value:'2.36 m',unit:'length'},
+  {record:'Loudest snore',holder:'Kåre Lindvåg, Norway',value:'93 dB',unit:'decibels'},
+  {record:'Highest fever survived',holder:'Willie Jones, USA',value:'46.5°C',unit:'temperature'},
+
+  // ADDED RECORDS - FOOD & EATING
+  {record:'Fastest time to eat a raw onion',holder:'Larry Semenza, USA',value:'59.4 s',unit:'seconds'},
+  {record:'Most bananas eaten in 1 minute',holder:'Patrick Bertoletti, USA',value:'8',unit:'bananas'},
+  {record:'Most hamburgers eaten in 3 minutes',holder:'Takeru Kobayashi, Japan',value:'12',unit:'hamburgers'},
+  {record:'Fastest time to peel an apple',holder:'Denton Mowrey, USA',value:'6.5 s',unit:'seconds'},
+  {record:'Largest pizza made',holder:'Various (Italy)',value:'1,261.65 m²',unit:'area'},
+  {record:'Largest cheesecake ever made',holder:'Various (USA)',value:'1,300 kg',unit:'weight'},
+  {record:'Most chicken wings eaten in 10 minutes',holder:'Molly Schuyler, USA',value:'501',unit:'wings'},
+  {record:'Fastest time to eat a 1 lb bar of chocolate',holder:'Fred Mills, USA',value:'2.5 min',unit:'minutes'},
+  {record:'Most strawberries eaten in 1 minute',holder:'Stephen Clarke, UK',value:'58',unit:'strawberries'},
+
+  // ADDED RECORDS - ANIMALS
+  {record:'Fastest land animal',holder:'Cheetah',value:'120 km/h',unit:'speed'},
+  {record:'Largest animal ever',holder:'Blue Whale',value:'190 tons',unit:'weight'},
+  {record:'Smallest mammal',holder:'Etruscan shrew',value:'2 g',unit:'weight'},
+  {record:'Longest living animal',holder:'Greenland shark',value:'500+ years',unit:'age'},
+  {record:'Most eggs laid by a chicken in 1 day',holder:'Unknown',value:'6',unit:'eggs'},
+  {record:'Largest cat breed',holder:'Maine Coon',value:'15.9 kg',unit:'weight'},
+  {record:'Smallest dog breed',holder:'Chihuahua',value:'1 kg',unit:'weight'},
+  {record:'Tallest dog',holder:'Zeus, USA',value:'111.8 cm',unit:'height'},
+  {record:'Fastest bird (diving)',holder:'Peregrine Falcon',value:'389 km/h',unit:'speed'},
+  {record:'Slowest mammal',holder:'Three-toed sloth',value:'0.24 km/h',unit:'speed'},
+  {record:'Largest spider',holder:'Goliath birdeater',value:'30 cm',unit:'leg span'},
+  {record:'Most venomous snake',holder:'Inland taipan, Australia',value:'110 mg',unit:'venom lethal dose'},
+
+  // ADDED RECORDS - SPORTS
+  {record:'Most Olympic gold medals (individual)',holder:'Michael Phelps, USA',value:'23',unit:'gold medals'},
+  {record:'Most marathon wins (male)',holder:'Eliud Kipchoge, Kenya',value:'16',unit:'wins'},
+  {record:'Highest long jump',holder:'Mike Powell, USA',value:'8.95 m',unit:'distance'},
+  {record:'Fastest 100m sprint',holder:'Usain Bolt, Jamaica',value:'9.58 s',unit:'seconds'},
+  {record:'Most home runs in MLB (career)',holder:'Barry Bonds, USA',value:'762',unit:'home runs'},
+  {record:'Most goals in football (career)',holder:'Pelé, Brazil',value:'1,283',unit:'goals'},
+  {record:'Most Grand Slam tennis titles',holder:'Novak Djokovic, Serbia',value:'24',unit:'titles'},
+  {record:'Most F1 World Championships',holder:'Lewis Hamilton, UK',value:'7',unit:'titles'},
+  {record:'Most consecutive free throws (NBA)',holder:'Michael Williams, USA',value:'97',unit:'free throws'},
+  {record:'Longest hole-in-one (golf)',holder:'Robert Mitera, USA',value:'408.5 m',unit:'distance'},
+  {record:'Fastest cricket ball',holder:'Shoaib Akhtar, Pakistan',value:'161.3 km/h',unit:'speed'},
+  {record:'Most World Cup wins (cricket)',holder:'Australia',value:'5',unit:'wins'},
+
+  // ADDED RECORDS - SCIENCE & TECH
+  {record:'Fastest computer (supercomputer)',holder:'Frontier, USA',value:'1.102 exaflops',unit:'computing speed'},
+  {record:'Fastest internet speed achieved',holder:'Various (UK)',value:'178 Tb/s',unit:'speed'},
+  {record:'Largest telescope',holder:'FAST, China',value:'500 m',unit:'diameter'},
+  {record:'Deepest human dive (submarine)',holder:'Trieste (US Navy)',value:'10,911 m',unit:'depth'},
+  {record:'Highest flight by a bird',holder:'Rüppell\'s vulture',value:'11,300 m',unit:'altitude'},
+  {record:'Most massive star discovered',holder:'R136a1',value:'265 solar masses',unit:'mass'},
+  {record:'Coldest temperature achieved',holder:'Various (MIT, USA)',value:'0.000000001 K',unit:'kelvin'},
+
+  // ADDED RECORDS - ART & CULTURE
+  {record:'Largest painting ever',holder:'Various (India)',value:'16,000 m²',unit:'area'},
+  {record:'Most expensive painting sold',holder:'Leonardo da Vinci, Salvator Mundi',value:'$450.3 million',unit:'price'},
+  {record:'Longest novel ever written',holder:'Marcel Proust, France',value:'1.2 million words',unit:'words'},
+  {record:'Most translated book (after Bible)',holder:'The Little Prince',value:'300+',unit:'languages'},
+  {record:'Longest concert ever performed',holder:'Various (USA)',value:'453 hours',unit:'duration'},
+  {record:'Most viewed video on YouTube',holder:'Baby Shark Dance',value:'13+ billion',unit:'views'},
+  {record:'Most Oscar wins by one film',holder:'Titanic, Ben Hur, Return of the King',value:'11',unit:'Oscars'},
+  {record:'Highest grossing film (ever)',holder:'Avatar (2009)',value:'$2.9 billion',unit:'box office'},
+
+  // ADDED RECORDS - BUILDINGS & STRUCTURES
+  {record:'Tallest building in the world',holder:'Burj Khalifa, UAE',value:'828 m',unit:'height'},
+  {record:'Largest stadium by capacity',holder:'Rungrado 1st of May Stadium, North Korea',value:'150,000',unit:'seats'},
+  {record:'Longest bridge (total length)',holder:'Danyang–Kunshan Grand Bridge, China',value:'164.8 km',unit:'length'},
+  {record:'Highest railway station',holder:'Tanggula, China',value:'5,068 m',unit:'altitude'},
+  {record:'Largest desert by area',holder:'Antarctic Desert',value:'14.2 million km²',unit:'area'},
+  {record:'Deepest point in the ocean',holder:'Mariana Trench',value:'11,034 m',unit:'depth'},
+  {record:'Largest lake by volume',holder:'Lake Baikal, Russia',value:'23,615 km³',unit:'volume'},
+
+  // ADDED RECORDS - BIZARRE & FUNNY
+  {record:'Most spoons balanced on face',holder:'Geng Yihao, China',value:'80',unit:'spoons'},
+  {record:'Most toothpicks in a beard',holder:'Joel Strasser, USA',value:'3,500',unit:'toothpicks'},
+  {record:'Farthest distance to walk with a glass of milk on head',holder:'Ashrita Furman, USA',value:'165 m',unit:'distance'},
+  {record:'Most clothespins attached to face',holder:'Garrett Gee, USA',value:'145',unit:'clothespins'},
+  {record:'Longest time balancing a lawnmower on chin',holder:'Ashrita Furman, USA',value:'9.5 s',unit:'seconds'},
+  {record:'Most people in a human pyramid (5 tiers)',holder:'Various (India)',value:'600',unit:'people'},
+  {record:'Farthest distance to throw a smartphone',holder:'Rauli Lievonen, Finland',value:'109 m',unit:'distance'},
+  {record:'Most toilet seats broken in 1 hour',holder:'Kevin Shelley, USA',value:'46',unit:'toilet seats'},
+  {record:'Longest duration balancing a pool cue on one finger',holder:'David Rush, USA',value:'2:30 min',unit:'duration'},
+  {record:'Fastest time to put on 100 t-shirts',holder:'Various (UK)',value:'35.4 s',unit:'seconds'},
+  {record:'Largest collection of rubber bands',holder:'Joel Waul, USA',value:'242,525',unit:'rubber bands'},
+  {record:'Most Smarties eaten in 1 minute (using chopsticks)',holder:'Andre Ortolf, Germany',value:'32',unit:'Smarties'},
+  {record:'Longest line of dominoes toppled',holder:'Various (Netherlands)',value:'4,491,863',unit:'dominoes'},
+
+  // ADDED RECORDS - ENVIRONMENTAL
+  {record:'Hottest temperature ever recorded',holder:'Death Valley, USA',value:'56.7°C',unit:'temperature'},
+  {record:'Coldest temperature ever recorded',holder:'Vostok Station, Antarctica',value:'-89.2°C',unit:'temperature'},
+  {record:'Wettest place on Earth',holder:'Mawsynram, India',value:'11,872 mm',unit:'annual rainfall'},
+  {record:'Driest place on Earth (non-polar)',holder:'Atacama Desert, Chile',value:'0.03 mm',unit:'annual rainfall'},
+  {record:'Highest waterfall',holder:'Angel Falls, Venezuela',value:'979 m',unit:'height'},
+  {record:'Longest river',holder:'Nile River, Africa',value:'6,650 km',unit:'length'},
+  {record:'Largest coral reef system',holder:'Great Barrier Reef, Australia',value:'2,300 km',unit:'length'},
+
+  // ADDED RECORDS - TRANSPORTATION
+  {record:'Fastest car (production)',holder:'Koenigsegg Jesko Absolut',value:'530 km/h',unit:'top speed'},
+  {record:'Fastest motorcycle',holder:'Kawasaki H2R',value:'400 km/h',unit:'top speed'},
+  {record:'Fastest train',holder:'Shanghai Maglev, China',value:'431 km/h',unit:'speed'},
+  {record:'Largest passenger airplane',holder:'Airbus A380',value:'853 passengers',unit:'capacity'},
+  {record:'Longest commercial flight route',holder:'Singapore-New York',value:'15,349 km',unit:'distance'},
 ];
 
-const HOLIDAYS=[
+const HOLIDAYS = [
+  // ORIGINAL HOLIDAYS
   {name:"New Year's Day",month:0,day:1},
   {name:'International Cat Day',month:7,day:8},
   {name:'Pi Day',month:2,day:14},
@@ -227,14 +579,572 @@ const HOLIDAYS=[
   {name:'World Penguin Day',month:3,day:25},
   {name:'Ask a Stupid Question Day',month:8,day:30},
   {name:'International Day of Awesomeness',month:2,day:10},
-];
 
-const CONSTELLATIONS=[
+  // ADDED HOLIDAYS - JANUARY
+  {name:'International Mind-Body Wellness Day',month:0,day:3},
+  {name:'World Braille Day',month:0,day:4},
+  {name:'National Technology Day',month:0,day:6},
+  {name:'World Day of Peace',month:0,day:1},
+
+  // ADDED HOLIDAYS - FEBRUARY
+  {name:'Groundhog Day',month:1,day:2},
+  {name:'Valentine\'s Day',month:1,day:14},
+  {name:'International Polar Bear Day',month:1,day:27},
+  {name:'World Day of Social Justice',month:1,day:20},
+  {name:'International Mother Language Day',month:1,day:21},
+
+  // ADDED HOLIDAYS - MARCH
+  {name:'World Wildlife Day',month:2,day:3},
+  {name:'International Women\'s Day',month:2,day:8},
+  {name:'Pi Day (Einstein\'s Birthday)',month:2,day:14},
+  {name:'St. Patrick\'s Day',month:2,day:17},
+  {name:'International Day of Happiness',month:2,day:20},
+  {name:'World Water Day',month:2,day:22},
+  {name:'Earth Hour',month:2,day:25,note:'Last Saturday of March'},
+  {name:'International Puppy Day',month:2,day:23},
+
+  // ADDED HOLIDAYS - APRIL
+  {name:'April Fools\' Day',month:3,day:1},
+  {name:'World Autism Awareness Day',month:3,day:2},
+  {name:'International Day of Sport for Peace',month:3,day:6},
+  {name:'Earth Day',month:3,day:22},
+  {name:'World Book Day',month:3,day:23},
+  {name:'International Dance Day',month:3,day:29},
+  {name:'International Joke Day',month:3,day:1,note:'Also known as April Fools'},
+
+  // ADDED HOLIDAYS - MAY
+  {name:'International Workers\' Day (May Day)',month:4,day:1},
+  {name:'World Press Freedom Day',month:4,day:3},
+  {name:'Star Wars Day ("May the 4th be with you")',month:4,day:4},
+  {name:'International No Diet Day',month:4,day:6},
+  {name:'Mother\'s Day',month:4,day:10,note:'Second Sunday of May'},
+  {name:'International Nurses Day',month:4,day:12},
+  {name:'World Bee Day',month:4,day:20},
+  {name:'International Day for Biological Diversity',month:4,day:22},
+  {name:'World Turtle Day',month:4,day:23},
+  {name:'Geek Pride Day',month:4,day:25},
+  {name:'World Otter Day',month:4,day:25,note:'Last Wednesday of May'},
+
+  // ADDED HOLIDAYS - JUNE
+  {name:'International Children\'s Day',month:5,day:1},
+  {name:'World Environment Day',month:5,day:5},
+  {name:'World Oceans Day',month:5,day:8},
+  {name:'World Gin Day',month:5,day:11,note:'Second Saturday of June'},
+  {name:'International Surfing Day',month:5,day:18,note:'Third Saturday of June'},
+  {name:'World Music Day',month:5,day:21},
+  {name:'International Yoga Day',month:5,day:21},
+  {name:'World Rainforest Day',month:5,day:22},
+  {name:'International Fairy Day',month:5,day:24},
+  {name:'World UFO Day',month:5,day:24},
+  {name:'International Day of the Seafarer',month:5,day:25},
+
+  // ADDED HOLIDAYS - JULY
+  {name:'International Joke Day (actually July 1)',month:6,day:1},
+  {name:'World UFO Day (July 2)',month:6,day:2},
+  {name:'International Plastic Bag Free Day',month:6,day:3},
+  {name:'Independence Day (USA)',month:6,day:4},
+  {name:'World Chocolate Day',month:6,day:7},
+  {name:'International Malala Day',month:6,day:12},
+  {name:'World Population Day',month:6,day:11},
+  {name:'International Kebab Day',month:6,day:12,note:'Second Friday of July'},
+  {name:'National Ice Cream Day',month:6,day:18,note:'Third Sunday of July'},
+  {name:'World Chess Day',month:6,day:20},
+  {name:'International Friendship Day',month:6,day:30},
+
+  // ADDED HOLIDAYS - AUGUST
+  {name:'International Beer Day',month:7,day:6,note:'First Friday of August'},
+  {name:'World Cat Day (already exists)',month:7,day:8},
+  {name:'International Youth Day',month:7,day:12},
+  {name:'World Left-Handers Day',month:7,day:13},
+  {name:'International Geocaching Day',month:7,day:14,note:'Third Saturday of August'},
+  {name:'World Photography Day',month:7,day:19},
+  {name:'World Mosquito Day',month:7,day:20},
+  {name:'International Dog Day',month:7,day:26},
+  {name:'World Water Week',month:7,day:27,note:'Last week of August'},
+
+  // ADDED HOLIDAYS - SEPTEMBER
+  {name:'International Day of Charity',month:8,day:5},
+  {name:'World Literacy Day',month:8,day:8},
+  {name:'World Suicide Prevention Day',month:8,day:10},
+  {name:'International Chocolate Day',month:8,day:13},
+  {name:'International Day of Democracy',month:8,day:15},
+  {name:'World Cleanup Day',month:8,day:18,note:'Third Saturday of September'},
+  {name:'International Peace Day',month:8,day:21},
+  {name:'World Rhino Day',month:8,day:22},
+  {name:'European Day of Languages',month:8,day:26},
+  {name:'World Tourism Day',month:8,day:27},
+
+  // ADDED HOLIDAYS - OCTOBER
+  {name:'International Coffee Day',month:9,day:1},
+  {name:'World Vegetarian Day',month:9,day:1},
+  {name:'International Day of Non-Violence',month:9,day:2},
+  {name:'World Animal Day',month:9,day:4},
+  {name:'World Teachers\' Day',month:9,day:5},
+  {name:'International Day of the Girl',month:9,day:11},
+  {name:'World Egg Day',month:9,day:12,note:'Second Friday of October'},
+  {name:'World Food Day',month:9,day:16},
+  {name:'International Day for the Eradication of Poverty',month:9,day:17},
+  {name:'World Statistics Day',month:9,day:20,note:'Every 5 years'},
+  {name:'United Nations Day',month:9,day:24},
+  {name:'World Pasta Day',month:9,day:25},
+  {name:'World Audio Drama Day',month:9,day:30},
+  {name:'Halloween',month:9,day:31},
+
+  // ADDED HOLIDAYS - NOVEMBER
+  {name:'World Vegan Day',month:10,day:1},
+  {name:'International Stress Awareness Day',month:10,day:2,note:'First Wednesday of November'},
+  {name:'World Tsunami Awareness Day',month:10,day:5},
+  {name:'International Day of Radiology',month:10,day:8},
+  {name:'World Science Day for Peace',month:10,day:10},
+  {name:'World Kindness Day',month:10,day:13},
+  {name:'International Men\'s Day',month:10,day:19},
+  {name:'World Philosophy Day',month:10,day:17,note:'Third Thursday of November'},
+  {name:'World Children\'s Day',month:10,day:20},
+  {name:'World Television Day',month:10,day:21},
+  {name:'Thanksgiving',month:10,day:24,note:'Fourth Thursday of November'},
+  {name:'International Day for the Elimination of Violence Against Women',month:10,day:25},
+  {name:'World GIS Day',month:10,day:15,note:'Third Wednesday of November'},
+
+  // ADDED HOLIDAYS - DECEMBER
+  {name:'World AIDS Day',month:11,day:1},
+  {name:'International Day of Disabled Persons',month:11,day:3},
+  {name:'International Volunteer Day',month:11,day:5},
+  {name:'World Soil Day',month:11,day:5},
+  {name:'International Anti-Corruption Day',month:11,day:9},
+  {name:'Human Rights Day',month:11,day:10},
+  {name:'International Mountain Day',month:11,day:11},
+  {name:'Winter Solstice',month:11,day:21,note:'Around December 21'},
+  {name:'Christmas Eve',month:11,day:24},
+  {name:'Christmas Day',month:11,day:25},
+  {name:'Boxing Day',month:11,day:26},
+  {name:'New Year\'s Eve',month:11,day:31},
+
+  // ADDED UNIQUE/FUN HOLIDAYS
+  {name:'National Sleep Day',month:0,day:3,note:'First Friday of January'},
+  {name:'World Adventure Day',month:0,day:4,note:'Every January 4'},
+  {name:'World Laughter Day',month:4,day:6,note:'First Sunday of May'},
+  {name:'International Beer Pong Day',month:4,day:21,note:'May 21'},
+  {name:'World Nutella Day',month:1,day:5,note:'February 5'},
+  {name:'International Fist Bump Day',month:3,day:30,note:'March 30'},
+  {name:'National Taco Day',month:9,day:4,note:'October 4'},
+  {name:'National Sibling Day',month:3,day:10,note:'April 10'},
+  {name:'National Bagel Day',month:0,day:15,note:'January 15'},
+  {name:'National Pizza Day',month:1,day:9,note:'February 9'},
+  {name:'National Donut Day',month:5,day:3,note:'First Friday of June'},
+  {name:'National Wine Day',month:4,day:25,note:'May 25'},
+  {name:'National Beer Day',month:3,day:7,note:'April 7'},
+  {name:'National Sandwich Day',month:10,day:3,note:'November 3'},
+  {name:'National Cookie Day',month:11,day:4,note:'December 4'},
+  {name:'National Pancake Day',month:8,day:26,note:'September 26'},
+  {name:'National Cupcake Day',month:11,day:15,note:'December 15'},
+  {name:'National Ice Cream Day',month:6,day:18,note:'Third Sunday of July'},
+  {name:'National Popcorn Day',month:0,day:19,note:'January 19'},
+];
+  
+const CONSTELLATIONS = [
+  // ORIGINAL CONSTELLATIONS
   {name:'Orion',stars:[[120,60],[140,100],[100,100],[120,140],[105,170],[135,170],[80,60],[160,60],[100,120],[140,120]],lines:[[0,2],[0,1],[2,4],[1,3],[4,5],[2,6],[1,7],[2,8],[1,9],[8,9],[8,4],[9,5]]},
   {name:'Ursa Major',stars:[[60,120],[90,100],[120,90],[150,100],[170,130],[150,160],[120,160],[80,60],[50,50],[30,30]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3],[1,7],[7,8],[8,9]]},
   {name:'Cassiopeia',stars:[[40,80],[80,50],[120,80],[160,50],[200,80]],lines:[[0,1],[1,2],[2,3],[3,4]]},
   {name:'Scorpius',stars:[[120,40],[120,70],[130,100],[120,130],[100,150],[80,170],[90,190],[110,200],[100,120],[80,110],[60,90]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[3,8],[8,9],[9,10]]},
   {name:'Leo',stars:[[100,140],[80,110],[70,80],[90,60],[120,70],[140,90],[130,130],[160,150]],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[0,7]]},
+
+  // ALL 88 CONSTELLATIONS (COMPLETE LIST)
+  // Each constellation is represented with approximate star positions and line connections
+  // Stars are [x,y] coordinates in a 200x200 grid
+  // Lines are [starIndex1, starIndex2] connecting stars
+
+  // NORTHERN CONSTELLATIONS
+  {
+    name:'Andromeda',
+    stars:[[30,40],[50,30],[70,40],[90,30],[110,50],[100,70],[80,90],[60,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0]]
+  },
+  {
+    name:'Aquila',
+    stars:[[100,20],[80,50],[100,60],[120,50],[80,80],[100,90],[120,80]],
+    lines:[[0,1],[0,3],[1,2],[3,2],[2,4],[2,6],[4,5],[5,6]]
+  },
+  {
+    name:'Ara',
+    stars:[[100,150],[80,170],[60,180],[100,180],[120,170],[140,150]],
+    lines:[[0,1],[1,2],[0,3],[3,4],[4,5]]
+  },
+  {
+    name:'Aries',
+    stars:[[60,120],[80,100],[100,110],[110,90],[130,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4]]
+  },
+  {
+    name:'Auriga',
+    stars:[[60,30],[80,40],[100,30],[110,50],[90,70],[70,60]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Boötes',
+    stars:[[100,50],[120,60],[140,50],[150,70],[130,90],[110,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Camelopardalis',
+    stars:[[60,20],[80,30],[100,20],[110,40],[90,60],[70,50]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Cancer',
+    stars:[[80,70],[100,60],[110,80],[100,100],[80,90]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Canes Venatici',
+    stars:[[120,40],[130,60],[140,50],[150,70]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Canis Major',
+    stars:[[60,150],[80,130],[100,140],[110,120],[90,100],[70,110]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Canis Minor',
+    stars:[[120,90],[140,80],[150,100]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Capricornus',
+    stars:[[100,150],[80,160],[70,180],[90,190],[110,180],[120,160]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Carina',
+    stars:[[60,150],[80,140],[100,150],[110,130],[90,120],[70,130]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Cassiopeia', // Already exists but included for completeness
+    stars:[[40,80],[80,50],[120,80],[160,50],[200,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4]]
+  },
+  {
+    name:'Centaurus',
+    stars:[[70,120],[90,100],[110,110],[120,130],[100,150],[80,140]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Cepheus',
+    stars:[[100,30],[120,20],[140,30],[130,50],[110,50]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Cetus',
+    stars:[[60,100],[80,110],[100,100],[120,110],[130,130],[110,140],[90,130]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0]]
+  },
+  {
+    name:'Coma Berenices',
+    stars:[[80,60],[100,50],[110,70],[90,80]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Corona Australis',
+    stars:[[100,160],[90,170],[80,180],[100,190],[120,180]],
+    lines:[[0,1],[1,2],[2,3],[3,4]]
+  },
+  {
+    name:'Corona Borealis',
+    stars:[[100,50],[110,60],[120,50],[110,40]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Corvus',
+    stars:[[120,160],[100,170],[110,190],[130,180]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Crater',
+    stars:[[100,140],[80,150],[90,170],[110,160]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Crux',
+    stars:[[100,120],[80,130],[100,140],[120,130]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Cygnus',
+    stars:[[100,20],[80,40],[100,50],[120,40],[90,70],[110,70]],
+    lines:[[0,1],[1,2],[2,3],[3,0],[2,4],[2,5]]
+  },
+  {
+    name:'Delphinus',
+    stars:[[80,80],[100,70],[110,80],[100,90]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Dorado',
+    stars:[[60,110],[80,100],[100,110],[90,130]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Draco',
+    stars:[[60,30],[80,20],[100,30],[110,50],[100,70],[80,60]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Equuleus',
+    stars:[[90,80],[100,70],[110,80]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Eridanus',
+    stars:[[40,100],[60,90],[80,100],[100,110],[120,100],[140,110]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5]]
+  },
+  {
+    name:'Fornax',
+    stars:[[60,120],[80,110],[100,120]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Gemini',
+    stars:[[60,60],[80,50],[100,60],[110,80],[90,90],[70,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Grus',
+    stars:[[80,140],[100,130],[120,140],[110,160]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Hercules',
+    stars:[[80,40],[100,30],[110,50],[100,70],[80,60]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Horologium',
+    stars:[[60,130],[80,120],[100,130]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Hydra',
+    stars:[[40,80],[60,70],[80,80],[100,90],[120,80],[140,90],[130,110],[110,120]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7]]
+  },
+  {
+    name:'Lacerta',
+    stars:[[80,40],[100,30],[110,50]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Leo', // Already exists
+    stars:[[100,140],[80,110],[70,80],[90,60],[120,70],[140,90],[130,130],[160,150]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[0,7]]
+  },
+  {
+    name:'Lepus',
+    stars:[[80,130],[100,120],[110,140],[90,150]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Libra',
+    stars:[[100,120],[80,130],[90,150],[110,140]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Lupus',
+    stars:[[80,110],[100,100],[110,120],[100,140]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Lynx',
+    stars:[[60,60],[80,50],[100,60],[90,80]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Lyra',
+    stars:[[100,40],[110,50],[100,60],[90,50]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Mensa',
+    stars:[[60,130],[80,120],[70,110]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Microscopium',
+    stars:[[90,140],[110,130],[100,150]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Monoceros',
+    stars:[[80,80],[100,70],[110,90],[90,100]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Musca',
+    stars:[[100,160],[80,170],[90,190]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Norma',
+    stars:[[80,140],[100,130],[90,150]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Octans',
+    stars:[[100,170],[80,180],[90,190],[110,180]],
+    lines:[[0,1],[1,2],[2,3],[3,0]]
+  },
+  {
+    name:'Ophiuchus',
+    stars:[[80,80],[100,70],[110,90],[100,110],[80,100]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Orion', // Already exists
+    stars:[[120,60],[140,100],[100,100],[120,140],[105,170],[135,170],[80,60],[160,60],[100,120],[140,120]],
+    lines:[[0,2],[0,1],[2,4],[1,3],[4,5],[2,6],[1,7],[2,8],[1,9],[8,9],[8,4],[9,5]]
+  },
+  {
+    name:'Pavo',
+    stars:[[80,150],[100,140],[120,150],[110,170]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Pegasus',
+    stars:[[60,60],[80,50],[100,60],[110,80],[90,90],[70,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Perseus',
+    stars:[[80,30],[100,20],[110,40],[100,60],[80,50]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Phoenix',
+    stars:[[60,130],[80,120],[100,130],[90,150]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Pictor',
+    stars:[[70,130],[90,120],[80,140]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Pisces',
+    stars:[[40,100],[60,90],[80,100],[100,110],[120,100],[140,110]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5]]
+  },
+  {
+    name:'Piscis Austrinus',
+    stars:[[100,140],[80,150],[90,170],[110,160]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Puppis',
+    stars:[[80,130],[100,120],[110,140],[90,150]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Pyxis',
+    stars:[[100,120],[80,130],[90,140]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Reticulum',
+    stars:[[80,130],[100,120],[90,140]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Sagitta',
+    stars:[[100,80],[110,70],[120,80]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Sagittarius',
+    stars:[[100,140],[80,150],[90,170],[110,160],[120,180],[100,190]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Scorpius', // Already exists
+    stars:[[120,40],[120,70],[130,100],[120,130],[100,150],[80,170],[90,190],[110,200],[100,120],[80,110],[60,90]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[3,8],[8,9],[9,10]]
+  },
+  {
+    name:'Sculptor',
+    stars:[[60,110],[80,100],[100,110]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Scutum',
+    stars:[[100,100],[110,110],[100,120]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Serpens',
+    stars:[[80,60],[100,50],[110,70],[100,90],[80,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4]]
+  },
+  {
+    name:'Sextans',
+    stars:[[80,100],[100,90],[90,110]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Taurus',
+    stars:[[60,60],[80,50],[100,60],[110,80],[90,90],[70,80]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]
+  },
+  {
+    name:'Telescopium',
+    stars:[[100,150],[80,160],[90,180]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Triangulum',
+    stars:[[100,60],[80,70],[90,90]],
+    lines:[[0,1],[1,2],[2,0]]
+  },
+  {
+    name:'Triangulum Australe',
+    stars:[[100,160],[80,170],[90,190]],
+    lines:[[0,1],[1,2],[2,0]]
+  },
+  {
+    name:'Tucana',
+    stars:[[60,150],[80,140],[100,150]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Ursa Major', // Already exists
+    stars:[[60,120],[90,100],[120,90],[150,100],[170,130],[150,160],[120,160],[80,60],[50,50],[30,30]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3],[1,7],[7,8],[8,9]]
+  },
+  {
+    name:'Ursa Minor',
+    stars:[[100,50],[110,60],[120,50],[110,40],[100,30]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Vela',
+    stars:[[80,120],[100,110],[110,130],[90,140]],
+    lines:[[0,1],[1,2],[2,3]]
+  },
+  {
+    name:'Virgo',
+    stars:[[80,80],[100,70],[110,90],[100,110],[80,100]],
+    lines:[[0,1],[1,2],[2,3],[3,4],[4,0]]
+  },
+  {
+    name:'Volans',
+    stars:[[80,140],[100,130],[90,150]],
+    lines:[[0,1],[1,2]]
+  },
+  {
+    name:'Vulpecula',
+    stars:[[100,70],[110,60],[120,70]],
+    lines:[[0,1],[1,2]]
+  }
 ];
 
 const ASCII_CREATURES=[
@@ -250,7 +1160,8 @@ const ASCII_CREATURES=[
   {name:'Bold Crab',art:'  \\  /  \n  (o o) \n  /  \\  '},
 ];
 
-const TYPING_SENTENCES=[
+const TYPING_SENTENCES = [
+  // ORIGINAL SENTENCES
   'The quick brown fox jumps over the lazy dog.',
   'Pack my box with five dozen liquor jugs.',
   'How vexingly quick daft zebras jump.',
@@ -261,27 +1172,335 @@ const TYPING_SENTENCES=[
   'We promptly judged antique ivory buckles for the next prize.',
   'A very bad quack might jinx zippy fowls.',
   'Two driven jocks help fax my big quiz.',
+
+  // ADDED PANGRAMS (sentences containing all letters)
+  'Crazy Fredericka bought many very exquisite opal jewels.',
+  'We quickly seized the black axle and just saved it.',
+  'The big fluffy dog jumped over the quick brown fox.',
+  'Mr. Jock, TV quiz PhD, bags few lynx.',
+  'Jazz and swing fans like fast, upbeat music.',
+  'My ex-wife had a great job at the zoo.',
+  'A quick movement of the enemy will jeopardize six gunboats.',
+  'Watchmen with huge jaws quickly fix the box.',
+  'The jay, pig, fox, zebra, and my wolves quack.',
+  'Quick zephyrs blow, vexing daft Jim.',
+  'Foxy diva Jennifer Lopez wasn\'t quick at jazz.',
+  'The wizard quickly jinxed the gnomes before they zapped.',
+  'Pack my red box with five dozen quality jugs.',
+  'The five boxing wizards jump quickly and silently.',
+  'Jazzy ragtime bands play for happy crowds.',
+  'Vampires walk quietly, but zombies jump.',
+  'Grumpy wizards make toxic brew for the evil Queen.',
+  'Six big devils from Japan quickly forgot how to waltz.',
+  'The job requires extra pluck and zeal from every young worker.',
+  'A quacking duck flew over the busy highway.',
+
+  // ADDED SHORT SENTENCES (for beginners)
+  'Hello world.',
+  'The sun is shining.',
+  'I love coding.',
+  'Practice makes perfect.',
+  'Stay hydrated.',
+  'Be kind always.',
+  'Think positive thoughts.',
+  'Dream big dreams.',
+  'Work hard play hard.',
+  'Never give up.',
+
+  // ADDED MEDIUM SENTENCES (intermediate)
+  'Programming requires patience and logical thinking.',
+  'The beautiful sunset painted the sky in vibrant colors.',
+  'She sells seashells by the seashore every morning.',
+  'A journey of a thousand miles begins with a single step.',
+  'The early bird catches the worm, but the second mouse gets the cheese.',
+  'To be or not to be, that is the question.',
+  'All that glitters is not gold, so be careful.',
+  'The pen is mightier than the sword in most battles.',
+  'Knowledge is power, and power is responsibility.',
+  'Success is not final, failure is not fatal.',
+  'The only way to do great work is to love what you do.',
+  'Innovation distinguishes between a leader and a follower.',
+  'Stay hungry, stay foolish, and keep learning.',
+  'Life is what happens when you are busy making other plans.',
+  'In the middle of difficulty lies opportunity.',
+
+  // ADDED LONG SENTENCES (advanced)
+  'The quick brown fox jumps over the lazy dog while the cat watches from the window sill.',
+  'A wizard\'s spell book contains many mysterious incantations and magical recipes.',
+  'The ancient library held thousands of dusty tomes and forgotten scrolls.',
+  'Programming languages like JavaScript and Python are used for web development.',
+  'The majestic mountains stood tall against the clear blue sky on that beautiful morning.',
+  'Artificial intelligence is transforming the way we live and work in modern society.',
+  'The delicious aroma of freshly baked bread filled the cozy kitchen with warmth.',
+  'She decided to explore the hidden cave despite the warnings from the villagers.',
+  'The spaceship traveled at incredible speed through the vast emptiness of space.',
+  'The brilliant scientist made a groundbreaking discovery that changed history forever.',
+
+  // ADDED TECHNICAL SENTENCES (for developers)
+  'const data = await fetch("https://api.example.com/data");',
+  'function calculateTotal(price, quantity) { return price * quantity; }',
+  'if (user.isAuthenticated) { redirectToDashboard(); }',
+  'The API returns a JSON object with nested properties and arrays.',
+  'Debugging is twice as hard as writing the code in the first place.',
+  'Always write clean, maintainable, and well-documented code.',
+  'The algorithm sorts the array in O(n log n) time complexity.',
+  'Version control systems like Git help teams collaborate effectively.',
+  'The database query returned 10,000 records in 0.5 seconds.',
+  'Responsive design ensures websites work on all screen sizes.',
+
+  // ADDED FUN & QUIRKY SENTENCES
+  'Why did the chicken cross the road? To get to the other side!',
+  'I ate a clock yesterday, it was very time-consuming.',
+  'The past, present, and future walked into a bar. It was tense.',
+  'Parallel lines have so much in common. It\'s a shame they\'ll never meet.',
+  'I\'m reading a book on anti-gravity. It\'s impossible to put down!',
+  'Did you hear about the mathematician who\'s afraid of negative numbers?',
+  'I would tell you a chemistry joke, but I know I wouldn\'t get a reaction.',
+  'Why don\'t scientists trust atoms? Because they make up everything!',
+  'I told my wife she was drawing her eyebrows too high. She looked surprised.',
+  'The shovel was a groundbreaking invention, truly ahead of its time.',
+
+  // ADDED MOTIVATIONAL SENTENCES
+  'Believe you can and you are halfway there.',
+  'Success is walking from failure to failure with no loss of enthusiasm.',
+  'The future belongs to those who believe in the beauty of their dreams.',
+  'Your limitation—it\'s only your imagination.',
+  'Push yourself, because no one else is going to do it for you.',
+  'Great things never come from comfort zones.',
+  'Dream it. Wish it. Do it.',
+  'Don\'t stop when you are tired. Stop when you are done.',
+  'Wake up with determination. Go to bed with satisfaction.',
+  'Little things make big days.',
+
+  // ADDED SENTENCES WITH SPECIAL CHARACTERS
+  'The price is $99.99, plus tax (8.5%).',
+  'Email: user@example.com | Phone: (555) 123-4567',
+  'C:\\Users\\Documents\\projects\\index.html',
+  'The tag <h1> is used for headings in HTML.',
+  'He said, "She told me, \'Hello world!\'" with a smile.',
+  'The temperature dropped to -5°C overnight.',
+  'The total is 1,234,567.89 in USD.',
+  'The meeting is scheduled for 3:30 PM on 12/31/2025.',
+  'The color code #FF5733 is a nice shade of orange.',
+  'The product ID is ABC-123-XYZ-987.',
+
+  // ADDED RHYTHMIC SENTENCES (for typing flow)
+  'The lazy dog sleeps under the warm sun all day long.',
+  'A gentle breeze blows through the tall green trees.',
+  'The happy child plays with colorful toys in the yard.',
+  'Fresh bread and creamy butter make a perfect breakfast.',
+  'The soft rain falls quietly on the window pane.',
+  'Golden sunshine illuminates the peaceful garden.',
+  'The little bird sings sweet melodies every morning.',
+  'Warm tea and good books are life\'s simple pleasures.',
+  'The gentle stream flows smoothly over the smooth rocks.',
+  'Dancing leaves twirl gracefully in the autumn wind.',
+
+  // ADDED SENTENCES FOR SPEED TYPING PRACTICE
+  'The ability to type quickly and accurately is a valuable skill in today\'s digital world.',
+  'Many people spend hours each day typing emails, documents, and messages on their computers.',
+  'Regular practice can significantly improve your typing speed and overall productivity.',
+  'A good typist can type over 100 words per minute with minimal errors.',
+  'Typing games and exercises make learning to type more enjoyable and effective.',
+  'Touch typing allows you to type without looking at the keyboard.',
+  'The most common keyboard layout in the English-speaking world is QWERTY.',
+  'Muscle memory is key to becoming a fast and accurate typist.',
+  'Take breaks during long typing sessions to avoid fatigue and strain.',
+  'Typing speed is measured in words per minute, or WPM.',
+
+  // ADDED RANDOM INTERESTING SENTENCES
+  'The museum had a fascinating exhibition about ancient Egyptian civilization.',
+  'The detective carefully examined the clues to solve the mysterious case.',
+  'A beautiful rainbow appeared after the thunderstorm passed.',
+  'The athlete broke the world record with an amazing performance.',
+  'The scientist conducted experiments to test her innovative hypothesis.',
+  'The artist painted a stunning masterpiece using bold colors.',
+  'The chef prepared an exquisite meal with fresh local ingredients.',
+  'The musician composed a symphony that moved the audience to tears.',
+  'The architect designed a sustainable building with green technology.',
+  'The teacher inspired her students to pursue their dreams.',
 ];
 
-const ON_THIS_DAY=[
-  {year:1969,event:'Apollo 11 lands on the Moon — the first crewed lunar landing in history.'},
+const ON_THIS_DAY = [
+  // ORIGINAL EVENTS
+  {year:1969,event:'Apollo 11 lands on the Moon, the first crewed lunar landing in history.'},
   {year:1990,event:'The Hubble Space Telescope is deployed from the Space Shuttle Discovery.'},
   {year:1928,event:'Alexander Fleming notices a mould killing bacteria in his lab, discovering penicillin.'},
   {year:1957,event:'Sputnik 1 becomes the first artificial satellite to orbit Earth.'},
   {year:1953,event:'Crick and Watson describe the double-helix structure of DNA in Nature.'},
-  {year:1989,event:'Tim Berners-Lee proposes a system of linked documents — the World Wide Web.'},
+  {year:1989,event:'Tim Berners-Lee proposes a system of linked documents, the World Wide Web.'},
   {year:1977,event:'Voyager 1 is launched on its journey to the outer solar system and beyond.'},
   {year:1905,event:'Einstein publishes his special theory of relativity, upending classical physics.'},
   {year:1974,event:"The Rubik's Cube is invented by Hungarian sculptor Ernő Rubik in Budapest."},
   {year:1981,event:'The first IBM Personal Computer goes on sale for $1,565.'},
-  {year:2007,event:'Steve Jobs unveils the first iPhone at Macworld — "an iPod, a phone, and the internet."'},
+  {year:2007,event:'Steve Jobs unveils the first iPhone at Macworld, "an iPod, a phone, and the internet."'},
   {year:2004,event:'Facebook launches from a Harvard dorm room as "thefacebook.com".'},
   {year:1976,event:'Apple Computer Company is founded by Jobs, Wozniak, and Wayne.'},
   {year:1969,event:'Woodstock music festival begins in Bethel, New York, drawing 400,000 people.'},
   {year:1962,event:'The first Walmart store opens in Rogers, Arkansas.'},
+
+  // ADDED EVENTS - ANCIENT HISTORY
+  {year: -2560,event:'The Great Pyramid of Giza is completed as a tomb for Pharaoh Khufu.'},
+  {year: -490,event:'The Battle of Marathon takes place, where Greeks defeat the Persians.'},
+  {year: -44,event:'Julius Caesar is assassinated by a group of Roman senators.'},
+  {year: 79,event:'Mount Vesuvius erupts and buries the city of Pompeii in ash.'},
+  {year: 476,event:'The Western Roman Empire falls with the deposition of Emperor Romulus Augustulus.'},
+  {year: 570,event:'The Prophet Muhammad is born in Mecca, now in Saudi Arabia.'},
+  {year: 800,event:'Charlemagne is crowned Holy Roman Emperor by Pope Leo III.'},
+  {year: 1066,event:'William the Conqueror invades England and becomes king after the Battle of Hastings.'},
+  {year: 1215,event:'The Magna Carta is sealed, limiting the power of the English monarch.'},
+  {year: 1347,event:'The Black Death arrives in Europe, ultimately killing 75-200 million people.'},
+  {year: 1492,event:'Christopher Columbus reaches the Americas, landing in the Bahamas.'},
+
+  // ADDED EVENTS - 1500s-1700s
+  {year: 1517,event:'Martin Luther nails his 95 Theses to a church door in Wittenberg, starting the Reformation.'},
+  {year: 1543,event:'Nicolaus Copernicus publishes his heliocentric theory of the solar system.'},
+  {year: 1588,event:'The Spanish Armada is defeated by the English fleet.'},
+  {year: 1609,event:'Galileo builds his first telescope and observes the moons of Jupiter.'},
+  {year: 1620,event:'The Mayflower lands at Plymouth Rock with the Pilgrims.'},
+  {year: 1687,event:'Isaac Newton publishes "Principia Mathematica," describing universal gravitation.'},
+  {year: 1776,event:'The Declaration of Independence is adopted by the Continental Congress.'},
+  {year: 1789,event:'The French Revolution begins with the storming of the Bastille.'},
+  {year: 1799,event:'The Rosetta Stone is discovered in Egypt, enabling the deciphering of hieroglyphs.'},
+
+  // ADDED EVENTS - 1800s
+  {year: 1801,event:'The United States Capitol building is occupied for the first time.'},
+  {year: 1804,event:'Haiti becomes the first independent nation in Latin America.'},
+  {year: 1815,event:'Napoleon is defeated at the Battle of Waterloo.'},
+  {year: 1825,event:'The first passenger railway opens in England (Stockton-Darlington).'},
+  {year: 1837,event:'Samuel Morse patents the telegraph, revolutionizing communication.'},
+  {year: 1848,event:'The California Gold Rush begins after gold is found at Sutter\'s Mill.'},
+  {year: 1859,event:'Charles Darwin publishes "On the Origin of Species" on evolution.'},
+  {year: 1861,event:'The American Civil War begins with the attack on Fort Sumter.'},
+  {year: 1865,event:'President Abraham Lincoln is assassinated at Ford\'s Theatre.'},
+  {year: 1876,event:'Alexander Graham Bell makes the first successful telephone call.'},
+  {year: 1879,event:'Thomas Edison invents the first practical incandescent light bulb.'},
+  {year: 1885,event:'Karl Benz builds the first practical automobile, the Benz Patent-Motorwagen.'},
+  {year: 1886,event:'The Statue of Liberty is dedicated as a gift from France to the United States.'},
+  {year: 1889,event:'The Eiffel Tower is completed for the Paris World\'s Fair.'},
+  {year: 1895,event:'The Lumiere brothers give the first public cinema screening in Paris.'},
+  {year: 1896,event:'The first modern Olympic Games are held in Athens, Greece.'},
+
+  // ADDED EVENTS - 1900-1950
+  {year: 1901,event:'Queen Victoria dies, ending the Victorian era.'},
+  {year: 1903,event:'The Wright brothers make the first controlled, powered airplane flight.'},
+  {year: 1912,event:'The Titanic sinks on its maiden voyage, killing over 1,500 people.'},
+  {year: 1914,event:'World War I begins after the assassination of Archduke Franz Ferdinand.'},
+  {year: 1917,event:'The Russian Revolution overthrows the czar and establishes communism.'},
+  {year: 1918,event:'World War I ends with the signing of the Armistice on November 11.'},
+  {year: 1920,event:'The 19th Amendment grants women the right to vote in the United States.'},
+  {year: 1927,event:'Charles Lindbergh completes the first solo transatlantic flight.'},
+  {year: 1929,event:'The Great Depression begins with the Wall Street Crash.'},
+  {year: 1939,event:'World War II begins when Germany invades Poland.'},
+  {year: 1941,event:'Japan attacks Pearl Harbor, bringing the US into World War II.'},
+  {year: 1944,event:'D-Day: Allied forces land in Normandy, France.'},
+  {year: 1945,event:'World War II ends after the atomic bombings of Hiroshima and Nagasaki.'},
+  {year: 1947,event:'India gains independence from British rule.'},
+  {year: 1948,event:'Israel is established as an independent state.'},
+  {year: 1949,event:'The Berlin Blockade ends; NATO is formed.'},
+
+  // ADDED EVENTS - 1950-2000
+  {year: 1950,event:'The Korean War begins when North Korea invades South Korea.'},
+  {year: 1954,event:'The Supreme Court rules that racial segregation in schools is unconstitutional.'},
+  {year: 1955,event:'Rosa Parks refuses to give up her bus seat, sparking the Montgomery Bus Boycott.'},
+  {year: 1959,event:'Fidel Castro becomes the leader of Cuba after the Cuban Revolution.'},
+  {year: 1960,event:'The first TV presidential debate is held between Kennedy and Nixon.'},
+  {year: 1961,event:'Yuri Gagarin becomes the first human in space.'},
+  {year: 1963,event:'President John F. Kennedy is assassinated in Dallas, Texas.'},
+  {year: 1964,event:'The Beatles arrive in America, launching the "British Invasion."'},
+  {year: 1965,event:'The first US combat troops arrive in Vietnam.'},
+  {year: 1968,event:'Martin Luther King Jr. is assassinated in Memphis, Tennessee.'},
+  {year: 1969,event:'The Woodstock music festival draws 400,000 people in Bethel, New York.'},
+  {year: 1972,event:'The Watergate break-in occurs, leading to President Nixon\'s resignation.'},
+  {year: 1973,event:'The US Supreme Court legalizes abortion in Roe v. Wade.'},
+  {year: 1975,event:'Microsoft is founded by Bill Gates and Paul Allen.'},
+  {year: 1979,event:'Margaret Thatcher becomes the first female Prime Minister of the UK.'},
+  {year: 1980,event:'CNN is launched as the first 24-hour news network.'},
+  {year: 1983,event:'The internet goes public with the introduction of TCP/IP protocols.'},
+  {year: 1985,event:'Live Aid concerts are held to raise money for famine relief in Africa.'},
+  {year: 1986,event:'The Chernobyl nuclear disaster occurs in Ukraine.'},
+  {year: 1987,event:'The first GPS satellite is launched into orbit.'},
+  {year: 1988,event:'The first email is sent from space on a shuttle mission.'},
+  {year: 1989,event:'The Berlin Wall falls, symbolizing the end of the Cold War.'},
+  {year: 1991,event:'The Soviet Union is officially dissolved, ending the Cold War.'},
+  {year: 1992,event:'The World Wide Web is released to the public.'},
+  {year: 1993,event:'The first SMS text message is sent in the UK.'},
+  {year: 1994,event:'Nelson Mandela becomes President of South Africa.'},
+  {year: 1995,event:'Windows 95 is released, revolutionizing personal computing.'},
+  {year: 1996,event:'Dolly the Sheep becomes the first cloned mammal.'},
+  {year: 1997,event:'The Mars Pathfinder lands on Mars, deploying the Sojourner rover.'},
+  {year: 1998,event:'Google is founded by Larry Page and Sergey Brin.'},
+  {year: 1999,event:'The Y2K bug fears cause widespread concern about computer systems.'},
+
+  // ADDED EVENTS - 2000-PRESENT
+  {year: 2000,event:'The first crew arrives at the International Space Station.'},
+  {year: 2001,event:'The 9/11 terrorist attacks occur in New York City and Washington, D.C.'},
+  {year: 2002,event:'The Euro becomes the official currency of 12 European countries.'},
+  {year: 2003,event:'The human genome is sequenced in full.'},
+  {year: 2004,event:'The Mars rover Spirit lands on the red planet.'},
+  {year: 2005,event:'YouTube is launched, revolutionizing online video sharing.'},
+  {year: 2006,event:'Twitter is founded, introducing the world to microblogging.'},
+  {year: 2007,event:'The iPhone is released, changing the smartphone industry forever.'},
+  {year: 2008,event:'Barack Obama is elected as the first African-American President of the US.'},
+  {year: 2009,event:'Bitcoin is released as the first cryptocurrency.'},
+  {year: 2010,event:'The iPad is introduced, creating the tablet computer market.'},
+  {year: 2011,event:'Bin Laden is killed by US Navy SEALs in Pakistan.'},
+  {year: 2012,event:'The Curiosity rover lands on Mars, searching for signs of life.'},
+  {year: 2013,event:'Pope Benedict XVI resigns, the first to do so in 600 years.'},
+  {year: 2014,event:'The Ebola epidemic is declared a global health emergency.'},
+  {year: 2015,event:'The first image of Pluto is captured by the New Horizons spacecraft.'},
+  {year: 2016,event:'Gravitational waves are directly detected for the first time.'},
+  {year: 2017,event:'A total solar eclipse sweeps across the United States.'},
+  {year: 2018,event:'The Falcon Heavy rocket is launched by SpaceX, carrying a Tesla into space.'},
+  {year: 2019,event:'The first image of a black hole is captured by the Event Horizon Telescope.'},
+  {year: 2020,event:'The COVID-19 pandemic is declared, shutting down the world.'},
+  {year: 2021,event:'The Perseverance rover lands on Mars, searching for ancient life.'},
+  {year: 2022,event:'The James Webb Space Telescope begins sending back stunning images.'},
+  {year: 2023,event:'AI becomes mainstream with the release of ChatGPT and other LLMs.'},
+
+  // ADDED INVENTIONS & DISCOVERIES
+  {year: 1440,event:'The printing press is invented by Johannes Gutenberg, revolutionizing literacy.'},
+  {year: 1590,event:'The first microscope is developed in the Netherlands.'},
+  {year: 1656,event:'The pendulum clock is invented by Christiaan Huygens.'},
+  {year: 1712,event:'The first practical steam engine is invented by Thomas Newcomen.'},
+  {year: 1769,event:'The first self-propelled vehicle is built by Nicolas Cugnot.'},
+  {year: 1807,event:'The first steamboat service begins on the Hudson River.'},
+  {year: 1814,event:'The first steam locomotive, the Puffing Billy, is built.'},
+  {year: 1839,event:'The first photograph of a human is taken (daguerreotype).'},
+  {year: 1861,event:'The first moving image (cinematography) is created.'},
+  {year: 1901,event:'Marconi receives the first transatlantic radio signal.'},
+  {year: 1926,event:'The first successful liquid-fueled rocket is launched by Robert Goddard.'},
+  {year: 1936,event:'The first television broadcast is made by the BBC.'},
+  {year: 1946,event:'The first general-purpose electronic computer, ENIAC, is unveiled.'},
+  {year: 1969,event:'The first internet message is sent (ARPANET).'},
+  {year: 1984,event:'The first mobile phone call is made by Motorola.'},
+  {year: 1991,event:'The first smartphone (IBM Simon) is released, ahead of its time.'},
+
+  // ADDED CULTURAL EVENTS
+  {year: 1892,event:'The first official basketball game is played in Massachusetts.'},
+  {year: 1908,event:'The first comic book is published in the US.'},
+  {year: 1919,event:'The first jazz recording is made by the Original Dixieland Jazz Band.'},
+  {year: 1930,event:'The first Mickey Mouse comic strip is published.'},
+  {year: 1938,event:'Superman makes his first appearance in Action Comics #1.'},
+  {year: 1939,event:'The Wizard of Oz premieres in theaters.'},
+  {year: 1954,event:'The first color television broadcast is made in the US.'},
+  {year: 1963,event:'The first episode of Doctor Who airs on BBC.'},
+  {year: 1977,event:'The first Star Wars movie is released, becoming a cultural phenomenon.'},
+  {year: 1980,event:'Pac-Man is released, becoming the most popular arcade game.'},
+  {year: 1981,event:'The first MTV music video broadcast is "Video Killed the Radio Star."'},
+  {year: 1983,event:'The first mobile phone (Motorola DynaTAC) is sold.'},
+  {year: 1985,event:'The Super Mario Bros. game is released for the NES.'},
+  {year: 1996,event:'Pokémon Red and Green are released in Japan, starting a global franchise.'},
+  {year: 1999,event:'The first episode of SpongeBob SquarePants airs.'},
+  {year: 2000,event:'The first Sims game is released, becoming a best-seller.'},
+  {year: 2002,event:'The first iPod is released, changing music listening forever.'},
+  {year: 2004,event:'World of Warcraft is launched, dominating the MMO gaming world.'},
+  {year: 2009,event:'The game Minecraft is released, becoming a global phenomenon.'},
+  {year: 2016,event:'Pokémon GO is released, blending gaming with augmented reality.'},
 ];
 
-const COLOR_PALETTES=[
+const COLOR_PALETTES = [
+  // ORIGINAL PALETTES
   {name:'Nordic Dusk',colors:['#2d3047','#419d78','#e0a458','#ffddd2','#e4b7a0']},
   {name:'Deep Ocean',colors:['#03045e','#0077b6','#00b4d8','#90e0ef','#caf0f8']},
   {name:'Desert Bloom',colors:['#c9184a','#ff4d6d','#ff758f','#ffb3c1','#fff0f3']},
@@ -294,6 +1513,117 @@ const COLOR_PALETTES=[
   {name:'Peach Blossom',colors:['#ffcdb2','#ffb4a2','#e5989b','#b5838d','#6d6875']},
   {name:'Matcha Latte',colors:['#606c38','#283618','#fefae0','#dda15e','#bc6c25']},
   {name:'Arctic Lichen',colors:['#caf0f8','#90e0ef','#00b4d8','#0077b6','#03045e']},
+
+  // ADDED - NATURE & LANDSCAPE
+  {name:'Aurora Borealis',colors:['#0a0a2a','#1a3a5a','#2a8a6a','#6ada7a','#9adafa']},
+  {name:'Sunset Horizon',colors:['#1a0a2a','#4a1a5a','#8a3a6a','#da6a4a','#fada2a']},
+  {name:'Misty Mountains',colors:['#1a1a2a','#2a3a4a','#4a6a7a','#8aaaba','#daeaea']},
+  {name:'Coral Reef',colors:['#0a1a3a','#1a5a7a','#da4a5a','#fa8a7a','#fada9a']},
+  {name:'Evergreen Forest',colors:['#0a1a0a','#1a3a1a','#2a5a2a','#4a8a4a','#7aba7a']},
+  {name:'Autumn Leaves',colors:['#2a1a0a','#5a3a1a','#8a5a2a','#ca8a3a','#fada6a']},
+  {name:'Spring Meadow',colors:['#1a2a0a','#3a5a1a','#6a8a3a','#9aba5a','#daeaa0']},
+  {name:'Winter Frost',colors:['#0a0a1a','#2a2a4a','#5a5a7a','#8a8aaa','#cacaea']},
+  {name:'Tropical Island',colors:['#0a2a1a','#1a5a3a','#3a8a5a','#6aba8a','#9adaaa']},
+  {name:'Desert Dunes',colors:['#3a2a1a','#5a3a2a','#8a5a3a','#ba8a5a','#eaca9a']},
+  {name:'Lavender Field',colors:['#1a0a2a','#3a1a5a','#6a3a8a','#9a6aba','#ca9ada']},
+  {name:'Cherry Blossom',colors:['#2a0a1a','#5a1a2a','#8a3a4a','#ca6a7a','#fa9aaa']},
+  {name:'Pine Forest',colors:['#0a1a0a','#1a2a1a','#2a4a2a','#4a6a4a','#6a8a6a']},
+  {name:'Ocean Waves',colors:['#0a1a3a','#0a3a5a','#0a5a7a','#2a7a9a','#5aaaba']},
+
+  // ADDED - URBAN & MODERN
+  {name:'Cyberpunk 2077',colors:['#0a0a1a','#1a0a3a','#4a0a7a','#fa0a7a','#faaa0a']},
+  {name:'Minimalist Grey',colors:['#1a1a1a','#3a3a3a','#5a5a5a','#8a8a8a','#cacaca']},
+  {name:'Neon Tokyo',colors:['#0a0a1a','#1a0a2a','#6a0a6a','#fa0a8a','#0afafa']},
+  {name:'Corporate Blue',colors:['#0a1a3a','#1a3a6a','#2a5a8a','#4a8aba','#6aaada']},
+  {name:'Urban Jungle',colors:['#1a1a1a','#2a3a2a','#4a5a4a','#7a8a7a','#baca9a']},
+  {name:'Tech Startup',colors:['#0a1a2a','#1a3a5a','#2a6a8a','#4a9aba','#8acada']},
+  {name:'Metropolis Night',colors:['#0a0a0a','#1a1a2a','#2a2a4a','#4a4a6a','#6a6a8a']},
+  {name:'Street Art',colors:['#2a0a0a','#5a1a0a','#8a3a0a','#fa6a0a','#faaa3a']},
+  {name:'Coastal Modern',colors:['#1a2a3a','#3a5a6a','#5a7a8a','#8aaaaa','#bacada']},
+  {name:'Sunset City',colors:['#1a0a2a','#3a1a4a','#6a2a6a','#da4a6a','#fa8a3a']},
+
+  // ADDED - VINTAGE & RETRO
+  {name:'Retro 80s',colors:['#1a0a2a','#4a1a5a','#8a2a6a','#da4a8a','#faaa3a']},
+  {name:'Mid-Century Modern',colors:['#2a1a0a','#5a3a1a','#8a5a2a','#ba8a5a','#eaca8a']},
+  {name:'Vinyl Records',colors:['#0a0a0a','#1a1a1a','#2a2a2a','#4a3a2a','#6a5a4a']},
+  {name:'Vintage Postcard',colors:['#3a2a1a','#5a4a2a','#8a7a4a','#ba9a6a','#eaca9a']},
+  {name:'Retro Diner',colors:['#2a1a0a','#6a3a1a','#ca4a1a','#fa7a3a','#faaa6a']},
+  {name:'Moody Vintage',colors:['#1a0a0a','#3a1a0a','#5a2a1a','#7a3a2a','#9a5a4a']},
+  {name:'Polaroid Era',colors:['#2a1a0a','#4a3a1a','#7a6a3a','#aa9a6a','#daca9a']},
+  {name:'Retro Gaming',colors:['#0a0a1a','#1a1a3a','#3a2a5a','#6a3a7a','#aa4a8a']},
+  {name:'Candy Store',colors:['#fa2a3a','#fa5a6a','#fa8a8a','#faaaaa','#fadada']},
+
+  // ADDED - SEASONAL & HOLIDAY
+  {name:'Christmas Cheer',colors:['#1a0a0a','#3a0a0a','#6a1a1a','#da2a2a','#faaa3a']},
+  {name:'Halloween Night',colors:['#0a0a0a','#1a0a0a','#3a0a0a','#8a3a0a','#fa6a0a']},
+  {name:'Thanksgiving Feast',colors:['#2a1a0a','#5a3a1a','#8a5a2a','#ba7a3a','#eaaa5a']},
+  {name:'Easter Morning',colors:['#2a1a2a','#5a3a5a','#8a5a7a','#ba8aaa','#dacada']},
+  {name:'Fourth of July',colors:['#0a0a3a','#1a2a5a','#3a5a8a','#da2a2a','#faaa2a']},
+  {name:'Valentine Love',colors:['#2a0a0a','#5a0a1a','#8a1a2a','#da2a4a','#fa5a6a']},
+  {name:'St. Patrick\'s Day',colors:['#0a1a0a','#1a3a1a','#2a5a2a','#4a8a3a','#7aba5a']},
+
+  // ADDED - COLOR WHEEL INSPIRED
+  {name:'Monochrome Red',colors:['#2a0a0a','#5a1a1a','#8a2a2a','#ba3a3a','#da4a4a']},
+  {name:'Monochrome Blue',colors:['#0a0a2a','#1a1a5a','#2a2a8a','#3a3aba','#4a4ada']},
+  {name:'Monochrome Green',colors:['#0a1a0a','#1a3a1a','#2a5a2a','#3a7a3a','#4a9a4a']},
+  {name:'Complementary Ocean',colors:['#0a3a5a','#1a5a7a','#2a7a9a','#fa5a3a','#fa8a6a']},
+  {name:'Triadic Pastel',colors:['#da6a7a','#6ada7a','#6a7ada','#da6ada','#dada6a']},
+  {name:'Analogous Warm',colors:['#3a1a0a','#6a2a0a','#8a3a0a','#aa5a1a','#ca7a3a']},
+  {name:'Analogous Cool',colors:['#0a1a3a','#0a3a5a','#0a5a7a','#2a7a8a','#4a9aaa']},
+
+  // ADDED - SPECIFIC MOODS
+  {name:'Zen Calm',colors:['#1a1a1a','#3a3a3a','#5a5a5a','#8a8a7a','#baba9a']},
+  {name:'Energetic Pop',colors:['#fa2a2a','#fa8a2a','#fada2a','#2ada2a','#2a2afa']},
+  {name:'Romantic Sunset',colors:['#3a0a1a','#6a1a3a','#aa3a5a','#da5a7a','#fa8a9a']},
+  {name:'Mysterious Night',colors:['#0a0a1a','#1a0a2a','#2a0a4a','#4a1a6a','#7a2a8a']},
+  {name:'Fresh Morning',colors:['#1a2a0a','#3a5a1a','#5a8a2a','#8aaa4a','#bacada']},
+  {name:'Cozy Autumn',colors:['#2a1a0a','#5a3a1a','#7a4a2a','#aa6a3a','#da8a5a']},
+  {name:'Winter Silence',colors:['#0a0a1a','#2a2a3a','#4a4a5a','#7a7a8a','#aaaaaa']},
+  {name:'Summer Breeze',colors:['#0a2a3a','#1a5a6a','#3a8a8a','#6aaaaa','#9acaca']},
+
+  // ADDED - CULTURE INSPIRED
+  {name:'Japanese Kimono',colors:['#1a0a2a','#3a1a5a','#6a2a7a','#da4a6a','#faaa3a']},
+  {name:'African Sunset',colors:['#2a0a0a','#5a1a0a','#8a3a0a','#ca6a1a','#faaa3a']},
+  {name:'Scandinavian',colors:['#1a2a3a','#3a4a5a','#6a7a8a','#aa9a8a','#dacaca']},
+  {name:'Mediterranean',colors:['#0a1a3a','#1a5a7a','#4a8a9a','#da7a3a','#eaca6a']},
+  {name:'Indian Spice',colors:['#2a0a0a','#6a1a0a','#aa3a0a','#da6a1a','#faaa3a']},
+  {name:'Celtic Mist',colors:['#0a1a1a','#1a3a3a','#3a5a5a','#5a7a7a','#8aaa9a']},
+  {name:'Moroccan Night',colors:['#0a0a1a','#1a0a3a','#3a0a6a','#8a1a5a','#da3a7a']},
+  {name:'Baltic Sea',colors:['#0a1a3a','#1a3a5a','#3a5a7a','#5a7a9a','#8aaaba']},
+
+  // ADDED - TECH & DIGITAL
+  {name:'Hacker Green',colors:['#0a0a0a','#0a1a0a','#0a2a0a','#1a3a1a','#3a5a3a']},
+  {name:'Dark Mode',colors:['#0a0a0a','#1a1a1a','#2a2a2a','#3a3a3a','#5a5a5a']},
+  {name:'Light Mode',colors:['#fafafa','#eaeaea','#dadaaa','#cacaaa','#babaaa']},
+  {name:'Matrix Code',colors:['#0a0a0a','#0a1a0a','#1a3a1a','#2a5a2a','#3a7a3a']},
+  {name:'Terminal',colors:['#0a0a0a','#1a1a1a','#2a2a2a','#4a4a4a','#6a6a6a']},
+  {name:'Gradient UI',colors:['#0a0a2a','#1a1a5a','#2a2a8a','#5a2a8a','#8a2a5a']},
+  {name:'Glassmorphism',colors:['#fafafa','#eaeaea','#dadada','#cacaca','#babaaba']},
+  {name:'Neumorphism',colors:['#dadaea','#eaeafa','#fafafa','#eaeaea','#dadada']},
+
+  // ADDED - PASTEL COLLECTIONS
+  {name:'Pastel Rainbow',colors:['#fa7a7a','#faaa7a','#fada7a','#7ada7a','#7a7afa','#da7afa']},
+  {name:'Pastel Pink',colors:['#fadada','#fabcbc','#fa9a9a','#fa7a7a','#fa5a5a']},
+  {name:'Pastel Blue',colors:['#daeafa','#bcdafa','#9acafa','#7abafa','#5aaaaa']},
+  {name:'Pastel Green',colors:['#dafada','#bcfabc','#9afa9a','#7ada7a','#5aba5a']},
+  {name:'Pastel Purple',colors:['#eadafa','#dabcfa','#ca9afa','#ba7ada','#aa5aba']},
+  {name:'Pastel Yellow',colors:['#fafada','#fafabc','#fafa9a','#fada7a','#daba5a']},
+
+  // ADDED - EARTH TONES
+  {name:'Terracotta',colors:['#2a1a0a','#5a3a1a','#8a5a2a','#ba7a3a','#da9a5a']},
+  {name:'Clay',colors:['#3a2a1a','#5a3a2a','#7a4a3a','#9a5a4a','#ba7a5a']},
+  {name:'Sandstone',colors:['#4a3a2a','#6a5a3a','#8a7a4a','#aa9a5a','#cabaaa']},
+  {name:'Slate',colors:['#1a1a2a','#2a2a3a','#3a3a4a','#5a5a6a','#7a7a8a']},
+  {name:'Moss',colors:['#1a2a1a','#2a3a2a','#3a5a3a','#5a7a5a','#7a9a7a']},
+  {name:'Peat',colors:['#1a0a0a','#3a1a0a','#5a2a1a','#7a3a2a','#9a5a3a']},
+
+  // ADDED - JEWEL TONES
+  {name:'Ruby',colors:['#1a0a0a','#4a0a0a','#8a1a1a','#ba2a2a','#da3a3a']},
+  {name:'Sapphire',colors:['#0a0a1a','#0a1a4a','#1a2a7a','#2a3a9a','#4a5aba']},
+  {name:'Emerald',colors:['#0a1a0a','#0a3a1a','#1a5a2a','#2a7a3a','#4a9a5a']},
+  {name:'Amethyst',colors:['#1a0a2a','#3a1a5a','#5a2a7a','#7a3a9a','#9a5aba']},
+  {name:'Topaz',colors:['#2a1a0a','#4a3a1a','#7a5a2a','#aa7a3a','#da9a4a']},
+  {name:'Citrine',colors:['#2a2a0a','#4a4a1a','#7a6a2a','#aa8a3a','#daaa4a']},
 ];
 
 const MOON_PHASES=[
@@ -382,7 +1712,7 @@ function widgetTime(){
     '<div class="big-value">'+h+'<span class="colon">:</span>'+m+'<span style="font-size:1.4rem;color:var(--muted)">:<span id="'+id+'">'+s+'</span></span></div>'+
     '<div class="big-label">'+place.flag+' '+place.city+', '+place.country+'</div>'+
     '<div class="sub-info">'+fmtD.format(now)+'</div>',
-    'Live clock — ticking in real time'
+    'Live clock, ticking in real time'
   );
 }
 
@@ -655,14 +1985,14 @@ function widgetRandomYear(){
     [2020,'A pandemic reshapes daily life globally for over two years.'],
     [2012,'The Higgs boson is confirmed at CERN, completing the Standard Model.'],
     [2001,'Wikipedia launches with a single stub article about the letter U.'],
-    [1997,'Deep Blue defeats Garry Kasparov — the first time a computer beats a chess world champion in match play.'],
+    [1997,'Deep Blue defeats Garry Kasparov, the first time a computer beats a chess world champion in match play.'],
     [1991,'The Soviet Union dissolves, ending the Cold War.'],
-    [1983,'The Internet is born — ARPANET switches to TCP/IP on January 1st.'],
+    [1983,'The Internet is born, ARPANET switches to TCP/IP on January 1st.'],
     [1969,'Humans walk on the Moon for the first time.'],
-    [1953,'The structure of DNA is described — the blueprint for all life.'],
+    [1953,'The structure of DNA is described, the blueprint for all life.'],
     [1945,'World War II ends after six years.'],
     [1929,'The Wall Street Crash triggers the Great Depression.'],
-    [1903,'The Wright Brothers fly for 12 seconds — the first powered aircraft flight.'],
+    [1903,'The Wright Brothers fly for 12 seconds, the first powered aircraft flight.'],
     [1889,'The Eiffel Tower opens, briefly the world\'s tallest structure.'],
     [1859,'Darwin publishes On the Origin of Species.'],
     [1815,'Napoleon is defeated at Waterloo.'],
@@ -685,19 +2015,19 @@ function widgetElement(){
   const elements=[
     {n:1,sym:'H',name:'Hydrogen',cat:'Nonmetal',mass:'1.008',fact:'Makes up 75% of the observable universe by mass.'},
     {n:2,sym:'He',name:'Helium',cat:'Noble Gas',mass:'4.003',fact:'The only element first discovered in the Sun before Earth.'},
-    {n:6,sym:'C',name:'Carbon',cat:'Nonmetal',mass:'12.011',fact:'Forms more compounds than any other element — the basis of all life.'},
+    {n:6,sym:'C',name:'Carbon',cat:'Nonmetal',mass:'12.011',fact:'Forms more compounds than any other element, the basis of all life.'},
     {n:8,sym:'O',name:'Oxygen',cat:'Nonmetal',mass:'15.999',fact:'Makes up 21% of Earth\'s atmosphere and 65% of the human body.'},
     {n:11,sym:'Na',name:'Sodium',cat:'Alkali Metal',mass:'22.990',fact:'So reactive it catches fire in water.'},
     {n:14,sym:'Si',name:'Silicon',cat:'Metalloid',mass:'28.086',fact:'Powers virtually every computer chip on Earth.'},
-    {n:26,sym:'Fe',name:'Iron',cat:'Transition Metal',mass:'55.845',fact:'Earth\'s core is mostly iron — it\'s what makes us magnetic.'},
+    {n:26,sym:'Fe',name:'Iron',cat:'Transition Metal',mass:'55.845',fact:'Earth\'s core is mostly iron, it\'s what makes us magnetic.'},
     {n:29,sym:'Cu',name:'Copper',cat:'Transition Metal',mass:'63.546',fact:'One of the first metals ever used by humans, ~10,000 years ago.'},
     {n:47,sym:'Ag',name:'Silver',cat:'Transition Metal',mass:'107.868',fact:'Has the highest electrical and thermal conductivity of all metals.'},
     {n:79,sym:'Au',name:'Gold',cat:'Transition Metal',mass:'196.967',fact:'One of the few metals that can be found in pure form in nature.'},
     {n:80,sym:'Hg',name:'Mercury',cat:'Transition Metal',mass:'200.592',fact:'The only metal that is liquid at room temperature.'},
-    {n:88,sym:'Ra',name:'Radium',cat:'Alkaline Earth',mass:'226',fact:'Marie Curie carried it in her pocket — her notebooks are still radioactive.'},
+    {n:88,sym:'Ra',name:'Radium',cat:'Alkaline Earth',mass:'226',fact:'Marie Curie carried it in her pocket, her notebooks are still radioactive.'},
     {n:86,sym:'Rn',name:'Radon',cat:'Noble Gas',mass:'222',fact:'Seeps from bedrock and is the second leading cause of lung cancer.'},
-    {n:118,sym:'Og',name:'Oganesson',cat:'Unknown',mass:'294',fact:'The heaviest known element — only 5 atoms have ever been created.'},
-    {n:36,sym:'Kr',name:'Krypton',cat:'Noble Gas',mass:'83.798',fact:'Named before Superman — from the Greek for "hidden".'},
+    {n:118,sym:'Og',name:'Oganesson',cat:'Unknown',mass:'294',fact:'The heaviest known element, only 5 atoms have ever been created.'},
+    {n:36,sym:'Kr',name:'Krypton',cat:'Noble Gas',mass:'83.798',fact:'Named before Superman, from the Greek for "hidden".'},
   ];
   const CAT_COLORS={
     'Nonmetal':'#22c55e','Noble Gas':'#8b5cf6','Alkali Metal':'#ef4444',
@@ -726,7 +2056,7 @@ function widgetElement(){
 function widgetSpeedFact(){
   const facts=[
     {val:'299,792',unit:'km/s',label:'Speed of light in vacuum',sub:'Fast enough to circle Earth 7.5× per second'},
-    {val:'1,234',unit:'km/h',label:'Speed of sound at sea level',sub:'That\'s Mach 1 — the sound barrier'},
+    {val:'1,234',unit:'km/h',label:'Speed of sound at sea level',sub:'That\'s Mach 1, the sound barrier'},
     {val:'107,200',unit:'km/h',label:'Earth\'s orbital speed around the Sun',sub:'We\'re hurtling through space right now'},
     {val:'220',unit:'km/s',label:'Speed of the Solar System around the Milky Way',sub:'A full orbit takes ~225 million years'},
     {val:'~600',unit:'km/h',label:'Cruising speed of a commercial aircraft',sub:'About half the speed of a rifle bullet'},
