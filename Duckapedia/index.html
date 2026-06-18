@@ -542,7 +542,7 @@
        type: "Explosive",
        lethal: "yes",
        availability: "Time Limited",
-       expires: "2026-06-18"
+       expires: "2026-06-16"
     },	
     /* ADD MORE DUCKS ABOVE THIS LINE */
 
@@ -577,6 +577,15 @@
   }
 
   function render() {
+
+	DUCKS.forEach(duck => {
+      if (duck.availability === 'Time Limited' && duck.expires) {
+        if (daysUntil(duck.expires) < 0) {
+          duck.availability = 'Not Available';
+        }
+      }
+    });
+	  
     const sortVal   = fSort.value;
     const typeVal   = fType.value;
     const lethalVal = fLethal.value;
