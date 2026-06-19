@@ -14,7 +14,7 @@
   header h1{font-family:var(--mono);font-size:clamp(1.4rem,4vw,2.2rem);letter-spacing:.35em;color:#fff}
   header p{font-size:11px;letter-spacing:.2em;color:var(--muted);margin-top:6px;font-family:var(--mono);text-transform:uppercase}
   .reload-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 18px;background:transparent;border:1px solid var(--border-bright);color:#7eb4ff;font-family:var(--mono);font-size:11px;letter-spacing:.15em;cursor:pointer;border-radius:3px;transition:background .2s,color .2s;text-transform:uppercase}
-  .reload-btn:hover{background:rgba(100,160,255,0.08);color:#aad0ff}
+  .reload-btn:hover{background:var(--theme-accent-soft,rgba(100,160,255,0.08));color:#aad0ff}
   .reload-btn svg{width:13px;height:13px}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px;margin:0 auto}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 22px 22px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:border-color .3s;min-height:190px}
@@ -37,7 +37,7 @@
   .loading{font-family:var(--mono);font-size:11px;color:var(--muted);animation:pulse 1.2s infinite;letter-spacing:.1em}
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
   .fact-text{font-size:14px;line-height:1.7;color:var(--text)}
-  .tag{display:inline-block;padding:2px 8px;font-family:var(--mono);font-size:10px;border-radius:3px;border:1px solid var(--border-bright);color:#7eb4ff;letter-spacing:.08em;margin-top:6px}
+  .tag{display:inline-block;padding:2px 8px;font-family:var(--mono);font-size:10px;border-radius:3px;border:1px solid var(--border-bright);color:var(--theme-accent,#7eb4ff);letter-spacing:.08em;margin-top:6px}
   .bar-row{display:flex;align-items:center;gap:8px;margin-top:6px}
   .bar-track{flex:1;height:4px;background:var(--border);border-radius:2px}
   .bar-fill{height:100%;border-radius:2px}
@@ -62,9 +62,9 @@
   .ascii-art{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--text);white-space:pre}
 
   /* TYPING */
-  .typing-target{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);border-left:2px solid #3b82f6;padding-left:10px;margin-bottom:8px}
+  .typing-target{font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--muted);border-left:2px solid var(--theme-accent,#3b82f6);padding-left:10px;margin-bottom:8px}
   .typing-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border-bright);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;outline:none;transition:border-color .2s}
-  .typing-input:focus{border-color:#3b82f6}
+  .typing-input:focus{border-color:var(--theme-accent,#3b82f6)}
   .typing-input.correct{border-color:#22c55e}
   .typing-input.wrong{border-color:#ef4444}
   .typing-stat{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
@@ -86,7 +86,7 @@
 
 <header>
   <h1>EVERY.THING</h1>
-  <p>Reload for a new universe &nbsp;/&nbsp; <span id="ts"></span></p>
+  <p id="tagline">Reload for a new universe &nbsp;/&nbsp; <span id="ts"></span></p>
 </header>
 
 <div class="grid" id="grid"></div>
@@ -103,6 +103,31 @@ function card(accent,label,html,footer){
     '<div class="card-main">'+html+'</div>'+
     (footer?'<div class="card-footer">'+footer+'</div>':'')+
   '</div>';
+}
+
+/* ── TAGLINES ──────────────────────────────── */
+const TAGLINES=[
+  'Reload for a new universe',
+  'Refresh for a different reality',
+  'Every load is a fresh roll of the dice',
+  'No two visits are the same',
+  'Hit reload, meet a new slice of everything',
+  'A different six things, every single time',
+  'The universe reshuffles on refresh',
+  'Chaos, served fresh on every load',
+  'Randomness as a service',
+  'Six things from infinity, picked just now',
+];
+
+/* ── THEME HUE ─────────────────────────────── */
+function applyRandomTheme(){
+  const hue=rnd(0,359);
+  const root=document.documentElement.style;
+  root.setProperty('--border-bright','hsla('+hue+',85%,68%,0.35)');
+  root.setProperty('--theme-accent','hsl('+hue+',85%,68%)');
+  root.setProperty('--theme-accent-soft','hsla('+hue+',85%,68%,0.08)');
+  document.querySelectorAll('.reload-btn').forEach(b=>{b.style.color='hsl('+hue+',85%,72%)'});
+  return hue;
 }
 
 /* ── DATA ─────────────────────────────────── */
@@ -2072,17 +2097,264 @@ function widgetSpeedFact(){
   );
 }
 
+/* ── ETYMOLOGY ─────────────────────────────── */
+const ETYMOLOGIES=[
+  {word:'salary',origin:'Latin salarium',meaning:'money given to soldiers to buy salt',note:'Roman soldiers were partly paid in, or with money for, salt — a precious preservative at the time.'},
+  {word:'nice',origin:'Latin nescius',meaning:'ignorant, unaware',note:'It drifted through "foolish," "fussy," and "precise" before settling on "pleasant" in the 18th century.'},
+  {word:'disaster',origin:'Greek dis- + astron',meaning:'bad star',note:'Rooted in astrology — a calamity was once blamed on an unfavorable position of the stars.'},
+  {word:'clue',origin:'Old English clew(e)',meaning:'a ball of thread',note:'From the myth of Theseus unwinding a thread to escape the Minotaur\'s labyrinth.'},
+  {word:'companion',origin:'Latin com- + panis',meaning:'one who breaks bread with you',note:'A companion was literally someone you shared a meal with.'},
+  {word:'muscle',origin:'Latin musculus',meaning:'little mouse',note:'Romans thought a flexing bicep looked like a mouse moving under the skin.'},
+  {word:'sabotage',origin:'French sabot',meaning:'wooden shoe',note:'Possibly from workers throwing wooden clogs into machinery to halt production.'},
+  {word:'bankrupt',origin:'Italian banca rotta',meaning:'broken bench',note:'Medieval moneylenders worked at benches that were physically broken when they failed.'},
+  {word:'quarantine',origin:'Italian quaranta giorni',meaning:'forty days',note:'Venice required ships to wait forty days offshore during plague outbreaks.'},
+  {word:'avocado',origin:'Nahuatl ahuacatl',meaning:'testicle',note:'A reference to the fruit\'s shape; Spanish colonizers adapted it via "aguacate."'},
+  {word:'robot',origin:'Czech robota',meaning:'forced labor, drudgery',note:'Coined for Karel Čapek\'s 1920 play "R.U.R.," about manufactured workers.'},
+  {word:'tragedy',origin:'Greek tragos + oide',meaning:'goat song',note:'Possibly tied to a goat being the prize, or sacrifice, at early dramatic competitions.'},
+  {word:'silly',origin:'Old English sælig',meaning:'blessed, happy',note:'It traveled through "innocent" and "feeble-minded" before landing on "foolish."'},
+  {word:'sincere',origin:'Latin sine cera',meaning:'without wax',note:'A folk etymology claims it described pure honey, or unflawed marble, not patched with wax.'},
+  {word:'galaxy',origin:'Greek galaxias',meaning:'milky',note:'Named for the Milky Way\'s appearance, long before "galaxy" meant any star system.'},
+  {word:'alcohol',origin:'Arabic al-kuhul',meaning:'the powdered antimony (kohl)',note:'Originally a cosmetic powder; the meaning shifted to "essence" and then to distilled spirit.'},
+  {word:'assassin',origin:'Arabic hashishin',meaning:'hashish users',note:'A medieval European term for a sect allegedly fortified by hashish before their killings.'},
+  {word:'lord',origin:'Old English hlafweard',meaning:'loaf-ward, keeper of bread',note:'A lord was originally the household member responsible for guarding the bread supply.'},
+  {word:'pencil',origin:'Latin penicillus',meaning:'little tail, small brush',note:'Originally referred to a fine brush, later applied to graphite writing tools.'},
+  {word:'window',origin:'Old Norse vindauga',meaning:'wind eye',note:'Early windows were unglazed holes that let in wind and light alike.'},
+];
+function widgetEtymology(){
+  const e=pick(ETYMOLOGIES);
+  return card('teal','📖 ETYMOLOGY',
+    '<div class="big-value" style="font-size:1.9rem;text-transform:lowercase">'+e.word+'</div>'+
+    '<div class="sub-info" style="margin-top:4px">from <span style="color:#7eb4ff">'+e.origin+'</span></div>'+
+    '<div class="big-label" style="margin-top:2px;font-style:italic">"'+e.meaning+'"</div>'+
+    '<div class="fact-text" style="margin-top:8px;font-size:13px;color:var(--muted)">'+e.note+'</div>',
+    'Word origins · reload for another'
+  );
+}
+
+/* ── CHESS OPENING ─────────────────────────── */
+const CHESS_OPENINGS=[
+  {name:'Sicilian Defence',moves:['e4','c5'],eco:'B20-B99',note:'The most popular response to 1.e4 at top level, fighting for the center asymmetrically.'},
+  {name:'Ruy Lopez',moves:['e4','e5','Nf3','Nc6','Bb5'],eco:'C60-C99',note:'Named after a 16th-century Spanish priest; one of the oldest openings still played at the highest level.'},
+  {name:'Queen\'s Gambit',moves:['d4','d5','c4'],eco:'D06-D69',note:'White offers a pawn to gain central control and open lines for fast development.'},
+  {name:'King\'s Indian Defence',moves:['d4','Nf6','c4','g6'],eco:'E60-E99',note:'Black lets White claim space early, planning a sharp counterattack later.'},
+  {name:'French Defence',moves:['e4','e6'],eco:'C00-C19',note:'Solid but cramped — Black accepts a passive bishop for long-term structural soundness.'},
+  {name:'Caro-Kann Defence',moves:['e4','c6'],eco:'B10-B19',note:'Prepares ...d5 without blocking in the light-squared bishop, unlike the French.'},
+  {name:'English Opening',moves:['c4'],eco:'A10-A39',note:'A flexible flank opening that can transpose into dozens of other structures.'},
+  {name:'Italian Game',moves:['e4','e5','Nf3','Nc6','Bc4'],eco:'C50-C59',note:'One of the oldest recorded openings, aiming straight at Black\'s weak f7 square.'},
+  {name:'Nimzo-Indian Defence',moves:['d4','Nf6','c4','e6','Nc3','Bb4'],eco:'E20-E59',note:'Black pins White\'s knight instead of fighting for the center with a pawn.'},
+  {name:'Scandinavian Defence',moves:['e4','d5'],eco:'B01',note:'Black trades immediately, aiming for quick development at the cost of a tempo.'},
+  {name:'London System',moves:['d4','Nf6','Nf3','d5','Bf4'],eco:'A45,D02',note:'A quiet, low-theory setup beloved by club players for its reliability.'},
+  {name:'Grünfeld Defence',moves:['d4','Nf6','c4','g6','Nc3','d5'],eco:'D70-D99',note:'Black strikes the center immediately with a pawn rather than fianchettoing passively.'},
+  {name:'Pirc Defence',moves:['e4','d6','d4','Nf6','Nc3','g6'],eco:'B07-B09',note:'A hypermodern setup letting White overextend before counterattacking.'},
+  {name:'Vienna Game',moves:['e4','e5','Nc3'],eco:'C25-C29',note:'A flexible, somewhat old-fashioned try that can lead to sharp gambit lines.'},
+  {name:'Catalan Opening',moves:['d4','Nf6','c4','e6','g3'],eco:'E00-E09',note:'Combines queen\'s-pawn solidity with a fianchettoed bishop eyeing the long diagonal.'},
+];
+function chessBoardSVG(moves){
+  const files='abcdefgh';
+  const sq=28,N=8;
+  let cells='';
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const dark=(r+c)%2===1;
+      cells+='<rect x="'+(c*sq)+'" y="'+(r*sq)+'" width="'+sq+'" height="'+sq+'" fill="'+(dark?'#1a2236':'#262f48')+'"/>';
+    }
+  }
+  // mark destination squares of each move (best-effort: only squares explicitly named, ignoring captures/checks)
+  let dots='';
+  moves.forEach((m,i)=>{
+    const match=m.match(/([a-h])([1-8])/);
+    if(!match)return;
+    const file=files.indexOf(match[1]),rank=8-parseInt(match[2],10);
+    const cx=file*sq+sq/2,cy=rank*sq+sq/2;
+    dots+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="none" stroke="#7eb4ff" stroke-width="2" opacity="'+(0.4+i*0.12).toFixed(2)+'"/>'+
+      '<text x="'+cx+'" y="'+(cy+3)+'" font-size="8" fill="#aad0ff" text-anchor="middle" font-family="var(--mono)">'+(i+1)+'</text>';
+  });
+  return '<svg viewBox="0 0 '+(sq*N)+' '+(sq*N)+'" style="width:140px;height:140px;flex-shrink:0;border-radius:3px">'+cells+dots+'</svg>';
+}
+function widgetChessOpening(){
+  const o=pick(CHESS_OPENINGS);
+  const moveStr=o.moves.map((m,i)=>(i%2===0?(Math.floor(i/2)+1)+'.':'')+m).join(' ');
+  return card('green','♞ CHESS OPENING',
+    '<div style="display:flex;gap:14px;align-items:flex-start">'+
+      chessBoardSVG(o.moves)+
+      '<div>'+
+        '<div style="font-size:16px;font-weight:600;color:var(--text)">'+o.name+'</div>'+
+        '<div class="sub-info" style="margin-top:3px">ECO '+o.eco+'</div>'+
+        '<div class="fact-text" style="font-size:12px;margin-top:6px;font-family:var(--mono);color:#7eb4ff">'+moveStr+'</div>'+
+        '<div class="fact-text" style="font-size:12px;margin-top:6px;color:var(--muted)">'+o.note+'</div>'+
+      '</div>'+
+    '</div>',
+    'Opening theory · reload for another'
+  );
+}
+
+/* ── RECIPE ────────────────────────────────── */
+const RECIPES=[
+  {name:'Garlic Butter Pasta',time:'15 min',serves:2,tag:'Italian',ingredients:['200g spaghetti','4 cloves garlic, sliced','60g butter','Chili flakes','Parmesan','Parsley'],steps:['Boil pasta until al dente, save a cup of the water.','Melt butter, gently fry garlic until golden, not brown.','Toss pasta in, add a splash of pasta water to loosen.','Finish with chili flakes, parmesan, and parsley.']},
+  {name:'Shakshuka',time:'25 min',serves:2,tag:'Middle Eastern',ingredients:['1 onion, diced','2 bell peppers','400g crushed tomatoes','4 eggs','Cumin, paprika','Feta, to serve'],steps:['Soften onion and peppers in oil for 5 minutes.','Add spices, then tomatoes; simmer 10 minutes.','Make wells in the sauce, crack in the eggs.','Cover and cook until whites set, yolks still soft.']},
+  {name:'Miso Soup',time:'10 min',serves:2,tag:'Japanese',ingredients:['500ml dashi stock','2 tbsp miso paste','Silken tofu, cubed','Dried wakame','Spring onion'],steps:['Heat dashi until just below boiling.','Whisk in miso paste off the heat, don\'t boil it.','Add tofu and rehydrated wakame.','Top with sliced spring onion before serving.']},
+  {name:'Classic Guacamole',time:'10 min',serves:4,tag:'Mexican',ingredients:['3 ripe avocados','1 lime, juiced','1/2 red onion, minced','1 tomato, diced','Coriander','Salt'],steps:['Mash avocados to your preferred chunkiness.','Stir in lime juice immediately to stop browning.','Fold in onion, tomato, and coriander.','Season with salt and rest 10 minutes before serving.']},
+  {name:'French Onion Soup',time:'1 hr',serves:4,tag:'French',ingredients:['4 large onions, sliced','60g butter','1L beef stock','Splash of white wine','Baguette slices','Gruyère cheese'],steps:['Cook onions in butter on low heat for 40 minutes until deep golden.','Deglaze with wine, then add stock; simmer 15 minutes.','Ladle into bowls, top with baguette and cheese.','Broil until the cheese is bubbling and browned.']},
+  {name:'Egg Fried Rice',time:'15 min',serves:2,tag:'Chinese',ingredients:['2 cups day-old rice','2 eggs','2 spring onions','2 tbsp soy sauce','1 tbsp sesame oil','Frozen peas'],steps:['Scramble eggs in a hot wok, set aside.','Stir-fry rice, breaking up clumps, for 3 minutes.','Add peas, soy sauce, and the scrambled egg back in.','Finish with sesame oil and sliced spring onion.']},
+  {name:'Patatas Bravas',time:'35 min',serves:3,tag:'Spanish',ingredients:['600g potatoes, cubed','2 tbsp olive oil','1 tsp smoked paprika','400g crushed tomatoes','1 tsp chili flakes','Garlic mayo, to serve'],steps:['Roast potatoes in oil at 220°C until crisp, about 25 minutes.','Simmer tomatoes with paprika and chili for the bravas sauce.','Toss roasted potatoes through the sauce.','Drizzle with garlic mayo to serve.']},
+  {name:'Tom Yum Soup',time:'30 min',serves:2,tag:'Thai',ingredients:['1L chicken stock','Lemongrass, smashed','Kaffir lime leaves','200g shrimp','Mushrooms','Fish sauce, lime juice, chili'],steps:['Simmer stock with lemongrass and lime leaves for 10 minutes.','Add mushrooms and shrimp, cook until just pink.','Season with fish sauce, lime juice, and chili to taste.','Remove the lemongrass stalks before serving.']},
+  {name:'Banana Pancakes',time:'20 min',serves:2,tag:'Breakfast',ingredients:['1 ripe banana, mashed','1 cup flour','1 egg','3/4 cup milk','1 tsp baking powder','Butter for the pan'],steps:['Whisk mashed banana, egg, and milk together.','Fold in flour and baking powder until just combined.','Cook spoonfuls in a buttered pan, 2 minutes per side.','Stack and serve with extra banana or syrup.']},
+  {name:'Caprese Salad',time:'10 min',serves:2,tag:'Italian',ingredients:['2 large tomatoes','200g fresh mozzarella','Fresh basil leaves','Extra virgin olive oil','Balsamic glaze','Salt and pepper'],steps:['Slice tomatoes and mozzarella into even rounds.','Layer alternately on a plate with basil leaves.','Drizzle with olive oil and balsamic glaze.','Finish with a pinch of salt and black pepper.']},
+];
+function widgetRecipe(){
+  const r=pick(RECIPES);
+  const ing=r.ingredients.map(i=>'<li style="margin-bottom:3px">'+i+'</li>').join('');
+  const steps=r.steps.map((s,i)=>'<li style="margin-bottom:4px"><span style="color:#7eb4ff;font-family:var(--mono);font-size:11px">'+(i+1)+'.</span> '+s+'</li>').join('');
+  return card('orange','🍳 RANDOM RECIPE',
+    '<div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<div style="font-size:17px;font-weight:600;color:var(--text)">'+r.name+'</div>'+
+      '<div class="tag">'+r.tag+'</div>'+
+    '</div>'+
+    '<div class="sub-info">'+r.time+' · serves '+r.serves+'</div>'+
+    '<div style="display:flex;gap:16px;margin-top:8px">'+
+      '<ul class="fact-text" style="font-size:12px;list-style:none;flex:1;color:var(--muted)">'+ing+'</ul>'+
+      '<ol class="fact-text" style="font-size:12px;list-style:none;flex:1;padding-left:0">'+steps+'</ol>'+
+    '</div>',
+    'Reload for a different dish'
+  );
+}
+
+/* ── COORDINATE ────────────────────────────── */
+function worldDotsSVG(lat,lon){
+  const W=240,H=130;
+  const x=((lon+180)/360)*W;
+  const y=((90-lat)/180)*H;
+  // faint lat/long grid
+  let grid='';
+  for(let gx=0;gx<=W;gx+=W/12){grid+='<line x1="'+gx+'" y1="0" x2="'+gx+'" y2="'+H+'" stroke="rgba(100,140,220,0.08)"/>'}
+  for(let gy=0;gy<=H;gy+=H/6){grid+='<line x1="0" y1="'+gy+'" x2="'+W+'" y2="'+gy+'" stroke="rgba(100,140,220,0.08)"/>'}
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block;background:rgba(255,255,255,0.02);border-radius:4px">'+
+    grid+
+    '<line x1="0" y1="'+(H/2)+'" x2="'+W+'" y2="'+(H/2)+'" stroke="rgba(100,160,255,0.18)" stroke-dasharray="3,3"/>'+
+    '<line x1="'+(W/2)+'" y1="0" x2="'+(W/2)+'" y2="'+H+'" stroke="rgba(100,160,255,0.18)" stroke-dasharray="3,3"/>'+
+    '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="9" fill="none" stroke="#7eb4ff" stroke-width="1.5" opacity="0.5"/>'+
+    '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.5" fill="#7eb4ff"/>'+
+  '</svg>';
+}
+function widgetCoordinate(){
+  const lat=(Math.random()*180-90);
+  const lon=(Math.random()*360-180);
+  const latStr=Math.abs(lat).toFixed(4)+'°'+(lat>=0?'N':'S');
+  const lonStr=Math.abs(lon).toFixed(4)+'°'+(lon>=0?'E':'W');
+  const isOcean=Math.random()<0.71; // ~71% of Earth's surface is ocean
+  return card('cyan','📍 RANDOM COORDINATE',
+    worldDotsSVG(lat,lon)+
+    '<div class="big-value" style="font-size:1.3rem;margin-top:8px">'+latStr+', '+lonStr+'</div>'+
+    '<div class="sub-info" style="margin-top:2px">Likely terrain: '+(isOcean?'open ocean 🌊':'land 🏔️')+'</div>',
+    'A uniformly random point on Earth · reload for another'
+  );
+}
+
+/* ── PLAYING CARD ──────────────────────────── */
+const CARD_RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const CARD_SUITS=[
+  {key:'spades',symbol:'♠',color:'#1a1f2e'},
+  {key:'hearts',symbol:'♥',color:'#d8334a'},
+  {key:'diamonds',symbol:'♦',color:'#d8334a'},
+  {key:'clubs',symbol:'♣',color:'#1a1f2e'},
+];
+function pipLayout(rank){
+  // pip placements as [x,y,rotated?] centered in the 140x196 card viewBox
+  const L=46,R=94,M=70;
+  const positions={
+    'A':[[M,98,0]],
+    '2':[[M,48,0],[M,148,1]],
+    '3':[[M,42,0],[M,98,0],[M,154,1]],
+    '4':[[L,48,0],[R,48,0],[L,148,1],[R,148,1]],
+    '5':[[L,48,0],[R,48,0],[M,98,0],[L,148,1],[R,148,1]],
+    '6':[[L,44,0],[R,44,0],[L,98,0],[R,98,0],[L,152,1],[R,152,1]],
+    '7':[[L,40,0],[R,40,0],[M,64,0],[L,94,0],[R,94,0],[L,152,1],[R,152,1]],
+    '8':[[L,36,0],[R,36,0],[M,58,0],[L,86,0],[R,86,0],[M,138,1],[L,160,1],[R,160,1]],
+    '9':[[L,34,0],[R,34,0],[L,76,0],[R,76,0],[M,98,0],[L,120,1],[R,120,1],[L,162,1],[R,162,1]],
+    '10':[[L,30,0],[R,30,0],[M,50,0],[L,72,0],[R,72,0],[L,124,1],[R,124,1],[M,146,1],[L,166,1],[R,166,1]],
+  };
+  return positions[rank]||[[M,98,0]];
+}
+function cardSVG(rank,suit,isJoker){
+  const W=140,H=196;
+  if(isJoker){
+    return '<svg viewBox="0 0 '+W+' '+H+'" style="width:110px;height:154px;flex-shrink:0">'+
+      '<rect x="2" y="2" width="'+(W-4)+'" height="'+(H-4)+'" rx="10" fill="#11162a" stroke="rgba(100,140,220,0.4)" stroke-width="2"/>'+
+      '<text x="14" y="28" font-size="14" font-family="var(--mono)" fill="#7eb4ff" font-weight="700">J</text>'+
+      '<text x="14" y="44" font-size="14" font-family="var(--mono)" fill="#7eb4ff" font-weight="700">★</text>'+
+      '<g transform="translate(70,108)">'+
+        '<circle r="26" fill="none" stroke="#a78bfa" stroke-width="2.5"/>'+
+        '<circle cx="-9" cy="-6" r="3" fill="#a78bfa"/><circle cx="9" cy="-6" r="3" fill="#a78bfa"/>'+
+        '<path d="M -12 8 Q 0 20 12 8" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>'+
+        '<path d="M -26 -22 Q -34 -34 -20 -36" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>'+
+        '<path d="M 26 -22 Q 34 -34 20 -36" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>'+
+        '<circle cx="-20" cy="-37" r="3" fill="#a78bfa"/><circle cx="20" cy="-37" r="3" fill="#a78bfa"/>'+
+      '</g>'+
+      '<text x="126" y="178" font-size="14" font-family="var(--mono)" fill="#7eb4ff" font-weight="700" transform="rotate(180 126 178)">J</text>'+
+      '<text x="126" y="162" font-size="14" font-family="var(--mono)" fill="#7eb4ff" font-weight="700" transform="rotate(180 126 162)">★</text>'+
+    '</svg>';
+  }
+  const isFace=['J','Q','K'].includes(rank);
+  let pips='';
+  if(!isFace){
+    pipLayout(rank).forEach(([x,y,rot])=>{
+      pips+='<text x="'+x+'" y="'+y+'" font-size="20" text-anchor="middle" fill="'+suit.color+'" transform="'+(rot?'rotate(180 '+x+' '+y+')':'')+'">'+suit.symbol+'</text>';
+    });
+  }else{
+    pips='<g transform="translate(70,98)">'+
+      '<rect x="-22" y="-38" width="44" height="76" rx="6" fill="none" stroke="'+suit.color+'" stroke-width="2"/>'+
+      '<text x="0" y="8" font-size="34" text-anchor="middle" fill="'+suit.color+'">'+suit.symbol+'</text>'+
+    '</g>';
+  }
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:110px;height:154px;flex-shrink:0">'+
+    '<rect x="2" y="2" width="'+(W-4)+'" height="'+(H-4)+'" rx="10" fill="#f4f1ea" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>'+
+    '<text x="12" y="26" font-size="16" font-family="var(--mono)" font-weight="700" fill="'+suit.color+'">'+rank+'</text>'+
+    '<text x="12" y="42" font-size="14" fill="'+suit.color+'">'+suit.symbol+'</text>'+
+    pips+
+    '<text x="128" y="178" font-size="16" font-family="var(--mono)" font-weight="700" fill="'+suit.color+'" transform="rotate(180 128 178)">'+rank+'</text>'+
+    '<text x="128" y="162" font-size="14" fill="'+suit.color+'" transform="rotate(180 128 162)">'+suit.symbol+'</text>'+
+  '</svg>';
+}
+function widgetPlayingCard(){
+  const isJoker=Math.random()<1/53; // 1 joker among 53 (52 + joker)
+  let label,svg;
+  if(isJoker){
+    label='Joker';
+    svg=cardSVG(null,null,true);
+  }else{
+    const rank=pick(CARD_RANKS);
+    const suit=pick(CARD_SUITS);
+    label=rank+' of '+suit.key.charAt(0).toUpperCase()+suit.key.slice(1);
+    svg=cardSVG(rank,suit,false);
+  }
+  return card('violet','🃏 RANDOM CARD',
+    '<div style="display:flex;gap:16px;align-items:center">'+
+      svg+
+      '<div>'+
+        '<div style="font-size:16px;font-weight:600;color:var(--text)">'+label+'</div>'+
+        '<div class="sub-info" style="margin-top:6px">French-suited deck</div>'+
+        '<div class="tag">1 in 53</div>'+
+      '</div>'+
+    '</div>',
+    'Drawn fresh on every reload'
+  );
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
   widgetGreeting, widgetRecord, widgetHoliday, widgetConstellation,
   widgetPalette, widgetAscii, widgetBinary, widgetISS,
   widgetOnThisDay, widgetTyping, widgetMoon, widgetRandomYear,
-  widgetElement, widgetSpeedFact,
+  widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
+  widgetRecipe, widgetCoordinate, widgetPlayingCard,
 ];
 
 /* ── INIT ──────────────────────────────────── */
 function init(){
+  applyRandomTheme();
+  document.getElementById('tagline').innerHTML=
+    pick(TAGLINES)+' &nbsp;/&nbsp; <span id="ts"></span>';
   document.getElementById('ts').textContent=
     new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' local';
   const chosen=shuffle(ALL_WIDGETS).slice(0,6);
