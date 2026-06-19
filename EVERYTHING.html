@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EVERY.THING</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;700&family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#080c14;--surface:#0d1220;--border:rgba(100,140,220,0.15);--border-bright:rgba(100,160,255,0.3);--text:#e2e8f4;--muted:#5a6a8a;--mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:20px;overflow-x:hidden}
@@ -13,9 +13,6 @@
   header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
   header h1{font-family:var(--mono);font-size:clamp(1.4rem,4vw,2.2rem);letter-spacing:.35em;color:#fff}
   header p{font-size:11px;letter-spacing:.2em;color:var(--muted);margin-top:6px;font-family:var(--mono);text-transform:uppercase}
-  .reload-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 18px;background:transparent;border:1px solid var(--border-bright);color:#7eb4ff;font-family:var(--mono);font-size:11px;letter-spacing:.15em;cursor:pointer;border-radius:3px;transition:background .2s,color .2s;text-transform:uppercase}
-  .reload-btn:hover{background:var(--theme-accent-soft,rgba(100,160,255,0.08));color:#aad0ff}
-  .reload-btn svg{width:13px;height:13px}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px;margin:0 auto}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 22px 22px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:border-color .3s;min-height:190px}
   .card:hover{border-color:var(--border-bright)}
@@ -86,7 +83,7 @@
 
 <header>
   <h1>EVERY.THING</h1>
-  <p id="tagline">Reload for a new universe &nbsp;/&nbsp; <span id="ts"></span></p>
+  <p id="tagline">A new universe &nbsp;/&nbsp; <span id="ts"></span></p>
 </header>
 
 <div class="grid" id="grid"></div>
@@ -133,8 +130,45 @@ function applyRandomTheme(){
   root.setProperty('--border-bright','hsla('+hue+',85%,68%,0.35)');
   root.setProperty('--theme-accent','hsl('+hue+',85%,68%)');
   root.setProperty('--theme-accent-soft','hsla('+hue+',85%,68%,0.08)');
-  document.querySelectorAll('.reload-btn').forEach(b=>{b.style.color='hsl('+hue+',85%,72%)'});
   return hue;
+}
+
+/* ── RANDOM FONT PAIRING ───────────────────── */
+const FONT_PAIRINGS=[
+  {mono:"'Space Mono',monospace",sans:"'Space Grotesk',sans-serif"},
+  {mono:"'JetBrains Mono',monospace",sans:"'IBM Plex Sans',sans-serif"},
+  {mono:"'Fira Code',monospace",sans:"'Sora',sans-serif"},
+  {mono:"'DM Mono',monospace",sans:"'Outfit',sans-serif"},
+  {mono:"'JetBrains Mono',monospace",sans:"'Sora',sans-serif"},
+  {mono:"'Space Mono',monospace",sans:"'Outfit',sans-serif"},
+];
+function applyRandomFontPairing(){
+  const f=pick(FONT_PAIRINGS);
+  const root=document.documentElement.style;
+  root.setProperty('--mono',f.mono);
+  root.setProperty('--sans',f.sans);
+}
+
+/* ── RANDOM PAGE TITLE ─────────────────────── */
+const PAGE_TITLES=[
+  'EVERY.THING',
+  'pls send help',
+  ':) hello',
+  '404: focus not found',
+  'definitely not a cult',
+  'send tab to a friend',
+  'the algorithm did this',
+  'ctrl+r for chaos',
+  'a website, probably',
+  'ⓢⓤⓡⓟⓡⓘⓢⓘⓝⓖⓛⓨ ⓛⓐⓑⓛⓢ',
+  'tab hoarder special',
+  'EVERY.THING (loading universe)',
+  'beep boop random',
+  'this tab again?',
+  'sponsored by entropy',
+];
+function applyRandomTitle(){
+  document.title=pick(PAGE_TITLES);
 }
 
 /* ── DATA ─────────────────────────────────── */
@@ -1731,13 +1765,19 @@ function widgetTime(){
   const s=parts.find(p=>p.type==='second').value;
   const fmtD=new Intl.DateTimeFormat('en-GB',{timeZone:place.tz,weekday:'long',day:'numeric',month:'short'});
   const id='ck'+Math.random().toString(36).slice(2);
+  const hId=id+'h',mId=id+'m',sId=id+'s';
   setTimeout(()=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    setInterval(()=>{const p2=fmt.formatToParts(new Date());el.textContent=p2.find(x=>x.type==='second').value},1000);
+    const hEl=document.getElementById(hId),mEl=document.getElementById(mId),sEl=document.getElementById(sId);
+    if(!hEl||!mEl||!sEl)return;
+    setInterval(()=>{
+      const p2=fmt.formatToParts(new Date());
+      hEl.textContent=p2.find(x=>x.type==='hour').value;
+      mEl.textContent=p2.find(x=>x.type==='minute').value;
+      sEl.textContent=p2.find(x=>x.type==='second').value;
+    },1000);
   },100);
   return card('blue','⏱ LOCAL TIME',
-    '<div class="big-value">'+h+'<span class="colon">:</span>'+m+'<span style="font-size:1.4rem;color:var(--muted)">:<span id="'+id+'">'+s+'</span></span></div>'+
+    '<div class="big-value"><span id="'+hId+'">'+h+'</span><span class="colon">:</span><span id="'+mId+'">'+m+'</span><span style="font-size:1.4rem;color:var(--muted)">:<span id="'+sId+'">'+s+'</span></span></div>'+
     '<div class="big-label">'+place.flag+' '+place.city+', '+place.country+'</div>'+
     '<div class="sub-info">'+fmtD.format(now)+'</div>',
     'Live clock, ticking in real time'
@@ -1787,7 +1827,7 @@ function widgetCountry(){
     '<div class="big-label" style="margin-top:4px">Capital: '+c.capital+'</div>'+
     '<div class="sub-info">Population: '+c.pop+'</div>'+
     '<div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">'+c.fact+'</div>',
-    'One of 195 countries · reload for another'
+    'One of 195 countries'
   );
 }
 
@@ -1847,7 +1887,7 @@ function widgetConstellation(){
   return card('blue','✨ CONSTELLATION',
     '<svg viewBox="0 0 '+W+' '+H+'" style="max-width:100%;display:block">'+bg+lines+stars+'</svg>'+
     '<div class="big-label" style="text-align:center">'+c.name+'</div>',
-    'Not to scale · reload for another'
+    'Not to scale'
   );
 }
 
@@ -1860,7 +1900,7 @@ function widgetPalette(){
     '<div class="palette-row">'+sw+'</div>'+
     '<div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">'+p.name+'</div>'+
     '<div style="display:flex;flex-wrap:wrap">'+dots+'</div>',
-    'Hover swatches for hex · reload for new palette'
+    'Hover swatches for hex'
   );
 }
 
@@ -2134,7 +2174,7 @@ function widgetEtymology(){
     '<div class="sub-info" style="margin-top:4px">from <span style="color:#7eb4ff">'+e.origin+'</span></div>'+
     '<div class="big-label" style="margin-top:2px;font-style:italic">"'+e.meaning+'"</div>'+
     '<div class="fact-text" style="margin-top:8px;font-size:13px;color:var(--muted)">'+e.note+'</div>',
-    'Word origins · reload for another'
+    'Word origins'
   );
 }
 
@@ -2191,7 +2231,7 @@ function widgetChessOpening(){
         '<div class="fact-text" style="font-size:12px;margin-top:6px;color:var(--muted)">'+o.note+'</div>'+
       '</div>'+
     '</div>',
-    'Opening theory · reload for another'
+    'Opening theory'
   );
 }
 
@@ -2222,7 +2262,7 @@ function widgetRecipe(){
       '<ul class="fact-text" style="font-size:12px;list-style:none;flex:1;color:var(--muted)">'+ing+'</ul>'+
       '<ol class="fact-text" style="font-size:12px;list-style:none;flex:1;padding-left:0">'+steps+'</ol>'+
     '</div>',
-    'Reload for a different dish'
+    'One dish from the archive'
   );
 }
 
@@ -2253,7 +2293,7 @@ function widgetCoordinate(){
     worldDotsSVG(lat,lon)+
     '<div class="big-value" style="font-size:1.3rem;margin-top:8px">'+latStr+', '+lonStr+'</div>'+
     '<div class="sub-info" style="margin-top:2px">Likely terrain: '+(isOcean?'open ocean 🌊':'land 🏔️')+'</div>',
-    'A uniformly random point on Earth · reload for another'
+    'A uniformly random point on Earth'
   );
 }
 
@@ -2343,7 +2383,161 @@ function widgetPlayingCard(){
         '<div class="tag">1 in 53</div>'+
       '</div>'+
     '</div>',
-    'Drawn fresh on every reload'
+    'Drawn fresh from the deck'
+  );
+}
+
+/* ── TAROT CARD ────────────────────────────── */
+const TAROT_CARDS=[
+  {name:'The Fool',num:'0',glyph:'sun',meaning:'New beginnings, leaps of faith, boundless potential.'},
+  {name:'The Magician',num:'I',glyph:'infinity',meaning:'Willpower, resourcefulness, turning ideas into action.'},
+  {name:'The High Priestess',num:'II',glyph:'moon',meaning:'Intuition, mystery, the unconscious mind.'},
+  {name:'The Empress',num:'III',glyph:'leaf',meaning:'Abundance, nurturing, creative fertility.'},
+  {name:'The Emperor',num:'IV',glyph:'square',meaning:'Structure, authority, stable foundations.'},
+  {name:'The Lovers',num:'VI',glyph:'heart',meaning:'Union, partnership, aligned values.'},
+  {name:'The Chariot',num:'VII',glyph:'wheel',meaning:'Willpower, determination, victory through control.'},
+  {name:'Strength',num:'VIII',glyph:'spiral',meaning:'Courage, inner resolve, calm power.'},
+  {name:'The Hermit',num:'IX',glyph:'lantern',meaning:'Introspection, solitude, inner guidance.'},
+  {name:'Wheel of Fortune',num:'X',glyph:'circle',meaning:'Cycles, fate, turning points.'},
+  {name:'Justice',num:'XI',glyph:'scales',meaning:'Fairness, truth, cause and effect.'},
+  {name:'The Hanged Man',num:'XII',glyph:'pause',meaning:'Surrender, new perspective, letting go.'},
+  {name:'Death',num:'XIII',glyph:'hourglass',meaning:'Transformation, endings that make room for beginnings.'},
+  {name:'Temperance',num:'XIV',glyph:'wave',meaning:'Balance, moderation, patient blending of opposites.'},
+  {name:'The Tower',num:'XVI',glyph:'bolt',meaning:'Sudden upheaval, revelation, breaking false structures.'},
+  {name:'The Star',num:'XVII',glyph:'star',meaning:'Hope, renewal, quiet guidance after hardship.'},
+  {name:'The Moon',num:'XVIII',glyph:'crescent',meaning:'Illusion, the subconscious, navigating uncertainty.'},
+  {name:'The Sun',num:'XIX',glyph:'sunburst',meaning:'Clarity, vitality, success out in the open.'},
+  {name:'Judgement',num:'XX',glyph:'trumpet',meaning:'Reckoning, awakening, a call to rise.'},
+  {name:'The World',num:'XXI',glyph:'rings',meaning:'Completion, wholeness, a cycle fulfilled.'},
+];
+function tarotGlyphSVG(glyph){
+  const g={
+    sun:'<circle r="14" fill="none" stroke="#d4a73a" stroke-width="2"/><g stroke="#d4a73a" stroke-width="2">'+[0,45,90,135,180,225,270,315].map(a=>'<line x1="0" y1="-20" x2="0" y2="-26" transform="rotate('+a+')"/>').join('')+'</g>',
+    infinity:'<path d="M -16 0 C -16 -10 -4 -10 0 0 C 4 10 16 10 16 0 C 16 -10 4 -10 0 0 C -4 10 -16 10 -16 0 Z" fill="none" stroke="#d4a73a" stroke-width="2.5"/>',
+    moon:'<path d="M 10 -16 A 16 16 0 1 0 10 16 A 12 14 0 1 1 10 -16 Z" fill="#d4a73a"/>',
+    leaf:'<path d="M 0 -18 C 16 -10 16 10 0 18 C -16 10 -16 -10 0 -18 Z" fill="none" stroke="#d4a73a" stroke-width="2"/><line x1="0" y1="-18" x2="0" y2="18" stroke="#d4a73a" stroke-width="1.5"/>',
+    square:'<rect x="-14" y="-14" width="28" height="28" fill="none" stroke="#d4a73a" stroke-width="2.5"/>',
+    heart:'<path d="M 0 14 C -18 0 -16 -16 -4 -16 C 0 -16 0 -10 0 -10 C 0 -10 0 -16 4 -16 C 16 -16 18 0 0 14 Z" fill="none" stroke="#d4a73a" stroke-width="2"/>',
+    wheel:'<circle r="14" fill="none" stroke="#d4a73a" stroke-width="2"/><circle r="3" fill="#d4a73a"/>'+[0,60,120,180,240,300].map(a=>'<line x1="0" y1="0" x2="0" y2="-14" stroke="#d4a73a" stroke-width="1.5" transform="rotate('+a+')"/>').join(''),
+    spiral:'<path d="M 0 0 C 6 0 6 -10 -4 -10 C -16 -10 -16 6 -2 8 C 12 10 14 -4 8 -8" fill="none" stroke="#d4a73a" stroke-width="2"/>',
+    lantern:'<rect x="-7" y="-12" width="14" height="20" rx="3" fill="none" stroke="#d4a73a" stroke-width="2"/><line x1="0" y1="-16" x2="0" y2="-12" stroke="#d4a73a" stroke-width="2"/><line x1="0" y1="8" x2="0" y2="16" stroke="#d4a73a" stroke-width="2"/>',
+    circle:'<circle r="14" fill="none" stroke="#d4a73a" stroke-width="2.5"/>',
+    scales:'<line x1="0" y1="-16" x2="0" y2="10" stroke="#d4a73a" stroke-width="2"/><line x1="-16" y1="-8" x2="16" y2="-8" stroke="#d4a73a" stroke-width="2"/><path d="M -16 -8 L -22 4 L -10 4 Z" fill="none" stroke="#d4a73a" stroke-width="1.5"/><path d="M 16 -8 L 10 4 L 22 4 Z" fill="none" stroke="#d4a73a" stroke-width="1.5"/>',
+    pause:'<line x1="-6" y1="-16" x2="-6" y2="16" stroke="#d4a73a" stroke-width="3"/><line x1="6" y1="-16" x2="6" y2="16" stroke="#d4a73a" stroke-width="3"/>',
+    hourglass:'<path d="M -10 -16 L 10 -16 L -10 16 L 10 16 Z" fill="none" stroke="#d4a73a" stroke-width="2"/>',
+    wave:'<path d="M -16 0 Q -8 -12 0 0 Q 8 12 16 0" fill="none" stroke="#d4a73a" stroke-width="2.5"/>',
+    bolt:'<path d="M 4 -18 L -8 2 L 0 2 L -4 18 L 10 -4 L 0 -4 Z" fill="#d4a73a"/>',
+    star:'<path d="M 0 -16 L 4 -4 L 16 -4 L 6 4 L 10 16 L 0 8 L -10 16 L -6 4 L -16 -4 L -4 -4 Z" fill="none" stroke="#d4a73a" stroke-width="1.8"/>',
+    crescent:'<path d="M 8 -16 A 16 16 0 1 0 8 16 A 11 13 0 1 1 8 -16 Z" fill="#d4a73a"/>',
+    sunburst:'<circle r="9" fill="#d4a73a"/><g stroke="#d4a73a" stroke-width="2">'+[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>'<line x1="0" y1="-12" x2="0" y2="-18" transform="rotate('+a+')"/>').join('')+'</g>',
+    trumpet:'<path d="M -14 4 L 8 4 L 14 -6 L 14 14 L 8 4" fill="none" stroke="#d4a73a" stroke-width="2"/><line x1="-14" y1="4" x2="-18" y2="4" stroke="#d4a73a" stroke-width="2"/>',
+    rings:'<circle cx="-6" r="10" fill="none" stroke="#d4a73a" stroke-width="2"/><circle cx="6" r="10" fill="none" stroke="#d4a73a" stroke-width="2"/>',
+  };
+  return g[glyph]||g.star;
+}
+function tarotCardSVG(card,reversed){
+  const W=140,H=196;
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:110px;height:154px;flex-shrink:0;'+(reversed?'transform:rotate(180deg)':'')+'">'+
+    '<rect x="2" y="2" width="'+(W-4)+'" height="'+(H-4)+'" rx="8" fill="#161024" stroke="#d4a73a" stroke-width="2"/>'+
+    '<rect x="9" y="9" width="'+(W-18)+'" height="'+(H-18)+'" rx="4" fill="none" stroke="rgba(212,167,58,0.4)" stroke-width="1"/>'+
+    '<text x="70" y="28" font-size="13" font-family="var(--mono)" fill="#d4a73a" text-anchor="middle" font-weight="700">'+card.num+'</text>'+
+    '<g transform="translate(70,98)">'+tarotGlyphSVG(card.glyph)+'</g>'+
+    '<text x="70" y="178" font-size="10" font-family="var(--mono)" fill="#d4a73a" text-anchor="middle" letter-spacing="1">'+card.name.toUpperCase()+'</text>'+
+  '</svg>';
+}
+function widgetTarot(){
+  const c=pick(TAROT_CARDS);
+  const reversed=Math.random()<0.5;
+  return card('violet','🔮 TAROT DRAW',
+    '<div style="display:flex;gap:16px;align-items:center">'+
+      tarotCardSVG(c,reversed)+
+      '<div>'+
+        '<div style="font-size:16px;font-weight:600;color:var(--text)">'+c.name+(reversed?' <span style="color:var(--muted);font-size:12px">(reversed)</span>':'')+'</div>'+
+        '<div class="fact-text" style="font-size:12px;margin-top:6px;color:var(--muted)">'+(reversed?'Reversed — consider the blocked or inward form: '+c.meaning.toLowerCase():c.meaning)+'</div>'+
+        '<div class="tag">Major Arcana</div>'+
+      '</div>'+
+    '</div>',
+    'For amusement, not divination'
+  );
+}
+
+/* ── DICE ROLL ─────────────────────────────── */
+const DIE_PIPS={
+  1:[[50,50]],
+  2:[[25,25],[75,75]],
+  3:[[25,25],[50,50],[75,75]],
+  4:[[25,25],[75,25],[25,75],[75,75]],
+  5:[[25,25],[75,25],[50,50],[25,75],[75,75]],
+  6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]],
+};
+function dieSVG(value,color){
+  const pips=DIE_PIPS[value].map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="7" fill="'+color+'"/>').join('');
+  return '<svg viewBox="0 0 100 100" style="width:64px;height:64px">'+
+    '<rect x="4" y="4" width="92" height="92" rx="14" fill="#f4f1ea" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>'+
+    pips+
+  '</svg>';
+}
+function widgetDice(){
+  const numDice=pick([1,2,2,3]);
+  const colors=['#1a1f2e','#d8334a','#3b82f6'];
+  const rolls=Array.from({length:numDice},()=>rnd(1,6));
+  const total=rolls.reduce((a,b)=>a+b,0);
+  const diceSVGs=rolls.map((r,i)=>dieSVG(r,colors[i%colors.length])).join('');
+  return card('red','🎲 DICE ROLL',
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+diceSVGs+'</div>'+
+    '<div class="big-value" style="text-align:center;margin-top:10px;font-size:2rem">'+total+'</div>'+
+    '<div class="sub-info" style="text-align:center">'+numDice+' × d6 → '+rolls.join(' + ')+'</div>',
+    'Pure chance, nothing more'
+  );
+}
+
+/* ── MORSE CODE ────────────────────────────── */
+const MORSE_MAP={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+const MORSE_WORDS=['HELLO','PULSE','SIGNAL','ECHO','RANDOM','VOYAGE','BEACON','ORBIT','CIPHER','DRIFT','SPARK','NOVA','QUIET','RADAR','ZENITH'];
+function widgetMorse(){
+  const word=pick(MORSE_WORDS);
+  const letters=word.split('');
+  const code=letters.map(l=>MORSE_MAP[l]).join(' / ');
+  const blocks=letters.map(l=>{
+    const symbols=MORSE_MAP[l].split('').map(s=>
+      '<div style="width:'+(s==='-'?'22px':'10px')+';height:10px;border-radius:5px;background:var(--theme-accent,#7eb4ff)"></div>'
+    ).join('');
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">'+
+      '<div style="display:flex;gap:3px;align-items:center;height:10px">'+symbols+'</div>'+
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--muted)">'+l+'</div>'+
+    '</div>';
+  }).join('');
+  return card('cyan','📡 MORSE CODE',
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'+blocks+'</div>'+
+    '<div class="big-label" style="text-align:center;margin-top:10px">'+word+'</div>'+
+    '<div class="sub-info" style="text-align:center;word-break:break-all">'+code+'</div>',
+    'Dot, dash, decode'
+  );
+}
+
+/* ── RANDOM EQUATION ───────────────────────── */
+const EQUATIONS=[
+  {eq:'E = mc²',name:'Mass–energy equivalence',field:'Physics',note:'Energy and mass are interchangeable, scaled by the speed of light squared.'},
+  {eq:'a² + b² = c²',name:'Pythagorean theorem',field:'Geometry',note:'In a right triangle, the square of the hypotenuse equals the sum of squares of the other two sides.'},
+  {eq:'F = ma',name:"Newton's second law",field:'Physics',note:'Force equals mass times acceleration — the foundation of classical mechanics.'},
+  {eq:'eiπ + 1 = 0',name:"Euler's identity",field:'Mathematics',note:'Links five fundamental constants in a single equation, often called the most beautiful in math.'},
+  {eq:'∇ · E = ρ/ε₀',name:"Gauss's law",field:'Electromagnetism',note:'Electric flux out of a volume is proportional to the charge enclosed within it.'},
+  {eq:'PV = nRT',name:'Ideal gas law',field:'Chemistry',note:'Relates pressure, volume, and temperature of an ideal gas to its amount of substance.'},
+  {eq:'S = k log W',name:'Boltzmann entropy',field:'Thermodynamics',note:'Entropy measures the number of microscopic ways a system can be arranged.'},
+  {eq:'i\u0127 ∂Ψ/∂t = ĤΨ',name:'Schrödinger equation',field:'Quantum Mechanics',note:'Describes how the quantum state of a system evolves over time.'},
+  {eq:'x = (-b ± √(b²-4ac)) / 2a',name:'Quadratic formula',field:'Algebra',note:'Solves any equation of the form ax² + bx + c = 0 for x.'},
+  {eq:'F = G(m₁m₂)/r²',name:"Newton's law of gravitation",field:'Physics',note:'Every mass attracts every other mass with a force that weakens with the square of distance.'},
+  {eq:'A = πr²',name:'Area of a circle',field:'Geometry',note:'The area enclosed by a circle depends only on the square of its radius.'},
+  {eq:'dS ≥ 0',name:'Second law of thermodynamics',field:'Thermodynamics',note:'The entropy of an isolated system never decreases over time.'},
+];
+function widgetEquation(){
+  const e=pick(EQUATIONS);
+  return card('amber','∑ RANDOM EQUATION',
+    '<div class="big-value" style="font-size:1.7rem;font-family:var(--mono)">'+e.eq+'</div>'+
+    '<div class="big-label" style="margin-top:8px;font-size:15px;color:var(--text)">'+e.name+'</div>'+
+    '<div class="tag" style="margin-top:4px">'+e.field+'</div>'+
+    '<div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">'+e.note+'</div>',
+    'One formula, picked at random'
   );
 }
 
@@ -2354,16 +2548,22 @@ const ALL_WIDGETS=[
   widgetPalette, widgetAscii, widgetBinary, widgetISS,
   widgetOnThisDay, widgetTyping, widgetMoon, widgetRandomYear,
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
-  widgetRecipe, widgetCoordinate, widgetPlayingCard,
+  widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
+  widgetDice, widgetMorse, widgetEquation,
 ];
 
 /* ── INIT ──────────────────────────────────── */
 function init(){
   applyRandomTheme();
+  applyRandomFontPairing();
+  applyRandomTitle();
   document.getElementById('tagline').innerHTML=
     pick(TAGLINES)+' &nbsp;/&nbsp; <span id="ts"></span>';
-  document.getElementById('ts').textContent=
-    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' local';
+  const tsEl=document.getElementById('ts');
+  const updateTs=()=>{tsEl.textContent=
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' local'};
+  updateTs();
+  setInterval(updateTs,1000);
   const chosen=shuffle(ALL_WIDGETS).slice(0,6);
   const accents=shuffle(ACCENTS);
   const grid=document.getElementById('grid');
