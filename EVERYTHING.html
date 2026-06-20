@@ -2,7 +2,7 @@
 <!--
   EVERY.THING
   ───────────
-  33 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  34 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
@@ -3196,6 +3196,100 @@ function widgetDinosaur(){
   return div;
 }
 
+/* ── RANDOM MOVIE (live API: Wikidata + Wikipedia) ── */
+const MOVIE_FALLBACK=[
+  {title:'The Godfather',year:'1972',extract:'A landmark crime drama following the Corleone mafia family, widely regarded as one of the greatest films ever made.'},
+  {title:'Pulp Fiction',year:'1994',extract:'A nonlinear crime film weaving together several interconnected Los Angeles stories, known for its sharp dialogue and soundtrack.'},
+  {title:'Spirited Away',year:'2001',extract:'A Studio Ghibli animated film about a girl trapped in a magical spirit world, and the highest-grossing film in Japanese history at release.'},
+  {title:'Mad Max: Fury Road',year:'2015',extract:'A high-octane post-apocalyptic chase film praised for its practical effects and minimal use of CGI.'},
+  {title:'Parasite',year:'2019',extract:'A South Korean dark comedy-thriller that became the first non-English-language film to win the Academy Award for Best Picture.'},
+  {title:'The Shining',year:'1980',extract:'A psychological horror film set in an isolated, haunted hotel, based on the novel by Stephen King.'},
+];
+// Wikidata holds a SPARQL-queryable graph of essentially every film with
+// metadata. We grab one at a random offset that has a poster image
+// (P3383) attached, then pull a real prose summary from Wikipedia's REST
+// API for that same title — much richer than any single Wikidata field.
+const MOVIE_SPARQL=
+  'SELECT ?film ?filmLabel ?image ?year WHERE {'+
+  '  ?film wdt:P31 wd:Q11424 ; wdt:P3383 ?image .'+
+  '  OPTIONAL { ?film wdt:P577 ?pubdate. BIND(YEAR(?pubdate) AS ?year) }'+
+  '  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }'+
+  '} LIMIT 1 OFFSET ';
+async function fetchWikidataFilm(){
+  // Films-with-posters is a large but bounded subset; a random offset
+  // into it (rather than ORDER BY on a hash, which forces a full sort)
+  // keeps this fast. If the offset lands past the end, the SELECT
+  // simply comes back empty and we retry with a fresh offset.
+  const offset=Math.floor(Math.random()*40000);
+  const url='https://query.wikidata.org/sparql?format=json&query='+
+    encodeURIComponent(MOVIE_SPARQL+offset);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),7000);
+  try{
+    const res=await fetch(url,{signal:controller.signal,headers:{'Accept':'application/sparql-results+json'}});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    const row=(d.results&&d.results.bindings&&d.results.bindings[0]);
+    if(!row||!row.filmLabel)throw new Error('empty result at offset '+offset);
+    return {
+      title:row.filmLabel.value,
+      year:row.year?row.year.value:'',
+      image:row.image?row.image.value:null
+    };
+  }finally{
+    clearTimeout(timer);
+  }
+}
+async function fetchWikipediaExtract(title){
+  const url='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title.replace(/ /g,'_'));
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),6000);
+  try{
+    const res=await fetch(url,{signal:controller.signal});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    return d.extract||null;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+async function fetchRandomMovie(){
+  const film=await fetchWikidataFilm();
+  let extract=null;
+  try{ extract=await fetchWikipediaExtract(film.title); }
+  catch(err){ console.warn('[widgetMovie] wikipedia extract failed:',err); }
+  return {title:film.title,year:film.year,image:film.image,extract};
+}
+function widgetMovie(){
+  const div=document.createElement('div');
+  div.innerHTML=card('violet','🎬 RANDOM MOVIE','<div class="loading">Scanning the marquee…</div>','Wikidata + Wikipedia · live');
+  setTimeout(async()=>{
+    let m=null;
+    for(let attempt=0;attempt<3&&!m;attempt++){
+      try{ m=await fetchRandomMovie(); }
+      catch(err){ console.warn('[widgetMovie] attempt '+(attempt+1)+' failed:',err); }
+    }
+    if(m){
+      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
+        (m.image?'<img src="'+m.image+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px;max-height:220px;object-fit:cover" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.title+'</div>'+
+        (m.year?'<div class="sub-info" style="margin-top:2px">'+m.year+'</div>':'')+
+        (m.extract?'<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+m.extract+'</div>':''),
+        'wikidata.org + en.wikipedia.org · live'
+      );
+    }else{
+      const f=pick(MOVIE_FALLBACK);
+      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+f.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+f.year+'</div>'+
+        '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+f.extract+'</div>',
+        'Offline fallback · API unreachable (see console)'
+      );
+    }
+  },50);
+  return div;
+}
+
 /* ── RANDOM VIDEOGAME (live API) ───────────── */
 const GAME_FALLBACK=[
   {title:'Minecraft',rating:'Overwhelmingly Positive',price:'$26.95'},
@@ -3306,7 +3400,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetGame, widgetBook,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook,
 ];
 
 /* ── INIT ──────────────────────────────────── */
