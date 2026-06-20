@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+<!--
+  EVERY.THING
+  ───────────
+  33 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  5 page-wide random systems outside the widget grid:
+    1. Random accent color / hue theme   (applyRandomTheme)
+    2. Random font pairing                (applyRandomFontPairing)
+    3. Random page <title>                (applyRandomTitle)
+    4. Random tagline under the header    (TAGLINES, picked in init())
+    5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon)
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -3099,11 +3110,13 @@ function widgetMovie(){
       const res=await fetch(url);
       if(!res.ok)throw new Error('bad response');
       const d=await res.json();
-      const results=(d.results||[]).filter(r=>r.trackName);
+      // Only keep results that actually have artwork, so the card never
+      // ends up showing a movie with no poster.
+      const results=(d.results||[]).filter(r=>r.trackName&&(r.artworkUrl100||r.artworkUrl60));
       if(!results.length)throw new Error('empty');
       const m=pick(results);
       const year=(m.releaseDate||'').slice(0,4);
-      const artBig=(m.artworkUrl100||'').replace('100x100','400x400');
+      const artBig=(m.artworkUrl100||m.artworkUrl60||'').replace(/100x100|60x60/,'400x400');
       div.innerHTML=card('violet','🎬 RANDOM MOVIE',
         (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px" loading="lazy">':'')+
         '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.trackName+'</div>'+
@@ -3131,47 +3144,47 @@ function widgetMovie(){
 
 /* ── RANDOM VIDEOGAME (live API) ───────────── */
 const GAME_FALLBACK=[
-  {title:'Minecraft',artist:'Mojang Studios',genre:'Sandbox',price:'$6.99'},
-  {title:'Stardew Valley',artist:'ConcernedApe',genre:'Simulation',price:'$4.99'},
-  {title:'Among Us',artist:'Innersloth',genre:'Social Deduction',price:'Free'},
-  {title:'Monument Valley',artist:'ustwo Games',genre:'Puzzle',price:'$3.99'},
-  {title:'Alto\u2019s Odyssey',artist:'Snowman',genre:'Adventure',price:'Free'},
-  {title:'Geometry Dash',artist:'RobTop Games',genre:'Arcade',price:'$1.99'},
+  {title:'Minecraft',rating:'Overwhelmingly Positive',price:'$26.95'},
+  {title:'Stardew Valley',rating:'Overwhelmingly Positive',price:'$14.99'},
+  {title:'Hades',rating:'Overwhelmingly Positive',price:'$24.99'},
+  {title:'Portal 2',rating:'Overwhelmingly Positive',price:'$9.99'},
+  {title:'Hollow Knight',rating:'Overwhelmingly Positive',price:'$14.99'},
+  {title:'Cyberpunk 2077',rating:'Very Positive',price:'$59.99'},
 ];
-// Searches the App Store's Games genre (genreId 6014) via the same iTunes
-// Search API, then picks one app at random from the batch.
+// CheapShark aggregates real PC games (Steam, GOG, Epic, etc.) and
+// fully supports direct browser CORS requests — no key needed.
+// We grab a page of current deals and pick one at random.
 function widgetGame(){
   const div=document.createElement('div');
-  div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME','<div class="loading">Loading high scores…</div>','iTunes Search API · live');
+  div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME','<div class="loading">Loading high scores…</div>','CheapShark API · live');
   setTimeout(async()=>{
     try{
-      const seed=pick(SONG_SEEDS);
-      const url='https://itunes.apple.com/search?term='+seed+'&media=software&entity=software&genreId=6014&limit=50';
+      const page=Math.floor(Math.random()*8);
+      const url='https://www.cheapshark.com/api/1.0/deals?pageSize=60&pageNumber='+page+'&sortBy=Reviews';
       const res=await fetch(url);
       if(!res.ok)throw new Error('bad response');
       const d=await res.json();
-      const results=(d.results||[]).filter(r=>r.trackName);
+      const results=(d||[]).filter(r=>r.title&&r.thumb);
       if(!results.length)throw new Error('empty');
       const g=pick(results);
-      const artBig=(g.artworkUrl100||'').replace('100x100','400x400');
-      const genre=(g.genres||[]).filter(x=>x!=='Games')[0]||g.primaryGenreName;
+      const price=parseFloat(g.salePrice)===0?'Free':'$'+g.salePrice;
       div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME',
-        (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:8px;display:block;margin-bottom:10px" loading="lazy">':'')+
-        '<div class="big-label" style="font-size:15px;color:var(--text)">'+g.trackName+'</div>'+
-        (g.artistName?'<div class="sub-info" style="margin-top:2px">'+g.artistName+'</div>':'')+
+        '<img src="'+g.thumb+'" style="width:100%;border-radius:8px;display:block;margin-bottom:10px" loading="lazy">'+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+g.title+'</div>'+
+        (g.steamRatingText?'<div class="sub-info" style="margin-top:2px">'+g.steamRatingText+' on Steam</div>':'')+
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-          (genre?'<span class="tag">'+genre+'</span>':'')+
-          '<span class="tag">'+(g.formattedPrice||'Free')+'</span>'+
+          (g.metacriticScore&&g.metacriticScore!=='0'?'<span class="tag">Metacritic '+g.metacriticScore+'</span>':'')+
+          '<span class="tag">'+price+'</span>'+
         '</div>',
-        'itunes.apple.com · App Store Games, live sample'
+        'cheapshark.com · live PC game catalog'
       );
     }catch{
       const g=pick(GAME_FALLBACK);
       div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME',
         '<div class="big-label" style="font-size:15px;color:var(--text)">'+g.title+'</div>'+
-        '<div class="sub-info" style="margin-top:2px">'+g.artist+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+g.rating+' on Steam</div>'+
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-          '<span class="tag">'+g.genre+'</span><span class="tag">'+g.price+'</span>'+
+          '<span class="tag">'+g.price+'</span>'+
         '</div>',
         'Offline fallback · API unreachable'
       );
