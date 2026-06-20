@@ -3102,74 +3102,50 @@ function widgetSong(){
   return div;
 }
 
-/* ── RANDOM MOVIE (live API) ───────────────── */
-const MOVIE_FALLBACK=[
-  {title:'The Godfather',artist:'Francis Ford Coppola',genre:'Drama',year:'1972'},
-  {title:'Pulp Fiction',artist:'Quentin Tarantino',genre:'Crime',year:'1994'},
-  {title:'Spirited Away',artist:'Hayao Miyazaki',genre:'Animation',year:'2001'},
-  {title:'Mad Max: Fury Road',artist:'George Miller',genre:'Action',year:'2015'},
-  {title:'Parasite',artist:'Bong Joon Ho',genre:'Thriller',year:'2019'},
-  {title:'The Shining',artist:'Stanley Kubrick',genre:'Horror',year:'1980'},
+/* ── RANDOM DINOSAUR (local generator) ───────── */
+// No live API needed — dinosaurs are extinct, so a curated local table
+// works just as well as a network call and never fails offline.
+const DINOSAURS=[
+  {name:'Tyrannosaurus rex',period:'Late Cretaceous',diet:'Carnivore',length:'12 m',fact:'Had one of the strongest bites of any land animal ever measured.'},
+  {name:'Triceratops',period:'Late Cretaceous',diet:'Herbivore',length:'9 m',fact:'Its frill may have been used for display rather than just defense.'},
+  {name:'Stegosaurus',period:'Late Jurassic',diet:'Herbivore',length:'9 m',fact:'The spikes on its tail are nicknamed the "thagomizer."'},
+  {name:'Velociraptor',period:'Late Cretaceous',diet:'Carnivore',length:'2 m',fact:'Was about the size of a turkey, not the movie-monster version.'},
+  {name:'Brachiosaurus',period:'Late Jurassic',diet:'Herbivore',length:'22 m',fact:'Its front legs were longer than its back legs, unlike most sauropods.'},
+  {name:'Spinosaurus',period:'Mid Cretaceous',diet:'Carnivore',length:'15 m',fact:'Likely the largest carnivorous dinosaur, and a strong swimmer.'},
+  {name:'Ankylosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'6.5 m',fact:'Armored in bony plates with a heavy club at the end of its tail.'},
+  {name:'Allosaurus',period:'Late Jurassic',diet:'Carnivore',length:'8.5 m',fact:'One of the most common large predators of the Jurassic period.'},
+  {name:'Parasaurolophus',period:'Late Cretaceous',diet:'Herbivore',length:'9.5 m',fact:'Its long head crest may have worked like a trombone for calls.'},
+  {name:'Diplodocus',period:'Late Jurassic',diet:'Herbivore',length:'25 m',fact:'Its whip-like tail may have been able to crack like a bullwhip.'},
+  {name:'Pteranodon',period:'Late Cretaceous',diet:'Carnivore',length:'~6 m wingspan',fact:'A flying reptile, not technically a dinosaur, with a wingspan over 6m.'},
+  {name:'Iguanodon',period:'Early Cretaceous',diet:'Herbivore',length:'10 m',fact:'One of the first dinosaurs ever named, back in 1825.'},
+  {name:'Pachycephalosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'4.5 m',fact:'Had a dome skull up to 25 cm thick, likely used in head-butting.'},
+  {name:'Carnotaurus',period:'Late Cretaceous',diet:'Carnivore',length:'8 m',fact:'Had unusually tiny arms even by theropod standards.'},
+  {name:'Therizinosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'10 m',fact:'Possessed the longest claws of any known animal, over 50 cm.'},
+  {name:'Compsognathus',period:'Late Jurassic',diet:'Carnivore',length:'1 m',fact:'One of the smallest known dinosaurs, roughly chicken-sized.'},
+  {name:'Archaeopteryx',period:'Late Jurassic',diet:'Carnivore',length:'0.5 m',fact:'A key fossil linking dinosaurs and modern birds.'},
+  {name:'Giganotosaurus',period:'Mid Cretaceous',diet:'Carnivore',length:'13 m',fact:'Rivaled T. rex in size and may have hunted in groups.'},
+  {name:'Dilophosaurus',period:'Early Jurassic',diet:'Carnivore',length:'7 m',fact:'Sported a pair of thin crests on its skull of uncertain purpose.'},
+  {name:'Apatosaurus',period:'Late Jurassic',diet:'Herbivore',length:'23 m',fact:'Formerly confused with "Brontosaurus," a name later revived as valid.'},
+  {name:'Microraptor',period:'Early Cretaceous',diet:'Carnivore',length:'0.8 m',fact:'Had feathered wings on both its arms and legs.'},
+  {name:'Styracosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'5.5 m',fact:'Sported a crown of long spikes ringing its neck frill.'},
+  {name:'Oviraptor',period:'Late Cretaceous',diet:'Omnivore',length:'2 m',fact:'Was once wrongly blamed for stealing eggs it was actually guarding.'},
+  {name:'Quetzalcoatlus',period:'Late Cretaceous',diet:'Carnivore',length:'~11 m wingspan',fact:'One of the largest flying animals ever, roughly the size of a giraffe.'},
+  {name:'Edmontosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'12 m',fact:'A duck-billed dinosaur known from rare fossils with preserved skin.'},
 ];
-// Same trick as the song widget: search the iTunes movie catalog, then
-// pick one result at random from the batch. Single letters work fine
-// against the huge song catalog but the movie catalog is much smaller,
-// so bare letters often return nothing (or no artwork) — these are common
-// words/names that reliably surface a wide spread of real movies instead.
-const MOVIE_SEEDS=['the','love','man','night','war','star','girl','king',
-  'dark','life','world','last','day','american','dream','story','house',
-  'good','black','blue','red','city','home','dead','heart','time','new',
-  'great','little','wild','lost','game','sun','moon','fire','ice','gold'];
-async function fetchRandomMovie(){
-  const seed=pick(MOVIE_SEEDS);
-  const url='https://itunes.apple.com/search?term='+seed+'&media=movie&entity=movie&limit=50';
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),6000);
-  try{
-    const res=await fetch(url,{signal:controller.signal});
-    if(!res.ok)throw new Error('bad response: '+res.status);
-    const d=await res.json();
-    const results=(d.results||[]).filter(r=>r.trackName&&(r.artworkUrl100||r.artworkUrl60));
-    if(!results.length)throw new Error('no results with artwork for seed "'+seed+'"');
-    return pick(results);
-  }finally{
-    clearTimeout(timer);
-  }
-}
-function widgetMovie(){
+const DINO_ACCENTS=['violet','teal','amber','green','cyan','orange'];
+function widgetDinosaur(){
   const div=document.createElement('div');
-  div.innerHTML=card('violet','🎬 RANDOM MOVIE','<div class="loading">Scanning the marquee…</div>','iTunes Search API · live');
-  setTimeout(async()=>{
-    let m=null;
-    for(let attempt=0;attempt<3&&!m;attempt++){
-      try{ m=await fetchRandomMovie(); }
-      catch(err){ console.warn('[widgetMovie] attempt '+(attempt+1)+' failed:',err); }
-    }
-    if(m){
-      const year=(m.releaseDate||'').slice(0,4);
-      const artBig=(m.artworkUrl100||m.artworkUrl60||'').replace(/100x100|60x60/,'400x400');
-      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
-        (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px" loading="lazy">':'')+
-        '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.trackName+'</div>'+
-        (m.artistName?'<div class="sub-info" style="margin-top:2px">Directed by '+m.artistName+'</div>':'')+
-        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-          (m.primaryGenreName?'<span class="tag">'+m.primaryGenreName+'</span>':'')+
-          (year?'<span class="tag">'+year+'</span>':'')+
-        '</div>',
-        'itunes.apple.com · pulled live from a 50-title sample'
-      );
-    }else{
-      const f=pick(MOVIE_FALLBACK);
-      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
-        '<div class="big-label" style="font-size:15px;color:var(--text)">'+f.title+'</div>'+
-        '<div class="sub-info" style="margin-top:2px">Directed by '+f.artist+'</div>'+
-        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-          '<span class="tag">'+f.genre+'</span><span class="tag">'+f.year+'</span>'+
-        '</div>',
-        'Offline fallback · API unreachable (see console)'
-      );
-    }
-  },50);
+  const d=pick(DINOSAURS);
+  const accent=pick(DINO_ACCENTS);
+  div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR',
+    '<div class="big-label" style="font-size:17px;color:var(--text);font-style:italic">'+d.name+'</div>'+
+    '<div class="sub-info" style="margin-top:4px">'+d.length+' long · '+d.diet+'</div>'+
+    '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+      '<span class="tag">'+d.period+'</span><span class="tag">'+d.diet+'</span>'+
+    '</div>'+
+    '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+d.fact+'</div>',
+    'Local dataset · '+DINOSAURS.length+' species in rotation'
+  );
   return div;
 }
 
@@ -3283,7 +3259,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetMovie, widgetGame, widgetBook,
+  widgetDinosaur, widgetGame, widgetBook,
 ];
 
 /* ── INIT ──────────────────────────────────── */
