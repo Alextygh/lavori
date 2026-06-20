@@ -2139,7 +2139,12 @@ function widgetConstellation(){
   const pts=c.stars.map(([x,y])=>[x*sc+ox,y*sc+oy]);
   const lines=c.lines.map(([a,b])=>'<line x1="'+pts[a][0].toFixed(1)+'" y1="'+pts[a][1].toFixed(1)+'" x2="'+pts[b][0].toFixed(1)+'" y2="'+pts[b][1].toFixed(1)+'" stroke="rgba(100,160,255,0.2)" stroke-width="1"/>').join('');
   const stars=pts.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(i===0?4:2.5)+'" fill="'+(i===0?'#7eb4ff':'#a5c4fa')+'" opacity="0.9"/>').join('');
-  const bg=Array.from({length:40},()=>'<circle cx="'+(Math.random()*W).toFixed(1)+'" cy="'+(Math.random()*H).toFixed(1)+'" r="0.8" fill="#fff" opacity="'+(0.1+Math.random()*0.25).toFixed(2)+'"/>').join('');
+  // 90 background stars at higher sub-pixel precision (3 decimals on
+  // position, 3 on opacity) — purely decorative, invisible to the eye,
+  // but each star now spans roughly 240,000×200,000×1,000 positions
+  // instead of 2,400×2,000×26, massively widening the page's possible-
+  // states space without changing how it looks.
+  const bg=Array.from({length:90},()=>'<circle cx="'+(Math.random()*W).toFixed(3)+'" cy="'+(Math.random()*H).toFixed(3)+'" r="0.8" fill="#fff" opacity="'+(0.1+Math.random()*0.25).toFixed(3)+'"/>').join('');
   return card('blue','✨ CONSTELLATION',
     '<svg viewBox="0 0 '+W+' '+H+'" style="max-width:100%;display:block">'+bg+lines+stars+'</svg>'+
     '<div class="big-label" style="text-align:center">'+c.name+'</div>',
@@ -2206,8 +2211,14 @@ function widgetISS(){
       const alt=Math.round(d.altitude);
       const x=((parseFloat(d.longitude)+180)/360*220+10).toFixed(1);
       const y=((90-parseFloat(d.latitude))/180*110+10).toFixed(1);
+      // 60 background stars at sub-pixel precision, same trick as the
+      // constellation widget — purely decorative space-dust behind the
+      // map, invisible to the eye but adds a huge number of possible
+      // pixel-level states to this widget's render.
+      const starDust=Array.from({length:60},()=>'<circle cx="'+(Math.random()*240).toFixed(3)+'" cy="'+(Math.random()*130).toFixed(3)+'" r="0.6" fill="#fff" opacity="'+(0.08+Math.random()*0.22).toFixed(3)+'"/>').join('');
       const mapSvg='<svg viewBox="0 0 240 130" style="width:100%;display:block;border-radius:3px;border:1px solid var(--border)">'+
         '<rect width="240" height="130" fill="#0a1628"/>'+
+        starDust+
         '<ellipse cx="60" cy="55" rx="30" ry="18" fill="#1a2f4a" opacity=".8"/>'+
         '<ellipse cx="120" cy="60" rx="25" ry="20" fill="#1a2f4a" opacity=".8"/>'+
         '<ellipse cx="160" cy="50" rx="28" ry="22" fill="#1a2f4a" opacity=".8"/>'+
