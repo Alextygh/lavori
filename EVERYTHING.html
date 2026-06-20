@@ -2980,6 +2980,104 @@ function widgetEquation(){
   );
 }
 
+/* ── RANDOM EMOJI (live API) ───────────────── */
+// Backup set used only if the API can't be reached, so the widget
+// never just shows an error.
+const EMOJI_FALLBACK=[
+  {name:'grinning face',category:'smileys and people',htmlCode:'😀'},
+  {name:'fire',category:'objects',htmlCode:'🔥'},
+  {name:'rocket',category:'travel and places',htmlCode:'🚀'},
+  {name:'alien monster',category:'smileys and people',htmlCode:'👾'},
+  {name:'rainbow',category:'travel and places',htmlCode:'🌈'},
+  {name:'crab',category:'animals and nature',htmlCode:'🦀'},
+  {name:'taco',category:'food and drink',htmlCode:'🌮'},
+  {name:'crystal ball',category:'activities',htmlCode:'🔮'},
+];
+function widgetEmoji(){
+  const div=document.createElement('div');
+  div.innerHTML=card('lime','🎲 RANDOM EMOJI','<div class="loading">Spinning the emoji wheel…</div>','emojihub.yurace.pro · live API');
+  setTimeout(async()=>{
+    try{
+      const res=await fetch('https://emojihub.yurace.pro/api/random');
+      if(!res.ok)throw new Error('bad response');
+      const d=await res.json();
+      const glyph=(d.htmlCode||[]).map(code=>{
+        const num=code.replace(/&#|;/g,'').trim();
+        return String.fromCodePoint(parseInt(num,10));
+      }).join('');
+      div.innerHTML=card('lime','🎲 RANDOM EMOJI',
+        '<div style="font-size:4rem;line-height:1;text-align:center">'+glyph+'</div>'+
+        '<div class="big-label" style="text-align:center;margin-top:10px;text-transform:capitalize">'+d.name+'</div>'+
+        '<div class="tag" style="display:block;text-align:center;width:fit-content;margin:6px auto 0;text-transform:capitalize">'+d.category+'</div>',
+        'emojihub.yurace.pro · fetched live, 1700+ emoji'
+      );
+    }catch{
+      const e=pick(EMOJI_FALLBACK);
+      div.innerHTML=card('lime','🎲 RANDOM EMOJI',
+        '<div style="font-size:4rem;line-height:1;text-align:center">'+e.htmlCode+'</div>'+
+        '<div class="big-label" style="text-align:center;margin-top:10px;text-transform:capitalize">'+e.name+'</div>'+
+        '<div class="tag" style="display:block;text-align:center;width:fit-content;margin:6px auto 0;text-transform:capitalize">'+e.category+'</div>',
+        'Offline fallback · API unreachable'
+      );
+    }
+  },50);
+  return div;
+}
+
+/* ── RANDOM SONG (live API) ────────────────── */
+// Backup set used only if the API can't be reached.
+const SONG_FALLBACK=[
+  {track:'Bohemian Rhapsody',artist:'Queen',album:'A Night at the Opera',genre:'Rock',year:'1975'},
+  {track:'Billie Jean',artist:'Michael Jackson',album:'Thriller',genre:'Pop',year:'1982'},
+  {track:'Hotel California',artist:'Eagles',album:'Hotel California',genre:'Rock',year:'1976'},
+  {track:'Like a Prayer',artist:'Madonna',album:'Like a Prayer',genre:'Pop',year:'1989'},
+  {track:'Smells Like Teen Spirit',artist:'Nirvana',album:'Nevermind',genre:'Grunge',year:'1991'},
+  {track:'Hey Ya!',artist:'OutKast',album:'Speakerboxxx/The Love Below',genre:'Hip-Hop',year:'2003'},
+];
+// Search the iTunes catalog with a single random letter/digit, pull back
+// a batch of tracks, then pick one at random — the closest thing to a
+// genuine "random song" the public iTunes Search API can offer.
+const SONG_SEEDS='abcdefghijklmnopqrstuvwxyz'.split('');
+function widgetSong(){
+  const div=document.createElement('div');
+  div.innerHTML=card('pink','🎵 RANDOM SONG','<div class="loading">Digging through the crates…</div>','iTunes Search API · live');
+  setTimeout(async()=>{
+    try{
+      const seed=pick(SONG_SEEDS);
+      const url='https://itunes.apple.com/search?term='+seed+'&media=music&entity=song&limit=50';
+      const res=await fetch(url);
+      if(!res.ok)throw new Error('bad response');
+      const d=await res.json();
+      const results=(d.results||[]).filter(r=>r.trackName&&r.artistName);
+      if(!results.length)throw new Error('empty');
+      const t=pick(results);
+      const year=(t.releaseDate||'').slice(0,4);
+      const artBig=(t.artworkUrl100||'').replace('100x100','300x300');
+      div.innerHTML=card('pink','🎵 RANDOM SONG',
+        (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+t.trackName+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+t.artistName+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          (t.primaryGenreName?'<span class="tag">'+t.primaryGenreName+'</span>':'')+
+          (year?'<span class="tag">'+year+'</span>':'')+
+        '</div>',
+        'itunes.apple.com · pulled live from a 50-track sample'
+      );
+    }catch{
+      const s=pick(SONG_FALLBACK);
+      div.innerHTML=card('pink','🎵 RANDOM SONG',
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+s.track+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+s.artist+' · '+s.album+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+s.genre+'</span><span class="tag">'+s.year+'</span>'+
+        '</div>',
+        'Offline fallback · API unreachable'
+      );
+    }
+  },50);
+  return div;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -2988,7 +3086,7 @@ const ALL_WIDGETS=[
   widgetOnThisDay, widgetTyping, widgetMoon, widgetRandomYear,
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
-  widgetDice, widgetMorse, widgetEquation,
+  widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
 ];
 
 /* ── INIT ──────────────────────────────────── */
