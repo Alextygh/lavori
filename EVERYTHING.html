@@ -3078,6 +3078,158 @@ function widgetSong(){
   return div;
 }
 
+/* ── RANDOM MOVIE (live API) ───────────────── */
+const MOVIE_FALLBACK=[
+  {title:'The Godfather',artist:'Francis Ford Coppola',genre:'Drama',year:'1972'},
+  {title:'Pulp Fiction',artist:'Quentin Tarantino',genre:'Crime',year:'1994'},
+  {title:'Spirited Away',artist:'Hayao Miyazaki',genre:'Animation',year:'2001'},
+  {title:'Mad Max: Fury Road',artist:'George Miller',genre:'Action',year:'2015'},
+  {title:'Parasite',artist:'Bong Joon Ho',genre:'Thriller',year:'2019'},
+  {title:'The Shining',artist:'Stanley Kubrick',genre:'Horror',year:'1980'},
+];
+// Same trick as the song widget: search the iTunes movie catalog with a
+// random letter, then pick one result at random from the batch.
+function widgetMovie(){
+  const div=document.createElement('div');
+  div.innerHTML=card('violet','🎬 RANDOM MOVIE','<div class="loading">Scanning the marquee…</div>','iTunes Search API · live');
+  setTimeout(async()=>{
+    try{
+      const seed=pick(SONG_SEEDS);
+      const url='https://itunes.apple.com/search?term='+seed+'&media=movie&entity=movie&limit=50';
+      const res=await fetch(url);
+      if(!res.ok)throw new Error('bad response');
+      const d=await res.json();
+      const results=(d.results||[]).filter(r=>r.trackName);
+      if(!results.length)throw new Error('empty');
+      const m=pick(results);
+      const year=(m.releaseDate||'').slice(0,4);
+      const artBig=(m.artworkUrl100||'').replace('100x100','400x400');
+      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
+        (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.trackName+'</div>'+
+        (m.artistName?'<div class="sub-info" style="margin-top:2px">Directed by '+m.artistName+'</div>':'')+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          (m.primaryGenreName?'<span class="tag">'+m.primaryGenreName+'</span>':'')+
+          (year?'<span class="tag">'+year+'</span>':'')+
+        '</div>',
+        'itunes.apple.com · pulled live from a 50-title sample'
+      );
+    }catch{
+      const m=pick(MOVIE_FALLBACK);
+      div.innerHTML=card('violet','🎬 RANDOM MOVIE',
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">Directed by '+m.artist+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+m.genre+'</span><span class="tag">'+m.year+'</span>'+
+        '</div>',
+        'Offline fallback · API unreachable'
+      );
+    }
+  },50);
+  return div;
+}
+
+/* ── RANDOM VIDEOGAME (live API) ───────────── */
+const GAME_FALLBACK=[
+  {title:'Minecraft',artist:'Mojang Studios',genre:'Sandbox',price:'$6.99'},
+  {title:'Stardew Valley',artist:'ConcernedApe',genre:'Simulation',price:'$4.99'},
+  {title:'Among Us',artist:'Innersloth',genre:'Social Deduction',price:'Free'},
+  {title:'Monument Valley',artist:'ustwo Games',genre:'Puzzle',price:'$3.99'},
+  {title:'Alto\u2019s Odyssey',artist:'Snowman',genre:'Adventure',price:'Free'},
+  {title:'Geometry Dash',artist:'RobTop Games',genre:'Arcade',price:'$1.99'},
+];
+// Searches the App Store's Games genre (genreId 6014) via the same iTunes
+// Search API, then picks one app at random from the batch.
+function widgetGame(){
+  const div=document.createElement('div');
+  div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME','<div class="loading">Loading high scores…</div>','iTunes Search API · live');
+  setTimeout(async()=>{
+    try{
+      const seed=pick(SONG_SEEDS);
+      const url='https://itunes.apple.com/search?term='+seed+'&media=software&entity=software&genreId=6014&limit=50';
+      const res=await fetch(url);
+      if(!res.ok)throw new Error('bad response');
+      const d=await res.json();
+      const results=(d.results||[]).filter(r=>r.trackName);
+      if(!results.length)throw new Error('empty');
+      const g=pick(results);
+      const artBig=(g.artworkUrl100||'').replace('100x100','400x400');
+      const genre=(g.genres||[]).filter(x=>x!=='Games')[0]||g.primaryGenreName;
+      div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME',
+        (artBig?'<img src="'+artBig+'" style="width:100%;border-radius:8px;display:block;margin-bottom:10px" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+g.trackName+'</div>'+
+        (g.artistName?'<div class="sub-info" style="margin-top:2px">'+g.artistName+'</div>':'')+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          (genre?'<span class="tag">'+genre+'</span>':'')+
+          '<span class="tag">'+(g.formattedPrice||'Free')+'</span>'+
+        '</div>',
+        'itunes.apple.com · App Store Games, live sample'
+      );
+    }catch{
+      const g=pick(GAME_FALLBACK);
+      div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME',
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+g.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+g.artist+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+g.genre+'</span><span class="tag">'+g.price+'</span>'+
+        '</div>',
+        'Offline fallback · API unreachable'
+      );
+    }
+  },50);
+  return div;
+}
+
+/* ── RANDOM BOOK (live API) ────────────────── */
+const BOOK_FALLBACK=[
+  {title:'Pride and Prejudice',author:'Jane Austen',subject:'Romance'},
+  {title:'Dune',author:'Frank Herbert',subject:'Science Fiction'},
+  {title:'The Hobbit',author:'J.R.R. Tolkien',subject:'Fantasy'},
+  {title:'1984',author:'George Orwell',subject:'Dystopian'},
+  {title:'Beloved',author:'Toni Morrison',subject:'Literary Fiction'},
+  {title:'Sapiens',author:'Yuval Noah Harari',subject:'Nonfiction'},
+];
+const BOOK_SUBJECTS=['fiction','fantasy','mystery','romance','science_fiction','horror','poetry','history','philosophy','biography','adventure','thriller','classics','drama','comics'];
+function widgetBook(){
+  const div=document.createElement('div');
+  div.innerHTML=card('cyan','📚 RANDOM BOOK','<div class="loading">Browsing the stacks…</div>','openlibrary.org · live API');
+  setTimeout(async()=>{
+    try{
+      const subject=pick(BOOK_SUBJECTS);
+      const offset=Math.floor(Math.random()*150);
+      const url='https://openlibrary.org/subjects/'+subject+'.json?limit=1&offset='+offset;
+      const res=await fetch(url);
+      if(!res.ok)throw new Error('bad response');
+      const d=await res.json();
+      const w=(d.works||[])[0];
+      if(!w)throw new Error('empty');
+      const author=(w.authors||[])[0]?.name||'Unknown author';
+      const cover=w.cover_id?'https://covers.openlibrary.org/b/id/'+w.cover_id+'-L.jpg':'';
+      div.innerHTML=card('cyan','📚 RANDOM BOOK',
+        (cover?'<img src="'+cover+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+w.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+author+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag" style="text-transform:capitalize">'+subject.replace('_',' ')+'</span>'+
+          (w.first_publish_year?'<span class="tag">'+w.first_publish_year+'</span>':'')+
+        '</div>',
+        'openlibrary.org · live, from the '+subject.replace('_',' ')+' shelf'
+      );
+    }catch{
+      const b=pick(BOOK_FALLBACK);
+      div.innerHTML=card('cyan','📚 RANDOM BOOK',
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+b.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">'+b.author+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+b.subject+'</span>'+
+        '</div>',
+        'Offline fallback · API unreachable'
+      );
+    }
+  },50);
+  return div;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -3087,6 +3239,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
+  widgetMovie, widgetGame, widgetBook,
 ];
 
 /* ── INIT ──────────────────────────────────── */
