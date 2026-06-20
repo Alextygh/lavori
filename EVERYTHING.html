@@ -3102,9 +3102,10 @@ function widgetSong(){
   return div;
 }
 
-/* ── RANDOM DINOSAUR (local generator) ───────── */
-// No live API needed — dinosaurs are extinct, so a curated local table
-// works just as well as a network call and never fails offline.
+/* ── RANDOM DINOSAUR (live API) ──────────────── */
+// Pulls a real summary + thumbnail from Wikipedia's REST API for a
+// randomly-seeded dinosaur genus. Falls back to this same local table
+// (used as both the seed list and the offline data) if the fetch fails.
 const DINOSAURS=[
   {name:'Tyrannosaurus rex',period:'Late Cretaceous',diet:'Carnivore',length:'12 m',fact:'Had one of the strongest bites of any land animal ever measured.'},
   {name:'Triceratops',period:'Late Cretaceous',diet:'Herbivore',length:'9 m',fact:'Its frill may have been used for display rather than just defense.'},
@@ -3133,19 +3134,65 @@ const DINOSAURS=[
   {name:'Edmontosaurus',period:'Late Cretaceous',diet:'Herbivore',length:'12 m',fact:'A duck-billed dinosaur known from rare fossils with preserved skin.'},
 ];
 const DINO_ACCENTS=['violet','teal','amber','green','cyan','orange'];
+async function fetchRandomDinosaur(){
+  const seed=pick(DINOSAURS);
+  // Use just the genus (first word) — Wikipedia pages are titled by genus,
+  // e.g. "Tyrannosaurus" rather than "Tyrannosaurus rex".
+  const genus=seed.name.split(' ')[0];
+  const url='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(genus);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),6000);
+  try{
+    const res=await fetch(url,{signal:controller.signal});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    if(!d.extract)throw new Error('no extract for "'+genus+'"');
+    return {
+      name:seed.name,
+      period:seed.period,
+      diet:seed.diet,
+      length:seed.length,
+      extract:d.extract,
+      thumb:(d.thumbnail&&d.thumbnail.source)||null
+    };
+  }finally{
+    clearTimeout(timer);
+  }
+}
 function widgetDinosaur(){
   const div=document.createElement('div');
-  const d=pick(DINOSAURS);
   const accent=pick(DINO_ACCENTS);
-  div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR',
-    '<div class="big-label" style="font-size:17px;color:var(--text);font-style:italic">'+d.name+'</div>'+
-    '<div class="sub-info" style="margin-top:4px">'+d.length+' long · '+d.diet+'</div>'+
-    '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-      '<span class="tag">'+d.period+'</span><span class="tag">'+d.diet+'</span>'+
-    '</div>'+
-    '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+d.fact+'</div>',
-    'Local dataset · '+DINOSAURS.length+' species in rotation'
-  );
+  div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR','<div class="loading">Digging up a fossil…</div>','Wikipedia REST API · live');
+  setTimeout(async()=>{
+    let d=null;
+    for(let attempt=0;attempt<3&&!d;attempt++){
+      try{ d=await fetchRandomDinosaur(); }
+      catch(err){ console.warn('[widgetDinosaur] attempt '+(attempt+1)+' failed:',err); }
+    }
+    if(d){
+      div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR',
+        (d.thumb?'<img src="'+d.thumb+'" style="width:100%;border-radius:4px;display:block;margin-bottom:10px;max-height:160px;object-fit:cover" loading="lazy">':'')+
+        '<div class="big-label" style="font-size:17px;color:var(--text);font-style:italic">'+d.name+'</div>'+
+        '<div class="sub-info" style="margin-top:4px">'+d.length+' long · '+d.diet+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+d.period+'</span><span class="tag">'+d.diet+'</span>'+
+        '</div>'+
+        '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+d.extract+'</div>',
+        'en.wikipedia.org · live summary'
+      );
+    }else{
+      const f=pick(DINOSAURS);
+      div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR',
+        '<div class="big-label" style="font-size:17px;color:var(--text);font-style:italic">'+f.name+'</div>'+
+        '<div class="sub-info" style="margin-top:4px">'+f.length+' long · '+f.diet+'</div>'+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<span class="tag">'+f.period+'</span><span class="tag">'+f.diet+'</span>'+
+        '</div>'+
+        '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+f.fact+'</div>',
+        'Offline fallback · API unreachable (see console)'
+      );
+    }
+  },50);
   return div;
 }
 
