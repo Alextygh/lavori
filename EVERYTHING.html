@@ -3111,14 +3111,17 @@ const MOVIE_FALLBACK=[
   {title:'Parasite',artist:'Bong Joon Ho',genre:'Thriller',year:'2019'},
   {title:'The Shining',artist:'Stanley Kubrick',genre:'Horror',year:'1980'},
 ];
-// Same trick as the song widget: search the iTunes movie catalog with a
-// random letter, then pick one result at random from the batch.
-// Hardened with: a request timeout (so a hung request doesn't just spin),
-// one automatic retry with a different seed letter if the first attempt
-// comes back empty, and a console.warn so failures are diagnosable instead
-// of silently dropping to the offline fallback.
+// Same trick as the song widget: search the iTunes movie catalog, then
+// pick one result at random from the batch. Single letters work fine
+// against the huge song catalog but the movie catalog is much smaller,
+// so bare letters often return nothing (or no artwork) — these are common
+// words/names that reliably surface a wide spread of real movies instead.
+const MOVIE_SEEDS=['the','love','man','night','war','star','girl','king',
+  'dark','life','world','last','day','american','dream','story','house',
+  'good','black','blue','red','city','home','dead','heart','time','new',
+  'great','little','wild','lost','game','sun','moon','fire','ice','gold'];
 async function fetchRandomMovie(){
-  const seed=pick(SONG_SEEDS);
+  const seed=pick(MOVIE_SEEDS);
   const url='https://itunes.apple.com/search?term='+seed+'&media=movie&entity=movie&limit=50';
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),6000);
@@ -3138,7 +3141,7 @@ function widgetMovie(){
   div.innerHTML=card('violet','🎬 RANDOM MOVIE','<div class="loading">Scanning the marquee…</div>','iTunes Search API · live');
   setTimeout(async()=>{
     let m=null;
-    for(let attempt=0;attempt<2&&!m;attempt++){
+    for(let attempt=0;attempt<3&&!m;attempt++){
       try{ m=await fetchRandomMovie(); }
       catch(err){ console.warn('[widgetMovie] attempt '+(attempt+1)+' failed:',err); }
     }
