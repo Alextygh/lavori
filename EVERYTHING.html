@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EVERY.THING</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;700&family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;700&family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600;700&family=Manrope:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500;700&family=Lexend:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&family=Albert+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Onest:wght@400;500;600;700&family=Martian+Mono:wght@400;600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#080c14;--surface:#0d1220;--border:rgba(100,140,220,0.15);--border-bright:rgba(100,160,255,0.3);--text:#e2e8f4;--muted:#5a6a8a;--mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:20px;overflow-x:hidden}
@@ -77,6 +77,10 @@
 
   /* ON THIS DAY */
   .year-badge{font-family:var(--mono);font-size:2rem;font-weight:700;color:#fff;line-height:1}
+
+  /* PASTE-BLOCK POPUP */
+  .paste-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(0);background:#181d2c;border:1px solid var(--border-bright);color:var(--text);font-family:var(--mono);font-size:13px;letter-spacing:.04em;padding:12px 20px;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,0.45);z-index:10000;opacity:0;transition:opacity .2s, transform .2s;pointer-events:none}
+  .paste-toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
 </style>
 </head>
 <body>
@@ -100,6 +104,21 @@ function card(accent,label,html,footer){
     '<div class="card-main">'+html+'</div>'+
     (footer?'<div class="card-footer">'+footer+'</div>':'')+
   '</div>';
+}
+
+/* ── TOAST POPUP ───────────────────────────── */
+let _toastEl=null;
+let _toastTimer=null;
+function showToast(msg){
+  if(!_toastEl){
+    _toastEl=document.createElement('div');
+    _toastEl.className='paste-toast';
+    document.body.appendChild(_toastEl);
+  }
+  _toastEl.textContent=msg;
+  clearTimeout(_toastTimer);
+  requestAnimationFrame(()=>_toastEl.classList.add('show'));
+  _toastTimer=setTimeout(()=>{_toastEl.classList.remove('show')},1600);
 }
 
 /* ── TAGLINES ──────────────────────────────── */
@@ -217,6 +236,20 @@ const FONT_PAIRINGS=[
   {mono:"'DM Mono',monospace",sans:"'Outfit',sans-serif"},
   {mono:"'JetBrains Mono',monospace",sans:"'Sora',sans-serif"},
   {mono:"'Space Mono',monospace",sans:"'Outfit',sans-serif"},
+  {mono:"'IBM Plex Mono',monospace",sans:"'Inter',sans-serif"},
+  {mono:"'Source Code Pro',monospace",sans:"'Manrope',sans-serif"},
+  {mono:"'Roboto Mono',monospace",sans:"'Plus Jakarta Sans',sans-serif"},
+  {mono:"'Red Hat Mono',monospace",sans:"'Lexend',sans-serif"},
+  {mono:"'Azeret Mono',monospace",sans:"'Albert Sans',sans-serif"},
+  {mono:"'Spline Sans Mono',monospace",sans:"'Onest',sans-serif"},
+  {mono:"'Martian Mono',monospace",sans:"'Hanken Grotesk',sans-serif"},
+  {mono:"'DM Mono',monospace",sans:"'Manrope',sans-serif"},
+  {mono:"'Fira Code',monospace",sans:"'Lexend',sans-serif"},
+  {mono:"'IBM Plex Mono',monospace",sans:"'Hanken Grotesk',sans-serif"},
+  {mono:"'Source Code Pro',monospace",sans:"'IBM Plex Sans',sans-serif"},
+  {mono:"'Space Mono',monospace",sans:"'Albert Sans',sans-serif"},
+  {mono:"'Roboto Mono',monospace",sans:"'Onest',sans-serif"},
+  {mono:"'Spline Sans Mono',monospace",sans:"'Plus Jakarta Sans',sans-serif"},
 ];
 function applyRandomFontPairing(){
   const f=pick(FONT_PAIRINGS);
@@ -2216,6 +2249,17 @@ function widgetTyping(){
     const inp=document.getElementById(id);const stat=document.getElementById(sid);
     if(!inp)return;
     let startTime=null;
+    inp.addEventListener('paste',(e)=>{
+      e.preventDefault();
+      showToast("it doesn't work like that");
+    });
+    inp.addEventListener('drop',(e)=>{
+      e.preventDefault();
+      showToast("it doesn't work like that");
+    });
+    inp.addEventListener('contextmenu',(e)=>{
+      e.preventDefault();
+    });
     inp.addEventListener('input',()=>{
       if(!startTime&&inp.value.length>0)startTime=Date.now();
       const val=inp.value;const correct=sentence.startsWith(val);
@@ -3015,6 +3059,16 @@ init();
   }
 
   // Load Font Awesome 6 Free webfont, then draw the favicon once it's ready.
+  // Guarded so the icon is only ever drawn ONCE — otherwise the fallback
+  // timer and the font-ready path can both fire and the icon visibly
+  // changes a split second after load.
+  let faviconDrawn=false;
+  function drawOnce(){
+    if(faviconDrawn)return;
+    faviconDrawn=true;
+    buildFontAwesomeFavicon();
+  }
+
   const faLink=document.createElement('link');
   faLink.rel='stylesheet';
   faLink.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
@@ -3023,13 +3077,15 @@ init();
   if(document.fonts && document.fonts.ready){
     faLink.onload=function(){
       document.fonts.load('900 38px "Font Awesome 6 Free"').then(function(){
-        document.fonts.load('400 38px "Font Awesome 6 Brands"').then(buildFontAwesomeFavicon);
-      }).catch(buildFontAwesomeFavicon);
+        document.fonts.load('400 38px "Font Awesome 6 Brands"').then(drawOnce);
+      }).catch(drawOnce);
     };
-    // Fallback in case fonts API or onload doesn't fire promptly
-    setTimeout(buildFontAwesomeFavicon,800);
+    faLink.onerror=drawOnce;
+    // Fallback in case fonts API or onload doesn't fire promptly —
+    // drawOnce() ensures this can't cause a second, different icon.
+    setTimeout(drawOnce,800);
   }else{
-    setTimeout(buildFontAwesomeFavicon,500);
+    setTimeout(drawOnce,500);
   }
 })();
 </script>
