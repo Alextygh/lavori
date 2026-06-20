@@ -3049,19 +3049,32 @@ const SONG_FALLBACK=[
 // a batch of tracks, then pick one at random — the closest thing to a
 // genuine "random song" the public iTunes Search API can offer.
 const SONG_SEEDS='abcdefghijklmnopqrstuvwxyz'.split('');
+async function fetchRandomSong(){
+  const seed=pick(SONG_SEEDS);
+  const url='https://itunes.apple.com/search?term='+seed+'&media=music&entity=song&limit=50';
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),6000);
+  try{
+    const res=await fetch(url,{signal:controller.signal});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    const results=(d.results||[]).filter(r=>r.trackName&&r.artistName);
+    if(!results.length)throw new Error('no results for seed "'+seed+'"');
+    return pick(results);
+  }finally{
+    clearTimeout(timer);
+  }
+}
 function widgetSong(){
   const div=document.createElement('div');
   div.innerHTML=card('pink','🎵 RANDOM SONG','<div class="loading">Digging through the crates…</div>','iTunes Search API · live');
   setTimeout(async()=>{
-    try{
-      const seed=pick(SONG_SEEDS);
-      const url='https://itunes.apple.com/search?term='+seed+'&media=music&entity=song&limit=50';
-      const res=await fetch(url);
-      if(!res.ok)throw new Error('bad response');
-      const d=await res.json();
-      const results=(d.results||[]).filter(r=>r.trackName&&r.artistName);
-      if(!results.length)throw new Error('empty');
-      const t=pick(results);
+    let t=null;
+    for(let attempt=0;attempt<2&&!t;attempt++){
+      try{ t=await fetchRandomSong(); }
+      catch(err){ console.warn('[widgetSong] attempt '+(attempt+1)+' failed:',err); }
+    }
+    if(t){
       const year=(t.releaseDate||'').slice(0,4);
       const artBig=(t.artworkUrl100||'').replace('100x100','300x300');
       div.innerHTML=card('pink','🎵 RANDOM SONG',
@@ -3074,7 +3087,7 @@ function widgetSong(){
         '</div>',
         'itunes.apple.com · pulled live from a 50-track sample'
       );
-    }catch{
+    }else{
       const s=pick(SONG_FALLBACK);
       div.innerHTML=card('pink','🎵 RANDOM SONG',
         '<div class="big-label" style="font-size:15px;color:var(--text)">'+s.track+'</div>'+
@@ -3082,7 +3095,7 @@ function widgetSong(){
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
           '<span class="tag">'+s.genre+'</span><span class="tag">'+s.year+'</span>'+
         '</div>',
-        'Offline fallback · API unreachable'
+        'Offline fallback · API unreachable (see console)'
       );
     }
   },50);
@@ -3100,21 +3113,36 @@ const MOVIE_FALLBACK=[
 ];
 // Same trick as the song widget: search the iTunes movie catalog with a
 // random letter, then pick one result at random from the batch.
+// Hardened with: a request timeout (so a hung request doesn't just spin),
+// one automatic retry with a different seed letter if the first attempt
+// comes back empty, and a console.warn so failures are diagnosable instead
+// of silently dropping to the offline fallback.
+async function fetchRandomMovie(){
+  const seed=pick(SONG_SEEDS);
+  const url='https://itunes.apple.com/search?term='+seed+'&media=movie&entity=movie&limit=50';
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),6000);
+  try{
+    const res=await fetch(url,{signal:controller.signal});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    const results=(d.results||[]).filter(r=>r.trackName&&(r.artworkUrl100||r.artworkUrl60));
+    if(!results.length)throw new Error('no results with artwork for seed "'+seed+'"');
+    return pick(results);
+  }finally{
+    clearTimeout(timer);
+  }
+}
 function widgetMovie(){
   const div=document.createElement('div');
   div.innerHTML=card('violet','🎬 RANDOM MOVIE','<div class="loading">Scanning the marquee…</div>','iTunes Search API · live');
   setTimeout(async()=>{
-    try{
-      const seed=pick(SONG_SEEDS);
-      const url='https://itunes.apple.com/search?term='+seed+'&media=movie&entity=movie&limit=50';
-      const res=await fetch(url);
-      if(!res.ok)throw new Error('bad response');
-      const d=await res.json();
-      // Only keep results that actually have artwork, so the card never
-      // ends up showing a movie with no poster.
-      const results=(d.results||[]).filter(r=>r.trackName&&(r.artworkUrl100||r.artworkUrl60));
-      if(!results.length)throw new Error('empty');
-      const m=pick(results);
+    let m=null;
+    for(let attempt=0;attempt<2&&!m;attempt++){
+      try{ m=await fetchRandomMovie(); }
+      catch(err){ console.warn('[widgetMovie] attempt '+(attempt+1)+' failed:',err); }
+    }
+    if(m){
       const year=(m.releaseDate||'').slice(0,4);
       const artBig=(m.artworkUrl100||m.artworkUrl60||'').replace(/100x100|60x60/,'400x400');
       div.innerHTML=card('violet','🎬 RANDOM MOVIE',
@@ -3127,15 +3155,15 @@ function widgetMovie(){
         '</div>',
         'itunes.apple.com · pulled live from a 50-title sample'
       );
-    }catch{
-      const m=pick(MOVIE_FALLBACK);
+    }else{
+      const f=pick(MOVIE_FALLBACK);
       div.innerHTML=card('violet','🎬 RANDOM MOVIE',
-        '<div class="big-label" style="font-size:15px;color:var(--text)">'+m.title+'</div>'+
-        '<div class="sub-info" style="margin-top:2px">Directed by '+m.artist+'</div>'+
+        '<div class="big-label" style="font-size:15px;color:var(--text)">'+f.title+'</div>'+
+        '<div class="sub-info" style="margin-top:2px">Directed by '+f.artist+'</div>'+
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-          '<span class="tag">'+m.genre+'</span><span class="tag">'+m.year+'</span>'+
+          '<span class="tag">'+f.genre+'</span><span class="tag">'+f.year+'</span>'+
         '</div>',
-        'Offline fallback · API unreachable'
+        'Offline fallback · API unreachable (see console)'
       );
     }
   },50);
