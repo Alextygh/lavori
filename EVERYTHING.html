@@ -2,7 +2,7 @@
 <!--
   EVERY.THING
   ───────────
-  34 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  33 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
@@ -3209,18 +3209,46 @@ const MOVIE_FALLBACK=[
 // metadata. We grab one at a random offset that has a poster image
 // (P3383) attached, then pull a real prose summary from Wikipedia's REST
 // API for that same title — much richer than any single Wikidata field.
+const MOVIE_COUNT_SPARQL=
+  'SELECT (COUNT(*) AS ?count) WHERE {'+
+  '  ?film wdt:P31 wd:Q11424 ; wdt:P3383 ?image .'+
+  '}';
 const MOVIE_SPARQL=
   'SELECT ?film ?filmLabel ?image ?year WHERE {'+
   '  ?film wdt:P31 wd:Q11424 ; wdt:P3383 ?image .'+
   '  OPTIONAL { ?film wdt:P577 ?pubdate. BIND(YEAR(?pubdate) AS ?year) }'+
   '  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }'+
   '} LIMIT 1 OFFSET ';
+// Cached so we only pay the COUNT query once per page load, not once
+// per widget refresh. A conservative hardcoded fallback covers the
+// (rare) case where even the count query fails.
+let _movieCountCache=null;
+async function getMovieCount(){
+  if(_movieCountCache)return _movieCountCache;
+  const url='https://query.wikidata.org/sparql?format=json&query='+
+    encodeURIComponent(MOVIE_COUNT_SPARQL);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),7000);
+  try{
+    const res=await fetch(url,{signal:controller.signal,headers:{'Accept':'application/sparql-results+json'}});
+    if(!res.ok)throw new Error('bad response: '+res.status);
+    const d=await res.json();
+    const n=parseInt(d.results.bindings[0].count.value,10);
+    if(!n||n<1)throw new Error('bad count');
+    _movieCountCache=n;
+    return n;
+  }finally{
+    clearTimeout(timer);
+  }
+}
 async function fetchWikidataFilm(){
-  // Films-with-posters is a large but bounded subset; a random offset
-  // into it (rather than ORDER BY on a hash, which forces a full sort)
-  // keeps this fast. If the offset lands past the end, the SELECT
-  // simply comes back empty and we retry with a fresh offset.
-  const offset=Math.floor(Math.random()*40000);
+  // Pick a random offset within the *real* size of the films-with-posters
+  // set (rather than a guessed ceiling) so we don't keep landing past
+  // the end of the data and getting empty results back.
+  let count;
+  try{ count=await getMovieCount(); }
+  catch{ count=4000; } // conservative fallback if the COUNT query itself fails
+  const offset=Math.floor(Math.random()*count);
   const url='https://query.wikidata.org/sparql?format=json&query='+
     encodeURIComponent(MOVIE_SPARQL+offset);
   const controller=new AbortController();
@@ -3230,7 +3258,7 @@ async function fetchWikidataFilm(){
     if(!res.ok)throw new Error('bad response: '+res.status);
     const d=await res.json();
     const row=(d.results&&d.results.bindings&&d.results.bindings[0]);
-    if(!row||!row.filmLabel)throw new Error('empty result at offset '+offset);
+    if(!row||!row.filmLabel)throw new Error('empty result at offset '+offset+' of '+count);
     return {
       title:row.filmLabel.value,
       year:row.year?row.year.value:'',
