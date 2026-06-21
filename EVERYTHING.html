@@ -3,15 +3,22 @@
   EVERY.THING
   ───────────
   36 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
-  Originally 33; widgetDinosaur, widgetMovie, widgetIDCard, and
-  widgetShadeMatch were added later (movie/dinosaur pull live data from
   Wikidata + Wikipedia; ID card and shade match are fully self-contained).
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
     3. Random page <title>                (applyRandomTitle)
     4. Random tagline under the header    (TAGLINES, picked in init())
-    5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon)
+    5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon,
+                                            270 solid + 52 brand icons)
+    6. Calm decorative SVG backgrounds    (bgStars/bgGrid/bgGlow/etc.,
+                                            defined but not auto-applied —
+                                            available for widgets to call)
+    7. Wild/chaotic backgrounds           (WILD_BACKGROUNDS, rolled via
+                                            maybeWeirdBg(chance) — lava
+                                            lamp, glitch bars, confetti,
+                                            static, code rain, and more,
+                                            ~10-18% odds per widget call)
 -->
 <html lang="en">
 <head>
@@ -3772,6 +3779,12 @@ function widgetShadeMatch(){
   const targetHue=rnd(0,359);
   const targetSat=rnd(55,85);
   const targetLight=rnd(25,75);
+  // Start the sliders at a random position too, instead of a fixed
+  // 180/50 — otherwise whenever the random target happened to land near
+  // that fixed default, locking in immediately without touching anything
+  // scored a "Perfect eye" by sheer luck rather than actual matching.
+  const startHue=rnd(0,359);
+  const startLight=rnd(10,90);
   const id='sm'+Math.random().toString(36).slice(2);
   const hueId=id+'h',lightId=id+'l',previewId=id+'p',targetId=id+'t',
         btnId=id+'b',resultId=id+'r';
@@ -3782,14 +3795,14 @@ function widgetShadeMatch(){
         '<div class="sub-info" style="margin-top:3px">Target</div>'+
       '</div>'+
       '<div style="flex:1;text-align:center">'+
-        '<div id="'+previewId+'" style="height:54px;border-radius:5px;background:hsl(180,60%,50%);border:1px solid var(--border)"></div>'+
+        '<div id="'+previewId+'" style="height:54px;border-radius:5px;background:hsl('+startHue+',60%,'+startLight+'%);border:1px solid var(--border)"></div>'+
         '<div class="sub-info" style="margin-top:3px">Your mix</div>'+
       '</div>'+
     '</div>'+
     '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:2px">HUE</div>'+
-    '<input type="range" id="'+hueId+'" min="0" max="359" value="180" style="width:100%">'+
+    '<input type="range" id="'+hueId+'" min="0" max="359" value="'+startHue+'" style="width:100%">'+
     '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin:6px 0 2px">LIGHTNESS</div>'+
-    '<input type="range" id="'+lightId+'" min="10" max="90" value="50" style="width:100%">'+
+    '<input type="range" id="'+lightId+'" min="10" max="90" value="'+startLight+'" style="width:100%">'+
     '<button id="'+btnId+'" style="margin-top:10px;width:100%;padding:7px;border-radius:4px;border:1px solid var(--border-bright);background:transparent;color:var(--text);font-family:var(--mono);font-size:11px;letter-spacing:.1em;cursor:pointer">LOCK IT IN</button>'+
     '<div id="'+resultId+'" class="sub-info" style="margin-top:8px;min-height:14px"></div>',
     'Match the swatch by eye · saturation fixed'
@@ -3861,17 +3874,48 @@ init();
    (https://fontawesome.com/search?ic=free-collection) and
    renders it as the page favicon on every load. */
 (function(){
-  // Representative sample of Font Awesome 6 Free icon unicode codepoints
-  // (solid + brands styles), pulled from the free collection.
-  const FA_SOLID=['f004','f005','f007','f015','f02d','f03e','f042','f048',
-    'f06d','f071','f072','f080','f084','f086','f0c0','f0e7','f11e','f118',
-    'f12e','f135','f13d','f164','f165','f1ad','f1bb','f1e3','f1fc','f206',
-    'f21a','f236','f24e','f291','f2bb','f2cc','f3a5','f522','f5aa','f6e3',
-    'f773','f7a4','f7d9','f7fb','f0eb','f188','f0c4','f0ad','f120','f121',
-    'f126','f140','f1b0','f1b9','f1c0','f1ec','f1fb','f201','f21e','f25d',
-    'f2c2','f53f','f5fc','f6a9','f6b6','f6c3','f6d1','f7a9'];
-  const FA_BRANDS=['f09b','f099','f08c','f16d','f167','f17a','f171','f1a0',
-    'f1bc','f232','f270','f281','f2d5','f3ca','f41b','f426'];
+  // Curated sample of Font Awesome 6 Free icon unicode codepoints
+  // (270 solid + 52 brand icons), pulled from the free collection's
+  // official metadata and filtered for icons that read clearly at
+  // favicon size — pure ASCII letter/digit glyphs and overly similar
+  // directional-arrow variants were excluded for variety's sake.
+  const FA_SOLID=[
+    'f000','f002','f004','f005','f007','f00a','f015','f017','f022','f023',
+    'f025','f028','f029','f02a','f02d','f030','f033','f036','f03c','f03e',
+    'f042','f048','f04a','f04c','f051','f05b','f068','f06a','f06c','f06d',
+    'f070','f071','f072','f073','f074','f079','f07a','f07c','f080','f084',
+    'f086','f089','f08d','f098','f09d','f0a6','f0aa','f0ac','f0ad','f0b2',
+    'f0c0','f0c2','f0c4','f0c6','f0c8','f0d9','f0e3','f0e7','f0eb','f0f0',
+    'f0f1','f0f2','f0fd','f109','f111','f118','f119','f11e','f120','f121',
+    'f124','f126','f12e','f135','f138','f13d','f140','f141','f144','f149',
+    'f151','f153','f164','f165','f182','f186','f187','f188','f19c','f1ad',
+    'f1b0','f1b2','f1b9','f1ba','f1bb','f1c0','f1c1','f1c3','f1c8','f1cd',
+    'f1e0','f1e3','f1e5','f1eb','f1ec','f1fb','f1fc','f1fe','f201','f205',
+    'f206','f218','f21a','f21b','f21d','f21e','f225','f228','f229','f22c',
+    'f22d','f233','f236','f241','f244','f24e','f251','f255','f25c','f25d',
+    'f26c','f279','f27a','f28d','f291','f29a','f29e','f2a7','f2b4','f2b9',
+    'f2bb','f2c2','f2c8','f2c9','f2cc','f2d3','f2fe','f303','f305','f30b',
+    'f359','f363','f386','f390','f3a5','f3cd','f3dd','f422','f433','f43a',
+    'f443','f458','f45d','f46a','f481','f485','f48b','f494','f4c0','f4c4',
+    'f4d7','f504','f508','f516','f51b','f522','f524','f528','f52d','f532',
+    'f535','f539','f53a','f53f','f544','f546','f54c','f554','f55c','f55e',
+    'f55f','f560','f562','f564','f566','f568','f56a','f570','f574','f575',
+    'f57d','f582','f587','f58b','f58e','f594','f597','f59c','f5a1','f5a2',
+    'f5aa','f5b0','f5b3','f5b6','f5b7','f5bb','f5bc','f5c2','f5c3','f5c9',
+    'f5cd','f5d1','f5dc','f5e1','f5eb','f5ee','f5fc','f624','f63c','f64f',
+    'f651','f658','f662','f698','f6a9','f6b6','f6c3','f6c4','f6d1','f6d3',
+    'f6d9','f6e3','f6ed','f700','f728','f729','f72f','f73b','f74d','f75b',
+    'f75f','f773','f781','f7a4','f7a9','f7ab','f7ae','f7b6','f7c9','f7d2',
+    'f7d9','f7fb','f818','f81d','f82a','f84a','f850','f86d','f87d','f8c0',
+  ];
+  const FA_BRANDS=[
+    'f08c','f099','f09a','f09b','f0d2','f13b','f13c','f167','f16d','f171',
+    'f179','f17a','f17b','f17c','f198','f19a','f1a0','f1a1','f1b6','f1bc',
+    'f1e8','f1ed','f232','f267','f268','f269','f270','f281','f287','f293',
+    'f2c6','f2d5','f379','f392','f395','f3aa','f3ab','f3b8','f3ca','f3d3',
+    'f3d4','f3e2','f41b','f41f','f420','f426','f429','f42e','f4e4','f7bb',
+    'f7df','f838',
+  ];
 
   function buildFontAwesomeFavicon(){
     const useBrand=Math.random()<0.2;
