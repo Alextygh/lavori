@@ -2,13 +2,14 @@
 <!--
   EVERY.THING
   ───────────
-  33 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
-  5 page-wide random systems outside the widget grid:
+  35 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  6 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
     3. Random page <title>                (applyRandomTitle)
     4. Random tagline under the header    (TAGLINES, picked in init())
     5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon)
+    6. Random background for widgets
 -->
 <html lang="en">
 <head>
@@ -3635,6 +3636,109 @@ function widgetBook(){
   return div;
 }
 
+
+/* ── ID DOCUMENT (Papers Please-style) ───────
+   A procedurally generated identity card in the spirit of border-control
+   inspection games: blocky monochrome photo, stamped fields, and a
+   10-character ID code. Nations, names, and birth cities below are all
+   original/fictional — not lifted from any specific game's invented
+   place names — built fresh in the same Cold-War-bureaucracy spirit. */
+const ID_NATIONS=[
+  'Vostrania','Kaldoria','Resnovia','Pelgorod Union','Drevenstadt',
+  'Severnyx Republic','Tarkhovia','Ulvenrike','Brennistok','Kovardia',
+  'Marrowfeld','Estrazh','Holzgrad Federation','Yantary','Norsklund',
+];
+const ID_GIVEN=[
+  'Kristiina','Aleksandr','Mira','Dragos','Yelena','Viktor','Anke','Toma',
+  'Lenka','Bohdan','Irina','Matthias','Olya','Stefen','Galina','Petro',
+  'Wanda','Ruslan','Nadia','Henrik','Zofia','Demyan','Katarzyna','Ilya',
+];
+const ID_SURNAME=[
+  'Pitkanova','Voronetsk','Halvardsen','Korolenko','Brandt','Ostrowski',
+  'Yevchenko','Marek','Dubrovin','Castellov','Tarnowski','Bregman',
+  'Sokolova','Linden','Vashenko','Krupina','Adlerstam','Novosel',
+];
+const ID_SEX=['M','F'];
+const ID_BIRTH_CITIES=[
+  'Korvenhaven','Ostrigrad','Belmira','Tarnopol','Vashport','Drezna',
+  'Kallstead','Pelnograd','Ruzhny','Maldoria','Svetlomir','Brennvik',
+  'Halgard','Tovenstad','Krasnopil','Ulvenfjord',
+];
+function idChecksumCode(){
+  // 10-character code: 4 letters + 5 digits + 1 letter — gives the
+  // "official document number" look without claiming to mean anything.
+  const L=()=>String.fromCharCode(65+rnd(0,25));
+  let s='';
+  for(let i=0;i<4;i++)s+=L();
+  s+=rnd(10000,99999);
+  s+=L();
+  return s;
+}
+// Procedural blocky portrait — an 8x10 grid of randomized "pixels" in a
+// muted duotone palette, rendered as an SVG so it scales crisply at any
+// size, evoking the low-res scanner photos on inspection-booth ID cards.
+function idPortraitSVG(skinTone,hairTone){
+  const cols=8,rows=10,cell=8;
+  let rects='';
+  // Background
+  rects+='<rect x="0" y="0" width="'+(cols*cell)+'" height="'+(rows*cell)+'" fill="#1a1f2e"/>';
+  // Hair block (top rows, randomized jagged edge)
+  for(let x=0;x<cols;x++){
+    const hairRows=rnd(2,4);
+    for(let y=0;y<hairRows;y++){
+      if(Math.random()<0.85)rects+='<rect x="'+(x*cell)+'" y="'+(y*cell)+'" width="'+cell+'" height="'+cell+'" fill="'+hairTone+'"/>';
+    }
+  }
+  // Face block (middle rows)
+  for(let x=1;x<cols-1;x++){
+    for(let y=3;y<8;y++){
+      rects+='<rect x="'+(x*cell)+'" y="'+(y*cell)+'" width="'+cell+'" height="'+cell+'" fill="'+skinTone+'"/>';
+    }
+  }
+  // Eyes (two dark pixels)
+  rects+='<rect x="'+(2*cell)+'" y="'+(5*cell)+'" width="'+cell+'" height="'+cell+'" fill="#1a1f2e"/>';
+  rects+='<rect x="'+(5*cell)+'" y="'+(5*cell)+'" width="'+cell+'" height="'+cell+'" fill="#1a1f2e"/>';
+  // Shoulders/collar (bottom rows)
+  for(let x=0;x<cols;x++){
+    rects+='<rect x="'+(x*cell)+'" y="'+(8*cell)+'" width="'+cell+'" height="'+(cell*2)+'" fill="#2a3142"/>';
+  }
+  return '<svg viewBox="0 0 '+(cols*cell)+' '+(rows*cell)+'" style="width:72px;height:90px;image-rendering:pixelated;border:1px solid #4a5568;flex-shrink:0">'+rects+'</svg>';
+}
+function widgetIDCard(){
+  const nation=pick(ID_NATIONS);
+  const given=pick(ID_GIVEN);
+  const surname=pick(ID_SURNAME);
+  const sex=pick(ID_SEX);
+  const birthCity=pick(ID_BIRTH_CITIES);
+  const birthYear=rnd(1948,2006);
+  const birthMonth=rnd(1,12);
+  const birthDay=rnd(1,28);
+  const issueYear=rnd(2018,2025);
+  const expireYear=issueYear+rnd(3,10);
+  const expireMonth=rnd(1,12);
+  const expireDay=rnd(1,28);
+  const pad=n=>String(n).padStart(2,'0');
+  const skinTone=pick(['#e0b294','#c98f6b','#8d5a3c','#f0cfa8','#a86c4d']);
+  const hairTone=pick(['#2b2118','#5c4332','#8a8a8a','#1a1a1a','#704214','#d4c5a3']);
+  const code=idChecksumCode();
+  return card('teal','🛂 IDENTITY DOCUMENT',
+    '<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-align:center;border:1px solid var(--border-bright);padding:3px 0;margin-bottom:8px;color:var(--text)">'+
+      '☰☰ '+nation.toUpperCase()+' ☰☰</div>'+
+    '<div style="display:flex;gap:10px">'+
+      idPortraitSVG(skinTone,hairTone)+
+      '<div style="font-family:var(--mono);font-size:10px;line-height:1.7;flex:1;min-width:0">'+
+        '<div style="color:var(--text);font-size:11px;margin-bottom:2px">'+surname.toUpperCase()+', '+given+'</div>'+
+        '<div><span style="color:var(--muted)">DOB </span>'+birthYear+'.'+pad(birthMonth)+'.'+pad(birthDay)+'</div>'+
+        '<div><span style="color:var(--muted)">SEX </span>'+sex+'</div>'+
+        '<div><span style="color:var(--muted)">BPL </span>'+birthCity+'</div>'+
+        '<div><span style="color:var(--muted)">EXP </span>'+expireYear+'.'+pad(expireMonth)+'.'+pad(expireDay)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-align:center;margin-top:8px;padding-top:6px;border-top:1px dashed var(--border)">'+code+'</div>',
+    'Procedurally generated · fictional nation, no real records'
+  ,maybeWeirdBg(0.08));
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -3644,7 +3748,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetMovie, widgetGame, widgetBook,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard,
 ];
 
 /* ── INIT ──────────────────────────────────── */
