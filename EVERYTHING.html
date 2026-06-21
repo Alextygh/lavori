@@ -26,6 +26,8 @@
   header p{font-size:11px;letter-spacing:.2em;color:var(--muted);margin-top:6px;font-family:var(--mono);text-transform:uppercase}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px;margin:0 auto}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 22px 22px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:border-color .3s;min-height:190px}
+  .card-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .card-label,.card-main,.card-footer{position:relative;z-index:1}
   .card:hover{border-color:var(--border-bright)}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:6px 6px 0 0}
   .card.accent-blue::before{background:#3b82f6}.card.accent-teal::before{background:#14b8a6}
@@ -109,13 +111,216 @@ function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
 
-function card(accent,label,html,footer){
+function card(accent,label,html,footer,bg){
   return '<div class="card accent-'+accent+'">'+
+    (bg?'<div class="card-bg">'+bg+'</div>':'')+
     '<div class="card-label"><span class="dot"></span>'+label+'</div>'+
     '<div class="card-main">'+html+'</div>'+
     (footer?'<div class="card-footer">'+footer+'</div>':'')+
   '</div>';
 }
+
+/* ── CARD BACKGROUND TOOLKIT ─────────────────
+   Small reusable generators for the decorative full-bleed layer that
+   sits behind every widget's content. Each returns an SVG fragment
+   (viewBox 0 0 300 200, stretched via CSS to fill the card) so callers
+   can mix and match. Kept low-opacity/low-contrast so text stays
+   legible on top. */
+const BG_W=300,BG_H=200;
+function bgWrapSVG(inner,opacity){
+  return '<svg viewBox="0 0 '+BG_W+' '+BG_H+'" preserveAspectRatio="none" style="width:100%;height:100%;display:block;opacity:'+(opacity??1)+'">'+inner+'</svg>';
+}
+// Scattered dots/stars, e.g. for space, night, or "sparkle" themes
+function bgStars(count,color){
+  color=color||'#fff';
+  const dots=Array.from({length:count},()=>{
+    const x=(Math.random()*BG_W).toFixed(2),y=(Math.random()*BG_H).toFixed(2);
+    const r=(0.4+Math.random()*0.9).toFixed(2),o=(0.08+Math.random()*0.22).toFixed(3);
+    return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+color+'" opacity="'+o+'"/>';
+  }).join('');
+  return bgWrapSVG(dots,1);
+}
+// Faint grid lines, e.g. for technical/data/coordinate themes
+function bgGrid(spacing,color){
+  spacing=spacing||24;color=color||'rgba(120,150,220,0.12)';
+  let l='';
+  for(let x=0;x<=BG_W;x+=spacing)l+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="'+BG_H+'" stroke="'+color+'" stroke-width="1"/>';
+  for(let y=0;y<=BG_H;y+=spacing)l+='<line x1="0" y1="'+y+'" x2="'+BG_W+'" y2="'+y+'" stroke="'+color+'" stroke-width="1"/>';
+  return bgWrapSVG(l,1);
+}
+// Soft radial glow in a corner, e.g. warm/cozy or "energy" themes
+function bgGlow(color,cx,cy,r){
+  cx=cx??BG_W*0.8;cy=cy??BG_H*0.15;r=r||160;
+  const id='glow'+Math.random().toString(36).slice(2,7);
+  return bgWrapSVG(
+    '<defs><radialGradient id="'+id+'" cx="50%" cy="50%" r="50%">'+
+      '<stop offset="0%" stop-color="'+color+'" stop-opacity="0.35"/>'+
+      '<stop offset="100%" stop-color="'+color+'" stop-opacity="0"/>'+
+    '</radialGradient></defs>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#'+id+')"/>',1);
+}
+// Diagonal stripes, e.g. for caution/alert/sport themes
+function bgStripes(color,gap){
+  color=color||'rgba(245,158,11,0.06)';gap=gap||26;
+  let s='';
+  for(let x=-BG_H;x<BG_W+BG_H;x+=gap)s+='<line x1="'+x+'" y1="0" x2="'+(x+BG_H)+'" y2="'+BG_H+'" stroke="'+color+'" stroke-width="10"/>';
+  return bgWrapSVG(s,1);
+}
+// Concentric ripples/waves, e.g. for water, sound, signal themes
+function bgRipples(color,cx,cy){
+  color=color||'rgba(100,180,255,0.1)';cx=cx??BG_W/2;cy=cy??BG_H/2;
+  let r='';
+  for(let i=1;i<=5;i++)r+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(i*22)+'" fill="none" stroke="'+color+'" stroke-width="1"/>';
+  return bgWrapSVG(r,1);
+}
+// Repeating dot matrix, e.g. for digital/binary/code themes
+function bgDotMatrix(spacing,color){
+  spacing=spacing||14;color=color||'rgba(125,180,255,0.15)';
+  let d='';
+  for(let x=spacing/2;x<BG_W;x+=spacing)for(let y=spacing/2;y<BG_H;y+=spacing)d+='<circle cx="'+x+'" cy="'+y+'" r="1" fill="'+color+'"/>';
+  return bgWrapSVG(d,1);
+}
+// Topographic-style wavy contour lines, e.g. for geography/nature themes
+function bgContours(color){
+  color=color||'rgba(120,200,160,0.1)';
+  let c='';
+  for(let i=0;i<5;i++){
+    const yOff=20+i*36,amp=8+i*2;
+    c+='<path d="M 0 '+yOff+' Q 75 '+(yOff-amp)+' 150 '+yOff+' T 300 '+yOff+'" fill="none" stroke="'+color+'" stroke-width="1.5"/>';
+  }
+  return bgWrapSVG(c,1);
+}
+
+/* ── WILD CARD BACKGROUNDS ────────────────────
+   A second, louder tier on top of the calm bgStars/bgGrid/etc. toolkit
+   above — chaotic, clashing, "did my browser just glitch" energy.
+   Every widget gets a small random chance (via maybeWeirdBg) to roll
+   one of these instead of its normal plain background. Still kept
+   under the content layer (.card-bg is z-index:0, text is z-index:1)
+   and at modest opacity so nothing becomes unreadable. */
+
+// Lava-lamp blobs: two soft, oversized blurred radial blooms
+function bgLavaLamp(){
+  const c1=pick(['#ff6b6b','#feca57','#48dbfb','#1dd1a1','#ff9ff3','#f368e0']);
+  const c2=pick(['#5f27cd','#00d2d3','#ff9f43','#ee5253','#10ac84','#341f97']);
+  const x1=rnd(10,90),y1=rnd(10,90),x2=rnd(10,90),y2=rnd(10,90);
+  return '<div style="position:absolute;inset:0;filter:blur(22px);opacity:0.55;background:'+
+    'radial-gradient(circle at '+x1+'% '+y1+'%, '+c1+', transparent 45%),'+
+    'radial-gradient(circle at '+x2+'% '+y2+'%, '+c2+', transparent 50%)"></div>';
+}
+// Glitch scanlines: stray RGB-tinted horizontal bars, screen-blended
+function bgGlitchBars(){
+  const bars=Array.from({length:7},()=>{
+    const y=rnd(0,95),h=rnd(2,6),x1=rnd(-10,30),x2=rnd(70,110);
+    const c=pick(['#ff004055','#00ffea55','#ffee0050','#ff00ff50']);
+    return '<div style="position:absolute;left:'+x1+'%;right:'+(100-x2)+'%;top:'+y+'%;height:'+h+'%;background:'+c+';mix-blend-mode:screen"></div>';
+  }).join('');
+  return '<div style="position:absolute;inset:0;background:#0a0a0a;opacity:0.5">'+bars+'</div>';
+}
+// Rave checkerboard: rotated repeating conic wedges
+function bgRaveGrid(){
+  const c=pick(['#ff0080','#00ff80','#ff8000','#8000ff','#00ffff']);
+  const sz=rnd(16,34),rot=rnd(0,45);
+  return '<div style="position:absolute;inset:-20%;opacity:0.22;transform:rotate('+rot+'deg);'+
+    'background-image:repeating-conic-gradient('+c+' 0% 25%, transparent 0% 50%);'+
+    'background-size:'+sz+'px '+sz+'px"></div>';
+}
+// Confetti burst: scattered random rotated rectangles
+function bgConfetti(){
+  const colors=['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff6f59'];
+  const pieces=Array.from({length:22},()=>{
+    const x=rnd(0,100),y=rnd(0,100),rot=rnd(0,360),sz=rnd(3,7);
+    const c=pick(colors);
+    return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:'+sz+'px;height:'+(sz*2.2).toFixed(0)+'px;background:'+c+';opacity:0.5;transform:rotate('+rot+'deg)"></div>';
+  }).join('');
+  return '<div style="position:absolute;inset:0">'+pieces+'</div>';
+}
+// TV static / snow noise
+function bgStatic(){
+  const dots=Array.from({length:140},()=>{
+    const x=(Math.random()*100).toFixed(1),y=(Math.random()*100).toFixed(1);
+    const v=rnd(0,1)?'#fff':'#000';
+    const op=(Math.random()*0.4+0.08).toFixed(2);
+    return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:2px;height:2px;background:'+v+';opacity:'+op+'"></div>';
+  }).join('');
+  return '<div style="position:absolute;inset:0;background:#111;opacity:0.6">'+dots+'</div>';
+}
+// 80s sunset gradient with retro horizon scanlines
+function bgSynthSunset(){
+  const top=pick(['#2d1b4e','#1a0533','#0f0524','#3a0ca3']);
+  const mid=pick(['#ff6b9d','#ff8c42','#f72585']);
+  const bot=pick(['#ffd23f','#ff9f1c','#f9c80e']);
+  return '<div style="position:absolute;inset:0;opacity:0.45;background:linear-gradient(180deg,'+top+' 0%,'+mid+' 55%,'+bot+' 100%)">'+
+    '<div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:repeating-linear-gradient(0deg,transparent,transparent 6px,#00000040 6px,#00000040 8px)"></div>'+
+  '</div>';
+}
+// Spinning sunburst rays
+function bgSunburst(){
+  const c=pick(['#ffbe0b','#fb5607','#ff006e','#8338ec','#3a86ff']);
+  const rot=rnd(0,90);
+  return '<div style="position:absolute;inset:-30%;opacity:0.22;transform:rotate('+rot+'deg);'+
+    'background:repeating-conic-gradient('+c+' 0deg 8deg, transparent 8deg 16deg)"></div>';
+}
+// Floating soft bubbles, random sizes
+function bgBubbles(){
+  const c=pick(['#a8e6cf','#dcedc1','#ffd3b6','#ffaaa5','#ff8b94','#a6d8d4']);
+  const bubbles=Array.from({length:13},()=>{
+    const x=rnd(0,100),y=rnd(0,100),sz=rnd(8,36);
+    return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+c+';opacity:0.25"></div>';
+  }).join('');
+  return '<div style="position:absolute;inset:0">'+bubbles+'</div>';
+}
+// Crayon scribble squiggle, SVG quadratic path
+function bgScribble(){
+  const c=pick(['#ff595e','#ffca3a','#1982c4','#6a4c93','#8ac926']);
+  let path='M '+rnd(0,300)+' '+rnd(0,200);
+  for(let i=0;i<6;i++)path+=' Q '+rnd(0,300)+' '+rnd(0,200)+' '+rnd(0,300)+' '+rnd(0,200);
+  return bgWrapSVG('<path d="'+path+'" stroke="'+c+'" stroke-width="3" fill="none" stroke-linecap="round"/>',0.3);
+}
+// Matrix-style falling glyph rain
+function bgCodeRain(){
+  const chars='01アイウエオカキクケコ$#%&@';
+  const cols=Array.from({length:9},()=>{
+    const x=rnd(0,95);
+    const str=Array.from({length:9},()=>chars[rnd(0,chars.length-1)]).join('<br>');
+    const delay=(Math.random()*2).toFixed(2);
+    return '<div style="position:absolute;left:'+x+'%;top:-20%;font-family:monospace;font-size:9px;line-height:1.3;color:#39ff14;opacity:0.3;animation:bgFall 4s linear '+delay+'s infinite">'+str+'</div>';
+  }).join('');
+  return '<div style="position:absolute;inset:0;background:#000;opacity:0.55;overflow:hidden">'+cols+
+    '<style>@keyframes bgFall{from{transform:translateY(0)}to{transform:translateY(220%)}}</style></div>';
+}
+// Holographic foil shimmer band
+function bgHolofoil(){
+  const angle=rnd(20,160);
+  return '<div style="position:absolute;inset:0;opacity:0.2;background:linear-gradient('+angle+'deg,'+
+    '#ff003c,#ff8a00,#fabd05,#3cba54,#4885ed,#7b2ff7,#ff003c)"></div>';
+}
+// Cracked glass fracture lines radiating from one point
+function bgCrackedGlass(){
+  const cx=rnd(60,240),cy=rnd(40,160);
+  const cracks=Array.from({length:9},()=>{
+    const a=Math.random()*Math.PI*2,len=rnd(40,140);
+    const x2=(cx+Math.cos(a)*len).toFixed(1),y2=(cy+Math.sin(a)*len).toFixed(1);
+    return '<line x1="'+cx+'" y1="'+cy+'" x2="'+x2+'" y2="'+y2+'" stroke="#ffffff50" stroke-width="1"/>';
+  }).join('');
+  return bgWrapSVG('<circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#ffffff66"/>'+cracks,0.6);
+}
+
+// Pool of every wild generator, ready to pick() from at random.
+const WILD_BACKGROUNDS=[
+  bgLavaLamp,bgGlitchBars,bgRaveGrid,bgConfetti,bgStatic,bgSynthSunset,
+  bgSunburst,bgBubbles,bgScribble,bgCodeRain,bgHolofoil,bgCrackedGlass,
+];
+
+// Rolls `chance` (0–1) odds that this render gets a random wild
+// background; otherwise returns null so card() falls back to its
+// normal plain surface color. Pass the result as card()'s 5th arg:
+//   return card('teal','📍 LABEL', html, footer, maybeWeirdBg(0.12));
+function maybeWeirdBg(chance){
+  if(Math.random()<chance)return pick(WILD_BACKGROUNDS)();
+  return null;
+}
+
 
 /* ── TOAST POPUP ───────────────────────────── */
 let _toastEl=null;
@@ -2007,7 +2212,7 @@ function widgetRubik(){
     '<div class="cube-net-wrap"><div class="cube-net">'+net+'</div></div>'+
     '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:2;letter-spacing:.02em">'+scHtml+'</div>',
     'All 6 faces shown · random state · 20-move scramble'
-  );
+  ,maybeWeirdBg(0.14));
 }
 
 /* ── TIME ──────────────────────────────────── */
@@ -2037,7 +2242,7 @@ function widgetTime(){
     '<div class="big-label">'+place.flag+' '+place.city+', '+place.country+'</div>'+
     '<div class="sub-info">'+fmtD.format(now)+'</div>',
     'Live clock, ticking in real time'
-  );
+  ,maybeWeirdBg(0.14));
 }
 
 /* ── WEATHER ───────────────────────────────── */
@@ -2056,8 +2261,8 @@ function widgetWeather(){
         '<div class="big-label">'+city.flag+' '+city.name+', '+city.country+'</div>'+
         '<div class="sub-info">'+(WX_DESC[code]||'Unknown')+' · Wind '+Math.round(cw.windspeed)+' km/h '+windDir+'</div>',
         'Data: Open-Meteo · WMO code '+code
-      );
-    }catch{div.innerHTML=card('teal','🌡 WEATHER SOMEWHERE','<div class="big-label">Could not reach weather API</div>',city.name)}
+      ,maybeWeirdBg(0.1));
+    }catch{div.innerHTML=card('teal','🌡 WEATHER SOMEWHERE','<div class="big-label">Could not reach weather API</div>',city.name,maybeWeirdBg(0.16))}
   },50);
   return div;
 }
@@ -2071,7 +2276,7 @@ function widgetLaw(){
     '<div style="margin-top:14px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ABSURDITY RATING</div>'+
     '<div class="bar-row"><div class="bar-track"><div class="bar-fill" style="width:'+ab+'%;background:#f59e0b"></div></div><div class="bar-label">'+ab+'%</div></div></div>',
     'Still technically on the books'
-  );
+  ,maybeWeirdBg(0.1));
 }
 
 /* ── COUNTRY ───────────────────────────────── */
@@ -2084,7 +2289,7 @@ function widgetCountry(){
     '<div class="sub-info">Population: '+c.pop+'</div>'+
     '<div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">'+c.fact+'</div>',
     'One of 195 countries'
-  );
+  ,maybeWeirdBg(0.1));
 }
 
 /* ── GREETING ──────────────────────────────── */
@@ -2095,7 +2300,7 @@ function widgetGreeting(){
     '<div style="font-family:var(--mono);font-size:.95rem;color:var(--muted);margin-top:6px">'+(g.roman!==g.word?g.roman:'\u00a0')+'</div>'+
     '<div class="tag">'+g.flag+' '+g.lang+'</div>',
     'Say it out loud'
-  );
+  ,maybeWeirdBg(0.14));
 }
 
 /* ── WORLD RECORD ──────────────────────────── */
@@ -2107,7 +2312,7 @@ function widgetRecord(){
     '<div class="sub-info" style="margin-top:4px">'+r.holder+'</div>'+
     '<div class="tag">'+r.unit+'</div>',
     'Guinness World Records'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── HOLIDAY ───────────────────────────────── */
@@ -2126,7 +2331,7 @@ function widgetHoliday(){
     '<div class="sub-info">'+h.date.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
     '<div class="sub-info" style="margin-top:4px">'+Math.floor(h.diff/7)+'w '+h.diff%7+'d away</div>',
     'Calendar is a social construct'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── CONSTELLATION ─────────────────────────── */
@@ -2149,7 +2354,7 @@ function widgetConstellation(){
     '<svg viewBox="0 0 '+W+' '+H+'" style="max-width:100%;display:block">'+bg+lines+stars+'</svg>'+
     '<div class="big-label" style="text-align:center">'+c.name+'</div>',
     'Not to scale'
-  );
+  ,maybeWeirdBg(0.14));
 }
 
 /* ── COLOR PALETTE ─────────────────────────── */
@@ -2162,7 +2367,7 @@ function widgetPalette(){
     '<div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">'+p.name+'</div>'+
     '<div style="display:flex;flex-wrap:wrap">'+dots+'</div>',
     'Hover swatches for hex'
-  );
+  ,maybeWeirdBg(0.14));
 }
 
 /* ── ASCII CREATURE ────────────────────────── */
@@ -2176,7 +2381,7 @@ function widgetAscii(){
       '<div class="tag">/ascii/creature</div></div>'+
     '</div>',
     'Handcrafted from punctuation since the 1970s'
-  );
+  ,maybeWeirdBg(0.16));
 }
 
 /* ── BINARY NUMBER ─────────────────────────── */
@@ -2194,7 +2399,7 @@ function widgetBinary(){
       '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">OCTAL</div><div style="font-family:var(--mono);font-size:13px;color:#34d399">'+n.toString(8)+'</div></div>'+
     '</div>',
     'Same number, four different masks'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── ISS POSITION ──────────────────────────── */
@@ -2238,8 +2443,8 @@ function widgetISS(){
           '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em">SPEED</div><div style="font-family:var(--mono);font-size:14px;color:#fff">'+spd.toLocaleString()+' km/h</div></div>'+
         '</div>',
         'wheretheiss.at · position at time of load'
-      );
-    }catch{div.innerHTML=card('teal','🛸 ISS LIVE POSITION','<div class="big-label">Could not reach ISS API</div><div class="sub-info">It\'s still up there though</div>','wheretheiss.at')}
+      ,maybeWeirdBg(0.1));
+    }catch{div.innerHTML=card('teal','🛸 ISS LIVE POSITION','<div class="big-label">Could not reach ISS API</div><div class="sub-info">It\'s still up there though</div>','wheretheiss.at',maybeWeirdBg(0.14))}
   },50);
   return div;
 }
@@ -2253,7 +2458,7 @@ function widgetOnThisDay(){
     '<div class="fact-text" style="margin-top:10px">'+e.event+'</div>'+
     '<div class="sub-info" style="margin-top:8px">'+yearsAgo+' years ago</div>',
     'History refusing to stay quiet'
-  );
+  ,maybeWeirdBg(0.18));
 }
 
 /* ── TYPING CHALLENGE ──────────────────────── */
@@ -2320,7 +2525,7 @@ function widgetMoon(){
     '<div class="bar-row"><div class="bar-track"><div class="bar-fill" style="width:'+phase.illumination+'%;background:#a78bfa"></div></div><div class="bar-label">'+phase.illumination+'%</div></div></div>'+
     '<div class="sub-info" style="margin-top:4px">Next full moon in ~'+daysToFull+' days</div>',
     'Calculated from lunar cycle · not location-specific'
-  );
+  ,maybeWeirdBg(0.16));
 }
 
 /* ── RANDOM YEAR ───────────────────────────── */
@@ -2353,7 +2558,7 @@ function widgetRandomYear(){
     '<div style="margin-top:10px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">'+(dist===0?'THAT YEAR':'NEARBY IN '+closest[0])+'</div>'+
     '<div class="fact-text" style="font-size:13px">'+closest[1]+'</div></div>',
     'A random year from 1700 to 2024'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── ELEMENT ───────────────────────────────── */
@@ -2508,7 +2713,7 @@ const CAT_COLORS = {
       '</div>'+
     '</div>',
     'Periodic table · element '+el.n+' of 118'
-  );
+  ,maybeWeirdBg(0.16));
 }
 
 /* ── SPEED OF LIGHT QUIZ ───────────────────── */
@@ -2572,7 +2777,7 @@ function widgetSpeedFact(){
     '<div class="big-label" style="margin-top:8px;font-size:14px;color:var(--text)">'+f.label+'</div>'+
     '<div class="sub-info" style="margin-top:6px;font-style:italic">'+f.sub+'</div>',
     'Physics is wild'
-  );
+  ,maybeWeirdBg(0.18));
 }
 
 /* ── ETYMOLOGY ─────────────────────────────── */
@@ -2626,7 +2831,7 @@ function widgetEtymology(){
     '<div class="big-label" style="margin-top:2px;font-style:italic">"'+e.meaning+'"</div>'+
     '<div class="fact-text" style="margin-top:8px;font-size:13px;color:var(--muted)">'+e.note+'</div>',
     'Word origins'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── CHESS OPENING ─────────────────────────── */
@@ -2683,7 +2888,7 @@ function widgetChessOpening(){
       '</div>'+
     '</div>',
     'Opening theory'
-  );
+  ,maybeWeirdBg(0.18));
 }
 
 /* ── RECIPE ────────────────────────────────── */
@@ -2724,7 +2929,7 @@ function widgetRecipe(){
       '<ol class="fact-text" style="font-size:12px;list-style:none;flex:1;padding-left:0">'+steps+'</ol>'+
     '</div>',
     'One dish from the archive'
-  );
+  ,maybeWeirdBg(0.1));
 }
 
 /* ── COORDINATE ────────────────────────────── */
@@ -2755,7 +2960,7 @@ function widgetCoordinate(){
     '<div class="big-value" style="font-size:1.3rem;margin-top:8px">'+latStr+', '+lonStr+'</div>'+
     '<div class="sub-info" style="margin-top:2px">Likely terrain: '+(isOcean?'open ocean 🌊':'land 🏔️')+'</div>',
     'A uniformly random point on Earth'
-  );
+  ,maybeWeirdBg(0.18));
 }
 
 /* ── PLAYING CARD ──────────────────────────── */
@@ -2845,7 +3050,7 @@ function widgetPlayingCard(){
       '</div>'+
     '</div>',
     'Drawn fresh from the deck'
-  );
+  ,maybeWeirdBg(0.18));
 }
 
 /* ── TAROT CARD ────────────────────────────── */
@@ -2919,7 +3124,7 @@ function widgetTarot(){
       '</div>'+
     '</div>',
     'For amusement, not divination'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── DICE ROLL ─────────────────────────────── */
@@ -2949,7 +3154,7 @@ function widgetDice(){
     '<div class="big-value" style="text-align:center;margin-top:10px;font-size:2rem">'+total+'</div>'+
     '<div class="sub-info" style="text-align:center">'+numDice+' × d6 → '+rolls.join(' + ')+'</div>',
     'Pure chance, nothing more'
-  );
+  ,maybeWeirdBg(0.12));
 }
 
 /* ── MORSE CODE ────────────────────────────── */
@@ -2973,7 +3178,7 @@ function widgetMorse(){
     '<div class="big-label" style="text-align:center;margin-top:10px">'+word+'</div>'+
     '<div class="sub-info" style="text-align:center;word-break:break-all">'+code+'</div>',
     'Dot, dash, decode'
-  );
+  ,maybeWeirdBg(0.1));
 }
 
 /* ── RANDOM EQUATION ───────────────────────── */
@@ -2999,7 +3204,7 @@ function widgetEquation(){
     '<div class="tag" style="margin-top:4px">'+e.field+'</div>'+
     '<div class="fact-text" style="margin-top:8px;font-size:12px;color:var(--muted)">'+e.note+'</div>',
     'One formula, picked at random'
-  );
+  ,maybeWeirdBg(0.1));
 }
 
 /* ── RANDOM EMOJI (live API) ───────────────── */
@@ -3032,7 +3237,7 @@ function widgetEmoji(){
         '<div class="big-label" style="text-align:center;margin-top:10px;text-transform:capitalize">'+d.name+'</div>'+
         '<div class="tag" style="display:block;text-align:center;width:fit-content;margin:6px auto 0;text-transform:capitalize">'+d.category+'</div>',
         'emojihub.yurace.pro · fetched live, 1700+ emoji'
-      );
+      ,maybeWeirdBg(0.1));
     }catch{
       const e=pick(EMOJI_FALLBACK);
       div.innerHTML=card('lime','🎲 RANDOM EMOJI',
@@ -3040,7 +3245,7 @@ function widgetEmoji(){
         '<div class="big-label" style="text-align:center;margin-top:10px;text-transform:capitalize">'+e.name+'</div>'+
         '<div class="tag" style="display:block;text-align:center;width:fit-content;margin:6px auto 0;text-transform:capitalize">'+e.category+'</div>',
         'Offline fallback · API unreachable'
-      );
+      ,maybeWeirdBg(0.16));
     }
   },50);
   return div;
@@ -3097,7 +3302,7 @@ function widgetSong(){
           (year?'<span class="tag">'+year+'</span>':'')+
         '</div>',
         'itunes.apple.com · pulled live from a 50-track sample'
-      );
+      ,maybeWeirdBg(0.18));
     }else{
       const s=pick(SONG_FALLBACK);
       div.innerHTML=card('pink','🎵 RANDOM SONG',
@@ -3107,7 +3312,7 @@ function widgetSong(){
           '<span class="tag">'+s.genre+'</span><span class="tag">'+s.year+'</span>'+
         '</div>',
         'Offline fallback · API unreachable (see console)'
-      );
+      ,maybeWeirdBg(0.1));
     }
   },50);
   return div;
@@ -3190,7 +3395,7 @@ function widgetDinosaur(){
         '</div>'+
         '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+d.extract+'</div>',
         'en.wikipedia.org · live summary'
-      );
+      ,maybeWeirdBg(0.18));
     }else{
       const f=pick(DINOSAURS);
       div.innerHTML=card(accent,'🦖 RANDOM DINOSAUR',
@@ -3201,7 +3406,7 @@ function widgetDinosaur(){
         '</div>'+
         '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+f.fact+'</div>',
         'Offline fallback · API unreachable (see console)'
-      );
+      ,maybeWeirdBg(0.1));
     }
   },50);
   return div;
@@ -3315,7 +3520,7 @@ function widgetMovie(){
         (m.year?'<div class="sub-info" style="margin-top:2px">'+m.year+'</div>':'')+
         (m.extract?'<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+m.extract+'</div>':''),
         'wikidata.org + en.wikipedia.org · live'
-      );
+      ,maybeWeirdBg(0.12));
     }else{
       const f=pick(MOVIE_FALLBACK);
       div.innerHTML=card('violet','🎬 RANDOM MOVIE',
@@ -3323,7 +3528,7 @@ function widgetMovie(){
         '<div class="sub-info" style="margin-top:2px">'+f.year+'</div>'+
         '<div class="fact-text" style="margin-top:10px;font-size:12px;color:var(--muted)">'+f.extract+'</div>',
         'Offline fallback · API unreachable (see console)'
-      );
+      ,maybeWeirdBg(0.12));
     }
   },50);
   return div;
@@ -3364,7 +3569,7 @@ function widgetGame(){
           '<span class="tag">'+price+'</span>'+
         '</div>',
         'cheapshark.com · live PC game catalog'
-      );
+      ,maybeWeirdBg(0.12));
     }catch{
       const g=pick(GAME_FALLBACK);
       div.innerHTML=card('orange','🕹️ RANDOM VIDEOGAME',
@@ -3374,7 +3579,7 @@ function widgetGame(){
           '<span class="tag">'+g.price+'</span>'+
         '</div>',
         'Offline fallback · API unreachable'
-      );
+      ,maybeWeirdBg(0.14));
     }
   },50);
   return div;
@@ -3414,7 +3619,7 @@ function widgetBook(){
           (w.first_publish_year?'<span class="tag">'+w.first_publish_year+'</span>':'')+
         '</div>',
         'openlibrary.org · live, from the '+subject.replace('_',' ')+' shelf'
-      );
+      ,maybeWeirdBg(0.1));
     }catch{
       const b=pick(BOOK_FALLBACK);
       div.innerHTML=card('cyan','📚 RANDOM BOOK',
@@ -3424,7 +3629,7 @@ function widgetBook(){
           '<span class="tag">'+b.subject+'</span>'+
         '</div>',
         'Offline fallback · API unreachable'
-      );
+      ,maybeWeirdBg(0.1));
     }
   },50);
   return div;
