@@ -2,14 +2,16 @@
 <!--
   EVERY.THING
   ───────────
-  35 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
-  6 page-wide random systems outside the widget grid:
+  36 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  Originally 33; widgetDinosaur, widgetMovie, widgetIDCard, and
+  widgetShadeMatch were added later (movie/dinosaur pull live data from
+  Wikidata + Wikipedia; ID card and shade match are fully self-contained).
+  5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
     3. Random page <title>                (applyRandomTitle)
     4. Random tagline under the header    (TAGLINES, picked in init())
     5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon)
-    6. Random background for widgets
 -->
 <html lang="en">
 <head>
@@ -3061,6 +3063,7 @@ const TAROT_CARDS=[
   {name:'The High Priestess',num:'II',glyph:'moon',meaning:'Intuition, mystery, the unconscious mind.'},
   {name:'The Empress',num:'III',glyph:'leaf',meaning:'Abundance, nurturing, creative fertility.'},
   {name:'The Emperor',num:'IV',glyph:'square',meaning:'Structure, authority, stable foundations.'},
+  {name:'The Hierophant',num:'V',glyph:'pillars',meaning:'Tradition, convention, shared belief and institutions.'},
   {name:'The Lovers',num:'VI',glyph:'heart',meaning:'Union, partnership, aligned values.'},
   {name:'The Chariot',num:'VII',glyph:'wheel',meaning:'Willpower, determination, victory through control.'},
   {name:'Strength',num:'VIII',glyph:'spiral',meaning:'Courage, inner resolve, calm power.'},
@@ -3070,6 +3073,7 @@ const TAROT_CARDS=[
   {name:'The Hanged Man',num:'XII',glyph:'pause',meaning:'Surrender, new perspective, letting go.'},
   {name:'Death',num:'XIII',glyph:'hourglass',meaning:'Transformation, endings that make room for beginnings.'},
   {name:'Temperance',num:'XIV',glyph:'wave',meaning:'Balance, moderation, patient blending of opposites.'},
+  {name:'The Devil',num:'XV',glyph:'horns',meaning:'Temptation, attachment, restriction disguised as desire.'},
   {name:'The Tower',num:'XVI',glyph:'bolt',meaning:'Sudden upheaval, revelation, breaking false structures.'},
   {name:'The Star',num:'XVII',glyph:'star',meaning:'Hope, renewal, quiet guidance after hardship.'},
   {name:'The Moon',num:'XVIII',glyph:'crescent',meaning:'Illusion, the subconscious, navigating uncertainty.'},
@@ -3099,6 +3103,8 @@ function tarotGlyphSVG(glyph){
     sunburst:'<circle r="9" fill="#d4a73a"/><g stroke="#d4a73a" stroke-width="2">'+[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>'<line x1="0" y1="-12" x2="0" y2="-18" transform="rotate('+a+')"/>').join('')+'</g>',
     trumpet:'<path d="M -14 4 L 8 4 L 14 -6 L 14 14 L 8 4" fill="none" stroke="#d4a73a" stroke-width="2"/><line x1="-14" y1="4" x2="-18" y2="4" stroke="#d4a73a" stroke-width="2"/>',
     rings:'<circle cx="-6" r="10" fill="none" stroke="#d4a73a" stroke-width="2"/><circle cx="6" r="10" fill="none" stroke="#d4a73a" stroke-width="2"/>',
+    pillars:'<line x1="-12" y1="-16" x2="-12" y2="16" stroke="#d4a73a" stroke-width="2.5"/><line x1="12" y1="-16" x2="12" y2="16" stroke="#d4a73a" stroke-width="2.5"/><line x1="-12" y1="-16" x2="12" y2="-16" stroke="#d4a73a" stroke-width="2"/><path d="M -5 4 L 0 -2 L 5 4" fill="none" stroke="#d4a73a" stroke-width="1.5"/>',
+    horns:'<path d="M -10 -6 C -14 -16 -6 -16 -4 -8" fill="none" stroke="#d4a73a" stroke-width="2"/><path d="M 10 -6 C 14 -16 6 -16 4 -8" fill="none" stroke="#d4a73a" stroke-width="2"/><circle r="9" fill="none" stroke="#d4a73a" stroke-width="2"/><path d="M -5 2 L 0 8 L 5 2" fill="none" stroke="#d4a73a" stroke-width="1.5"/>',
   };
   return g[glyph]||g.star;
 }
@@ -3739,6 +3745,81 @@ function widgetIDCard(){
   ,maybeWeirdBg(0.08));
 }
 
+
+/* ── SHADE MATCH (interactive color game) ────
+   Shows a randomly generated target swatch; the player drags hue/
+   lightness sliders to mix a matching color, then locks it in to see
+   how close they got. Genuinely random each time (target hue/lightness,
+   plus the player's own freeform input), unlike the static palette
+   widget above which just displays a fixed set of swatches. */
+function shadeDist(h1,l1,h2,l2){
+  // Hue is circular (0 and 359 are neighbors), so wrap the difference;
+  // lightness is linear. Weight hue a bit lower since large hue swings
+  // read as "still kind of close" more than equivalent lightness swings.
+  let dh=Math.abs(h1-h2);
+  if(dh>180)dh=360-dh;
+  const dl=Math.abs(l1-l2);
+  return Math.sqrt((dh*0.6)**2+(dl*1.4)**2);
+}
+function shadeTier(dist){
+  if(dist<4)return{label:'Perfect eye',color:'#22c55e'};
+  if(dist<10)return{label:'Excellent',color:'#84cc16'};
+  if(dist<20)return{label:'Pretty close',color:'#eab308'};
+  if(dist<35)return{label:'In the ballpark',color:'#f97316'};
+  return{label:'Not even close',color:'#ef4444'};
+}
+function widgetShadeMatch(){
+  const targetHue=rnd(0,359);
+  const targetSat=rnd(55,85);
+  const targetLight=rnd(25,75);
+  const id='sm'+Math.random().toString(36).slice(2);
+  const hueId=id+'h',lightId=id+'l',previewId=id+'p',targetId=id+'t',
+        btnId=id+'b',resultId=id+'r';
+  const html=card('cyan','🎯 SHADE MATCH',
+    '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">'+
+      '<div style="flex:1;text-align:center">'+
+        '<div id="'+targetId+'" style="height:54px;border-radius:5px;background:hsl('+targetHue+',' +targetSat+'%,'+targetLight+'%);border:1px solid var(--border-bright)"></div>'+
+        '<div class="sub-info" style="margin-top:3px">Target</div>'+
+      '</div>'+
+      '<div style="flex:1;text-align:center">'+
+        '<div id="'+previewId+'" style="height:54px;border-radius:5px;background:hsl(180,60%,50%);border:1px solid var(--border)"></div>'+
+        '<div class="sub-info" style="margin-top:3px">Your mix</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:2px">HUE</div>'+
+    '<input type="range" id="'+hueId+'" min="0" max="359" value="180" style="width:100%">'+
+    '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin:6px 0 2px">LIGHTNESS</div>'+
+    '<input type="range" id="'+lightId+'" min="10" max="90" value="50" style="width:100%">'+
+    '<button id="'+btnId+'" style="margin-top:10px;width:100%;padding:7px;border-radius:4px;border:1px solid var(--border-bright);background:transparent;color:var(--text);font-family:var(--mono);font-size:11px;letter-spacing:.1em;cursor:pointer">LOCK IT IN</button>'+
+    '<div id="'+resultId+'" class="sub-info" style="margin-top:8px;min-height:14px"></div>',
+    'Match the swatch by eye · saturation fixed'
+  ,maybeWeirdBg(0.1));
+  setTimeout(()=>{
+    const hueEl=document.getElementById(hueId);
+    const lightEl=document.getElementById(lightId);
+    const preview=document.getElementById(previewId);
+    const btn=document.getElementById(btnId);
+    const result=document.getElementById(resultId);
+    if(!hueEl||!lightEl||!preview||!btn||!result)return;
+    let locked=false;
+    function updatePreview(){
+      preview.style.background='hsl('+hueEl.value+',60%,'+lightEl.value+'%)';
+    }
+    hueEl.addEventListener('input',updatePreview);
+    lightEl.addEventListener('input',updatePreview);
+    btn.addEventListener('click',()=>{
+      if(locked)return;
+      locked=true;
+      const dist=shadeDist(targetHue,targetLight,+hueEl.value,+lightEl.value);
+      const tier=shadeTier(dist);
+      result.innerHTML='<span style="color:'+tier.color+';font-weight:600">'+tier.label+'</span> · off by '+dist.toFixed(1);
+      hueEl.disabled=true;lightEl.disabled=true;
+      btn.textContent='LOCKED';btn.disabled=true;btn.style.opacity='0.5';btn.style.cursor='default';
+    });
+  },100);
+  return html;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -3748,7 +3829,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch,
 ];
 
 /* ── INIT ──────────────────────────────────── */
