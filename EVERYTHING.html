@@ -3995,7 +3995,7 @@ function widgetWordle(){
     '<div class="wordle-grid" id="'+gridId+'">'+gridHtml+'</div>'+
     '<div id="'+msgId+'" class="sub-info" style="text-align:center;min-height:14px;margin:6px 0">Guess the 5-letter word · 6 tries</div>'+
     '<div class="wordle-keyboard" id="'+keyId+'">'+kbHtml+'</div>',
-    'Word list: '+WORDLE_WORDS.length+' common 5-letter words'
+    'Target from '+WORDLE_WORDS.length+' common words · guesses checked against a live dictionary'
   ,maybeWeirdBg(0.08));
   setTimeout(()=>{
     const gridEl=document.getElementById(gridId);
@@ -4014,16 +4014,58 @@ function widgetWordle(){
       const btn=keyEl.querySelector('[data-key="'+key+'"]');
       return btn;
     }
-    function submitGuess(){
+    // Cache dictionary-API lookups for this game session so re-typing
+    // the same not-quite-common word twice (or guessing a word that
+    // turns out invalid) doesn't hit the network again.
+    const dictCache=new Map();
+    async function isRealWord(word){
+      if(wordSet.has(word))return true;
+      if(dictCache.has(word))return dictCache.get(word);
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),5000);
+      try{
+        const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+word.toLowerCase(),{signal:controller.signal});
+        // The API 404s for words it doesn't recognize and returns a
+        // JSON array of entries for words it does — we only need to
+        // know which case happened, not the definitions themselves.
+        const valid=res.ok;
+        dictCache.set(word,valid);
+        return valid;
+      }catch(err){
+        console.warn('[widgetWordle] dictionary lookup failed, falling back to local list only:',err);
+        // Network hiccup or API down — we can't confirm the word, but
+        // rejecting it outright would be unfair for a word that might
+        // be perfectly valid. Accept it rather than punish the player
+        // for a connectivity issue outside their control.
+        return true;
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+    let checking=false;
+    async function submitGuess(){
+      if(checking)return;
       if(curGuess.length<5){
         msgEl.textContent='Not enough letters';
         msgEl.style.color='#ef4444';
         return;
       }
-      if(!wordSet.has(curGuess)){
-        msgEl.textContent='Not in word list';
-        msgEl.style.color='#ef4444';
-        return;
+      const guessSnapshot=curGuess;
+      if(!wordSet.has(guessSnapshot)){
+        checking=true;
+        msgEl.textContent='Checking…';
+        msgEl.style.color='var(--muted)';
+        const valid=await isRealWord(guessSnapshot);
+        checking=false;
+        // The player could have kept typing/backspacing while the
+        // lookup was in flight — only proceed if the guess on screen
+        // still matches what we checked.
+        if(curGuess!==guessSnapshot)return;
+        if(!valid){
+          msgEl.textContent='Not a real word';
+          msgEl.style.color='#ef4444';
+          return;
+        }
       }
       const result=wordleScore(curGuess,target);
       const cells=cellsForRow(curRow);
@@ -4059,7 +4101,7 @@ function widgetWordle(){
       }
     }
     function handleKey(key){
-      if(gameOver)return;
+      if(gameOver||checking)return;
       if(key==='ENTER'){submitGuess();return;}
       if(key==='BACK'){curGuess=curGuess.slice(0,-1);renderCurrent();return;}
       if(/^[A-Z]$/.test(key)&&curGuess.length<5){
