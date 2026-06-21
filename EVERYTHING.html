@@ -2,8 +2,11 @@
 <!--
   EVERY.THING
   ───────────
-  36 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
-  Wikidata + Wikipedia; ID card and shade match are fully self-contained).
+  37 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  Originally 33; widgetDinosaur, widgetMovie, widgetIDCard,
+  widgetShadeMatch, and widgetWordle were added later (movie/dinosaur
+  pull live data from Wikidata + Wikipedia; the rest are fully
+  self-contained, including a 718-word local dictionary for Wordle).
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
@@ -11,6 +14,8 @@
     4. Random tagline under the header    (TAGLINES, picked in init())
     5. Random favicon icon (Font Awesome) (buildFontAwesomeFavicon,
                                             270 solid + 52 brand icons)
+  Plus 2 per-card background systems, rolled independently for every
+  widget render rather than once per page:
     6. Calm decorative SVG backgrounds    (bgStars/bgGrid/bgGlow/etc.,
                                             defined but not auto-applied —
                                             available for widgets to call)
@@ -88,6 +93,26 @@
   .typing-input.correct{border-color:#22c55e}
   .typing-input.wrong{border-color:#ef4444}
   .typing-stat{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+
+  /* WORDLE */
+  .wordle-grid{display:flex;flex-direction:column;gap:4px;align-items:center;margin-bottom:10px}
+  .wordle-row{display:flex;gap:4px}
+  .wordle-cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:15px;font-weight:700;text-transform:uppercase;
+    border:2px solid var(--border);border-radius:3px;color:var(--text);transition:background-color .2s,border-color .2s}
+  .wordle-cell.wordle-hit{background:#22c55e;border-color:#22c55e;color:#fff}
+  .wordle-cell.wordle-present{background:#eab308;border-color:#eab308;color:#fff}
+  .wordle-cell.wordle-miss{background:rgba(255,255,255,0.06);border-color:var(--border);color:var(--muted)}
+  .wordle-keyboard{display:flex;flex-direction:column;gap:5px;align-items:center}
+  .wordle-kbrow{display:flex;gap:4px;justify-content:center}
+  .wordle-key{font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 5px;min-width:20px;
+    border:none;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--text);cursor:pointer;
+    transition:background-color .15s;flex:1}
+  .wordle-key:hover{background:rgba(255,255,255,0.16)}
+  .wordle-key-wide{flex:1.6;font-size:9px}
+  .wordle-key-hit{background:#22c55e;color:#fff}
+  .wordle-key-present{background:#eab308;color:#fff}
+  .wordle-key-miss{background:rgba(255,255,255,0.03);color:var(--muted)}
 
   /* BINARY */
   .binary-row{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0}
@@ -3833,6 +3858,239 @@ function widgetShadeMatch(){
   return html;
 }
 
+
+/* ── WORDLE ───────────────────────────────────
+   A compact, self-contained Wordle clone: 6 guesses at a random
+   5-letter target word, full duplicate-letter-aware scoring (the part
+   most quick clones get wrong), an on-screen keyboard that tracks
+   letter status, and physical keyboard support too. */
+const WORDLE_WORDS=[
+  'ABOUT','ABOVE','ACTOR','ADULT','AFTER','AGAIN','AGENT','AGREE','AHEAD','ALARM',
+  'ALBUM','ALERT','ALIEN','ALIGN','ALIKE','ALIVE','ALLOW','ALONE','ALONG','ALTER',
+  'AMONG','AMPLE','ANGER','ANGLE','ANGRY','APPLE','APPLY','ARENA','ARGUE','ARISE',
+  'ARROW','ASIDE','ASSET','AUDIO','AUDIT','AVOID','AWAKE','AWARD','AWARE','BADGE',
+  'BAKER','BASIC','BASIN','BASIS','BEACH','BEGIN','BEING','BELOW','BENCH','BIRTH',
+  'BLACK','BLADE','BLAME','BLANK','BLAST','BLEND','BLESS','BLIND','BLOCK','BLOOD',
+  'BOARD','BOAST','BONUS','BOOST','BOOTH','BOUND','BRAIN','BRAND','BRASS','BRAVE',
+  'BREAD','BREAK','BREED','BRICK','BRIDE','BRIEF','BRING','BROAD','BROOK','BROWN',
+  'BUILD','BUNCH','BURST','CABLE','CANDY','CARGO','CARRY','CARVE','CATCH','CAUSE',
+  'CHAIN','CHAIR','CHALK','CHAOS','CHARM','CHART','CHASE','CHEAP','CHEAT','CHECK',
+  'CHEST','CHIEF','CHILD','CHILL','CHOIR','CHOSE','CHUNK','CIVIC','CLAIM','CLASH',
+  'CLASS','CLEAN','CLEAR','CLERK','CLICK','CLIFF','CLIMB','CLOCK','CLOSE','CLOTH',
+  'CLOUD','CLOWN','COACH','COAST','COLOR','COUCH','COULD','COUNT','COURT','COVER',
+  'CRACK','CRAFT','CRANE','CRASH','CRAVE','CRAWL','CRAZY','CREAM','CREEK','CREST',
+  'CREWS','CRIME','CRISP','CROSS','CROWD','CROWN','CRUEL','CRUSH','CURVE','CYCLE',
+  'DAILY','DANCE','DEALT','DEATH','DEBUT','DECAY','DECOR','DELAY','DEPTH','DIARY',
+  'DIGIT','DODGE','DOZEN','DRAFT','DRAIN','DRAMA','DRANK','DRAWN','DREAM','DRESS',
+  'DRIED','DRIFT','DRILL','DRINK','DRIVE','DROVE','DRYER','DUTCH','EAGER','EARLY',
+  'EARTH','EIGHT','ELDER','ELECT','ELITE','EMPTY','ENJOY','ENTER','ENTRY','EQUAL',
+  'ERROR','EVENT','EVERY','EXACT','EXIST','EXTRA','FABLE','FAINT','FAIRY','FAITH',
+  'FALSE','FANCY','FATAL','FAULT','FAVOR','FENCE','FERRY','FEVER','FIBER','FIELD',
+  'FIERY','FIFTH','FIFTY','FIGHT','FINAL','FIRST','FIXED','FLAME','FLASH','FLEET',
+  'FLESH','FLOAT','FLOCK','FLOOD','FLOOR','FLOUR','FLOWN','FLUID','FLUSH','FOCUS',
+  'FORCE','FORGE','FORTH','FORUM','FOUND','FRAME','FRANK','FRAUD','FRESH','FRONT',
+  'FROST','FROZE','FRUIT','FUNNY','GAUGE','GENRE','GHOST','GIANT','GIVEN','GLAND',
+  'GLARE','GLASS','GLEAM','GLIDE','GLOBE','GLORY','GLOVE','GOING','GOOSE','GRACE',
+  'GRADE','GRAIN','GRAND','GRANT','GRAPE','GRASP','GRASS','GRAVE','GREAT','GREEN',
+  'GREET','GRIEF','GRILL','GRIND','GRIPE','GROSS','GROUP','GROVE','GROWN','GUARD',
+  'GUESS','GUEST','GUIDE','GUILT','HABIT','HAPPY','HARSH','HASTE','HATCH','HAUNT',
+  'HEART','HEAVY','HELLO','HENCE','HONOR','HORSE','HOTEL','HOUSE','HUMAN','HUMOR',
+  'HUNCH','HURRY','IDEAL','IMAGE','IMPLY','INDEX','INNER','INPUT','ISSUE','IVORY',
+  'JOINT','JOLLY','JUDGE','JUICE','JUMBO','KNACK','KNEEL','KNIFE','KNOCK','KNOWN',
+  'LABEL','LARGE','LASER','LATER','LAUGH','LAYER','LEARN','LEASE','LEAST','LEAVE',
+  'LEDGE','LEMON','LEVEL','LIGHT','LIMIT','LINEN','LIVER','LOCAL','LODGE','LOGIC',
+  'LOOSE','LOWER','LOYAL','LUCKY','LUNAR','LYRIC','MAGIC','MAJOR','MAKER','MARCH',
+  'MARSH','MATCH','MAYOR','MEANT','MEDAL','MEDIA','MELON','MERCY','MERIT','MERRY',
+  'METAL','MIGHT','MINOR','MINUS','MIXED','MODEL','MOIST','MONTH','MORAL','MOTOR',
+  'MOUNT','MOUSE','MOUTH','MOVIE','MUSIC','NAIVE','NAKED','NASTY','NEEDY','NERVE',
+  'NEVER','NEWLY','NIGHT','NOBLE','NOISE','NORTH','NOTED','NOVEL','NURSE','OCCUR',
+  'OCEAN','OFFER','OFTEN','OLIVE','ORBIT','ORDER','ORGAN','OTHER','OUGHT','OUTER',
+  'OWNER','OZONE','PAGER','PAINT','PANEL','PANIC','PAPER','PATCH','PAUSE','PEACE',
+  'PEARL','PHASE','PHONE','PHOTO','PIANO','PIECE','PILOT','PITCH','PIVOT','PIXEL',
+  'PLAIN','PLANE','PLANT','PLATE','PLAZA','PLOTS','POESY','POINT','POUCH','POUND',
+  'POWER','PRESS','PRICE','PRIDE','PRIME','PRINT','PRIOR','PRIZE','PROOF','PROUD',
+  'PROVE','PULSE','PUPIL','PUZZY','QUART','QUEEN','QUERY','QUEST','QUICK','QUIET',
+  'QUILT','QUITE','QUOTE','RADAR','RADIO','RAISE','RALLY','RANCH','RANGE','RAPID',
+  'RATIO','REACH','READY','REALM','REBEL','REFER','RELAX','REPLY','RIDGE','RIFLE',
+  'RIGID','RIVAL','RIVER','ROAST','ROBIN','ROBOT','ROCKY','ROOST','ROUGH','ROUND',
+  'ROUTE','ROYAL','RULER','RURAL','SADLY','SALAD','SALON','SAUCE','SCALE','SCARE',
+  'SCARF','SCENE','SCENT','SCOLD','SCOPE','SCORE','SCOUT','SCRAP','SCREW','SEDAN',
+  'SENSE','SERVE','SETUP','SEVEN','SEWER','SHADE','SHADY','SHAKE','SHALL','SHAME',
+  'SHAPE','SHARE','SHARK','SHARP','SHEAR','SHEEP','SHEER','SHEET','SHELF','SHELL',
+  'SHIFT','SHINE','SHINY','SHIRT','SHOCK','SHONE','SHOOT','SHORE','SHORT','SHOUT',
+  'SHOWN','SIEGE','SIGHT','SILLY','SINCE','SIXTH','SIXTY','SKILL','SKULL','SLATE',
+  'SLEEP','SLICE','SLIDE','SLOPE','SMALL','SMART','SMILE','SMOKE','SNAKE','SNEAK',
+  'SOLAR','SOLID','SOLVE','SORRY','SOUND','SOUTH','SPACE','SPARE','SPARK','SPEAK',
+  'SPEED','SPELL','SPEND','SPENT','SPICE','SPINE','SPLIT','SPOIL','SPOKE','SPOON',
+  'SPORT','SQUAD','STACK','STAFF','STAGE','STAIR','STAKE','STALE','STARE','START',
+  'STATE','STEAM','STEEL','STEEP','STEER','STERN','STICK','STIFF','STILL','STING',
+  'STOCK','STONE','STOOD','STORE','STORM','STORY','STOVE','STRAY','STRIP','STUCK',
+  'STUDY','STUFF','STYLE','SUGAR','SUITE','SUNNY','SUPER','SWEAR','SWEAT','SWEET',
+  'SWIFT','SWING','SWORD','SWORN','TABLE','TASTE','TEACH','TENSE','TENTH','THANK',
+  'THEFT','THEIR','THEME','THERE','THICK','THIEF','THING','THINK','THIRD','THORN',
+  'THOSE','THREE','THREW','THROW','THUMB','TIGER','TIGHT','TIRED','TITLE','TODAY',
+  'TOKEN','TOOTH','TOPIC','TOTAL','TOUCH','TOUGH','TOWER','TRACE','TRACK','TRADE',
+  'TRAIL','TRAIN','TRAIT','TRASH','TREAT','TREND','TRIAL','TRIBE','TRICK','TRIED',
+  'TRUCK','TRULY','TRUST','TRUTH','TULIP','TUMOR','TWICE','UNCLE','UNDUE','UNFIT',
+  'UNION','UNITY','UNTIL','UPPER','URBAN','USAGE','USUAL','VALID','VALUE','VAPOR',
+  'VAULT','VENUE','VERSE','VIDEO','VIRUS','VISIT','VITAL','VOCAL','VOICE','VOTER',
+  'WAGON','WASTE','WATCH','WATER','WHEAT','WHEEL','WHERE','WHICH','WHILE','WHITE',
+  'WHOLE','WIDEN','WIDOW','WIDTH','WORLD','WORRY','WORSE','WORST','WORTH','WOULD',
+  'WOUND','WRECK','WRIST','WRITE','WRONG','YIELD','YOUNG','YOUTH',
+];
+
+// Scores a guess against the target with correct duplicate-letter
+// handling: first pass marks exact position matches ('hit') and removes
+// those letters from the pool; second pass marks remaining letters
+// 'present' only if the target still has an unclaimed copy of them,
+// otherwise 'miss'. This avoids the classic clone bug where a guess
+// with a repeated letter gets two yellows when the target only has
+// one of that letter.
+function wordleScore(guess,target){
+  const result=new Array(5).fill('miss');
+  const pool={};
+  for(let i=0;i<5;i++){
+    if(guess[i]===target[i]){
+      result[i]='hit';
+    }else{
+      pool[target[i]]=(pool[target[i]]||0)+1;
+    }
+  }
+  for(let i=0;i<5;i++){
+    if(result[i]==='hit')continue;
+    const c=guess[i];
+    if(pool[c]>0){
+      result[i]='present';
+      pool[c]--;
+    }
+  }
+  return result;
+}
+function widgetWordle(){
+  const target=pick(WORDLE_WORDS);
+  const wordSet=new Set(WORDLE_WORDS);
+  const id='wd'+Math.random().toString(36).slice(2);
+  const gridId=id+'g',keyId=id+'k',msgId=id+'m';
+  const ROWS=6;
+  let gridHtml='';
+  for(let r=0;r<ROWS;r++){
+    gridHtml+='<div class="wordle-row" data-row="'+r+'">';
+    for(let c=0;c<5;c++){
+      gridHtml+='<div class="wordle-cell" data-row="'+r+'" data-col="'+c+'"></div>';
+    }
+    gridHtml+='</div>';
+  }
+  const KB_ROWS=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+  let kbHtml='';
+  KB_ROWS.forEach((row,ri)=>{
+    kbHtml+='<div class="wordle-kbrow">';
+    if(ri===2)kbHtml+='<button class="wordle-key wordle-key-wide" data-key="ENTER">ENTER</button>';
+    row.split('').forEach(ch=>{
+      kbHtml+='<button class="wordle-key" data-key="'+ch+'">'+ch+'</button>';
+    });
+    if(ri===2)kbHtml+='<button class="wordle-key wordle-key-wide" data-key="BACK">⌫</button>';
+    kbHtml+='</div>';
+  });
+  const html=card('green','🟩 WORDLE',
+    '<div class="wordle-grid" id="'+gridId+'">'+gridHtml+'</div>'+
+    '<div id="'+msgId+'" class="sub-info" style="text-align:center;min-height:14px;margin:6px 0">Guess the 5-letter word · 6 tries</div>'+
+    '<div class="wordle-keyboard" id="'+keyId+'">'+kbHtml+'</div>',
+    'Word list: '+WORDLE_WORDS.length+' common 5-letter words'
+  ,maybeWeirdBg(0.08));
+  setTimeout(()=>{
+    const gridEl=document.getElementById(gridId);
+    const keyEl=document.getElementById(keyId);
+    const msgEl=document.getElementById(msgId);
+    if(!gridEl||!keyEl||!msgEl)return;
+    let curRow=0,curGuess='',gameOver=false;
+    function cellsForRow(r){
+      return gridEl.querySelectorAll('[data-row="'+r+'"].wordle-cell');
+    }
+    function renderCurrent(){
+      const cells=cellsForRow(curRow);
+      cells.forEach((cell,i)=>{cell.textContent=curGuess[i]||'';});
+    }
+    function keyState(key){
+      const btn=keyEl.querySelector('[data-key="'+key+'"]');
+      return btn;
+    }
+    function submitGuess(){
+      if(curGuess.length<5){
+        msgEl.textContent='Not enough letters';
+        msgEl.style.color='#ef4444';
+        return;
+      }
+      if(!wordSet.has(curGuess)){
+        msgEl.textContent='Not in word list';
+        msgEl.style.color='#ef4444';
+        return;
+      }
+      const result=wordleScore(curGuess,target);
+      const cells=cellsForRow(curRow);
+      result.forEach((res,i)=>{
+        const cell=cells[i];
+        cell.classList.add('wordle-'+res);
+        const k=keyState(curGuess[i]);
+        if(k){
+          // Don't downgrade a key that's already shown as a better state
+          // (hit > present > miss) from an earlier guess this game.
+          const rank={hit:3,present:2,miss:1};
+          const curRank=rank[k.dataset.state]||0;
+          if(rank[res]>curRank){
+            k.dataset.state=res;
+            k.className='wordle-key wordle-key-'+res+(k.classList.contains('wordle-key-wide')?' wordle-key-wide':'');
+          }
+        }
+      });
+      if(curGuess===target){
+        msgEl.textContent='🎉 Solved in '+(curRow+1)+'/'+ROWS;
+        msgEl.style.color='#22c55e';
+        gameOver=true;
+        return;
+      }
+      curRow++;
+      curGuess='';
+      if(curRow>=ROWS){
+        msgEl.textContent='Out of guesses — it was '+target;
+        msgEl.style.color='#f97316';
+        gameOver=true;
+      }else{
+        msgEl.textContent='';
+      }
+    }
+    function handleKey(key){
+      if(gameOver)return;
+      if(key==='ENTER'){submitGuess();return;}
+      if(key==='BACK'){curGuess=curGuess.slice(0,-1);renderCurrent();return;}
+      if(/^[A-Z]$/.test(key)&&curGuess.length<5){
+        curGuess+=key;
+        renderCurrent();
+      }
+    }
+    keyEl.addEventListener('click',(e)=>{
+      const btn=e.target.closest('.wordle-key');
+      if(!btn)return;
+      handleKey(btn.dataset.key);
+    });
+    function physicalKeyHandler(e){
+      // Only handle keys while this widget's card is still in the DOM —
+      // avoids capturing keystrokes meant for other inputs (typing
+      // challenge, etc.) once this widget has scrolled out or reset.
+      // Also bail out entirely if focus is in a text input/textarea
+      // elsewhere on the page, so this doesn't steal keystrokes from
+      // the typing-challenge widget or any other text field.
+      if(!document.body.contains(gridEl))return;
+      const active=document.activeElement;
+      if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'))return;
+      if(e.key==='Enter'){handleKey('ENTER');}
+      else if(e.key==='Backspace'){handleKey('BACK');}
+      else if(/^[a-zA-Z]$/.test(e.key)){handleKey(e.key.toUpperCase());}
+    }
+    document.addEventListener('keydown',physicalKeyHandler);
+  },100);
+  return html;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -3842,7 +4100,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch, widgetWordle,
 ];
 
 /* ── INIT ──────────────────────────────────── */
