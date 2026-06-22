@@ -2,12 +2,15 @@
 <!--
   EVERY.THING
   ───────────
-  38 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  39 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
   Originally 33; widgetDinosaur, widgetMovie, widgetIDCard,
-  widgetShadeMatch, widgetWordle, and widgetLabyrinth were added later
-  (movie/dinosaur pull live data from Wikidata + Wikipedia; the rest are
-  fully self-contained, including a recursive-backtracker maze generator
-  and a 718-word local dictionary for Wordle).
+  widgetShadeMatch, widgetWordle, widgetLabyrinth, and
+  widgetMinesweeper were added later (movie/dinosaur pull live data from
+  Wikidata + Wikipedia; the rest are fully self-contained, including a
+  recursive-backtracker maze generator and a 718-word local dictionary
+  for Wordle). None of the games have a "regenerate" button — refreshing
+  the whole page is the intended way to get a new puzzle, in keeping
+  with the site's everything-reshuffles-on-load premise.
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
@@ -114,6 +117,15 @@
   .wordle-key-hit{background:#22c55e;color:#fff}
   .wordle-key-present{background:#eab308;color:#fff}
   .wordle-key-miss{background:rgba(255,255,255,0.03);color:var(--muted)}
+
+  /* MINESWEEPER */
+  .mine-grid{display:grid;gap:2px;justify-content:center;margin:0 auto 6px;width:max-content}
+  .mine-cell{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;font-weight:700;border-radius:2px;
+    background:rgba(255,255,255,0.08);cursor:pointer;user-select:none;transition:background-color .1s}
+  .mine-cell:hover{background:rgba(255,255,255,0.14)}
+  .mine-cell.mine-revealed{background:rgba(255,255,255,0.03);cursor:default}
+  .mine-cell.mine-boom{background:#ef4444}
 
   /* BINARY */
   .binary-row{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0}
@@ -4202,12 +4214,9 @@ function mazeSVG(cells,cols,rows,cellSize,px,py){
 function widgetLabyrinth(){
   const COLS=10,ROWS=10,CELL=22;
   const id='mz'+Math.random().toString(36).slice(2);
-  const svgWrapId=id+'s',playerId=id+'p',msgId=id+'m',movesId=id+'c',regenId=id+'r';
+  const svgWrapId=id+'s',playerId=id+'p',msgId=id+'m',movesId=id+'c';
   const dpadId=id+'d';
-  function buildMaze(){
-    return generateMaze(COLS,ROWS);
-  }
-  let cells=buildMaze();
+  const cells=generateMaze(COLS,ROWS);
   let px=0,py=0,moves=0,won=false;
   const dpadHtml=
     '<div style="display:grid;grid-template-columns:repeat(3,32px);grid-template-rows:repeat(2,28px);gap:3px;justify-content:center;margin-top:8px">'+
@@ -4220,19 +4229,15 @@ function widgetLabyrinth(){
     '<div id="'+svgWrapId+'" style="position:relative"></div>'+
     '<div id="'+msgId+'" class="sub-info" style="text-align:center;margin-top:6px;min-height:14px">Reach the red exit · arrow keys or D-pad</div>'+
     '<div id="'+dpadId+'">'+dpadHtml+'</div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'+
-      '<span class="sub-info">Moves: <span id="'+movesId+'">0</span></span>'+
-      '<button id="'+regenId+'" class="wordle-key" style="padding:5px 10px;font-size:9px">NEW MAZE</button>'+
-    '</div>',
+    '<div class="sub-info" style="margin-top:8px">Moves: <span id="'+movesId+'">0</span></div>',
     COLS+'×'+ROWS+' cells · recursive backtracker, one unique path'
   ,maybeWeirdBg(0.1));
   setTimeout(()=>{
     const svgWrap=document.getElementById(svgWrapId);
     const msgEl=document.getElementById(msgId);
     const movesEl=document.getElementById(movesId);
-    const regenBtn=document.getElementById(regenId);
     const dpadEl=document.getElementById(dpadId);
-    if(!svgWrap||!msgEl||!movesEl||!regenBtn||!dpadEl)return;
+    if(!svgWrap||!msgEl||!movesEl||!dpadEl)return;
     function renderPlayer(){
       svgWrap.innerHTML=mazeSVG(cells,COLS,ROWS,CELL,px,py);
     }
@@ -4253,19 +4258,10 @@ function widgetLabyrinth(){
         msgEl.style.color='#22c55e';
       }
     }
-    function regenerate(){
-      cells=buildMaze();
-      px=0;py=0;moves=0;won=false;
-      movesEl.textContent='0';
-      msgEl.textContent='Reach the red exit · arrow keys or D-pad';
-      msgEl.style.color='var(--muted)';
-      renderPlayer();
-    }
     dpadEl.addEventListener('click',(e)=>{
       const btn=e.target.closest('[data-dir]');
       if(btn)move(btn.dataset.dir);
     });
-    regenBtn.addEventListener('click',regenerate);
     function keyHandler(e){
       if(!document.body.contains(svgWrap))return;
       const active=document.activeElement;
@@ -4282,6 +4278,189 @@ function widgetLabyrinth(){
   return html;
 }
 
+
+/* ── MINESWEEPER ──────────────────────────────
+   Classic Minesweeper on a small grid. Mines are placed randomly but
+   never on or adjacent to your first click (standard fairness rule —
+   no first-move instant-loss with zero information). Left-click/tap
+   reveals, right-click/long-press flags. Flood-fills connected zero-
+   adjacency cells automatically, same as the original. */
+function buildMineBoard(cols,rows,mineCount,safeX,safeY){
+  const cells=[];
+  for(let y=0;y<rows;y++){
+    const row=[];
+    for(let x=0;x<cols;x++)row.push({x,y,mine:false,revealed:false,flagged:false,adjacent:0});
+    cells.push(row);
+  }
+  const isSafeZone=(x,y)=>Math.abs(x-safeX)<=1&&Math.abs(y-safeY)<=1;
+  let placed=0,attempts=0;
+  while(placed<mineCount&&attempts<10000){
+    attempts++;
+    const x=rnd(0,cols-1),y=rnd(0,rows-1);
+    if(cells[y][x].mine||isSafeZone(x,y))continue;
+    cells[y][x].mine=true;
+    placed++;
+  }
+  for(let y=0;y<rows;y++){
+    for(let x=0;x<cols;x++){
+      if(cells[y][x].mine)continue;
+      let count=0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        if(dx===0&&dy===0)continue;
+        const nx=x+dx,ny=y+dy;
+        if(nx>=0&&nx<cols&&ny>=0&&ny<rows&&cells[ny][nx].mine)count++;
+      }
+      cells[y][x].adjacent=count;
+    }
+  }
+  return cells;
+}
+function floodReveal(cells,cols,rows,x,y){
+  const stack=[[x,y]];
+  while(stack.length){
+    const[cx,cy]=stack.pop();
+    const c=cells[cy][cx];
+    if(c.revealed||c.flagged)continue;
+    c.revealed=true;
+    if(c.adjacent===0&&!c.mine){
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        if(dx===0&&dy===0)continue;
+        const nx=cx+dx,ny=cy+dy;
+        if(nx>=0&&nx<cols&&ny>=0&&ny<rows&&!cells[ny][nx].revealed)stack.push([nx,ny]);
+      }
+    }
+  }
+}
+const MINE_NUM_COLORS=['','#7eb4ff','#22c55e','#ef4444','#a78bfa','#f97316','#06b6d4','#e2e8f4','#94a3b8'];
+function widgetMinesweeper(){
+  const COLS=9,ROWS=9,MINES=10,CELL=26;
+  const id='ms'+Math.random().toString(36).slice(2);
+  const gridId=id+'g',msgId=id+'m',flagId=id+'f',mineId=id+'n';
+  let cells=null; // built lazily on first click, so we know the safe zone
+  let started=false,gameOver=false,won=false,flagsUsed=0;
+  const totalSafe=COLS*ROWS-MINES;
+  let revealedCount=0;
+  let gridHtml='';
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      gridHtml+='<div class="mine-cell" data-x="'+x+'" data-y="'+y+'"></div>';
+    }
+  }
+  const html=card('orange','💣 MINESWEEPER',
+    '<div class="mine-grid" id="'+gridId+'" style="grid-template-columns:repeat('+COLS+','+CELL+'px)">'+gridHtml+'</div>'+
+    '<div id="'+msgId+'" class="sub-info" style="text-align:center;margin-top:6px;min-height:14px">Click any cell to start · right-click to flag</div>'+
+    '<div class="sub-info" style="margin-top:4px">Mines: '+MINES+' · Flags used: <span id="'+flagId+'">0</span></div>',
+    COLS+'×'+ROWS+' grid · '+MINES+' mines · first click is always safe'
+  ,maybeWeirdBg(0.1));
+  setTimeout(()=>{
+    const gridEl=document.getElementById(gridId);
+    const msgEl=document.getElementById(msgId);
+    const flagEl=document.getElementById(flagId);
+    if(!gridEl||!msgEl||!flagEl)return;
+    function cellEl(x,y){
+      return gridEl.querySelector('[data-x="'+x+'"][data-y="'+y+'"]');
+    }
+    function renderAll(){
+      for(let y=0;y<ROWS;y++){
+        for(let x=0;x<COLS;x++){
+          const c=cells[y][x];
+          const el=cellEl(x,y);
+          el.className='mine-cell'+(c.revealed?' mine-revealed':'');
+          if(c.revealed){
+            if(c.mine){
+              el.textContent='💣';
+              el.classList.add('mine-boom');
+            }else if(c.adjacent>0){
+              el.textContent=c.adjacent;
+              el.style.color=MINE_NUM_COLORS[c.adjacent];
+            }else{
+              el.textContent='';
+            }
+          }else if(c.flagged){
+            el.textContent='🚩';
+          }else{
+            el.textContent='';
+          }
+        }
+      }
+    }
+    function revealAllMines(){
+      for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(cells[y][x].mine)cells[y][x].revealed=true;
+    }
+    function checkWin(){
+      revealedCount=0;
+      for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(cells[y][x].revealed&&!cells[y][x].mine)revealedCount++;
+      if(revealedCount===totalSafe){
+        gameOver=true;won=true;
+        msgEl.textContent='🎉 Cleared the field!';
+        msgEl.style.color='#22c55e';
+      }
+    }
+    function reveal(x,y){
+      if(gameOver)return;
+      if(!started){
+        // Board is generated only now, so mine placement can safely
+        // exclude this exact first-clicked cell and its neighbors.
+        cells=buildMineBoard(COLS,ROWS,MINES,x,y);
+        started=true;
+      }
+      const c=cells[y][x];
+      if(c.revealed||c.flagged)return;
+      if(c.mine){
+        c.revealed=true;
+        gameOver=true;
+        revealAllMines();
+        renderAll();
+        msgEl.textContent='💥 Boom — try the next one';
+        msgEl.style.color='#ef4444';
+        return;
+      }
+      floodReveal(cells,COLS,ROWS,x,y);
+      renderAll();
+      checkWin();
+    }
+    function toggleFlag(x,y){
+      if(gameOver||!started)return;
+      const c=cells[y][x];
+      if(c.revealed)return;
+      c.flagged=!c.flagged;
+      flagsUsed+=c.flagged?1:-1;
+      flagEl.textContent=flagsUsed;
+      renderAll();
+    }
+    gridEl.addEventListener('click',(e)=>{
+      const el=e.target.closest('.mine-cell');
+      if(!el)return;
+      reveal(+el.dataset.x,+el.dataset.y);
+    });
+    gridEl.addEventListener('contextmenu',(e)=>{
+      const el=e.target.closest('.mine-cell');
+      if(!el)return;
+      e.preventDefault();
+      toggleFlag(+el.dataset.x,+el.dataset.y);
+    });
+    // Long-press to flag on touch devices, where there's no right-click.
+    // Touch interactions fire a synthetic 'click' right after touchend,
+    // so without suppressing it, a long-press-to-flag would also reveal
+    // the same cell a moment later — guard with a flag and preventDefault.
+    let pressTimer=null,longPressed=false;
+    gridEl.addEventListener('touchstart',(e)=>{
+      const el=e.target.closest('.mine-cell');
+      if(!el)return;
+      longPressed=false;
+      pressTimer=setTimeout(()=>{
+        longPressed=true;
+        toggleFlag(+el.dataset.x,+el.dataset.y);
+      },500);
+    },{passive:true});
+    gridEl.addEventListener('touchend',(e)=>{
+      if(pressTimer)clearTimeout(pressTimer);
+      if(longPressed)e.preventDefault();
+    });
+  },100);
+  return html;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -4291,7 +4470,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch, widgetWordle, widgetLabyrinth,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch, widgetWordle, widgetLabyrinth, widgetMinesweeper,
 ];
 
 /* ── INIT ──────────────────────────────────── */
