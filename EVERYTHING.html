@@ -2,11 +2,12 @@
 <!--
   EVERY.THING
   ───────────
-  37 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
+  38 widgets in the ALL_WIDGETS rotation (see widgetXxx functions below).
   Originally 33; widgetDinosaur, widgetMovie, widgetIDCard,
-  widgetShadeMatch, and widgetWordle were added later (movie/dinosaur
-  pull live data from Wikidata + Wikipedia; the rest are fully
-  self-contained, including a 718-word local dictionary for Wordle).
+  widgetShadeMatch, widgetWordle, and widgetLabyrinth were added later
+  (movie/dinosaur pull live data from Wikidata + Wikipedia; the rest are
+  fully self-contained, including a recursive-backtracker maze generator
+  and a 718-word local dictionary for Wordle).
   5 page-wide random systems outside the widget grid:
     1. Random accent color / hue theme   (applyRandomTheme)
     2. Random font pairing                (applyRandomFontPairing)
@@ -4133,6 +4134,154 @@ function widgetWordle(){
   return html;
 }
 
+
+/* ── LABYRINTH (interactive maze) ─────────────
+   A randomly generated perfect maze (recursive-backtracker algorithm —
+   every cell reachable, no loops, exactly one path between any two
+   points) rendered as SVG walls. Navigate from the top-left entrance to
+   the bottom-right exit with arrow keys or the on-screen D-pad. */
+function generateMaze(cols,rows){
+  const cells=[];
+  for(let y=0;y<rows;y++){
+    const row=[];
+    for(let x=0;x<cols;x++){
+      row.push({x,y,walls:{N:true,S:true,E:true,W:true},visited:false});
+    }
+    cells.push(row);
+  }
+  const opposite={N:'S',S:'N',E:'W',W:'E'};
+  const dirs=[{d:'N',dx:0,dy:-1},{d:'S',dx:0,dy:1},{d:'E',dx:1,dy:0},{d:'W',dx:-1,dy:0}];
+  const stack=[];
+  let current=cells[0][0];
+  current.visited=true;
+  stack.push(current);
+  while(stack.length>0){
+    current=stack[stack.length-1];
+    const neighbors=shuffle(dirs).map(({d,dx,dy})=>{
+      const nx=current.x+dx,ny=current.y+dy;
+      if(nx<0||nx>=cols||ny<0||ny>=rows)return null;
+      const cell=cells[ny][nx];
+      if(cell.visited)return null;
+      return{d,cell};
+    }).filter(Boolean);
+    if(neighbors.length===0){stack.pop();continue;}
+    const{d,cell}=neighbors[0];
+    current.walls[d]=false;
+    cell.walls[opposite[d]]=false;
+    cell.visited=true;
+    stack.push(cell);
+  }
+  return cells;
+}
+function mazeSVG(cells,cols,rows,cellSize,px,py){
+  const W=cols*cellSize,H=rows*cellSize;
+  let walls='';
+  for(let y=0;y<rows;y++){
+    for(let x=0;x<cols;x++){
+      const c=cells[y][x];
+      const x0=x*cellSize,y0=y*cellSize,x1=x0+cellSize,y1=y0+cellSize;
+      if(c.walls.N)walls+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'"/>';
+      if(c.walls.W)walls+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'"/>';
+      // Only draw S/E for the last row/col — interior S/E walls are
+      // already drawn as a neighboring cell's N/W wall, avoids doubled lines.
+      if(y===rows-1&&c.walls.S)walls+='<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y1+'"/>';
+      if(x===cols-1&&c.walls.E)walls+='<line x1="'+x1+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'"/>';
+    }
+  }
+  // Player marker is drawn as part of the same SVG (not a separately
+  // positioned HTML overlay) so it always lines up with the maze
+  // regardless of how the SVG itself gets scaled to fit the card width.
+  const playerCx=px*cellSize+cellSize/2,playerCy=py*cellSize+cellSize/2;
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;background:rgba(255,255,255,0.02);border-radius:4px">'+
+    '<g stroke="var(--border-bright,#7eb4ff)" stroke-width="2" stroke-linecap="round" fill="none">'+walls+'</g>'+
+    '<rect x="2" y="2" width="'+(cellSize-4)+'" height="'+(cellSize-4)+'" fill="#22c55e" opacity="0.5" rx="2"/>'+
+    '<rect x="'+((cols-1)*cellSize+2)+'" y="'+((rows-1)*cellSize+2)+'" width="'+(cellSize-4)+'" height="'+(cellSize-4)+'" fill="#ef4444" opacity="0.5" rx="2"/>'+
+    '<circle cx="'+playerCx+'" cy="'+playerCy+'" r="'+(cellSize/2-3)+'" fill="#7eb4ff" style="transition:cx .1s,cy .1s"/>'+
+  '</svg>';
+}
+function widgetLabyrinth(){
+  const COLS=10,ROWS=10,CELL=22;
+  const id='mz'+Math.random().toString(36).slice(2);
+  const svgWrapId=id+'s',playerId=id+'p',msgId=id+'m',movesId=id+'c',regenId=id+'r';
+  const dpadId=id+'d';
+  function buildMaze(){
+    return generateMaze(COLS,ROWS);
+  }
+  let cells=buildMaze();
+  let px=0,py=0,moves=0,won=false;
+  const dpadHtml=
+    '<div style="display:grid;grid-template-columns:repeat(3,32px);grid-template-rows:repeat(2,28px);gap:3px;justify-content:center;margin-top:8px">'+
+      '<div></div><button class="wordle-key" data-dir="N" style="padding:4px">▲</button><div></div>'+
+      '<button class="wordle-key" data-dir="W" style="padding:4px">◀</button>'+
+      '<button class="wordle-key" data-dir="S" style="padding:4px">▼</button>'+
+      '<button class="wordle-key" data-dir="E" style="padding:4px">▶</button>'+
+    '</div>';
+  const html=card('violet','🌀 LABYRINTH',
+    '<div id="'+svgWrapId+'" style="position:relative"></div>'+
+    '<div id="'+msgId+'" class="sub-info" style="text-align:center;margin-top:6px;min-height:14px">Reach the red exit · arrow keys or D-pad</div>'+
+    '<div id="'+dpadId+'">'+dpadHtml+'</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'+
+      '<span class="sub-info">Moves: <span id="'+movesId+'">0</span></span>'+
+      '<button id="'+regenId+'" class="wordle-key" style="padding:5px 10px;font-size:9px">NEW MAZE</button>'+
+    '</div>',
+    COLS+'×'+ROWS+' cells · recursive backtracker, one unique path'
+  ,maybeWeirdBg(0.1));
+  setTimeout(()=>{
+    const svgWrap=document.getElementById(svgWrapId);
+    const msgEl=document.getElementById(msgId);
+    const movesEl=document.getElementById(movesId);
+    const regenBtn=document.getElementById(regenId);
+    const dpadEl=document.getElementById(dpadId);
+    if(!svgWrap||!msgEl||!movesEl||!regenBtn||!dpadEl)return;
+    function renderPlayer(){
+      svgWrap.innerHTML=mazeSVG(cells,COLS,ROWS,CELL,px,py);
+    }
+    function move(dir){
+      if(won)return;
+      const c=cells[py][px];
+      if(c.walls[dir])return; // blocked by a wall
+      if(dir==='N')py--;
+      if(dir==='S')py++;
+      if(dir==='E')px++;
+      if(dir==='W')px--;
+      moves++;
+      movesEl.textContent=moves;
+      renderPlayer();
+      if(px===COLS-1&&py===ROWS-1){
+        won=true;
+        msgEl.textContent='🎉 Escaped in '+moves+' moves!';
+        msgEl.style.color='#22c55e';
+      }
+    }
+    function regenerate(){
+      cells=buildMaze();
+      px=0;py=0;moves=0;won=false;
+      movesEl.textContent='0';
+      msgEl.textContent='Reach the red exit · arrow keys or D-pad';
+      msgEl.style.color='var(--muted)';
+      renderPlayer();
+    }
+    dpadEl.addEventListener('click',(e)=>{
+      const btn=e.target.closest('[data-dir]');
+      if(btn)move(btn.dataset.dir);
+    });
+    regenBtn.addEventListener('click',regenerate);
+    function keyHandler(e){
+      if(!document.body.contains(svgWrap))return;
+      const active=document.activeElement;
+      if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'))return;
+      const map={ArrowUp:'N',ArrowDown:'S',ArrowLeft:'W',ArrowRight:'E'};
+      if(map[e.key]){
+        e.preventDefault();
+        move(map[e.key]);
+      }
+    }
+    document.addEventListener('keydown',keyHandler);
+    renderPlayer();
+  },100);
+  return html;
+}
+
 /* ── ALL WIDGETS ───────────────────────────── */
 const ALL_WIDGETS=[
   widgetTime, widgetWeather, widgetRubik, widgetLaw, widgetCountry,
@@ -4142,7 +4291,7 @@ const ALL_WIDGETS=[
   widgetElement, widgetSpeedFact, widgetEtymology, widgetChessOpening,
   widgetRecipe, widgetCoordinate, widgetPlayingCard, widgetTarot,
   widgetDice, widgetMorse, widgetEquation, widgetEmoji, widgetSong,
-  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch, widgetWordle,
+  widgetDinosaur, widgetMovie, widgetGame, widgetBook, widgetIDCard, widgetShadeMatch, widgetWordle, widgetLabyrinth,
 ];
 
 /* ── INIT ──────────────────────────────────── */
