@@ -122,7 +122,8 @@
   .mine-grid{display:grid;gap:2px;justify-content:center;margin:0 auto 6px;width:max-content}
   .mine-cell{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
     font-family:var(--mono);font-size:12px;font-weight:700;border-radius:2px;
-    background:rgba(255,255,255,0.08);cursor:pointer;user-select:none;transition:background-color .1s}
+    background:rgba(255,255,255,0.08);cursor:pointer;user-select:none;-webkit-user-select:none;
+    -webkit-touch-callout:none;touch-action:manipulation;transition:background-color .1s}
   .mine-cell:hover{background:rgba(255,255,255,0.14)}
   .mine-cell.mine-revealed{background:rgba(255,255,255,0.03);cursor:default}
   .mine-cell.mine-boom{background:#ef4444}
@@ -4440,23 +4441,43 @@ function widgetMinesweeper(){
       toggleFlag(+el.dataset.x,+el.dataset.y);
     });
     // Long-press to flag on touch devices, where there's no right-click.
-    // Touch interactions fire a synthetic 'click' right after touchend,
-    // so without suppressing it, a long-press-to-flag would also reveal
-    // the same cell a moment later — guard with a flag and preventDefault.
-    let pressTimer=null,longPressed=false;
+    // Three things have to work together for this to be reliable:
+    //  1. CSS touch-action/-webkit-touch-callout (set on .mine-cell)
+    //     stops the browser's own long-press text-selection/callout from
+    //     hijacking the gesture before our timer even fires.
+    //  2. touchmove cancels the pending flag if the finger drifts off
+    //     the cell it started on (a finger is never perfectly still,
+    //     and a real drag/scroll shouldn't register as a long-press).
+    //  3. Touch interactions fire a synthetic 'click' right after
+    //     touchend, so without suppressing it, a long-press-to-flag
+    //     would also reveal the same cell a moment later — guarded with
+    //     a flag and preventDefault on touchend.
+    let pressTimer=null,longPressed=false,pressEl=null;
+    function clearPress(){
+      if(pressTimer)clearTimeout(pressTimer);
+      pressTimer=null;
+      pressEl=null;
+    }
     gridEl.addEventListener('touchstart',(e)=>{
       const el=e.target.closest('.mine-cell');
       if(!el)return;
       longPressed=false;
+      pressEl=el;
       pressTimer=setTimeout(()=>{
         longPressed=true;
         toggleFlag(+el.dataset.x,+el.dataset.y);
+        pressTimer=null;
       },500);
     },{passive:true});
+    gridEl.addEventListener('touchmove',(e)=>{
+      const el=e.target.closest('.mine-cell');
+      if(el!==pressEl)clearPress();
+    },{passive:true});
     gridEl.addEventListener('touchend',(e)=>{
-      if(pressTimer)clearTimeout(pressTimer);
+      clearPress();
       if(longPressed)e.preventDefault();
     });
+    gridEl.addEventListener('touchcancel',clearPress);
   },100);
   return html;
 }
