@@ -8,7 +8,7 @@
   widgetMinesweeper were added later (movie/dinosaur pull live data from
   Wikidata + Wikipedia; the rest are fully self-contained, including a
   recursive-backtracker maze generator and a 718-word local dictionary
-  for Wordle). None of the games have a "regenerate" button — refreshing
+  for Wordle). None of the games have a "regenerate" button, refreshing
   the whole page is the intended way to get a new puzzle, in keeping
   with the site's everything-reshuffles-on-load premise.
   5 page-wide random systems outside the widget grid:
@@ -21,10 +21,10 @@
   Plus 2 per-card background systems, rolled independently for every
   widget render rather than once per page:
     6. Calm decorative SVG backgrounds    (bgStars/bgGrid/bgGlow/etc.,
-                                            defined but not auto-applied —
+                                            defined but not auto-applied,
                                             available for widgets to call)
     7. Wild/chaotic backgrounds           (WILD_BACKGROUNDS, rolled via
-                                            maybeWeirdBg(chance) — lava
+                                            maybeWeirdBg(chance), lava
                                             lamp, glitch bars, confetti,
                                             static, code rain, and more,
                                             ~10-18% odds per widget call)
@@ -242,7 +242,7 @@ function bgContours(color){
 
 /* ── WILD CARD BACKGROUNDS ────────────────────
    A second, louder tier on top of the calm bgStars/bgGrid/etc. toolkit
-   above — chaotic, clashing, "did my browser just glitch" energy.
+   above, chaotic, clashing, "did my browser just glitch" energy.
    Every widget gets a small random chance (via maybeWeirdBg) to roll
    one of these instead of its normal plain background. Still kept
    under the content layer (.card-bg is z-index:0, text is z-index:1)
@@ -2394,7 +2394,7 @@ function widgetConstellation(){
   const lines=c.lines.map(([a,b])=>'<line x1="'+pts[a][0].toFixed(1)+'" y1="'+pts[a][1].toFixed(1)+'" x2="'+pts[b][0].toFixed(1)+'" y2="'+pts[b][1].toFixed(1)+'" stroke="rgba(100,160,255,0.2)" stroke-width="1"/>').join('');
   const stars=pts.map(([x,y],i)=>'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(i===0?4:2.5)+'" fill="'+(i===0?'#7eb4ff':'#a5c4fa')+'" opacity="0.9"/>').join('');
   // 90 background stars at higher sub-pixel precision (3 decimals on
-  // position, 3 on opacity) — purely decorative, invisible to the eye,
+  // position, 3 on opacity), purely decorative, invisible to the eye,
   // but each star now spans roughly 240,000×200,000×1,000 positions
   // instead of 2,400×2,000×26, massively widening the page's possible-
   // states space without changing how it looks.
@@ -2466,7 +2466,7 @@ function widgetISS(){
       const x=((parseFloat(d.longitude)+180)/360*220+10).toFixed(1);
       const y=((90-parseFloat(d.latitude))/180*110+10).toFixed(1);
       // 60 background stars at sub-pixel precision, same trick as the
-      // constellation widget — purely decorative space-dust behind the
+      // constellation widget, purely decorative space-dust behind the
       // map, invisible to the eye but adds a huge number of possible
       // pixel-level states to this widget's render.
       const starDust=Array.from({length:60},()=>'<circle cx="'+(Math.random()*240).toFixed(3)+'" cy="'+(Math.random()*130).toFixed(3)+'" r="0.6" fill="#fff" opacity="'+(0.08+Math.random()*0.22).toFixed(3)+'"/>').join('');
@@ -3315,7 +3315,7 @@ const SONG_FALLBACK=[
   {track:'Hey Ya!',artist:'OutKast',album:'Speakerboxxx/The Love Below',genre:'Hip-Hop',year:'2003'},
 ];
 // Search the iTunes catalog with a single random letter/digit, pull back
-// a batch of tracks, then pick one at random — the closest thing to a
+// a batch of tracks, then pick one at random, the closest thing to a
 // genuine "random song" the public iTunes Search API can offer.
 const SONG_SEEDS='abcdefghijklmnopqrstuvwxyz'.split('');
 async function fetchRandomSong(){
@@ -3405,7 +3405,7 @@ const DINOSAURS=[
 const DINO_ACCENTS=['violet','teal','amber','green','cyan','orange'];
 async function fetchRandomDinosaur(){
   const seed=pick(DINOSAURS);
-  // Use just the genus (first word) — Wikipedia pages are titled by genus,
+  // Use just the genus (first word), Wikipedia pages are titled by genus,
   // e.g. "Tyrannosaurus" rather than "Tyrannosaurus rex".
   const genus=seed.name.split(' ')[0];
   const url='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(genus);
@@ -3477,7 +3477,7 @@ const MOVIE_FALLBACK=[
 // Wikidata holds a SPARQL-queryable graph of essentially every film with
 // metadata. We grab one at a random offset that has a poster image
 // (P3383) attached, then pull a real prose summary from Wikipedia's REST
-// API for that same title — much richer than any single Wikidata field.
+// API for that same title, much richer than any single Wikidata field.
 const MOVIE_COUNT_SPARQL=
   'SELECT (COUNT(*) AS ?count) WHERE {'+
   '  ?film wdt:P31 wd:Q11424 ; wdt:P3383 ?image .'+
@@ -3597,7 +3597,7 @@ const GAME_FALLBACK=[
   {title:'Cyberpunk 2077',rating:'Very Positive',price:'$59.99'},
 ];
 // CheapShark aggregates real PC games (Steam, GOG, Epic, etc.) and
-// fully supports direct browser CORS requests — no key needed.
+// fully supports direct browser CORS requests, no key needed.
 // We grab a page of current deals and pick one at random.
 function widgetGame(){
   const div=document.createElement('div');
@@ -3693,8 +3693,8 @@ function widgetBook(){
    A procedurally generated identity card in the spirit of border-control
    inspection games: blocky monochrome photo, stamped fields, and a
    10-character ID code. Nations, names, and birth cities below are all
-   original/fictional — not lifted from any specific game's invented
-   place names — built fresh in the same Cold-War-bureaucracy spirit. */
+   original/fictional, not lifted from any specific game's invented
+   place names, built fresh in the same Cold-War-bureaucracy spirit. */
 const ID_NATIONS=[
   'Vostrania','Kaldoria','Resnovia','Pelgorod Union','Drevenstadt',
   'Severnyx Republic','Tarkhovia','Ulvenrike','Brennistok','Kovardia',
@@ -3717,7 +3717,7 @@ const ID_BIRTH_CITIES=[
   'Halgard','Tovenstad','Krasnopil','Ulvenfjord',
 ];
 function idChecksumCode(){
-  // 10-character code: 4 letters + 5 digits + 1 letter — gives the
+  // 10-character code: 4 letters + 5 digits + 1 letter, gives the
   // "official document number" look without claiming to mean anything.
   const L=()=>String.fromCharCode(65+rnd(0,25));
   let s='';
@@ -3726,7 +3726,7 @@ function idChecksumCode(){
   s+=L();
   return s;
 }
-// Procedural blocky portrait — an 8x10 grid of randomized "pixels" in a
+// Procedural blocky portrait, an 8x10 grid of randomized "pixels" in a
 // muted duotone palette, rendered as an SVG so it scales crisply at any
 // size, evoking the low-res scanner photos on inspection-booth ID cards.
 function idPortraitSVG(skinTone,hairTone){
@@ -3819,7 +3819,7 @@ function widgetShadeMatch(){
   const targetSat=rnd(55,85);
   const targetLight=rnd(25,75);
   // Start the sliders at a random position too, instead of a fixed
-  // 180/50 — otherwise whenever the random target happened to land near
+  // 180/50, otherwise whenever the random target happened to land near
   // that fixed default, locking in immediately without touching anything
   // scored a "Perfect eye" by sheer luck rather than actual matching.
   const startHue=rnd(0,359);
@@ -4040,14 +4040,14 @@ function widgetWordle(){
       try{
         const res=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+word.toLowerCase(),{signal:controller.signal});
         // The API 404s for words it doesn't recognize and returns a
-        // JSON array of entries for words it does — we only need to
+        // JSON array of entries for words it does, we only need to
         // know which case happened, not the definitions themselves.
         const valid=res.ok;
         dictCache.set(word,valid);
         return valid;
       }catch(err){
         console.warn('[widgetWordle] dictionary lookup failed, falling back to local list only:',err);
-        // Network hiccup or API down — we can't confirm the word, but
+        // Network hiccup or API down, we can't confirm the word, but
         // rejecting it outright would be unfair for a word that might
         // be perfectly valid. Accept it rather than punish the player
         // for a connectivity issue outside their control.
@@ -4072,7 +4072,7 @@ function widgetWordle(){
         const valid=await isRealWord(guessSnapshot);
         checking=false;
         // The player could have kept typing/backspacing while the
-        // lookup was in flight — only proceed if the guess on screen
+        // lookup was in flight, only proceed if the guess on screen
         // still matches what we checked.
         if(curGuess!==guessSnapshot)return;
         if(!valid){
@@ -4107,7 +4107,7 @@ function widgetWordle(){
       curRow++;
       curGuess='';
       if(curRow>=ROWS){
-        msgEl.textContent='Out of guesses — it was '+target;
+        msgEl.textContent='Out of guesses, it was '+target;
         msgEl.style.color='#f97316';
         gameOver=true;
       }else{
@@ -4129,7 +4129,7 @@ function widgetWordle(){
       handleKey(btn.dataset.key);
     });
     function physicalKeyHandler(e){
-      // Only handle keys while this widget's card is still in the DOM —
+      // Only handle keys while this widget's card is still in the DOM,
       // avoids capturing keystrokes meant for other inputs (typing
       // challenge, etc.) once this widget has scrolled out or reset.
       // Also bail out entirely if focus is in a text input/textarea
@@ -4149,7 +4149,7 @@ function widgetWordle(){
 
 
 /* ── LABYRINTH (interactive maze) ─────────────
-   A randomly generated perfect maze (recursive-backtracker algorithm —
+   A randomly generated perfect maze (recursive-backtracker algorithm,
    every cell reachable, no loops, exactly one path between any two
    points) rendered as SVG walls. Navigate from the top-left entrance to
    the bottom-right exit with arrow keys or the on-screen D-pad. */
@@ -4195,7 +4195,7 @@ function mazeSVG(cells,cols,rows,cellSize,px,py){
       const x0=x*cellSize,y0=y*cellSize,x1=x0+cellSize,y1=y0+cellSize;
       if(c.walls.N)walls+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'"/>';
       if(c.walls.W)walls+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'"/>';
-      // Only draw S/E for the last row/col — interior S/E walls are
+      // Only draw S/E for the last row/col, interior S/E walls are
       // already drawn as a neighboring cell's N/W wall, avoids doubled lines.
       if(y===rows-1&&c.walls.S)walls+='<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y1+'"/>';
       if(x===cols-1&&c.walls.E)walls+='<line x1="'+x1+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'"/>';
@@ -4282,7 +4282,7 @@ function widgetLabyrinth(){
 
 /* ── MINESWEEPER ──────────────────────────────
    Classic Minesweeper on a small grid. Mines are placed randomly but
-   never on or adjacent to your first click (standard fairness rule —
+   never on or adjacent to your first click (standard fairness rule,
    no first-move instant-loss with zero information). Left-click/tap
    reveals, right-click/long-press flags. Flood-fills connected zero-
    adjacency cells automatically, same as the original. */
@@ -4412,7 +4412,7 @@ function widgetMinesweeper(){
         gameOver=true;
         revealAllMines();
         renderAll();
-        msgEl.textContent='💥 Boom — try the next one';
+        msgEl.textContent='💥 Boom, try the next one';
         msgEl.style.color='#ef4444';
         return;
       }
@@ -4450,7 +4450,7 @@ function widgetMinesweeper(){
     //     and a real drag/scroll shouldn't register as a long-press).
     //  3. Touch interactions fire a synthetic 'click' right after
     //     touchend, so without suppressing it, a long-press-to-flag
-    //     would also reveal the same cell a moment later — guarded with
+    //     would also reveal the same cell a moment later, guarded with
     //     a flag and preventDefault on touchend.
     let pressTimer=null,longPressed=false,pressEl=null;
     function clearPress(){
@@ -4526,7 +4526,7 @@ init();
   // Curated sample of Font Awesome 6 Free icon unicode codepoints
   // (270 solid + 52 brand icons), pulled from the free collection's
   // official metadata and filtered for icons that read clearly at
-  // favicon size — pure ASCII letter/digit glyphs and overly similar
+  // favicon size, pure ASCII letter/digit glyphs and overly similar
   // directional-arrow variants were excluded for variety's sake.
   const FA_SOLID=[
     'f000','f002','f004','f005','f007','f00a','f015','f017','f022','f023',
@@ -4593,7 +4593,7 @@ init();
   }
 
   // Load Font Awesome 6 Free webfont, then draw the favicon once it's ready.
-  // Guarded so the icon is only ever drawn ONCE — otherwise the fallback
+  // Guarded so the icon is only ever drawn ONCE, otherwise the fallback
   // timer and the font-ready path can both fire and the icon visibly
   // changes a split second after load.
   let faviconDrawn=false;
@@ -4615,7 +4615,7 @@ init();
       }).catch(drawOnce);
     };
     faLink.onerror=drawOnce;
-    // Fallback in case fonts API or onload doesn't fire promptly —
+    // Fallback in case fonts API or onload doesn't fire promptly,
     // drawOnce() ensures this can't cause a second, different icon.
     setTimeout(drawOnce,800);
   }else{
