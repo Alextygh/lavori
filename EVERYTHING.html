@@ -4497,9 +4497,8 @@ function widgetMinesweeper(){
 
 /* ── INSPIRATIONAL LETTER (live API) ─────────
    Generates a short letter built around a real quote pulled from the
-   ZenQuotes API, no key required. Falls back to a small local quote
-   set if the API is unreachable. Attribution to ZenQuotes is included
-   in the footer per their free-tier usage terms. */
+   DummyJSON quotes API, no key required, CORS-enabled for browser use.
+   Falls back to a local quote set if the API is unreachable. */
 const LETTER_SALUTATIONS=[
   'Dear friend,','To whoever needs this today,','Dear reader,',
   'Hey there,','To you, specifically,','Dear stranger,',
@@ -4529,27 +4528,46 @@ const LETTER_FALLBACK_QUOTES=[
   {q:'Whether you think you can or you think you can\u2019t, you\u2019re right.',a:'Henry Ford'},
   {q:'Believe you can and you\u2019re halfway there.',a:'Theodore Roosevelt'},
   {q:'Out of difficulties grow miracles.',a:'Jean de La Bruy\u00e8re'},
+  {q:'Strive not to be a success, but rather to be of value.',a:'Albert Einstein'},
+  {q:'The only way to do great work is to love what you do.',a:'Steve Jobs'},
+  {q:'In the middle of difficulty lies opportunity.',a:'Albert Einstein'},
+  {q:'Success is not final, failure is not fatal: it is the courage to continue that counts.',a:'Winston Churchill'},
+  {q:'What lies behind us and what lies before us are tiny matters compared to what lies within us.',a:'Ralph Waldo Emerson'},
+  {q:'The future belongs to those who believe in the beauty of their dreams.',a:'Eleanor Roosevelt'},
+  {q:'Twenty years from now you will be more disappointed by the things you didn\u2019t do than by the ones you did.',a:'Mark Twain'},
+  {q:'You miss 100% of the shots you don\u2019t take.',a:'Wayne Gretzky'},
+  {q:'It is during our darkest moments that we must focus to see the light.',a:'Aristotle'},
+  {q:'Do not wait for the perfect moment, take the moment and make it perfect.',a:'Unknown'},
+  {q:'The only impossible journey is the one you never begin.',a:'Tony Robbins'},
+  {q:'In the end, it\u2019s not the years in your life that count, it\u2019s the life in your years.',a:'Abraham Lincoln'},
+  {q:'Act as if what you do makes a difference. It does.',a:'William James'},
+  {q:'Everything you\u2019ve ever wanted is on the other side of fear.',a:'George Addair'},
 ];
-async function fetchZenQuotes(){
+async function fetchLetterQuotes(){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),6000);
   try{
-    const res=await fetch('https://zenquotes.io/api/quotes',{signal:controller.signal});
+    // DummyJSON returns up to 30 quotes per page by default; bump the
+    // limit so a single call gives a good-sized random pool to pick from.
+    const res=await fetch('https://dummyjson.com/quotes?limit=50',{signal:controller.signal});
     if(!res.ok)throw new Error('bad response: '+res.status);
     const data=await res.json();
-    if(!Array.isArray(data)||!data.length)throw new Error('empty quote list');
-    return data;
+    const list=data&&data.quotes;
+    if(!Array.isArray(list)||!list.length)throw new Error('empty quote list');
+    // Normalize to the same {q,a} shape used by the local fallback set,
+    // since DummyJSON's field names (quote/author) differ.
+    return list.map(item=>({q:item.quote,a:item.author}));
   }finally{
     clearTimeout(timer);
   }
 }
 function widgetLetter(){
   const div=document.createElement('div');
-  div.innerHTML=card('pink','💌 A LETTER FOR YOU','<div class="loading">Finding the right words…</div>','zenquotes.io · live');
+  div.innerHTML=card('pink','💌 A LETTER FOR YOU','<div class="loading">Finding the right words…</div>','dummyjson.com · live');
   setTimeout(async()=>{
     let quotes=null;
     for(let attempt=0;attempt<3&&!quotes;attempt++){
-      try{ quotes=await fetchZenQuotes(); }
+      try{ quotes=await fetchLetterQuotes(); }
       catch(err){ console.warn('[widgetLetter] attempt '+(attempt+1)+' failed:',err); }
     }
     const picked=quotes?pick(quotes):pick(LETTER_FALLBACK_QUOTES);
@@ -4569,7 +4587,7 @@ function widgetLetter(){
         '<div>'+closing+'</div><br>'+
         '<div style="color:var(--muted);font-size:11px">'+signature+'</div>'+
       '</div>',
-      quotes?'Quote via ZenQuotes API · zenquotes.io':'Offline fallback quote · API unreachable'
+      quotes?'Quote via DummyJSON · dummyjson.com':'Offline fallback quote · API unreachable'
     ,maybeWeirdBg(0.1));
   },50);
   return div;
