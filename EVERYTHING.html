@@ -36,7 +36,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EVERY.THING</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;700&family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600;700&family=Manrope:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500;700&family=Lexend:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&family=Albert+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Onest:wght@400;500;600;700&family=Martian+Mono:wght@400;600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;700&family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600;700&family=Manrope:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500;700&family=Lexend:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&family=Albert+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Onest:wght@400;500;600;700&family=Martian+Mono:wght@400;600&family=Hanken+Grotesk:wght@400;500;600;700&family=VT323&family=Bangers&family=Press+Start+2P&family=Righteous&family=Permanent+Marker&family=Creepster&family=Bungee&family=Luckiest+Guy&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#080c14;--surface:#0d1220;--border:rgba(100,140,220,0.15);--border-bright:rgba(100,160,255,0.3);--text:#e2e8f4;--muted:#5a6a8a;--mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:20px;overflow-x:hidden}
@@ -516,6 +516,12 @@ const FONT_PAIRINGS=[
   {mono:"'Space Mono',monospace",sans:"'Albert Sans',sans-serif"},
   {mono:"'Roboto Mono',monospace",sans:"'Onest',sans-serif"},
   {mono:"'Spline Sans Mono',monospace",sans:"'Plus Jakarta Sans',sans-serif"},
+  {mono:"'VT323',monospace",sans:"'Bangers',cursive"},
+  {mono:"'Press Start 2P',monospace",sans:"'Righteous',sans-serif"},
+  {mono:"'VT323',monospace",sans:"'Permanent Marker',cursive"},
+  {mono:"'Space Mono',monospace",sans:"'Creepster',cursive"},
+  {mono:"'Press Start 2P',monospace",sans:"'Bungee',cursive"},
+  {mono:"'JetBrains Mono',monospace",sans:"'Luckiest Guy',cursive"},
 ];
 function applyRandomFontPairing(){
   const f=pick(FONT_PAIRINGS);
@@ -4435,30 +4441,29 @@ function widgetMinesweeper(){
       if(!el)return;
       reveal(+el.dataset.x,+el.dataset.y);
     });
+    // The native right-click/long-press context menu is unconditionally
+    // suppressed here. Flagging is handled entirely by our own touch
+    // and right-click logic below, so the browser's own menu has no
+    // job to do on this grid, and letting it through was the actual
+    // source of the original bug: on touch devices, the OS can fire
+    // its own contextmenu event on its own timing (not necessarily
+    // tied to a fixed hold duration), which would flag a cell through
+    // a path completely separate from, and unaffected by, our 500ms
+    // timer below. That's why flags appeared to "always count" no
+    // matter how long the press was held: a long hold was actually
+    // being caught by the OS gesture, not by this widget's own timer.
     gridEl.addEventListener('contextmenu',(e)=>{
-      const el=e.target.closest('.mine-cell');
-      if(!el)return;
       e.preventDefault();
-      // On touch devices, a sustained press can trigger the browser's
-      // native contextmenu event *in addition to* our own touch timer
-      // below. Without this guard, a long (>500ms) hold would flag the
-      // cell via the touch handler, then immediately un-flag it again
-      // when contextmenu fired moments later, making long holds appear
-      // to silently do nothing while only a precisely-timed short hold
-      // worked. suppressTouchContextMenu is set right before our own
-      // touch-triggered toggle and briefly afterward, so we know to
-      // ignore a contextmenu that's just an echo of the same gesture.
-      if(suppressTouchContextMenu)return;
-      toggleFlag(+el.dataset.x,+el.dataset.y);
     });
     // Long-press to flag on touch devices, where there's no right-click.
-    // touchmove cancels the pending flag if the finger drifts off the
-    // cell it started on (a finger is never perfectly still, and a real
-    // drag/scroll shouldn't register as a long-press). Touch interactions
-    // also fire a synthetic 'click' right after touchend, so without
-    // suppressing it, a long-press-to-flag would also reveal the same
-    // cell a moment later, guarded with a flag and preventDefault.
-    let pressTimer=null,longPressed=false,pressEl=null,suppressTouchContextMenu=false;
+    // Movement is tracked using the actual touch coordinates (clientX/Y)
+    // rather than e.target, since e.target in a touchmove handler always
+    // stays the element the touch started on and never updates to
+    // whatever is currently under the finger, that check was previously
+    // unable to ever detect real finger drift. A small movement
+    // tolerance (10px) avoids canceling on the tiny jitter every real
+    // touch has even when the person means to hold still.
+    let pressTimer=null,touchStartX=0,touchStartY=0,pressEl=null;
     function clearPress(){
       if(pressTimer)clearTimeout(pressTimer);
       pressTimer=null;
@@ -4467,27 +4472,31 @@ function widgetMinesweeper(){
     gridEl.addEventListener('touchstart',(e)=>{
       const el=e.target.closest('.mine-cell');
       if(!el)return;
-      longPressed=false;
+      const t=e.touches[0];
+      touchStartX=t.clientX;
+      touchStartY=t.clientY;
       pressEl=el;
       pressTimer=setTimeout(()=>{
-        longPressed=true;
-        suppressTouchContextMenu=true;
         toggleFlag(+el.dataset.x,+el.dataset.y);
         pressTimer=null;
-        // Keep suppressing for a bit after the toggle, since the native
-        // contextmenu event (if the platform fires one for this same
-        // hold) can arrive somewhat after our own timer does, not
-        // necessarily in the same tick.
-        setTimeout(()=>{suppressTouchContextMenu=false;},700);
+        // Mark this element so the upcoming touchend knows a flag just
+        // happened on it and should not also reveal the cell.
+        el.dataset.justFlagged='1';
       },500);
     },{passive:true});
     gridEl.addEventListener('touchmove',(e)=>{
-      const el=e.target.closest('.mine-cell');
-      if(el!==pressEl)clearPress();
+      if(!pressTimer)return;
+      const t=e.touches[0];
+      const dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;
+      if(Math.hypot(dx,dy)>10)clearPress();
     },{passive:true});
     gridEl.addEventListener('touchend',(e)=>{
+      const releasedEl=pressEl;
       clearPress();
-      if(longPressed)e.preventDefault();
+      if(releasedEl&&releasedEl.dataset.justFlagged){
+        delete releasedEl.dataset.justFlagged;
+        e.preventDefault(); // swallow the synthetic click that follows, so the flagged cell isn't also revealed
+      }
     });
     gridEl.addEventListener('touchcancel',clearPress);
   },100);
