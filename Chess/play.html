@@ -2461,7 +2461,7 @@ function buildBoard() {
 function renderBoard() {
   const legalSet   = new Set(legalMoves.map(m => m.to));
   const legalCaps  = new Set(legalMoves.filter(m => m.flags.includes('c') || m.flags.includes('e')).map(m => m.to));
-  const inCheck    = chess.inCheck();
+  const inCheck    = chess.in_check();
   const kingSq     = inCheck ? findKing(chess.turn()) : null;
 
   for (let row = 0; row < 8; row++) {
@@ -2524,7 +2524,7 @@ function findKing(color) {
 //  CLICK HANDLER
 // ══════════════════════════════════════════════════════════════
 function onSqClick(sq) {
-  if (botThinking || chess.isGameOver()) return;
+  if (botThinking || chess.game_over()) return;
   if (chess.turn() !== humanColor) return;
 
   const piece = chess.get(sq);
@@ -2564,7 +2564,7 @@ async function executeHumanMove(move) {
   updateHistory();
   updateCaptured();
 
-  if (chess.isGameOver()) { handleGameOver(); return; }
+  if (chess.game_over()) { handleGameOver(); return; }
 
   updateStatus('Bot is thinking…', 'thinking');
   setTimeout(doBotMove, 300);
@@ -2574,7 +2574,7 @@ async function executeHumanMove(move) {
 //  BOT MOVE  (placeholder — random legal move for now)
 // ══════════════════════════════════════════════════════════════
 function doBotMove() {
-  if (chess.isGameOver()) return;
+  if (chess.game_over()) return;
   botThinking = true;
 
   // TODO: replace with actual bot AI (Stockfish + profile)
@@ -2594,7 +2594,7 @@ function doBotMove() {
     updateHistory();
     updateCaptured();
 
-    if (chess.isGameOver()) { handleGameOver(); return; }
+    if (chess.game_over()) { handleGameOver(); return; }
     updateStatus('Your move!');
   }, delay);
 }
@@ -2604,9 +2604,9 @@ function doBotMove() {
 // ══════════════════════════════════════════════════════════════
 function handleGameOver() {
   let msg;
-  if      (chess.isCheckmate())  msg = `Checkmate! ${chess.turn() === 'w' ? 'Black' : 'White'} wins.`;
-  else if (chess.isStalemate())  msg = 'Stalemate — draw.';
-  else if (chess.isDraw())       msg = 'Draw.';
+  if      (chess.in_checkmate())  msg = `Checkmate! ${chess.turn() === 'w' ? 'Black' : 'White'} wins.`;
+  else if (chess.in_stalemate())  msg = 'Stalemate — draw.';
+  else if (chess.in_draw())       msg = 'Draw.';
   else                           msg = 'Game over.';
   updateStatus(msg, 'result');
 }
