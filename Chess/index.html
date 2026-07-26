@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chessverse — Choose Your Opponent</title>
+  <title>The multiverse of Chess</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -401,19 +401,13 @@
   <!-- HERO -->
   <section class="hero">
     <p class="hero-eyebrow">Choose your opponent</p>
-    <h1>Every bot has a <em>story</em>.</h1>
-    <p>Pick a challenger — from a curious beginner to a cold-blooded engine — and see how long you last.</p>
+    <h1>Bots from every <em>universe</em>.</h1>
+    <p>Challengers pulled from across the multiverse.</p>
   </section>
 
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
+  <!-- FILTER BAR — buttons injected by JS from bots.json -->
+  <div class="filter-bar" id="filter-bar">
     <span class="filter-label">Filter:</span>
-    <button class="filter-btn active" data-filter="All">All</button>
-    <button class="filter-btn" data-filter="Beginner">Beginner</button>
-    <button class="filter-btn" data-filter="Intermediate">Intermediate</button>
-    <button class="filter-btn" data-filter="Advanced">Advanced</button>
-    <button class="filter-btn" data-filter="Expert">Expert</button>
-    <button class="filter-btn" data-filter="Clone">Clone</button>
     <span class="filter-count" id="filter-count"></span>
   </div>
 
@@ -434,16 +428,16 @@
       <li><a href="about.html">About</a></li>
       <li><a href="copyright.html">Copyright</a></li>
     </ul>
-    <p class="footer-copy">Chessverse — a passion project. All bot characters are fictional.</p>
+    <p class="footer-copy">All rights and copyright to their respect owners (please don't sue me).</p>
   </footer>
 
   <script>
     // ── Config ──────────────────────────────────────────────────────────────
     const BOTS_JSON = 'bots.json';
 
-    // Rating range for the difficulty bar (Lichess-style: lower = harder)
-    const MIN_RATING = 600;
-    const MAX_RATING = 2800;
+    // Rating range for the difficulty bar (Lichess-style: 0 = strongest)
+    const MIN_RATING = 0;
+    const MAX_RATING = 3000;
 
     // ── State ────────────────────────────────────────────────────────────────
     let allBots      = [];
@@ -451,21 +445,21 @@
 
     // ── Difficulty helpers ───────────────────────────────────────────────────
     function difficultyFill(rating) {
-      // Higher rating = easier = more bar fill
-      return Math.round(((rating - MIN_RATING) / (MAX_RATING - MIN_RATING)) * 100);
+      // Lower rating = stronger = less bar fill (closer to 0 = hardest)
+      return Math.round(((MAX_RATING - rating) / (MAX_RATING - MIN_RATING)) * 100);
     }
 
     function difficultyColor(rating) {
-      if (rating < 1000) return '#3fb950'; // green  = easy
-      if (rating < 1500) return '#d2991a'; // yellow = medium
-      if (rating < 2000) return '#f85149'; // red    = hard
-      return '#bc64ff';                    // purple = expert
+      if (rating >= 2000) return '#3fb950'; // green  = easy (high rating)
+      if (rating >= 1500) return '#d2991a'; // yellow = medium
+      if (rating >= 1000) return '#f85149'; // red    = hard
+      return '#bc64ff';                     // purple = expert (near 0)
     }
 
     function difficultyLabel(rating) {
-      if (rating < 1000) return 'Easy';
-      if (rating < 1500) return 'Medium';
-      if (rating < 2000) return 'Hard';
+      if (rating >= 2000) return 'Easy';
+      if (rating >= 1500) return 'Medium';
+      if (rating >= 1000) return 'Hard';
       return 'Expert';
     }
 
@@ -502,7 +496,7 @@
           <div class="difficulty-row">
             <div class="difficulty-labels">
               <span class="difficulty-rating">${formatRating(bot.rating)}</span>
-              <span class="difficulty-tag">${label} · lower = harder</span>
+              <span class="difficulty-tag">${label}</span>
             </div>
             <div class="difficulty-track">
               <div class="difficulty-fill" style="width:${fill}%;background:${color}"></div>
@@ -540,15 +534,29 @@
       filtered.forEach(bot => grid.appendChild(buildCard(bot)));
     }
 
-    // ── Filter buttons ───────────────────────────────────────────────────────
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeFilter = btn.dataset.filter;
-        render();
+    // ── Build filter buttons from JSON categories ────────────────────────────
+    function buildFilters(bots) {
+      const bar = document.getElementById('filter-bar');
+      const countEl = document.getElementById('filter-count');
+
+      // Collect unique categories in the order they first appear
+      const categories = ['All', ...new Set(bots.map(b => b.category))];
+
+      // Insert buttons before the count span
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className   = 'filter-btn' + (cat === 'All' ? ' active' : '');
+        btn.dataset.filter = cat;
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+          bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeFilter = cat;
+          render();
+        });
+        bar.insertBefore(btn, countEl);
       });
-    });
+    }
 
     // ── Load bots.json ───────────────────────────────────────────────────────
     fetch(BOTS_JSON)
@@ -558,6 +566,7 @@
       })
       .then(data => {
         allBots = data;
+        buildFilters(allBots);
         render();
       })
       .catch(err => {
