@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chessverse — Choose Your Opponent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & tokens ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #21262d;
+      --border:    #30363d;
+      --gold:      #e6c97a;
+      --gold-dim:  #a8894a;
+      --text:      #f0f6fc;
+      --muted:     #8b949e;
+      --danger:    #f85149;
+      --radius:    12px;
+      --card-r:    14px;
+      --transition: 0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(16px, 5vw, 64px);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo .piece { font-size: 22px; }
+
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: color var(--transition), background var(--transition);
+    }
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
+    .nav-links a.active { color: var(--gold); }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero {
+      padding: clamp(48px, 10vw, 96px) clamp(16px, 5vw, 64px) clamp(32px, 6vw, 64px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle chessboard pattern in background */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-conic-gradient(
+          rgba(255,255,255,0.018) 0% 25%,
+          transparent 0% 50%
+        );
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text);
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .hero p {
+      font-size: clamp(15px, 2vw, 17px);
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Filter bar ─────────────────────────────────────────────── */
+    .filter-bar {
+      padding: 0 clamp(16px, 5vw, 64px) 32px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+    .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .filter-btn.active {
+      border-color: var(--gold);
+      background: rgba(230,201,122,0.1);
+      color: var(--gold);
+    }
+
+    .filter-count {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── Bot grid ───────────────────────────────────────────────── */
+    .grid-wrap {
+      padding: 0 clamp(16px, 5vw, 64px) 80px;
+    }
+
+    #bot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    /* ── Bot card ───────────────────────────────────────────────── */
+    .bot-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-r);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      color: inherit;
+    }
+    .bot-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold-dim);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .bot-card:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Card header image */
+    .card-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: var(--surface2);
+    }
+    .card-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .card-img-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(13,17,23,0.7) 100%);
+      pointer-events: none;
+    }
+
+    /* Category badge floats over the image */
+    .card-category {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: rgba(13,17,23,0.6);
+      color: var(--text);
+    }
+    .card-category[data-cat="Beginner"]    { border-color: rgba(63,185,80,0.5); color: #3fb950; }
+    .card-category[data-cat="Intermediate"]{ border-color: rgba(210,153,34,0.5); color: #d2991a; }
+    .card-category[data-cat="Advanced"]    { border-color: rgba(248,81,73,0.5);  color: #f85149; }
+    .card-category[data-cat="Expert"]      { border-color: rgba(188,100,255,0.5);color: #bc64ff; }
+    .card-category[data-cat="Clone"]       { border-color: rgba(56,189,248,0.5); color: #38bdf8; }
+
+    /* Card body */
+    .card-body {
+      padding: 18px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    /* Difficulty bar — Lichess style: lower rating = harder = bar more empty */
+    .difficulty-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .difficulty-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .difficulty-rating {
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .difficulty-tag {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .difficulty-track {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .difficulty-fill {
+      height: 100%;
+      border-radius: 2px;
+      /* Width is computed in JS: higher rating = more fill (easier) */
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-top: 4px;
+      transition: gap var(--transition);
+    }
+    .bot-card:hover .card-cta { gap: 10px; }
+
+    /* ── Empty state ────────────────────────────────────────────── */
+    #empty-state {
+      display: none;
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    #empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px clamp(16px, 5vw, 64px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      color: var(--gold-dim);
+      font-weight: 600;
+    }
+    footer .footer-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+    footer .footer-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    footer .footer-links a:hover { color: var(--text); }
+    footer .footer-copy {
+      font-size: 12px;
+      color: var(--muted);
+      width: 100%;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .filter-count { width: 100%; margin-left: 0; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bot-card { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <span class="piece">♟</span> Chessverse
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Bots</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="copyright.html">Copyright</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">Choose your opponent</p>
+    <h1>Every bot has a <em>story</em>.</h1>
+    <p>Pick a challenger — from a curious beginner to a cold-blooded engine — and see how long you last.</p>
+  </section>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="All">All</button>
+    <button class="filter-btn" data-filter="Beginner">Beginner</button>
+    <button class="filter-btn" data-filter="Intermediate">Intermediate</button>
+    <button class="filter-btn" data-filter="Advanced">Advanced</button>
+    <button class="filter-btn" data-filter="Expert">Expert</button>
+    <button class="filter-btn" data-filter="Clone">Clone</button>
+    <span class="filter-count" id="filter-count"></span>
+  </div>
+
+  <!-- BOT GRID -->
+  <div class="grid-wrap">
+    <div id="bot-grid">
+      <div id="empty-state">
+        <div class="empty-icon">♟</div>
+        No bots in this category yet.
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">♟ Chessverse</span>
+    <ul class="footer-links">
+      <li><a href="about.html">About</a></li>
+      <li><a href="copyright.html">Copyright</a></li>
+    </ul>
+    <p class="footer-copy">Chessverse — a passion project. All bot characters are fictional.</p>
+  </footer>
+
+  <script>
+    // ── Config ──────────────────────────────────────────────────────────────
+    const BOTS_JSON = 'bots.json';
+
+    // Rating range for the difficulty bar (Lichess-style: lower = harder)
+    const MIN_RATING = 600;
+    const MAX_RATING = 2800;
+
+    // ── State ────────────────────────────────────────────────────────────────
+    let allBots      = [];
+    let activeFilter = 'All';
+
+    // ── Difficulty helpers ───────────────────────────────────────────────────
+    function difficultyFill(rating) {
+      // Higher rating = easier = more bar fill
+      return Math.round(((rating - MIN_RATING) / (MAX_RATING - MIN_RATING)) * 100);
+    }
+
+    function difficultyColor(rating) {
+      if (rating < 1000) return '#3fb950'; // green  = easy
+      if (rating < 1500) return '#d2991a'; // yellow = medium
+      if (rating < 2000) return '#f85149'; // red    = hard
+      return '#bc64ff';                    // purple = expert
+    }
+
+    function difficultyLabel(rating) {
+      if (rating < 1000) return 'Easy';
+      if (rating < 1500) return 'Medium';
+      if (rating < 2000) return 'Hard';
+      return 'Expert';
+    }
+
+    function formatRating(rating) {
+      // Lichess-style: space-separated thousands e.g. "2 150"
+      return rating.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
+    }
+
+    // ── Card builder ─────────────────────────────────────────────────────────
+    function buildCard(bot) {
+      const fill  = difficultyFill(bot.rating);
+      const color = difficultyColor(bot.rating);
+      const label = difficultyLabel(bot.rating);
+
+      const card = document.createElement('a');
+      card.className   = 'bot-card';
+      card.href        = `play.html?bot=${encodeURIComponent(bot.id)}`;
+      card.dataset.cat = bot.category;
+      card.setAttribute('aria-label', `Play against ${bot.name}`);
+
+      card.innerHTML = `
+        <div class="card-img-wrap">
+          <img
+            class="card-img"
+            src="${escHtml(bot.image)}"
+            alt="${escHtml(bot.name)} header image"
+            loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800&q=60'"
+          />
+          <span class="card-category" data-cat="${escHtml(bot.category)}">${escHtml(bot.category)}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${escHtml(bot.name)}</div>
+          <div class="difficulty-row">
+            <div class="difficulty-labels">
+              <span class="difficulty-rating">${formatRating(bot.rating)}</span>
+              <span class="difficulty-tag">${label} · lower = harder</span>
+            </div>
+            <div class="difficulty-track">
+              <div class="difficulty-fill" style="width:${fill}%;background:${color}"></div>
+            </div>
+          </div>
+          <p class="card-desc">${escHtml(bot.description)}</p>
+          <span class="card-cta">Play &rarr;</span>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // ── Render ───────────────────────────────────────────────────────────────
+    function render() {
+      const grid  = document.getElementById('bot-grid');
+      const empty = document.getElementById('empty-state');
+      const count = document.getElementById('filter-count');
+
+      // Remove existing cards (keep empty-state node)
+      [...grid.querySelectorAll('.bot-card')].forEach(c => c.remove());
+
+      const filtered = activeFilter === 'All'
+        ? allBots
+        : allBots.filter(b => b.category === activeFilter);
+
+      count.textContent = `${filtered.length} bot${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      filtered.forEach(bot => grid.appendChild(buildCard(bot)));
+    }
+
+    // ── Filter buttons ───────────────────────────────────────────────────────
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    // ── Load bots.json ───────────────────────────────────────────────────────
+    fetch(BOTS_JSON)
+      .then(r => {
+        if (!r.ok) throw new Error(`Could not load ${BOTS_JSON} (${r.status})`);
+        return r.json();
+      })
+      .then(data => {
+        allBots = data;
+        render();
+      })
+      .catch(err => {
+        document.getElementById('bot-grid').innerHTML =
+          `<div id="empty-state" style="display:block;grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
+            <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+            Could not load bots: ${escHtml(err.message)}.<br>
+            Make sure <code>bots.json</code> is in the same folder as this file.
+          </div>`;
+      });
+
+    // ── Util ─────────────────────────────────────────────────────────────────
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "marco",
+    "name": "Marco",
+    "category": "Beginner",
+    "rating": 800,
+    "description": "A curious kid who just learned the rules last week. He loves moving his knights in random directions and forgets to protect his queen. Perfect for your very first game.",
+    "image": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800&q=80"
+  },
+  {
+    "id": "the-librarian",
+    "name": "The Librarian",
+    "category": "Beginner",
+    "rating": 1050,
+    "description": "She has read every chess book in the library but never played a real game. Her openings are textbook-perfect, but the middlegame is anyone's guess.",
+    "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
+  },
+  {
+    "id": "old-rook",
+    "name": "Old Rook",
+    "category": "Intermediate",
+    "rating": 1350,
+    "description": "A retired postal worker who plays at the park every Sunday. He knows all the endgame basics and will grind you down slowly if you give him the chance.",
+    "image": "https://images.unsplash.com/photo-1560785496-3c9d27877182?w=800&q=80"
+  },
+  {
+    "id": "elena",
+    "name": "Elena",
+    "category": "Intermediate",
+    "rating": 1600,
+    "description": "A university student studying mathematics. She plays sharp Sicilian lines and is dangerous with open files. Expect relentless pressure once she gets an initiative.",
+    "image": "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800&q=80"
+  },
+  {
+    "id": "the-ghost",
+    "name": "The Ghost",
+    "category": "Advanced",
+    "rating": 1900,
+    "description": "Nobody knows who he is. He shows up in online tournaments, demolishes everyone, then disappears. His style is cold, efficient, and deeply positional.",
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
+  },
+  {
+    "id": "iron-queen",
+    "name": "Iron Queen",
+    "category": "Advanced",
+    "rating": 2150,
+    "description": "A former national champion who never stopped playing. She sacrifices material without hesitation and punishes the slightest inaccuracy with surgical precision.",
+    "image": "https://images.unsplash.com/photo-1509781827353-fb95231f1870?w=800&q=80"
+  },
+  {
+    "id": "the-oracle",
+    "name": "The Oracle",
+    "category": "Expert",
+    "rating": 2400,
+    "description": "A machine mind wrapped in mystery. Its moves seem impossibly deep, as if it sees ten moves ahead by instinct. Few players have ever survived past move thirty.",
+    "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80"
+  },
+  {
+    "id": "lichess-clone",
+    "name": "The Mirror",
+    "category": "Clone",
+    "rating": 1750,
+    "description": "A bot built by cloning a real Lichess player's style. It adapts its aggression, depth and opening repertoire to mimic how that player actually moves. Eerie to play against.",
+    "image": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80"
+  }
+]
