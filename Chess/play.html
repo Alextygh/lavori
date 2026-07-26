@@ -568,19 +568,19 @@ function preloadPieces(botId) {
     const img = new Image();
     img.onload  = () => { pieceImgs[key] = img; resolve(); };
     img.onerror = () => { pieceImgs[key] = null; resolve(); }; // graceful fallback
-    img.src = `${folder}${key}.jpg`;
+    img.src = `${folder}${key}.png`;
   }));
   // Also preload tiles (not stored, just warmed)
   ['wt','bt'].forEach(key => {
     const img = new Image();
-    img.src = `${folder}${key}.jpg`;
+    img.src = `${folder}${key}.png`;
   });
   return Promise.all(loads);
 }
 
 function tileUrl(isLight) {
   const key = isLight ? 'wt' : 'bt';
-  return `images/${bot.id}/${key}.jpg`;
+  return `images/${bot.id}/${key}.png`;
 }
 
 function pieceImg(color, type) {
