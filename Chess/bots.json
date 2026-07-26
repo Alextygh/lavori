@@ -1,5 +1,5 @@
 [
-  { 
+  {
     "id": "videochess",
     "name": "Video Chess (Atari 2600)",
     "category": "Console",
@@ -94,5 +94,5 @@
     "rating": 63,
     "description": "I suck at this game, you can probably beat me easily",
     "image": "/me/image.jpg"
-  },
+  }
 ]
