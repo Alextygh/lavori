@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chessverse — Play</title>
+  <title>Chessverse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -2271,6 +2271,8 @@ let lastMove    = null;   // { from, to }
 let botThinking = false;
 let sqSize      = 64;     // px, computed on layout
 let pieceImgs   = {};     // cache: 'wp' -> HTMLImageElement
+let sfWorker    = null;   // Stockfish web worker
+let botProfile  = null;   // playstyle profile derived from Lichess game
 
 const FILES = ['a','b','c','d','e','f','g','h'];
 
@@ -2298,6 +2300,29 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   bot = bots.find(b => b.id === botId);
   if (!bot) return showError(`Bot "${botId}" not found.`, 'Check the bots.json file.');
+
+  // Fetch and analyse Lichess game if bot specifies one
+  if (bot.lichessGame && bot.cloneSide) {
+    setLoadMsg('Fetching Lichess game…');
+    try {
+      const pgn = await fetchLichessPgn(bot.lichessGame);
+      botProfile = buildProfile(pgn, bot.cloneSide);
+    } catch(e) {
+      console.warn('Could not load Lichess game, using rating-based profile:', e.message);
+    }
+  }
+
+  // Fall back to rating-based profile if no Lichess game
+  if (!botProfile) botProfile = profileFromRating(bot.rating);
+
+  // Start Stockfish
+  setLoadMsg('Starting engine…');
+  try {
+    await initStockfish();
+    applyProfile(botProfile);
+  } catch(e) {
+    console.warn('Stockfish failed, using random moves:', e.message);
+  }
 
   // Preload piece images
   setLoadMsg('Loading board assets…');
@@ -2571,32 +2596,269 @@ async function executeHumanMove(move) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  BOT MOVE  (placeholder — random legal move for now)
+//  LICHESS PGN FETCH
+// ══════════════════════════════════════════════════════════════
+async function fetchLichessPgn(gameId) {
+  const r = await fetch(
+    `https://lichess.org/game/export/${gameId}?moves=true&opening=true&clocks=false`,
+    { headers: { Accept: 'application/x-chess-pgn' } }
+  );
+  if (!r.ok) throw new Error(`Lichess ${r.status}`);
+  return r.text();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PLAYSTYLE PROFILE FROM PGN
+// ══════════════════════════════════════════════════════════════
+function buildProfile(pgn, side) {
+  const tag = name => { const m = pgn.match(new RegExp(`\\[${name} "([^"]+)"\\]`)); return m ? m[1] : '?'; };
+  let movesSection = pgn.replace(/\[.*?\]\s*/gs, '').trim();
+  movesSection = movesSection.replace(/\{[^}]*\}/g, '').replace(/\d+\./g, '')
+                             .replace(/1-0|0-1|1\/2-1\/2|\*/g, '').trim();
+  const all   = movesSection.split(/\s+/).filter(m => m && !/^\d/.test(m));
+  const moves = all.filter((_, i) => side === 'white' ? i % 2 === 0 : i % 2 === 1);
+  const n     = moves.length || 1;
+  const totalPly = all.length;
+
+  let captures=0, earlyCaptures=0, checks=0, ksAct=0, qsAct=0;
+  let pawnMoves=0, pieceMoves=0, castledEarly=false;
+  let sacrificeSigns=0, earlyQueenMove=false, openingCaptures=0;
+
+  moves.forEach((mv, i) => {
+    if (!mv) return;
+    const cap  = mv.includes('x');
+    const chk  = mv.includes('+') || mv.includes('#');
+    const file = mv.replace(/[^a-h]/g, '')[0];
+    if (cap) captures++;
+    if (cap && i < 10) openingCaptures++;
+    if (cap && i < 20) earlyCaptures++;
+    if (chk) checks++;
+    if (/^[a-h]/.test(mv)) pawnMoves++;
+    if (/^[NBRQK]/.test(mv) && !cap) pieceMoves++;
+    if (mv === 'O-O' || mv === 'O-O-O') { if (i < 12) castledEarly = true; }
+    if (mv.startsWith('Q') && i < 6) earlyQueenMove = true;
+    if (file && ['f','g','h'].includes(file)) ksAct++;
+    if (file && ['a','b','c'].includes(file)) qsAct++;
+    if (/^[NBRQ]x/.test(mv) && i < 15) sacrificeSigns++;
+  });
+
+  const clamp = v => Math.round(Math.max(0, Math.min(100, v)));
+  const aggression  = clamp((earlyCaptures/n)*120 + (checks/n)*60 + (earlyQueenMove?15:0) + (sacrificeSigns/n)*40);
+  const positional  = clamp((pieceMoves/n)*30 + (castledEarly?25:0) + (totalPly>80?20:0) + (pawnMoves/n)*20);
+  const tactical    = clamp((captures/n)*40 + (checks/n)*50 + (sacrificeSigns/n)*50 + aggression*0.2);
+  const defensive   = clamp((castledEarly?30:0) + (totalPly>80?25:0) + (1 - aggression/100)*45);
+  const prefersKingside = ksAct >= qsAct;
+
+  // Map to Stockfish params
+  // Rating 0-400: lower = stronger. Convert to UCI_Elo 600-2800
+  const ratingElo   = 600 + Math.round(((400 - (bot.rating||200)) / 400) * 2200);
+  // Skill 0-20: lower rating = higher skill
+  const skillLevel  = Math.round(((400 - (bot.rating||200)) / 400) * 20);
+  // Search depth: positional bots think deeper, aggressive bots play faster
+  const depth       = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
+  // MultiPV: how many candidate moves Stockfish returns for us to style-filter
+  const multiPV     = 5;
+  // Think time variance (ms): aggressive = fast, positional = slow
+  const thinkMin    = aggression > 60 ? 300  : 600;
+  const thinkMax    = aggression > 60 ? 900  : 2000;
+
+  return { aggression, positional, tactical, defensive, prefersKingside,
+           skillLevel, ratingElo, depth, multiPV, thinkMin, thinkMax, castledEarly };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PROFILE FROM RATING ONLY (no Lichess game)
+// ══════════════════════════════════════════════════════════════
+function profileFromRating(rating) {
+  // rating 0-400, lower = stronger
+  const strength    = (400 - (rating||200)) / 400; // 0=weakest, 1=strongest
+  const skillLevel  = Math.round(strength * 20);
+  const ratingElo   = 600 + Math.round(strength * 2200);
+  // Weaker bots: more random/aggressive feel; stronger: more positional
+  const aggression  = Math.round((1 - strength) * 70 + 10);
+  const positional  = Math.round(strength * 80);
+  const tactical    = Math.round(strength * 60 + 20);
+  const defensive   = Math.round(strength * 50 + 20);
+  const depth       = 4 + Math.round(strength * 14);
+  return { aggression, positional, tactical, defensive, prefersKingside: true,
+           skillLevel, ratingElo, depth, multiPV: 5,
+           thinkMin: 300 + Math.round(strength * 400),
+           thinkMax: 700 + Math.round(strength * 1500),
+           castledEarly: strength > 0.5 };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STOCKFISH
+// ══════════════════════════════════════════════════════════════
+function initStockfish() {
+  return new Promise((resolve, reject) => {
+    const workerSrc = `
+      self.importScripts('https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js');
+      var sf = Stockfish();
+      sf.onmessage = function(line) { postMessage(line); };
+      onmessage = function(e) { sf.postMessage(e.data); };
+    `;
+    const blob = new Blob([workerSrc], { type: 'application/javascript' });
+    sfWorker   = new Worker(URL.createObjectURL(blob));
+
+    const timer = setTimeout(() => {
+      sfWorker = null;
+      reject(new Error('Stockfish timeout'));
+    }, 12000);
+
+    sfWorker.onmessage = e => {
+      if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
+        clearTimeout(timer);
+        resolve();
+      }
+    };
+    sfWorker.onerror = e => { clearTimeout(timer); reject(e); };
+    sfWorker.postMessage('uci');
+  });
+}
+
+function applyProfile(p) {
+  if (!sfWorker) return;
+  sfWorker.postMessage('ucinewgame');
+  sfWorker.postMessage(`setoption name Skill Level value ${p.skillLevel}`);
+  sfWorker.postMessage(`setoption name UCI_LimitStrength value true`);
+  sfWorker.postMessage(`setoption name UCI_Elo value ${p.ratingElo}`);
+  sfWorker.postMessage(`setoption name MultiPV value ${p.multiPV}`);
+  sfWorker.postMessage('isready');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BOT MOVE — Stockfish + playstyle filtering
 // ══════════════════════════════════════════════════════════════
 function doBotMove() {
   if (chess.game_over()) return;
   botThinking = true;
 
-  // TODO: replace with actual bot AI (Stockfish + profile)
-  const moves = chess.moves({ verbose: true });
-  if (!moves.length) { botThinking = false; handleGameOver(); return; }
+  const legalMvs = chess.moves({ verbose: true });
+  if (!legalMvs.length) { botThinking = false; handleGameOver(); return; }
 
-  // Random move with a slight delay to feel natural
-  const delay = 400 + Math.random() * 600;
-  setTimeout(() => {
-    const pick = moves[Math.floor(Math.random() * moves.length)];
-    chess.move({ from: pick.from, to: pick.to, promotion: pick.promotion || 'q' });
+  // No Stockfish? Fall back to weighted random
+  if (!sfWorker) {
+    const delay = botProfile.thinkMin + Math.random() * (botProfile.thinkMax - botProfile.thinkMin);
+    setTimeout(() => applyStyleMove(legalMvs, null), delay);
+    return;
+  }
 
-    lastMove    = { from: pick.from, to: pick.to };
-    botThinking = false;
+  const p       = botProfile;
+  const fen     = chess.fen();
+  const candidates = []; // { move: UCI string, score: centipawns }
 
-    renderBoard();
-    updateHistory();
-    updateCaptured();
+  const handler = e => {
+    const line = e.data;
+    if (typeof line !== 'string') return;
 
-    if (chess.game_over()) { handleGameOver(); return; }
-    updateStatus('Your move!');
-  }, delay);
+    // Parse "info depth N multipv K score cp X ... pv MOVE"
+    const pvMatch = line.match(/multipv (\d+).*?score cp (-?\d+).*? pv (\S+)/);
+    if (pvMatch) {
+      const idx   = parseInt(pvMatch[1]) - 1;
+      const score = parseInt(pvMatch[2]);
+      const uci   = pvMatch[3];
+      candidates[idx] = { uci, score };
+    }
+
+    if (line.startsWith('bestmove')) {
+      sfWorker.removeEventListener('message', handler);
+      const best = line.split(' ')[1];
+
+      // Build final candidate list (best move always included as safety)
+      const finalCandidates = candidates.filter(Boolean);
+      if (!finalCandidates.length) finalCandidates.push({ uci: best, score: 0 });
+
+      const delay = p.thinkMin + Math.random() * (p.thinkMax - p.thinkMin);
+      setTimeout(() => applyStyleMove(legalMvs, finalCandidates), delay);
+    }
+  };
+
+  sfWorker.addEventListener('message', handler);
+  sfWorker.postMessage(`position fen ${fen}`);
+  sfWorker.postMessage(`go depth ${p.depth}`);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PLAYSTYLE MOVE SELECTION
+// ══════════════════════════════════════════════════════════════
+function applyStyleMove(legalMvs, candidates) {
+  const p    = botProfile;
+  let picked = null;
+
+  if (candidates && candidates.length) {
+    // Score each candidate by playstyle affinity
+    const scored = candidates.map(c => {
+      const uci  = c.uci;
+      const from = uci.slice(0, 2);
+      const to   = uci.slice(2, 4);
+      const mv   = legalMvs.find(m => m.from === from && m.to === to);
+      if (!mv) return null;
+
+      let bias = 0;
+      const isCapture = mv.flags.includes('c') || mv.flags.includes('e');
+      const isCheck   = mv.san && (mv.san.includes('+') || mv.san.includes('#'));
+      const isCastle  = mv.flags.includes('k') || mv.flags.includes('q');
+      const toFile    = to[0];
+      const isKingside = ['f','g','h'].includes(toFile);
+      const isQueenside = ['a','b','c'].includes(toFile);
+
+      // Aggressive bots prefer captures and checks
+      if (isCapture) bias += p.aggression * 0.4;
+      if (isCheck)   bias += p.tactical   * 0.5;
+
+      // Positional bots prefer castling and quiet piece moves
+      if (isCastle && !p.castledEarly) bias += p.positional * 0.3;
+      if (!isCapture && mv.piece !== 'p') bias += p.positional * 0.15;
+
+      // Directional preference
+      if (isKingside  && p.prefersKingside)  bias += 8;
+      if (isQueenside && !p.prefersKingside) bias += 8;
+
+      // Defensive bots avoid moving king early
+      if (mv.piece === 'k' && !isCastle) bias -= p.defensive * 0.4;
+
+      // Use engine score as base, modulated by bias
+      // Stronger aggression = care less about raw centipawn score
+      const engineWeight = 1 - (p.aggression / 200);
+      const total = c.score * engineWeight + bias * 10;
+
+      return { mv, total };
+    }).filter(Boolean);
+
+    if (scored.length) {
+      // Sort by total score, pick from top with some randomness based on weakness
+      scored.sort((a, b) => b.total - a.total);
+      // Weaker bots (high aggression, low skill) occasionally pick 2nd/3rd best
+      const sloppiness = Math.max(0, (400 - (bot.rating||200)) / 400);
+      const pickIdx    = Math.random() < sloppiness * 0.6
+        ? Math.floor(Math.random() * Math.min(scored.length, 3))
+        : 0;
+      picked = scored[pickIdx].mv;
+    }
+  }
+
+  // Ultimate fallback
+  if (!picked) {
+    picked = legalMvs[Math.floor(Math.random() * legalMvs.length)];
+  }
+
+  const result = chess.move({ from: picked.from, to: picked.to, promotion: picked.promotion || 'q' });
+  if (!result) {
+    // If move failed (rare), play any legal move
+    const fallback = legalMvs[0];
+    chess.move({ from: fallback.from, to: fallback.to, promotion: 'q' });
+    lastMove = { from: fallback.from, to: fallback.to };
+  } else {
+    lastMove = { from: picked.from, to: picked.to };
+  }
+
+  botThinking = false;
+  renderBoard();
+  updateHistory();
+  updateCaptured();
+  if (chess.game_over()) { handleGameOver(); return; }
+  updateStatus('Your move!');
 }
 
 // ══════════════════════════════════════════════════════════════
