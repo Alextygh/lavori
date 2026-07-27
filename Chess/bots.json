@@ -5,7 +5,9 @@
     "category": "Console",
     "rating": 56,
     "description": "Probably the first digital chess game that you can play at home, now with the advantage to not have to wait 10 hours per move!",
-    "image": "images/videochess/image.jpg"
+    "image": "images/videochess/image.jpg",
+    "lichessGame": "JgucDKJi",
+    "cloneSide": "black"
   },
   {
     "id": "chessmasternes",
@@ -13,7 +15,9 @@
     "category": "Console",
     "rating": 33,
     "description": "The most succesfull and recognizable chess game from the 80' and 90'",
-    "image": "images/chessmasternes/image.jpg"
+    "image": "images/chessmasternes/image.jpg",
+    "lichessGame": "wizDDymE",
+    "cloneSide": "black"
   },
   {
     "id": "battlechess",
@@ -21,7 +25,9 @@
     "category": "Console",
     "rating": 75,
     "description": "It's cool and all, it gave a bit of personality to chess, still, it's pretty weak.",
-    "image": "images/battlechess/image.jpg"
+    "image": "images/battlechess/image.jpg",
+    "lichessGame": "10oRri62",
+    "cloneSide": "black"
   },
   {
     "id": "segachess",
@@ -29,7 +35,9 @@
     "category": "Console",
     "rating": 35,
     "description": "Sega first and only attempt at creating a chess game, it's pretty strong.",
-    "image": "images/segachess/image.jpg"
+    "image": "images/segachess/image.jpg",
+    "lichessGame": "nieRoNxo",
+    "cloneSide": "black"
   },
   {
     "id": "chessmastergenesis",
@@ -61,7 +69,9 @@
     "category": "Website",
     "rating": 25,
     "description": "The most famous chess website, you probably have an account, don't lie.",
-    "image": "images/chess.com/image.jpg"
+    "image": "images/chess.com/image.jpg",
+    "lichessGame": "P5U8gI2O",
+    "cloneSide": "black"
   },
   {
     "id": "chessbase.com",
