@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .clock-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .clock {
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .digits {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      min-width: 2ch;
+      text-align: center;
+    }
+
+    /* Smallest → largest: ss mm hh dd mo yy */
+    #ss { font-size: clamp(1.4rem, 3.5vw, 3rem); }
+    #mm { font-size: clamp(1.8rem, 4.5vw, 3.9rem); }
+    #hh { font-size: clamp(2.2rem, 5.5vw, 4.8rem); }
+    #dd { font-size: clamp(2.6rem, 6.5vw, 5.7rem); }
+    #mo { font-size: clamp(3.0rem, 7.5vw, 6.6rem); }
+    #yy { font-size: clamp(3.4rem, 8.5vw, 7.5rem); }
+
+    .label {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: clamp(0.4rem, 0.9vw, 0.65rem);
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    .sep {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: clamp(1.4rem, 3.5vw, 3rem);
+      color: rgba(255,255,255,0.15);
+      line-height: 1;
+      padding: 0 3px;
+      padding-bottom: 0;
+      user-select: none;
+      /* align sep to the bottom of the smallest adjacent digit */
+      align-self: flex-end;
+      margin-bottom: 0;
+    }
+
+    .rule {
+      width: 100%;
+      max-width: 900px;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+  </style>
+</head>
+<body>
+  <div class="clock-wrap">
+    <div class="rule"></div>
+    <div class="clock">
+      <div class="unit"><span class="digits" id="ss">00</span><span class="label">Seconds</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="digits" id="mm">00</span><span class="label">Minutes</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="digits" id="hh">00</span><span class="label">Hours</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="digits" id="dd">00</span><span class="label">Days</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="digits" id="mo">00</span><span class="label">Months</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="digits" id="yy">00</span><span class="label">Years</span></div>
+    </div>
+    <div class="rule"></div>
+  </div>
+
+  <script>
+    const START = new Date(Date.UTC(2026, 6, 28, 9, 48, 0));
+
+    function daysInMonth(month, year) {
+      return new Date(year, month, 0).getDate();
+    }
+
+    function computeElapsed(nowMs) {
+      let totalSec = Math.floor((nowMs - START.getTime()) / 1000);
+      if (totalSec < 0) totalSec = 0;
+
+      const seconds = totalSec % 60;
+      let remaining = Math.floor(totalSec / 60);
+      const minutes = remaining % 60;
+      remaining = Math.floor(remaining / 60);
+      const hours = remaining % 24;
+      remaining = Math.floor(remaining / 24);
+
+      let y = 2026, m = 7, d = 28;
+      let daysLeft = remaining;
+
+      while (daysLeft > 0) {
+        const dim = daysInMonth(m, y);
+        const toEndOfMonth = dim - d;
+        if (daysLeft <= toEndOfMonth) {
+          d += daysLeft;
+          daysLeft = 0;
+        } else {
+          daysLeft -= (toEndOfMonth + 1);
+          m++;
+          if (m > 12) { m = 1; y++; }
+          d = 1;
+        }
+      }
+
+      let eYears = y - 2026;
+      let eMonths = m - 7;
+      let eDays = d - 28;
+
+      if (eDays < 0) {
+        eMonths--;
+        let pm = m - 1, py = y;
+        if (pm < 1) { pm = 12; py--; }
+        eDays += daysInMonth(pm, py);
+      }
+      if (eMonths < 0) { eYears--; eMonths += 12; }
+
+      return { yy: eYears, mo: eMonths, dd: eDays, hh: hours, mm: minutes, ss: seconds };
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      const e = computeElapsed(Date.now());
+      document.getElementById('yy').textContent = pad(e.yy);
+      document.getElementById('mo').textContent = pad(e.mo);
+      document.getElementById('dd').textContent = pad(e.dd);
+      document.getElementById('hh').textContent = pad(e.hh);
+      document.getElementById('mm').textContent = pad(e.mm);
+      document.getElementById('ss').textContent = pad(e.ss);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
