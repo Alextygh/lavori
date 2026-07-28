@@ -2012,7 +2012,11 @@ return exports.Chess;
     @keyframes pulse { 0%,100%{transform:scale(1);opacity:0.4;} 50%{transform:scale(1.4);opacity:1;} }
 
     /* Board */
-    #board-outer { position: relative; }
+    #board-outer {
+      position: relative;
+      margin-left: 18px;
+      margin-bottom: 18px;
+    }
     #board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
@@ -2065,14 +2069,25 @@ return exports.Chess;
     }
     .sq.hl-last::after   { background: rgba(255,210,0,0.25); }
     .sq.hl-check::after  { background: rgba(220,30,30,0.55); }
-    .sq .coord {
+    /* Coord labels — outside the board */
+    .board-coords-left {
       position: absolute;
-      font-size: clamp(7px,1vw,10px);
-      font-weight: 600; opacity: 0.5;
-      pointer-events: none; z-index: 4; line-height: 1;
+      top: 0; left: -18px;
+      display: flex; flex-direction: column;
+      pointer-events: none;
     }
-    .sq .coord-rank { top: 3px; left: 4px; }
-    .sq .coord-file { bottom: 3px; right: 4px; }
+    .board-coords-bottom {
+      position: absolute;
+      bottom: -18px; left: 0;
+      display: flex; flex-direction: row;
+      pointer-events: none;
+    }
+    .coord-label {
+      font-size: clamp(9px,1vw,11px);
+      font-weight: 600; color: var(--muted);
+      line-height: 1; display: flex;
+      align-items: center; justify-content: center;
+    }
 
     /* Info panel */
     #info-col {
@@ -2133,6 +2148,18 @@ return exports.Chess;
       border-color: var(--gold-dim); color: var(--gold);
     }
     .ctrl-btn.primary:hover { background: rgba(230,201,122,0.2); }
+
+    /* PGN copy */
+    #pgn-copy-btn {
+      width: 100%; padding: 7px 12px;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted);
+      font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; text-align: left;
+      transition: border-color var(--transition), color var(--transition);
+    }
+    #pgn-copy-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    #pgn-copy-btn.copied { border-color: #3fb950; color: #3fb950; }
 
     /* Match result banner */
     #result-banner {
@@ -2302,6 +2329,7 @@ return exports.Chess;
     <div class="info-card">
       <h3>Moves</h3>
       <div id="history-list"></div>
+      <button id="pgn-copy-btn" onclick="copyPgn()">⎘ Copy PGN</button>
     </div>
     <div class="info-card" style="gap:8px">
       <h3>Controls</h3>
@@ -2320,6 +2348,7 @@ return exports.Chess;
     <div id="result-subtitle">—</div>
     <div class="result-actions">
       <button class="result-btn primary"   onclick="rematch()">⟳ Rematch</button>
+      <button class="result-btn secondary" onclick="viewBoard()">🔍 View board</button>
       <button class="result-btn secondary" onclick="goToSetup()">⚙ New matchup</button>
       <button class="result-btn secondary" onclick="backToMenu()">← Back to bots</button>
     </div>
@@ -2623,6 +2652,10 @@ function buildBoard() {
   const board = document.getElementById('board');
   board.innerHTML = '';
 
+  // Remove old coord overlays
+  const outer = document.getElementById('board-outer');
+  outer.querySelectorAll('.board-coords-left,.board-coords-bottom').forEach(el => el.remove());
+
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const file = FILES[col];
@@ -2638,23 +2671,36 @@ function buildBoard() {
       div.style.backgroundImage = `url('${tileForRow(row, isLight)}')`;
       div.style.backgroundSize  = 'cover';
       div.classList.add(isLight ? 'light-fallback' : 'dark-fallback');
-
-      if (col === 0) {
-        const r = document.createElement('span');
-        r.className = 'coord coord-rank';
-        r.textContent = rank;
-        div.appendChild(r);
-      }
-      if (row === 7) {
-        const f = document.createElement('span');
-        f.className = 'coord coord-file';
-        f.textContent = file;
-        div.appendChild(f);
-      }
-
       board.appendChild(div);
     }
   }
+
+  // Rank labels — left side
+  const leftCol = document.createElement('div');
+  leftCol.className = 'board-coords-left';
+  for (let row = 0; row < 8; row++) {
+    const rank = 8 - row;
+    const span = document.createElement('span');
+    span.className = 'coord-label';
+    span.style.width  = '18px';
+    span.style.height = sqSize + 'px';
+    span.textContent  = rank;
+    leftCol.appendChild(span);
+  }
+  outer.appendChild(leftCol);
+
+  // File labels — bottom
+  const bottomRow = document.createElement('div');
+  bottomRow.className = 'board-coords-bottom';
+  for (let col = 0; col < 8; col++) {
+    const span = document.createElement('span');
+    span.className = 'coord-label';
+    span.style.width  = sqSize + 'px';
+    span.style.height = '18px';
+    span.textContent  = FILES[col];
+    bottomRow.appendChild(span);
+  }
+  outer.appendChild(bottomRow);
 
   // Reposition the split line
   const line = document.getElementById('split-line');
@@ -3051,6 +3097,39 @@ function profileFromRating(rating) {
   const defensive  = Math.round(strength*50+20);
   return { aggression, positional, tactical, defensive, prefersKingside: true,
            skillLevel, ratingElo, castledEarly: strength > 0.5 };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PGN COPY
+// ══════════════════════════════════════════════════════════════
+function copyPgn() {
+  const h = chess ? chess.history() : [];
+  if (!h.length) return;
+  let pgn = `[White "${whiteBot?.name || 'White'}"]\n[Black "${blackBot?.name || 'Black'}"]\n\n`;
+  for (let i = 0; i < h.length; i++) {
+    if (i % 2 === 0) pgn += `${i/2+1}. `;
+    pgn += h[i] + ' ';
+  }
+  pgn = pgn.trim();
+  const btn = document.getElementById('pgn-copy-btn');
+  const done = () => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy PGN'; btn.classList.remove('copied'); }, 2000);
+  };
+  navigator.clipboard.writeText(pgn).then(done).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = pgn; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); done();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  VIEW BOARD (dismiss result banner without clearing game)
+// ══════════════════════════════════════════════════════════════
+function viewBoard() {
+  document.getElementById('result-banner').classList.remove('show');
 }
 
 // ══════════════════════════════════════════════════════════════

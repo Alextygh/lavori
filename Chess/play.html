@@ -1945,7 +1945,8 @@ return exports.Chess;
     /* ── Board ── */
     #board-outer {
       position: relative;
-      /* size set by JS based on viewport */
+      margin-left: 18px;
+      margin-bottom: 18px;
     }
 
     #board {
@@ -2006,16 +2007,25 @@ return exports.Chess;
       background: radial-gradient(circle, transparent 52%, rgba(0,0,0,0.22) 53%);
     }
 
-    /* Coord labels */
-    .sq .coord {
+    /* Coord labels — rendered outside the board */
+    .board-coords-left {
       position: absolute;
-      font-size: clamp(8px, 1.1vw, 11px);
-      font-weight: 600; opacity: 0.55;
-      pointer-events: none; z-index: 4;
-      line-height: 1;
+      top: 0; left: -18px;
+      display: flex; flex-direction: column;
+      pointer-events: none;
     }
-    .sq .coord-rank { top: 3px; left: 4px; }
-    .sq .coord-file { bottom: 3px; right: 4px; }
+    .board-coords-bottom {
+      position: absolute;
+      bottom: -18px; left: 0;
+      display: flex; flex-direction: row;
+      pointer-events: none;
+    }
+    .coord-label {
+      font-size: clamp(9px, 1.1vw, 11px);
+      font-weight: 600; color: var(--muted);
+      line-height: 1; display: flex;
+      align-items: center; justify-content: center;
+    }
 
     /* ── Right column: info panel ── */
     #info-col {
@@ -2110,6 +2120,18 @@ return exports.Chess;
     .promo-btn:hover { border-color: var(--gold); transform: scale(1.08); }
     .promo-btn img { width: 100%; height: 100%; object-fit: contain; }
 
+    /* ── PGN copy ── */
+    #pgn-copy-btn {
+      width: 100%; padding: 7px 12px;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted);
+      font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif;
+      cursor: pointer; text-align: left;
+      transition: border-color var(--transition), color var(--transition);
+    }
+    #pgn-copy-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    #pgn-copy-btn.copied { border-color: #3fb950; color: #3fb950; }
+
     /* ── Error / loading ── */
     #loading-overlay {
       position: fixed; inset: 0; z-index: 100;
@@ -2146,6 +2168,7 @@ return exports.Chess;
   <a class="nav-logo" href="index.html">♟ Chessverse</a>
   <ul class="nav-links">
     <li><a href="index.html">Bots</a></li>
+    <li><a href="battle.html">Bot vs Bot</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="copyright.html">Copyright</a></li>
   </ul>
@@ -2231,6 +2254,7 @@ return exports.Chess;
     <div class="info-card">
       <h3>Moves</h3>
       <div id="history-list"></div>
+      <button id="pgn-copy-btn" onclick="copyPgn()">⎘ Copy PGN</button>
     </div>
 
     <div class="info-card" style="gap:8px">
@@ -2442,6 +2466,10 @@ function buildBoard() {
   const board = document.getElementById('board');
   board.innerHTML = '';
 
+  // Remove old coord overlays if any
+  const outer = document.getElementById('board-outer');
+  outer.querySelectorAll('.board-coords-left,.board-coords-bottom').forEach(el => el.remove());
+
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const file = flipped ? FILES[7 - col] : FILES[col];
@@ -2456,28 +2484,39 @@ function buildBoard() {
       div.style.height = sqSize + 'px';
       div.style.backgroundImage  = `url('${tileUrl(!flipped ? isLight : !isLight)}')`;
       div.style.backgroundSize   = 'cover';
-
-      // Fallback color class
       div.classList.add(isLight ? 'light-fallback' : 'dark-fallback');
-
-      // Coord labels (rank on leftmost col, file on bottom row)
-      if (col === 0) {
-        const r = document.createElement('span');
-        r.className = 'coord coord-rank';
-        r.textContent = rank;
-        div.appendChild(r);
-      }
-      if (row === 7) {
-        const f = document.createElement('span');
-        f.className = 'coord coord-file';
-        f.textContent = file;
-        div.appendChild(f);
-      }
-
       div.addEventListener('click', () => onSqClick(sq));
       board.appendChild(div);
     }
   }
+
+  // Rank labels — left side, one per row
+  const leftCol = document.createElement('div');
+  leftCol.className = 'board-coords-left';
+  for (let row = 0; row < 8; row++) {
+    const rank = flipped ? row + 1 : 8 - row;
+    const span = document.createElement('span');
+    span.className = 'coord-label';
+    span.style.width  = '18px';
+    span.style.height = sqSize + 'px';
+    span.textContent  = rank;
+    leftCol.appendChild(span);
+  }
+  outer.appendChild(leftCol);
+
+  // File labels — bottom, one per column
+  const bottomRow = document.createElement('div');
+  bottomRow.className = 'board-coords-bottom';
+  for (let col = 0; col < 8; col++) {
+    const file = flipped ? FILES[7 - col] : FILES[col];
+    const span = document.createElement('span');
+    span.className = 'coord-label';
+    span.style.width  = sqSize + 'px';
+    span.style.height = '18px';
+    span.textContent  = file;
+    bottomRow.appendChild(span);
+  }
+  outer.appendChild(bottomRow);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2918,6 +2957,36 @@ function updateHistory() {
     el.appendChild(row);
   }
   el.scrollTop = el.scrollHeight;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PGN COPY
+// ══════════════════════════════════════════════════════════════
+function copyPgn() {
+  const h = chess.history();
+  if (!h.length) return;
+  let pgn = '';
+  for (let i = 0; i < h.length; i++) {
+    if (i % 2 === 0) pgn += `${i/2+1}. `;
+    pgn += h[i] + ' ';
+  }
+  pgn = pgn.trim();
+  navigator.clipboard.writeText(pgn).then(() => {
+    const btn = document.getElementById('pgn-copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy PGN'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    // Fallback for browsers without clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = pgn; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('pgn-copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy PGN'; btn.classList.remove('copied'); }, 2000);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
