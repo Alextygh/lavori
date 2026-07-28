@@ -2649,20 +2649,18 @@ function buildProfile(pgn, side) {
   const defensive   = clamp((castledEarly?30:0) + (totalPly>80?25:0) + (1 - aggression/100)*45);
   const prefersKingside = ksAct >= qsAct;
 
-  // Derive engine strength from bot.rating (0–400 scale, lower = stronger),
-  // blended with style analysis from the PGN so the actual game influences
-  // how well the engine plays — not just which moves it picks.
-  const ratingStrength = (400 - (bot.rating || 200)) / 400;           // 0=weakest,1=strongest
+  // Derive engine strength from bot.rating blended with PGN style analysis,
+  // so the Lichess game actually influences how well the engine plays.
+  const ratingStrength = (400 - (bot.rating || 200)) / 400;          // 0=weakest,1=strongest
   const styleStrength  = (positional * 0.5 + (100 - aggression) * 0.3 + defensive * 0.2) / 100;
-  const blended        = ratingStrength * 0.6 + styleStrength * 0.4;  // rating anchors, style modulates
+  const blended        = ratingStrength * 0.6 + styleStrength * 0.4;
 
-  const ratingElo  = 600 + Math.round(blended * 2200);   // UCI_Elo 600–2800
-  const skillLevel = Math.round(blended * 20);            // Skill Level 0–20
-
-  const depth    = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
-  const multiPV  = 5;
-  const thinkMin = aggression > 60 ? 300  : 600;
-  const thinkMax = aggression > 60 ? 900  : 2000;
+  const ratingElo  = 600 + Math.round(blended * 2200);  // UCI_Elo 600–2800
+  const skillLevel = Math.round(blended * 20);           // Skill Level 0–20
+  const depth      = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
+  const multiPV    = 5;
+  const thinkMin   = aggression > 60 ? 300  : 600;
+  const thinkMax   = aggression > 60 ? 900  : 2000;
 
   return { aggression, positional, tactical, defensive, prefersKingside,
            skillLevel, ratingElo, depth, multiPV, thinkMin, thinkMax, castledEarly,
@@ -2693,29 +2691,25 @@ function profileFromRating(rating) {
 // ══════════════════════════════════════════════════════════════
 //  STOCKFISH
 // ══════════════════════════════════════════════════════════════
-
-// stockfish.js (npm: "stockfish.js") is a pure ASM.js build — one JS file,
-// no WASM sidecar, no SharedArrayBuffer, works on GitHub Pages with no
-// special CORS headers, and jsDelivr serves it with Access-Control-Allow-Origin: *.
-// It exposes a global `STOCKFISH` factory and is designed to be used directly
-// as a Worker script, so `new Worker(url)` works without any importScripts tricks.
 //
-// Fallback chain:
-//   1. stockfish.js v11 via jsDelivr  (pure JS, CORS-safe, Worker-safe)
-//   2. stockfish.js v10 via jsDelivr  (same package, older pin)
-//   3. fetch+blob: fetch the text ourselves then inline into a blob worker
-//      (works if the direct Worker URL is blocked but fetch is not)
+// niklasf/stockfish.js is a self-contained UCI worker script:
+// you point new Worker() at it and talk UCI directly.
+// No factory call, no WASM sidecar needed.
+// cdnjs serves it with Access-Control-Allow-Origin: * so
+// new Worker(cdnUrl) works cross-origin on GitHub Pages.
+//
+// Fallback: fetch → blob worker, which bypasses any browser
+// restriction on cross-origin Worker construction.
 
-const SF_WORKER_URLS = [
+const SF_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js',
   'https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js',
-  'https://cdn.jsdelivr.net/npm/stockfish.js@10.0.0/stockfish.js',
 ];
 
-function tryWorkerUrl(url) {
+function spawnWorkerFromUrl(url) {
   return new Promise((resolve, reject) => {
     let w;
     try { w = new Worker(url); } catch(e) { return reject(e); }
-
     const t = setTimeout(() => { w.terminate(); reject(new Error('timeout')); }, 10000);
     w.onmessage = e => {
       if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
@@ -2727,44 +2721,20 @@ function tryWorkerUrl(url) {
   });
 }
 
-async function tryFetchBlob(url) {
-  // Fetch the source text (main-thread fetch is not subject to Worker CORS rules),
-  // inline it into a blob, then start the blob worker.
+async function spawnBlobWorker(url) {
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`fetch ${r.status}`);
-  const src = await r.text();
-
-  // stockfish.js exposes STOCKFISH() factory; wire up the UCI bridge inline.
-  const blob = new Blob([src + `
-;(function(){
-  var sf = (typeof STOCKFISH==='function') ? STOCKFISH() : (typeof Stockfish==='function') ? Stockfish() : null;
-  if(!sf) { console.error('No Stockfish factory found'); return; }
-  sf.onmessage = function(line){ postMessage(line); };
-  onmessage     = function(e)  { sf.postMessage(e.data); };
-})();
-`], { type: 'application/javascript' });
-
-  return new Promise((resolve, reject) => {
-    const w = new Worker(URL.createObjectURL(blob));
-    const t = setTimeout(() => { w.terminate(); reject(new Error('blob timeout')); }, 10000);
-    w.onmessage = e => {
-      if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
-        clearTimeout(t); sfWorker = w; resolve();
-      }
-    };
-    w.onerror = e => { clearTimeout(t); w.terminate(); reject(e); };
-    w.postMessage('uci');
-  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const src  = await r.text();
+  const blob = new Blob([src], { type: 'application/javascript' });
+  return spawnWorkerFromUrl(URL.createObjectURL(blob));
 }
 
 async function initStockfish() {
-  // Try each URL as a direct Worker first (fastest, no size overhead)
-  for (const url of SF_WORKER_URLS) {
-    try { await tryWorkerUrl(url); return; } catch(_) {}
+  for (const url of SF_URLS) {
+    try { await spawnWorkerFromUrl(url); return; } catch(_) {}
   }
-  // If direct Worker failed, fetch+blob each URL (bypasses Worker CORS restrictions)
-  for (const url of SF_WORKER_URLS) {
-    try { await tryFetchBlob(url); return; } catch(_) {}
+  for (const url of SF_URLS) {
+    try { await spawnBlobWorker(url); return; } catch(_) {}
   }
   throw new Error('All Stockfish URLs failed');
 }
