@@ -2650,28 +2650,23 @@ function buildProfile(pgn, side) {
   const prefersKingside = ksAct >= qsAct;
 
   // Derive engine strength from bot.rating (0–400 scale, lower = stronger),
-  // then blend with positional score from the PGN so the analysed game actually
-  // influences how well the engine plays — not just how it *picks* moves.
-  const ratingStrength = (400 - (bot.rating || 200)) / 400;          // 0=weakest,1=strongest
+  // blended with style analysis from the PGN so the actual game influences
+  // how well the engine plays — not just which moves it picks.
+  const ratingStrength = (400 - (bot.rating || 200)) / 400;           // 0=weakest,1=strongest
   const styleStrength  = (positional * 0.5 + (100 - aggression) * 0.3 + defensive * 0.2) / 100;
   const blended        = ratingStrength * 0.6 + styleStrength * 0.4;  // rating anchors, style modulates
 
-  // UCI_Elo range 600–2800
-  const ratingElo  = 600 + Math.round(blended * 2200);
-  // Skill Level range 0–20
-  const skillLevel = Math.round(blended * 20);
+  const ratingElo  = 600 + Math.round(blended * 2200);   // UCI_Elo 600–2800
+  const skillLevel = Math.round(blended * 20);            // Skill Level 0–20
 
-  // Search depth: positional bots think deeper, aggressive bots play fast
   const depth    = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
   const multiPV  = 5;
-
-  // Think time (ms): positional = slow, aggressive = snappy
   const thinkMin = aggression > 60 ? 300  : 600;
   const thinkMax = aggression > 60 ? 900  : 2000;
 
   return { aggression, positional, tactical, defensive, prefersKingside,
            skillLevel, ratingElo, depth, multiPV, thinkMin, thinkMax, castledEarly,
-           _source: 'lichess-pgn' };  // tag so we can tell which path was used
+           _source: 'lichess-pgn' };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2699,59 +2694,79 @@ function profileFromRating(rating) {
 //  STOCKFISH
 // ══════════════════════════════════════════════════════════════
 
-// Fetch Stockfish JS source from one of several CDN candidates,
-// then wrap it in a blob worker so no importScripts is needed
-// (importScripts fails for cross-origin scripts in blob workers).
-const SF_CANDIDATES = [
-  'https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js',
-  'https://unpkg.com/stockfish@16.0.0/src/stockfish.js',
-  'https://cdn.jsdelivr.net/npm/stockfish@10.0.0/stockfish.js',
-  'https://unpkg.com/stockfish@10.0.0/stockfish.js',
+// stockfish.js (npm: "stockfish.js") is a pure ASM.js build — one JS file,
+// no WASM sidecar, no SharedArrayBuffer, works on GitHub Pages with no
+// special CORS headers, and jsDelivr serves it with Access-Control-Allow-Origin: *.
+// It exposes a global `STOCKFISH` factory and is designed to be used directly
+// as a Worker script, so `new Worker(url)` works without any importScripts tricks.
+//
+// Fallback chain:
+//   1. stockfish.js v11 via jsDelivr  (pure JS, CORS-safe, Worker-safe)
+//   2. stockfish.js v10 via jsDelivr  (same package, older pin)
+//   3. fetch+blob: fetch the text ourselves then inline into a blob worker
+//      (works if the direct Worker URL is blocked but fetch is not)
+
+const SF_WORKER_URLS = [
+  'https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js',
+  'https://cdn.jsdelivr.net/npm/stockfish.js@10.0.0/stockfish.js',
 ];
 
-async function fetchStockfishSrc() {
-  for (const url of SF_CANDIDATES) {
-    try {
-      const r = await fetch(url);
-      if (!r.ok) continue;
-      const text = await r.text();
-      if (text.length > 1000) return text; // sanity check
-    } catch(_) { /* try next */ }
-  }
-  throw new Error('All Stockfish URLs failed');
+function tryWorkerUrl(url) {
+  return new Promise((resolve, reject) => {
+    let w;
+    try { w = new Worker(url); } catch(e) { return reject(e); }
+
+    const t = setTimeout(() => { w.terminate(); reject(new Error('timeout')); }, 10000);
+    w.onmessage = e => {
+      if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
+        clearTimeout(t); sfWorker = w; resolve();
+      }
+    };
+    w.onerror = e => { clearTimeout(t); w.terminate(); reject(e); };
+    w.postMessage('uci');
+  });
 }
 
-async function initStockfish() {
-  const sfSrc = await fetchStockfishSrc();
+async function tryFetchBlob(url) {
+  // Fetch the source text (main-thread fetch is not subject to Worker CORS rules),
+  // inline it into a blob, then start the blob worker.
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`fetch ${r.status}`);
+  const src = await r.text();
 
-  // The fetched source exposes a global `Stockfish` factory.
-  // We wrap it so the worker acts as a simple UCI bridge.
-  const workerSrc = sfSrc + `
+  // stockfish.js exposes STOCKFISH() factory; wire up the UCI bridge inline.
+  const blob = new Blob([src + `
 ;(function(){
-  var sf = (typeof Stockfish === 'function') ? Stockfish() : STOCKFISH();
+  var sf = (typeof STOCKFISH==='function') ? STOCKFISH() : (typeof Stockfish==='function') ? Stockfish() : null;
+  if(!sf) { console.error('No Stockfish factory found'); return; }
   sf.onmessage = function(line){ postMessage(line); };
   onmessage     = function(e)  { sf.postMessage(e.data); };
 })();
-`;
-  const blob = new Blob([workerSrc], { type: 'application/javascript' });
-  const worker = new Worker(URL.createObjectURL(blob));
+`], { type: 'application/javascript' });
 
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      worker.terminate();
-      reject(new Error('Stockfish worker timeout'));
-    }, 15000);
-
-    worker.onmessage = e => {
+    const w = new Worker(URL.createObjectURL(blob));
+    const t = setTimeout(() => { w.terminate(); reject(new Error('blob timeout')); }, 10000);
+    w.onmessage = e => {
       if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
-        clearTimeout(timer);
-        sfWorker = worker;
-        resolve();
+        clearTimeout(t); sfWorker = w; resolve();
       }
     };
-    worker.onerror = e => { clearTimeout(timer); worker.terminate(); reject(e); };
-    worker.postMessage('uci');
+    w.onerror = e => { clearTimeout(t); w.terminate(); reject(e); };
+    w.postMessage('uci');
   });
+}
+
+async function initStockfish() {
+  // Try each URL as a direct Worker first (fastest, no size overhead)
+  for (const url of SF_WORKER_URLS) {
+    try { await tryWorkerUrl(url); return; } catch(_) {}
+  }
+  // If direct Worker failed, fetch+blob each URL (bypasses Worker CORS restrictions)
+  for (const url of SF_WORKER_URLS) {
+    try { await tryFetchBlob(url); return; } catch(_) {}
+  }
+  throw new Error('All Stockfish URLs failed');
 }
 
 function applyProfile(p) {
