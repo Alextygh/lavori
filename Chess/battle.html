@@ -1,0 +1,3068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bot vs Bot — Chessverse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+var Chess = (function(){
+var exports = {};
+/*
+ * Copyright (c) 2020, Jeff Hlywa (jhlywa@gmail.com)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ *----------------------------------------------------------------------------*/
+
+/* minified license below  */
+
+/* @license
+ * Copyright (c) 2018, Jeff Hlywa (jhlywa@gmail.com)
+ * Released under the BSD license
+ * https://github.com/jhlywa/chess.js/blob/master/LICENSE
+ */
+
+var Chess = function(fen) {
+  var BLACK = 'b'
+  var WHITE = 'w'
+
+  var EMPTY = -1
+
+  var PAWN = 'p'
+  var KNIGHT = 'n'
+  var BISHOP = 'b'
+  var ROOK = 'r'
+  var QUEEN = 'q'
+  var KING = 'k'
+
+  var SYMBOLS = 'pnbrqkPNBRQK'
+
+  var DEFAULT_POSITION =
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*']
+
+  var PAWN_OFFSETS = {
+    b: [16, 32, 17, 15],
+    w: [-16, -32, -17, -15]
+  }
+
+  var PIECE_OFFSETS = {
+    n: [-18, -33, -31, -14, 18, 33, 31, 14],
+    b: [-17, -15, 17, 15],
+    r: [-16, 1, 16, -1],
+    q: [-17, -16, -15, 1, 17, 16, 15, -1],
+    k: [-17, -16, -15, 1, 17, 16, 15, -1]
+  }
+
+  // prettier-ignore
+  var ATTACKS = [
+    20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
+     0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
+     0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
+     0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
+     0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
+    24,24,24,24,24,24,56,  0, 56,24,24,24,24,24,24, 0,
+     0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
+     0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
+     0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
+     0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
+    20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20
+  ];
+
+  // prettier-ignore
+  var RAYS = [
+     17,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0, 15, 0,
+      0, 17,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0, 15,  0, 0,
+      0,  0, 17,  0,  0,  0,  0, 16,  0,  0,  0,  0, 15,  0,  0, 0,
+      0,  0,  0, 17,  0,  0,  0, 16,  0,  0,  0, 15,  0,  0,  0, 0,
+      0,  0,  0,  0, 17,  0,  0, 16,  0,  0, 15,  0,  0,  0,  0, 0,
+      0,  0,  0,  0,  0, 17,  0, 16,  0, 15,  0,  0,  0,  0,  0, 0,
+      0,  0,  0,  0,  0,  0, 17, 16, 15,  0,  0,  0,  0,  0,  0, 0,
+      1,  1,  1,  1,  1,  1,  1,  0, -1, -1,  -1,-1, -1, -1, -1, 0,
+      0,  0,  0,  0,  0,  0,-15,-16,-17,  0,  0,  0,  0,  0,  0, 0,
+      0,  0,  0,  0,  0,-15,  0,-16,  0,-17,  0,  0,  0,  0,  0, 0,
+      0,  0,  0,  0,-15,  0,  0,-16,  0,  0,-17,  0,  0,  0,  0, 0,
+      0,  0,  0,-15,  0,  0,  0,-16,  0,  0,  0,-17,  0,  0,  0, 0,
+      0,  0,-15,  0,  0,  0,  0,-16,  0,  0,  0,  0,-17,  0,  0, 0,
+      0,-15,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,-17,  0, 0,
+    -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
+  ];
+
+  var SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 }
+
+  var FLAGS = {
+    NORMAL: 'n',
+    CAPTURE: 'c',
+    BIG_PAWN: 'b',
+    EP_CAPTURE: 'e',
+    PROMOTION: 'p',
+    KSIDE_CASTLE: 'k',
+    QSIDE_CASTLE: 'q'
+  }
+
+  var BITS = {
+    NORMAL: 1,
+    CAPTURE: 2,
+    BIG_PAWN: 4,
+    EP_CAPTURE: 8,
+    PROMOTION: 16,
+    KSIDE_CASTLE: 32,
+    QSIDE_CASTLE: 64
+  }
+
+  var RANK_1 = 7
+  var RANK_2 = 6
+  var RANK_3 = 5
+  var RANK_4 = 4
+  var RANK_5 = 3
+  var RANK_6 = 2
+  var RANK_7 = 1
+  var RANK_8 = 0
+
+  // prettier-ignore
+  var SQUARES = {
+    a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
+    a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
+    a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
+    a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
+    a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
+    a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
+    a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
+    a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
+  };
+
+  var ROOKS = {
+    w: [
+      { square: SQUARES.a1, flag: BITS.QSIDE_CASTLE },
+      { square: SQUARES.h1, flag: BITS.KSIDE_CASTLE }
+    ],
+    b: [
+      { square: SQUARES.a8, flag: BITS.QSIDE_CASTLE },
+      { square: SQUARES.h8, flag: BITS.KSIDE_CASTLE }
+    ]
+  }
+
+  var board = new Array(128)
+  var kings = { w: EMPTY, b: EMPTY }
+  var turn = WHITE
+  var castling = { w: 0, b: 0 }
+  var ep_square = EMPTY
+  var half_moves = 0
+  var move_number = 1
+  var history = []
+  var header = {}
+
+  /* if the user passes in a fen string, load it, else default to
+   * starting position
+   */
+  if (typeof fen === 'undefined') {
+    load(DEFAULT_POSITION)
+  } else {
+    load(fen)
+  }
+
+  function clear(keep_headers) {
+    if (typeof keep_headers === 'undefined') {
+      keep_headers = false
+    }
+
+    board = new Array(128)
+    kings = { w: EMPTY, b: EMPTY }
+    turn = WHITE
+    castling = { w: 0, b: 0 }
+    ep_square = EMPTY
+    half_moves = 0
+    move_number = 1
+    history = []
+    if (!keep_headers) header = {}
+    update_setup(generate_fen())
+  }
+
+  function reset() {
+    load(DEFAULT_POSITION)
+  }
+
+  function load(fen, keep_headers) {
+    if (typeof keep_headers === 'undefined') {
+      keep_headers = false
+    }
+
+    var tokens = fen.split(/\s+/)
+    var position = tokens[0]
+    var square = 0
+
+    if (!validate_fen(fen).valid) {
+      return false
+    }
+
+    clear(keep_headers)
+
+    for (var i = 0; i < position.length; i++) {
+      var piece = position.charAt(i)
+
+      if (piece === '/') {
+        square += 8
+      } else if (is_digit(piece)) {
+        square += parseInt(piece, 10)
+      } else {
+        var color = piece < 'a' ? WHITE : BLACK
+        put({ type: piece.toLowerCase(), color: color }, algebraic(square))
+        square++
+      }
+    }
+
+    turn = tokens[1]
+
+    if (tokens[2].indexOf('K') > -1) {
+      castling.w |= BITS.KSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('Q') > -1) {
+      castling.w |= BITS.QSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('k') > -1) {
+      castling.b |= BITS.KSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('q') > -1) {
+      castling.b |= BITS.QSIDE_CASTLE
+    }
+
+    ep_square = tokens[3] === '-' ? EMPTY : SQUARES[tokens[3]]
+    half_moves = parseInt(tokens[4], 10)
+    move_number = parseInt(tokens[5], 10)
+
+    update_setup(generate_fen())
+
+    return true
+  }
+
+  /* TODO: this function is pretty much crap - it validates structure but
+   * completely ignores content (e.g. doesn't verify that each side has a king)
+   * ... we should rewrite this, and ditch the silly error_number field while
+   * we're at it
+   */
+  function validate_fen(fen) {
+    var errors = {
+      0: 'No errors.',
+      1: 'FEN string must contain six space-delimited fields.',
+      2: '6th field (move number) must be a positive integer.',
+      3: '5th field (half move counter) must be a non-negative integer.',
+      4: '4th field (en-passant square) is invalid.',
+      5: '3rd field (castling availability) is invalid.',
+      6: '2nd field (side to move) is invalid.',
+      7: "1st field (piece positions) does not contain 8 '/'-delimited rows.",
+      8: '1st field (piece positions) is invalid [consecutive numbers].',
+      9: '1st field (piece positions) is invalid [invalid piece].',
+      10: '1st field (piece positions) is invalid [row too large].',
+      11: 'Illegal en-passant square'
+    }
+
+    /* 1st criterion: 6 space-seperated fields? */
+    var tokens = fen.split(/\s+/)
+    if (tokens.length !== 6) {
+      return { valid: false, error_number: 1, error: errors[1] }
+    }
+
+    /* 2nd criterion: move number field is a integer value > 0? */
+    if (isNaN(tokens[5]) || parseInt(tokens[5], 10) <= 0) {
+      return { valid: false, error_number: 2, error: errors[2] }
+    }
+
+    /* 3rd criterion: half move counter is an integer >= 0? */
+    if (isNaN(tokens[4]) || parseInt(tokens[4], 10) < 0) {
+      return { valid: false, error_number: 3, error: errors[3] }
+    }
+
+    /* 4th criterion: 4th field is a valid e.p.-string? */
+    if (!/^(-|[abcdefgh][36])$/.test(tokens[3])) {
+      return { valid: false, error_number: 4, error: errors[4] }
+    }
+
+    /* 5th criterion: 3th field is a valid castle-string? */
+    if (!/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(tokens[2])) {
+      return { valid: false, error_number: 5, error: errors[5] }
+    }
+
+    /* 6th criterion: 2nd field is "w" (white) or "b" (black)? */
+    if (!/^(w|b)$/.test(tokens[1])) {
+      return { valid: false, error_number: 6, error: errors[6] }
+    }
+
+    /* 7th criterion: 1st field contains 8 rows? */
+    var rows = tokens[0].split('/')
+    if (rows.length !== 8) {
+      return { valid: false, error_number: 7, error: errors[7] }
+    }
+
+    /* 8th criterion: every row is valid? */
+    for (var i = 0; i < rows.length; i++) {
+      /* check for right sum of fields AND not two numbers in succession */
+      var sum_fields = 0
+      var previous_was_number = false
+
+      for (var k = 0; k < rows[i].length; k++) {
+        if (!isNaN(rows[i][k])) {
+          if (previous_was_number) {
+            return { valid: false, error_number: 8, error: errors[8] }
+          }
+          sum_fields += parseInt(rows[i][k], 10)
+          previous_was_number = true
+        } else {
+          if (!/^[prnbqkPRNBQK]$/.test(rows[i][k])) {
+            return { valid: false, error_number: 9, error: errors[9] }
+          }
+          sum_fields += 1
+          previous_was_number = false
+        }
+      }
+      if (sum_fields !== 8) {
+        return { valid: false, error_number: 10, error: errors[10] }
+      }
+    }
+
+    if (
+      (tokens[3][1] == '3' && tokens[1] == 'w') ||
+      (tokens[3][1] == '6' && tokens[1] == 'b')
+    ) {
+      return { valid: false, error_number: 11, error: errors[11] }
+    }
+
+    /* everything's okay! */
+    return { valid: true, error_number: 0, error: errors[0] }
+  }
+
+  function generate_fen() {
+    var empty = 0
+    var fen = ''
+
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      if (board[i] == null) {
+        empty++
+      } else {
+        if (empty > 0) {
+          fen += empty
+          empty = 0
+        }
+        var color = board[i].color
+        var piece = board[i].type
+
+        fen += color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+      }
+
+      if ((i + 1) & 0x88) {
+        if (empty > 0) {
+          fen += empty
+        }
+
+        if (i !== SQUARES.h1) {
+          fen += '/'
+        }
+
+        empty = 0
+        i += 8
+      }
+    }
+
+    var cflags = ''
+    if (castling[WHITE] & BITS.KSIDE_CASTLE) {
+      cflags += 'K'
+    }
+    if (castling[WHITE] & BITS.QSIDE_CASTLE) {
+      cflags += 'Q'
+    }
+    if (castling[BLACK] & BITS.KSIDE_CASTLE) {
+      cflags += 'k'
+    }
+    if (castling[BLACK] & BITS.QSIDE_CASTLE) {
+      cflags += 'q'
+    }
+
+    /* do we have an empty castling flag? */
+    cflags = cflags || '-'
+    var epflags = ep_square === EMPTY ? '-' : algebraic(ep_square)
+
+    return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
+  }
+
+  function set_header(args) {
+    for (var i = 0; i < args.length; i += 2) {
+      if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
+        header[args[i]] = args[i + 1]
+      }
+    }
+    return header
+  }
+
+  /* called when the initial board setup is changed with put() or remove().
+   * modifies the SetUp and FEN properties of the header object.  if the FEN is
+   * equal to the default position, the SetUp and FEN are deleted
+   * the setup is only updated if history.length is zero, ie moves haven't been
+   * made.
+   */
+  function update_setup(fen) {
+    if (history.length > 0) return
+
+    if (fen !== DEFAULT_POSITION) {
+      header['SetUp'] = '1'
+      header['FEN'] = fen
+    } else {
+      delete header['SetUp']
+      delete header['FEN']
+    }
+  }
+
+  function get(square) {
+    var piece = board[SQUARES[square]]
+    return piece ? { type: piece.type, color: piece.color } : null
+  }
+
+  function put(piece, square) {
+    /* check for valid piece object */
+    if (!('type' in piece && 'color' in piece)) {
+      return false
+    }
+
+    /* check for piece */
+    if (SYMBOLS.indexOf(piece.type.toLowerCase()) === -1) {
+      return false
+    }
+
+    /* check for valid square */
+    if (!(square in SQUARES)) {
+      return false
+    }
+
+    var sq = SQUARES[square]
+
+    /* don't let the user place more than one king */
+    if (
+      piece.type == KING &&
+      !(kings[piece.color] == EMPTY || kings[piece.color] == sq)
+    ) {
+      return false
+    }
+
+    board[sq] = { type: piece.type, color: piece.color }
+    if (piece.type === KING) {
+      kings[piece.color] = sq
+    }
+
+    update_setup(generate_fen())
+
+    return true
+  }
+
+  function remove(square) {
+    var piece = get(square)
+    board[SQUARES[square]] = null
+    if (piece && piece.type === KING) {
+      kings[piece.color] = EMPTY
+    }
+
+    update_setup(generate_fen())
+
+    return piece
+  }
+
+  function build_move(board, from, to, flags, promotion) {
+    var move = {
+      color: turn,
+      from: from,
+      to: to,
+      flags: flags,
+      piece: board[from].type
+    }
+
+    if (promotion) {
+      move.flags |= BITS.PROMOTION
+      move.promotion = promotion
+    }
+
+    if (board[to]) {
+      move.captured = board[to].type
+    } else if (flags & BITS.EP_CAPTURE) {
+      move.captured = PAWN
+    }
+    return move
+  }
+
+  function generate_moves(options) {
+    function add_move(board, moves, from, to, flags) {
+      /* if pawn promotion */
+      if (
+        board[from].type === PAWN &&
+        (rank(to) === RANK_8 || rank(to) === RANK_1)
+      ) {
+        var pieces = [QUEEN, ROOK, BISHOP, KNIGHT]
+        for (var i = 0, len = pieces.length; i < len; i++) {
+          moves.push(build_move(board, from, to, flags, pieces[i]))
+        }
+      } else {
+        moves.push(build_move(board, from, to, flags))
+      }
+    }
+
+    var moves = []
+    var us = turn
+    var them = swap_color(us)
+    var second_rank = { b: RANK_7, w: RANK_2 }
+
+    var first_sq = SQUARES.a8
+    var last_sq = SQUARES.h1
+    var single_square = false
+
+    /* do we want legal moves? */
+    var legal =
+      typeof options !== 'undefined' && 'legal' in options
+        ? options.legal
+        : true
+
+    /* are we generating moves for a single square? */
+    if (typeof options !== 'undefined' && 'square' in options) {
+      if (options.square in SQUARES) {
+        first_sq = last_sq = SQUARES[options.square]
+        single_square = true
+      } else {
+        /* invalid square */
+        return []
+      }
+    }
+
+    for (var i = first_sq; i <= last_sq; i++) {
+      /* did we run off the end of the board */
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      var piece = board[i]
+      if (piece == null || piece.color !== us) {
+        continue
+      }
+
+      if (piece.type === PAWN) {
+        /* single square, non-capturing */
+        var square = i + PAWN_OFFSETS[us][0]
+        if (board[square] == null) {
+          add_move(board, moves, i, square, BITS.NORMAL)
+
+          /* double square */
+          var square = i + PAWN_OFFSETS[us][1]
+          if (second_rank[us] === rank(i) && board[square] == null) {
+            add_move(board, moves, i, square, BITS.BIG_PAWN)
+          }
+        }
+
+        /* pawn captures */
+        for (j = 2; j < 4; j++) {
+          var square = i + PAWN_OFFSETS[us][j]
+          if (square & 0x88) continue
+
+          if (board[square] != null && board[square].color === them) {
+            add_move(board, moves, i, square, BITS.CAPTURE)
+          } else if (square === ep_square) {
+            add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
+          }
+        }
+      } else {
+        for (var j = 0, len = PIECE_OFFSETS[piece.type].length; j < len; j++) {
+          var offset = PIECE_OFFSETS[piece.type][j]
+          var square = i
+
+          while (true) {
+            square += offset
+            if (square & 0x88) break
+
+            if (board[square] == null) {
+              add_move(board, moves, i, square, BITS.NORMAL)
+            } else {
+              if (board[square].color === us) break
+              add_move(board, moves, i, square, BITS.CAPTURE)
+              break
+            }
+
+            /* break, if knight or king */
+            if (piece.type === 'n' || piece.type === 'k') break
+          }
+        }
+      }
+    }
+
+    /* check for castling if: a) we're generating all moves, or b) we're doing
+     * single square move generation on the king's square
+     */
+    if (!single_square || last_sq === kings[us]) {
+      /* king-side castling */
+      if (castling[us] & BITS.KSIDE_CASTLE) {
+        var castling_from = kings[us]
+        var castling_to = castling_from + 2
+
+        if (
+          board[castling_from + 1] == null &&
+          board[castling_to] == null &&
+          !attacked(them, kings[us]) &&
+          !attacked(them, castling_from + 1) &&
+          !attacked(them, castling_to)
+        ) {
+          add_move(board, moves, kings[us], castling_to, BITS.KSIDE_CASTLE)
+        }
+      }
+
+      /* queen-side castling */
+      if (castling[us] & BITS.QSIDE_CASTLE) {
+        var castling_from = kings[us]
+        var castling_to = castling_from - 2
+
+        if (
+          board[castling_from - 1] == null &&
+          board[castling_from - 2] == null &&
+          board[castling_from - 3] == null &&
+          !attacked(them, kings[us]) &&
+          !attacked(them, castling_from - 1) &&
+          !attacked(them, castling_to)
+        ) {
+          add_move(board, moves, kings[us], castling_to, BITS.QSIDE_CASTLE)
+        }
+      }
+    }
+
+    /* return all pseudo-legal moves (this includes moves that allow the king
+     * to be captured)
+     */
+    if (!legal) {
+      return moves
+    }
+
+    /* filter out illegal moves */
+    var legal_moves = []
+    for (var i = 0, len = moves.length; i < len; i++) {
+      make_move(moves[i])
+      if (!king_attacked(us)) {
+        legal_moves.push(moves[i])
+      }
+      undo_move()
+    }
+
+    return legal_moves
+  }
+
+  /* convert a move from 0x88 coordinates to Standard Algebraic Notation
+   * (SAN)
+   *
+   * @param {boolean} sloppy Use the sloppy SAN generator to work around over
+   * disambiguation bugs in Fritz and Chessbase.  See below:
+   *
+   * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
+   * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
+   * 4. ... Ne7 is technically the valid SAN
+   */
+  function move_to_san(move, sloppy) {
+    var output = ''
+
+    if (move.flags & BITS.KSIDE_CASTLE) {
+      output = 'O-O'
+    } else if (move.flags & BITS.QSIDE_CASTLE) {
+      output = 'O-O-O'
+    } else {
+      var disambiguator = get_disambiguator(move, sloppy)
+
+      if (move.piece !== PAWN) {
+        output += move.piece.toUpperCase() + disambiguator
+      }
+
+      if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+        if (move.piece === PAWN) {
+          output += algebraic(move.from)[0]
+        }
+        output += 'x'
+      }
+
+      output += algebraic(move.to)
+
+      if (move.flags & BITS.PROMOTION) {
+        output += '=' + move.promotion.toUpperCase()
+      }
+    }
+
+    make_move(move)
+    if (in_check()) {
+      if (in_checkmate()) {
+        output += '#'
+      } else {
+        output += '+'
+      }
+    }
+    undo_move()
+
+    return output
+  }
+
+  // parses all of the decorators out of a SAN string
+  function stripped_san(move) {
+    return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
+  }
+
+  function attacked(color, square) {
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      /* did we run off the end of the board */
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      /* if empty square or wrong color */
+      if (board[i] == null || board[i].color !== color) continue
+
+      var piece = board[i]
+      var difference = i - square
+      var index = difference + 119
+
+      if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
+        if (piece.type === PAWN) {
+          if (difference > 0) {
+            if (piece.color === WHITE) return true
+          } else {
+            if (piece.color === BLACK) return true
+          }
+          continue
+        }
+
+        /* if the piece is a knight or a king */
+        if (piece.type === 'n' || piece.type === 'k') return true
+
+        var offset = RAYS[index]
+        var j = i + offset
+
+        var blocked = false
+        while (j !== square) {
+          if (board[j] != null) {
+            blocked = true
+            break
+          }
+          j += offset
+        }
+
+        if (!blocked) return true
+      }
+    }
+
+    return false
+  }
+
+  function king_attacked(color) {
+    return attacked(swap_color(color), kings[color])
+  }
+
+  function in_check() {
+    return king_attacked(turn)
+  }
+
+  function in_checkmate() {
+    return in_check() && generate_moves().length === 0
+  }
+
+  function in_stalemate() {
+    return !in_check() && generate_moves().length === 0
+  }
+
+  function insufficient_material() {
+    var pieces = {}
+    var bishops = []
+    var num_pieces = 0
+    var sq_color = 0
+
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      sq_color = (sq_color + 1) % 2
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      var piece = board[i]
+      if (piece) {
+        pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1
+        if (piece.type === BISHOP) {
+          bishops.push(sq_color)
+        }
+        num_pieces++
+      }
+    }
+
+    /* k vs. k */
+    if (num_pieces === 2) {
+      return true
+    } else if (
+      /* k vs. kn .... or .... k vs. kb */
+      num_pieces === 3 &&
+      (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)
+    ) {
+      return true
+    } else if (num_pieces === pieces[BISHOP] + 2) {
+      /* kb vs. kb where any number of bishops are all on the same color */
+      var sum = 0
+      var len = bishops.length
+      for (var i = 0; i < len; i++) {
+        sum += bishops[i]
+      }
+      if (sum === 0 || sum === len) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  function in_threefold_repetition() {
+    /* TODO: while this function is fine for casual use, a better
+     * implementation would use a Zobrist key (instead of FEN). the
+     * Zobrist key would be maintained in the make_move/undo_move functions,
+     * avoiding the costly that we do below.
+     */
+    var moves = []
+    var positions = {}
+    var repetition = false
+
+    while (true) {
+      var move = undo_move()
+      if (!move) break
+      moves.push(move)
+    }
+
+    while (true) {
+      /* remove the last two fields in the FEN string, they're not needed
+       * when checking for draw by rep */
+      var fen = generate_fen()
+        .split(' ')
+        .slice(0, 4)
+        .join(' ')
+
+      /* has the position occurred three or move times */
+      positions[fen] = fen in positions ? positions[fen] + 1 : 1
+      if (positions[fen] >= 3) {
+        repetition = true
+      }
+
+      if (!moves.length) {
+        break
+      }
+      make_move(moves.pop())
+    }
+
+    return repetition
+  }
+
+  function push(move) {
+    history.push({
+      move: move,
+      kings: { b: kings.b, w: kings.w },
+      turn: turn,
+      castling: { b: castling.b, w: castling.w },
+      ep_square: ep_square,
+      half_moves: half_moves,
+      move_number: move_number
+    })
+  }
+
+  function make_move(move) {
+    var us = turn
+    var them = swap_color(us)
+    push(move)
+
+    board[move.to] = board[move.from]
+    board[move.from] = null
+
+    /* if ep capture, remove the captured pawn */
+    if (move.flags & BITS.EP_CAPTURE) {
+      if (turn === BLACK) {
+        board[move.to - 16] = null
+      } else {
+        board[move.to + 16] = null
+      }
+    }
+
+    /* if pawn promotion, replace with new piece */
+    if (move.flags & BITS.PROMOTION) {
+      board[move.to] = { type: move.promotion, color: us }
+    }
+
+    /* if we moved the king */
+    if (board[move.to].type === KING) {
+      kings[board[move.to].color] = move.to
+
+      /* if we castled, move the rook next to the king */
+      if (move.flags & BITS.KSIDE_CASTLE) {
+        var castling_to = move.to - 1
+        var castling_from = move.to + 1
+        board[castling_to] = board[castling_from]
+        board[castling_from] = null
+      } else if (move.flags & BITS.QSIDE_CASTLE) {
+        var castling_to = move.to + 1
+        var castling_from = move.to - 2
+        board[castling_to] = board[castling_from]
+        board[castling_from] = null
+      }
+
+      /* turn off castling */
+      castling[us] = ''
+    }
+
+    /* turn off castling if we move a rook */
+    if (castling[us]) {
+      for (var i = 0, len = ROOKS[us].length; i < len; i++) {
+        if (
+          move.from === ROOKS[us][i].square &&
+          castling[us] & ROOKS[us][i].flag
+        ) {
+          castling[us] ^= ROOKS[us][i].flag
+          break
+        }
+      }
+    }
+
+    /* turn off castling if we capture a rook */
+    if (castling[them]) {
+      for (var i = 0, len = ROOKS[them].length; i < len; i++) {
+        if (
+          move.to === ROOKS[them][i].square &&
+          castling[them] & ROOKS[them][i].flag
+        ) {
+          castling[them] ^= ROOKS[them][i].flag
+          break
+        }
+      }
+    }
+
+    /* if big pawn move, update the en passant square */
+    if (move.flags & BITS.BIG_PAWN) {
+      if (turn === 'b') {
+        ep_square = move.to - 16
+      } else {
+        ep_square = move.to + 16
+      }
+    } else {
+      ep_square = EMPTY
+    }
+
+    /* reset the 50 move counter if a pawn is moved or a piece is captured */
+    if (move.piece === PAWN) {
+      half_moves = 0
+    } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+      half_moves = 0
+    } else {
+      half_moves++
+    }
+
+    if (turn === BLACK) {
+      move_number++
+    }
+    turn = swap_color(turn)
+  }
+
+  function undo_move() {
+    var old = history.pop()
+    if (old == null) {
+      return null
+    }
+
+    var move = old.move
+    kings = old.kings
+    turn = old.turn
+    castling = old.castling
+    ep_square = old.ep_square
+    half_moves = old.half_moves
+    move_number = old.move_number
+
+    var us = turn
+    var them = swap_color(turn)
+
+    board[move.from] = board[move.to]
+    board[move.from].type = move.piece // to undo any promotions
+    board[move.to] = null
+
+    if (move.flags & BITS.CAPTURE) {
+      board[move.to] = { type: move.captured, color: them }
+    } else if (move.flags & BITS.EP_CAPTURE) {
+      var index
+      if (us === BLACK) {
+        index = move.to - 16
+      } else {
+        index = move.to + 16
+      }
+      board[index] = { type: PAWN, color: them }
+    }
+
+    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+      var castling_to, castling_from
+      if (move.flags & BITS.KSIDE_CASTLE) {
+        castling_to = move.to + 1
+        castling_from = move.to - 1
+      } else if (move.flags & BITS.QSIDE_CASTLE) {
+        castling_to = move.to - 2
+        castling_from = move.to + 1
+      }
+
+      board[castling_to] = board[castling_from]
+      board[castling_from] = null
+    }
+
+    return move
+  }
+
+  /* this function is used to uniquely identify ambiguous moves */
+  function get_disambiguator(move, sloppy) {
+    var moves = generate_moves({ legal: !sloppy })
+
+    var from = move.from
+    var to = move.to
+    var piece = move.piece
+
+    var ambiguities = 0
+    var same_rank = 0
+    var same_file = 0
+
+    for (var i = 0, len = moves.length; i < len; i++) {
+      var ambig_from = moves[i].from
+      var ambig_to = moves[i].to
+      var ambig_piece = moves[i].piece
+
+      /* if a move of the same piece type ends on the same to square, we'll
+       * need to add a disambiguator to the algebraic notation
+       */
+      if (piece === ambig_piece && from !== ambig_from && to === ambig_to) {
+        ambiguities++
+
+        if (rank(from) === rank(ambig_from)) {
+          same_rank++
+        }
+
+        if (file(from) === file(ambig_from)) {
+          same_file++
+        }
+      }
+    }
+
+    if (ambiguities > 0) {
+      /* if there exists a similar moving piece on the same rank and file as
+       * the move in question, use the square as the disambiguator
+       */
+      if (same_rank > 0 && same_file > 0) {
+        return algebraic(from)
+      } else if (same_file > 0) {
+        /* if the moving piece rests on the same file, use the rank symbol as the
+         * disambiguator
+         */
+        return algebraic(from).charAt(1)
+      } else {
+        /* else use the file symbol */
+        return algebraic(from).charAt(0)
+      }
+    }
+
+    return ''
+  }
+
+  function ascii() {
+    var s = '   +------------------------+\n'
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      /* display the rank */
+      if (file(i) === 0) {
+        s += ' ' + '87654321'[rank(i)] + ' |'
+      }
+
+      /* empty piece */
+      if (board[i] == null) {
+        s += ' . '
+      } else {
+        var piece = board[i].type
+        var color = board[i].color
+        var symbol = color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+        s += ' ' + symbol + ' '
+      }
+
+      if ((i + 1) & 0x88) {
+        s += '|\n'
+        i += 8
+      }
+    }
+    s += '   +------------------------+\n'
+    s += '     a  b  c  d  e  f  g  h\n'
+
+    return s
+  }
+
+  // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
+  function move_from_san(move, sloppy) {
+    // strip off any move decorations: e.g Nf3+?!
+    var clean_move = stripped_san(move)
+
+    // if we're using the sloppy parser run a regex to grab piece, to, and from
+    // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
+    if (sloppy) {
+      var matches = clean_move.match(
+        /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
+      )
+      if (matches) {
+        var piece = matches[1]
+        var from = matches[2]
+        var to = matches[3]
+        var promotion = matches[4]
+      }
+    }
+
+    var moves = generate_moves()
+    for (var i = 0, len = moves.length; i < len; i++) {
+      // try the strict parser first, then the sloppy parser if requested
+      // by the user
+      if (
+        clean_move === stripped_san(move_to_san(moves[i])) ||
+        (sloppy && clean_move === stripped_san(move_to_san(moves[i], true)))
+      ) {
+        return moves[i]
+      } else {
+        if (
+          matches &&
+          (!piece || piece.toLowerCase() == moves[i].piece) &&
+          SQUARES[from] == moves[i].from &&
+          SQUARES[to] == moves[i].to &&
+          (!promotion || promotion.toLowerCase() == moves[i].promotion)
+        ) {
+          return moves[i]
+        }
+      }
+    }
+
+    return null
+  }
+
+  /*****************************************************************************
+   * UTILITY FUNCTIONS
+   ****************************************************************************/
+  function rank(i) {
+    return i >> 4
+  }
+
+  function file(i) {
+    return i & 15
+  }
+
+  function algebraic(i) {
+    var f = file(i),
+      r = rank(i)
+    return 'abcdefgh'.substring(f, f + 1) + '87654321'.substring(r, r + 1)
+  }
+
+  function swap_color(c) {
+    return c === WHITE ? BLACK : WHITE
+  }
+
+  function is_digit(c) {
+    return '0123456789'.indexOf(c) !== -1
+  }
+
+  /* pretty = external move object */
+  function make_pretty(ugly_move) {
+    var move = clone(ugly_move)
+    move.san = move_to_san(move, false)
+    move.to = algebraic(move.to)
+    move.from = algebraic(move.from)
+
+    var flags = ''
+
+    for (var flag in BITS) {
+      if (BITS[flag] & move.flags) {
+        flags += FLAGS[flag]
+      }
+    }
+    move.flags = flags
+
+    return move
+  }
+
+  function clone(obj) {
+    var dupe = obj instanceof Array ? [] : {}
+
+    for (var property in obj) {
+      if (typeof property === 'object') {
+        dupe[property] = clone(obj[property])
+      } else {
+        dupe[property] = obj[property]
+      }
+    }
+
+    return dupe
+  }
+
+  function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '')
+  }
+
+  /*****************************************************************************
+   * DEBUGGING UTILITIES
+   ****************************************************************************/
+  function perft(depth) {
+    var moves = generate_moves({ legal: false })
+    var nodes = 0
+    var color = turn
+
+    for (var i = 0, len = moves.length; i < len; i++) {
+      make_move(moves[i])
+      if (!king_attacked(color)) {
+        if (depth - 1 > 0) {
+          var child_nodes = perft(depth - 1)
+          nodes += child_nodes
+        } else {
+          nodes++
+        }
+      }
+      undo_move()
+    }
+
+    return nodes
+  }
+
+  return {
+    /***************************************************************************
+     * PUBLIC CONSTANTS (is there a better way to do this?)
+     **************************************************************************/
+    WHITE: WHITE,
+    BLACK: BLACK,
+    PAWN: PAWN,
+    KNIGHT: KNIGHT,
+    BISHOP: BISHOP,
+    ROOK: ROOK,
+    QUEEN: QUEEN,
+    KING: KING,
+    SQUARES: (function() {
+      /* from the ECMA-262 spec (section 12.6.4):
+       * "The mechanics of enumerating the properties ... is
+       * implementation dependent"
+       * so: for (var sq in SQUARES) { keys.push(sq); } might not be
+       * ordered correctly
+       */
+      var keys = []
+      for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+        if (i & 0x88) {
+          i += 7
+          continue
+        }
+        keys.push(algebraic(i))
+      }
+      return keys
+    })(),
+    FLAGS: FLAGS,
+
+    /***************************************************************************
+     * PUBLIC API
+     **************************************************************************/
+    load: function(fen) {
+      return load(fen)
+    },
+
+    reset: function() {
+      return reset()
+    },
+
+    moves: function(options) {
+      /* The internal representation of a chess move is in 0x88 format, and
+       * not meant to be human-readable.  The code below converts the 0x88
+       * square coordinates to algebraic coordinates.  It also prunes an
+       * unnecessary move keys resulting from a verbose call.
+       */
+
+      var ugly_moves = generate_moves(options)
+      var moves = []
+
+      for (var i = 0, len = ugly_moves.length; i < len; i++) {
+        /* does the user want a full move object (most likely not), or just
+         * SAN
+         */
+        if (
+          typeof options !== 'undefined' &&
+          'verbose' in options &&
+          options.verbose
+        ) {
+          moves.push(make_pretty(ugly_moves[i]))
+        } else {
+          moves.push(move_to_san(ugly_moves[i], false))
+        }
+      }
+
+      return moves
+    },
+
+    in_check: function() {
+      return in_check()
+    },
+
+    in_checkmate: function() {
+      return in_checkmate()
+    },
+
+    in_stalemate: function() {
+      return in_stalemate()
+    },
+
+    in_draw: function() {
+      return (
+        half_moves >= 100 ||
+        in_stalemate() ||
+        insufficient_material() ||
+        in_threefold_repetition()
+      )
+    },
+
+    insufficient_material: function() {
+      return insufficient_material()
+    },
+
+    in_threefold_repetition: function() {
+      return in_threefold_repetition()
+    },
+
+    game_over: function() {
+      return (
+        half_moves >= 100 ||
+        in_checkmate() ||
+        in_stalemate() ||
+        insufficient_material() ||
+        in_threefold_repetition()
+      )
+    },
+
+    validate_fen: function(fen) {
+      return validate_fen(fen)
+    },
+
+    fen: function() {
+      return generate_fen()
+    },
+
+    board: function() {
+      var output = [],
+        row = []
+
+      for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+        if (board[i] == null) {
+          row.push(null)
+        } else {
+          row.push({ type: board[i].type, color: board[i].color })
+        }
+        if ((i + 1) & 0x88) {
+          output.push(row)
+          row = []
+          i += 8
+        }
+      }
+
+      return output
+    },
+
+    pgn: function(options) {
+      /* using the specification from http://www.chessclub.com/help/PGN-spec
+       * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
+       */
+      var newline =
+        typeof options === 'object' && typeof options.newline_char === 'string'
+          ? options.newline_char
+          : '\n'
+      var max_width =
+        typeof options === 'object' && typeof options.max_width === 'number'
+          ? options.max_width
+          : 0
+      var result = []
+      var header_exists = false
+
+      /* add the PGN header headerrmation */
+      for (var i in header) {
+        /* TODO: order of enumerated properties in header object is not
+         * guaranteed, see ECMA-262 spec (section 12.6.4)
+         */
+        result.push('[' + i + ' "' + header[i] + '"]' + newline)
+        header_exists = true
+      }
+
+      if (header_exists && history.length) {
+        result.push(newline)
+      }
+
+      /* pop all of history onto reversed_history */
+      var reversed_history = []
+      while (history.length > 0) {
+        reversed_history.push(undo_move())
+      }
+
+      var moves = []
+      var move_string = ''
+
+      /* build the list of moves.  a move_string looks like: "3. e3 e6" */
+      while (reversed_history.length > 0) {
+        var move = reversed_history.pop()
+
+        /* if the position started with black to move, start PGN with 1. ... */
+        if (!history.length && move.color === 'b') {
+          move_string = move_number + '. ...'
+        } else if (move.color === 'w') {
+          /* store the previous generated move_string if we have one */
+          if (move_string.length) {
+            moves.push(move_string)
+          }
+          move_string = move_number + '.'
+        }
+
+        move_string = move_string + ' ' + move_to_san(move, false)
+        make_move(move)
+      }
+
+      /* are there any other leftover moves? */
+      if (move_string.length) {
+        moves.push(move_string)
+      }
+
+      /* is there a result? */
+      if (typeof header.Result !== 'undefined') {
+        moves.push(header.Result)
+      }
+
+      /* history should be back to what is was before we started generating PGN,
+       * so join together moves
+       */
+      if (max_width === 0) {
+        return result.join('') + moves.join(' ')
+      }
+
+      /* wrap the PGN output at max_width */
+      var current_width = 0
+      for (var i = 0; i < moves.length; i++) {
+        /* if the current move will push past max_width */
+        if (current_width + moves[i].length > max_width && i !== 0) {
+          /* don't end the line with whitespace */
+          if (result[result.length - 1] === ' ') {
+            result.pop()
+          }
+
+          result.push(newline)
+          current_width = 0
+        } else if (i !== 0) {
+          result.push(' ')
+          current_width++
+        }
+        result.push(moves[i])
+        current_width += moves[i].length
+      }
+
+      return result.join('')
+    },
+
+    load_pgn: function(pgn, options) {
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy =
+        typeof options !== 'undefined' && 'sloppy' in options
+          ? options.sloppy
+          : false
+
+      function mask(str) {
+        return str.replace(/\\/g, '\\')
+      }
+
+      function has_keys(object) {
+        for (var key in object) {
+          return true
+        }
+        return false
+      }
+
+      function parse_pgn_header(header, options) {
+        var newline_char =
+          typeof options === 'object' &&
+          typeof options.newline_char === 'string'
+            ? options.newline_char
+            : '\r?\n'
+        var header_obj = {}
+        var headers = header.split(new RegExp(mask(newline_char)))
+        var key = ''
+        var value = ''
+
+        for (var i = 0; i < headers.length; i++) {
+          key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1')
+          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1')
+          if (trim(key).length > 0) {
+            header_obj[key] = value
+          }
+        }
+
+        return header_obj
+      }
+
+      var newline_char =
+        typeof options === 'object' && typeof options.newline_char === 'string'
+          ? options.newline_char
+          : '\r?\n'
+
+      // RegExp to split header. Takes advantage of the fact that header and movetext
+      // will always have a blank line between them (ie, two newline_char's).
+      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
+      var header_regex = new RegExp(
+        '^(\\[((?:' +
+          mask(newline_char) +
+          ')|.)*\\])' +
+          '(?:' +
+          mask(newline_char) +
+          '){2}'
+      )
+
+      // If no header given, begin with moves.
+      var header_string = header_regex.test(pgn)
+        ? header_regex.exec(pgn)[1]
+        : ''
+
+      // Put the board in the starting position
+      reset()
+
+      /* parse PGN header */
+      var headers = parse_pgn_header(header_string, options)
+      for (var key in headers) {
+        set_header([key, headers[key]])
+      }
+
+      /* load the starting position indicated by [Setup '1'] and
+       * [FEN position] */
+      if (headers['SetUp'] === '1') {
+        if (!('FEN' in headers && load(headers['FEN'], true))) {
+          // second argument to load: don't clear the headers
+          return false
+        }
+      }
+
+      /* delete header to get the moves */
+      var ms = pgn
+        .replace(header_string, '')
+        .replace(new RegExp(mask(newline_char), 'g'), ' ')
+
+      /* delete comments */
+      ms = ms.replace(/(\{[^}]+\})+?/g, '')
+
+      /* delete recursive annotation variations */
+      var rav_regex = /(\([^\(\)]+\))+?/g
+      while (rav_regex.test(ms)) {
+        ms = ms.replace(rav_regex, '')
+      }
+
+      /* delete move numbers */
+      ms = ms.replace(/\d+\.(\.\.)?/g, '')
+
+      /* delete ... indicating black to move */
+      ms = ms.replace(/\.\.\./g, '')
+
+      /* delete numeric annotation glyphs */
+      ms = ms.replace(/\$\d+/g, '')
+
+      /* trim and get array of moves */
+      var moves = trim(ms).split(new RegExp(/\s+/))
+
+      /* delete empty entries */
+      moves = moves
+        .join(',')
+        .replace(/,,+/g, ',')
+        .split(',')
+      var move = ''
+
+      for (var half_move = 0; half_move < moves.length - 1; half_move++) {
+        move = move_from_san(moves[half_move], sloppy)
+
+        /* move not possible! (don't clear the board to examine to show the
+         * latest valid position)
+         */
+        if (move == null) {
+          return false
+        } else {
+          make_move(move)
+        }
+      }
+
+      /* examine last move */
+      move = moves[moves.length - 1]
+      if (POSSIBLE_RESULTS.indexOf(move) > -1) {
+        if (has_keys(header) && typeof header.Result === 'undefined') {
+          set_header(['Result', move])
+        }
+      } else {
+        move = move_from_san(move, sloppy)
+        if (move == null) {
+          return false
+        } else {
+          make_move(move)
+        }
+      }
+      return true
+    },
+
+    header: function() {
+      return set_header(arguments)
+    },
+
+    ascii: function() {
+      return ascii()
+    },
+
+    turn: function() {
+      return turn
+    },
+
+    move: function(move, options) {
+      /* The move function can be called with in the following parameters:
+       *
+       * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
+       *
+       * .move({ from: 'h7', <- where the 'move' is a move object (additional
+       *         to :'h8',      fields are ignored)
+       *         promotion: 'q',
+       *      })
+       */
+
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy =
+        typeof options !== 'undefined' && 'sloppy' in options
+          ? options.sloppy
+          : false
+
+      var move_obj = null
+
+      if (typeof move === 'string') {
+        move_obj = move_from_san(move, sloppy)
+      } else if (typeof move === 'object') {
+        var moves = generate_moves()
+
+        /* convert the pretty move object to an ugly move object */
+        for (var i = 0, len = moves.length; i < len; i++) {
+          if (
+            move.from === algebraic(moves[i].from) &&
+            move.to === algebraic(moves[i].to) &&
+            (!('promotion' in moves[i]) ||
+              move.promotion === moves[i].promotion)
+          ) {
+            move_obj = moves[i]
+            break
+          }
+        }
+      }
+
+      /* failed to find move */
+      if (!move_obj) {
+        return null
+      }
+
+      /* need to make a copy of move because we can't generate SAN after the
+       * move is made
+       */
+      var pretty_move = make_pretty(move_obj)
+
+      make_move(move_obj)
+
+      return pretty_move
+    },
+
+    undo: function() {
+      var move = undo_move()
+      return move ? make_pretty(move) : null
+    },
+
+    clear: function() {
+      return clear()
+    },
+
+    put: function(piece, square) {
+      return put(piece, square)
+    },
+
+    get: function(square) {
+      return get(square)
+    },
+
+    remove: function(square) {
+      return remove(square)
+    },
+
+    perft: function(depth) {
+      return perft(depth)
+    },
+
+    square_color: function(square) {
+      if (square in SQUARES) {
+        var sq_0x88 = SQUARES[square]
+        return (rank(sq_0x88) + file(sq_0x88)) % 2 === 0 ? 'light' : 'dark'
+      }
+
+      return null
+    },
+
+    history: function(options) {
+      var reversed_history = []
+      var move_history = []
+      var verbose =
+        typeof options !== 'undefined' &&
+        'verbose' in options &&
+        options.verbose
+
+      while (history.length > 0) {
+        reversed_history.push(undo_move())
+      }
+
+      while (reversed_history.length > 0) {
+        var move = reversed_history.pop()
+        if (verbose) {
+          move_history.push(make_pretty(move))
+        } else {
+          move_history.push(move_to_san(move))
+        }
+        make_move(move)
+      }
+
+      return move_history
+    }
+  }
+}
+
+/* export Chess object if using node or any other CommonJS compatible
+ * environment */
+if (typeof exports !== 'undefined') exports.Chess = Chess
+/* export Chess object for any RequireJS compatible environment */
+if (typeof define !== 'undefined')
+  define(function() {
+    return Chess
+  })
+
+return exports.Chess;
+})();
+</script>
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #21262d;
+      --border:    #30363d;
+      --gold:      #e6c97a;
+      --gold-dim:  #a8894a;
+      --text:      #f0f6fc;
+      --muted:     #8b949e;
+      --radius:    12px;
+      --transition: 0.2s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(16px,5vw,64px);
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--gold); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-links { display: flex; gap: 6px; list-style: none; align-items: center; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 6px 12px; border-radius: 8px;
+      transition: color var(--transition), background var(--transition);
+    }
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
+    .nav-links a.active { color: var(--gold); }
+
+    /* ── Loading ── */
+    #loading-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+    }
+    #loading-overlay.gone { display: none; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-msg { font-size: 14px; color: var(--muted); }
+
+    /* ── Setup modal ── */
+    #setup-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.80);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    #setup-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%; max-width: 580px;
+      padding: 32px;
+      display: flex; flex-direction: column; gap: 28px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .setup-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; font-weight: 700; color: var(--gold);
+      text-align: center;
+    }
+    .setup-subtitle { font-size: 13px; color: var(--muted); text-align: center; }
+
+    .setup-section { display: flex; flex-direction: column; gap: 12px; }
+    .setup-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Bot selector cards */
+    .bot-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 2px;
+    }
+    .bot-select-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      display: flex; flex-direction: column; gap: 6px;
+      position: relative;
+    }
+    .bot-select-card:hover {
+      border-color: var(--gold-dim);
+      background: #1e2530;
+      transform: translateY(-2px);
+    }
+    .bot-select-card.selected-white {
+      border-color: #f0f6fc;
+      background: rgba(240,246,252,0.08);
+    }
+    .bot-select-card.selected-black {
+      border-color: #bc64ff;
+      background: rgba(188,100,255,0.08);
+    }
+    .bsc-img {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover;
+      border-radius: 6px; background: var(--bg);
+    }
+    .bsc-name {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bsc-badge {
+      position: absolute; top: 6px; right: 6px;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .bsc-badge.white { background: #f0f6fc; color: #0d1117; }
+    .bsc-badge.black { background: #bc64ff; color: #fff; }
+
+    /* Side assignment */
+    .side-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+    }
+    .side-btn {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 10px; padding: 12px 8px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .side-btn:hover { border-color: var(--gold-dim); background: #1e2530; transform: translateY(-2px); }
+    .side-btn.active { border-color: var(--gold); background: rgba(230,201,122,0.1); }
+    .side-btn .sb-icon { font-size: 26px; }
+    .side-btn .sb-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .side-btn .sb-sub   { font-size: 10px; color: var(--muted); text-align: center; }
+
+    /* Speed control */
+    .speed-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .speed-btn {
+      border: 1px solid var(--border); background: var(--surface2);
+      border-radius: 8px; padding: 8px 4px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .speed-btn:hover { border-color: var(--gold-dim); background: #1e2530; }
+    .speed-btn.active { border-color: var(--gold); background: rgba(230,201,122,0.1); }
+    .speed-btn .spd-icon  { font-size: 18px; }
+    .speed-btn .spd-label { font-size: 11px; font-weight: 600; color: var(--text); }
+
+    /* Start button */
+    .start-btn {
+      width: 100%; padding: 14px;
+      background: rgba(230,201,122,0.15);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      color: var(--gold);
+      font-size: 15px; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .start-btn:hover { background: rgba(230,201,122,0.25); }
+    .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Game layout ── */
+    #game-wrap {
+      display: none;
+      flex: 1;
+      padding: clamp(12px,2vw,24px) clamp(16px,4vw,40px);
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    #game-wrap.visible { display: flex; }
+    @media (max-width: 860px) {
+      #game-wrap { flex-direction: column; align-items: center; }
+    }
+
+    /* Board column */
+    #board-col { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+
+    .player-strip {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px; gap: 10px;
+    }
+    .player-strip .ps-name {
+      font-weight: 600; font-size: 13px; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ps-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border); }
+    .ps-dot.white-dot { background: #f0f6fc; }
+    .ps-dot.black-dot { background: #21262d; }
+    .player-strip .ps-captured {
+      display: flex; flex-wrap: wrap; gap: 2px;
+      font-size: 13px; flex: 1;
+    }
+    .player-strip .ps-score {
+      font-size: 12px; color: var(--gold); font-weight: 600;
+      min-width: 20px; text-align: right;
+    }
+    .thinking-indicator {
+      display: inline-block;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      animation: pulse 1s ease-in-out infinite;
+      margin-left: 6px;
+    }
+    .thinking-indicator.active { opacity: 1; }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:0.4;} 50%{transform:scale(1.4);opacity:1;} }
+
+    /* Board */
+    #board-outer { position: relative; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      user-select: none;
+      position: relative;
+    }
+
+    /* The split line in the middle of the board */
+    #split-line {
+      position: absolute;
+      left: 0; right: 0;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(230,201,122,0.6), transparent);
+      pointer-events: none;
+      z-index: 10;
+      transform: translateY(-1px);
+    }
+
+    .sq {
+      position: relative;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+    .sq.light-fallback { background-color: #f0d9b5; }
+    .sq.dark-fallback  { background-color: #b58863; }
+    .sq img.piece-img {
+      width: 100%; height: 100%;
+      display: block; position: absolute; inset: 0;
+      pointer-events: none; object-fit: contain; padding: 4%;
+    }
+    /* Piece owner badge — tiny colored dot on piece */
+    .sq .owner-dot {
+      position: absolute;
+      bottom: 3px; right: 3px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      border: 1px solid rgba(0,0,0,0.5);
+    }
+    .sq::after {
+      content: '';
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    .sq.hl-last::after   { background: rgba(255,210,0,0.25); }
+    .sq.hl-check::after  { background: rgba(220,30,30,0.55); }
+    .sq .coord {
+      position: absolute;
+      font-size: clamp(7px,1vw,10px);
+      font-weight: 600; opacity: 0.5;
+      pointer-events: none; z-index: 4; line-height: 1;
+    }
+    .sq .coord-rank { top: 3px; left: 4px; }
+    .sq .coord-file { bottom: 3px; right: 4px; }
+
+    /* Info panel */
+    #info-col {
+      display: flex; flex-direction: column; gap: 14px;
+      width: 240px; flex-shrink: 0;
+    }
+    @media (max-width: 860px) { #info-col { width: 100%; max-width: 520px; } }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .info-card h3 {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    #status-text {
+      font-size: 13px; color: var(--text); font-weight: 500;
+      line-height: 1.5; min-height: 36px;
+    }
+    #status-text.thinking { color: var(--muted); font-style: italic; }
+    #status-text.result   { color: var(--gold); font-weight: 600; }
+
+    /* Move history */
+    #history-list {
+      display: flex; flex-direction: column; gap: 2px;
+      max-height: 200px; overflow-y: auto;
+      font-size: 12px; font-family: monospace;
+    }
+    .hist-row {
+      display: grid; grid-template-columns: 26px 1fr 1fr;
+      gap: 4px; padding: 2px 0;
+      border-bottom: 1px solid var(--surface2);
+    }
+    .hist-row:last-child { border-bottom: none; }
+    .hist-num { color: var(--muted); }
+    .hist-w   { color: var(--text); }
+    .hist-b   { color: var(--muted); }
+
+    /* Controls */
+    .ctrl-btn {
+      width: 100%; padding: 8px 14px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text);
+      font-size: 12px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      text-align: left;
+    }
+    .ctrl-btn:hover { border-color: var(--gold-dim); background: #1e2530; }
+    .ctrl-btn.primary {
+      background: rgba(230,201,122,0.12);
+      border-color: var(--gold-dim); color: var(--gold);
+    }
+    .ctrl-btn.primary:hover { background: rgba(230,201,122,0.2); }
+
+    /* Match result banner */
+    #result-banner {
+      display: none;
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #result-banner.show { display: flex; }
+    #result-box {
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 18px; padding: 40px 48px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 18px;
+      text-align: center;
+    }
+    #result-trophy { font-size: 52px; }
+    #result-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; color: var(--gold);
+    }
+    #result-subtitle { font-size: 14px; color: var(--muted); }
+    .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .result-btn {
+      padding: 10px 24px; border-radius: 9px;
+      font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background var(--transition), border-color var(--transition);
+    }
+    .result-btn.primary {
+      background: rgba(230,201,122,0.15);
+      border: 1px solid var(--gold); color: var(--gold);
+    }
+    .result-btn.primary:hover { background: rgba(230,201,122,0.28); }
+    .result-btn.secondary {
+      background: var(--surface2);
+      border: 1px solid var(--border); color: var(--text);
+    }
+    .result-btn.secondary:hover { border-color: var(--gold-dim); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">♟ Chessverse</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Bots</a></li>
+    <li><a href="battle.html" class="active">Bot vs Bot</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+</nav>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div id="loading-msg">Loading bots…</div>
+</div>
+
+<!-- SETUP MODAL -->
+<div id="setup-overlay" style="display:none">
+  <div id="setup-box">
+    <div class="setup-title">⚔ Bot vs Bot</div>
+    <div class="setup-subtitle">Select two bots and watch them clash</div>
+
+    <!-- White bot selection -->
+    <div class="setup-section">
+      <div class="setup-label">⬜ White bot — click to select</div>
+      <div class="bot-select-grid" id="white-grid"></div>
+    </div>
+
+    <!-- Black bot selection -->
+    <div class="setup-section">
+      <div class="setup-label">⬛ Black bot — click to select</div>
+      <div class="bot-select-grid" id="black-grid"></div>
+    </div>
+
+    <!-- Side assignment -->
+    <div class="setup-section">
+      <div class="setup-label">Who plays white?</div>
+      <div class="side-row">
+        <button class="side-btn active" data-side="a" onclick="setSide('a')">
+          <span class="sb-icon">♔</span>
+          <span class="sb-label">Bot A</span>
+          <span class="sb-sub">First selected</span>
+        </button>
+        <button class="side-btn" data-side="b" onclick="setSide('b')">
+          <span class="sb-icon">♚</span>
+          <span class="sb-label">Bot B</span>
+          <span class="sb-sub">Second selected</span>
+        </button>
+        <button class="side-btn" data-side="random" onclick="setSide('random')">
+          <span class="sb-icon">⚄</span>
+          <span class="sb-label">Random</span>
+          <span class="sb-sub">Flip a coin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Speed -->
+    <div class="setup-section">
+      <div class="setup-label">Game speed</div>
+      <div class="speed-row">
+        <button class="speed-btn" data-spd="slow" onclick="setSpeed('slow')">
+          <span class="spd-icon">🐢</span>
+          <span class="spd-label">Slow</span>
+        </button>
+        <button class="speed-btn active" data-spd="normal" onclick="setSpeed('normal')">
+          <span class="spd-icon">🚶</span>
+          <span class="spd-label">Normal</span>
+        </button>
+        <button class="speed-btn" data-spd="fast" onclick="setSpeed('fast')">
+          <span class="spd-icon">🏃</span>
+          <span class="spd-label">Fast</span>
+        </button>
+        <button class="speed-btn" data-spd="instant" onclick="setSpeed('instant')">
+          <span class="spd-icon">⚡</span>
+          <span class="spd-label">Instant</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startBattle()" disabled>
+      Select two bots to begin
+    </button>
+  </div>
+</div>
+
+<!-- GAME AREA -->
+<div id="game-wrap">
+  <div id="board-col">
+    <!-- Top player -->
+    <div class="player-strip" id="strip-top">
+      <span class="ps-name">
+        <span class="ps-dot" id="dot-top"></span>
+        <span id="name-top">—</span>
+        <span class="thinking-indicator" id="think-top"></span>
+      </span>
+      <span class="ps-captured" id="cap-top"></span>
+      <span class="ps-score"    id="score-top"></span>
+    </div>
+
+    <div id="board-outer">
+      <div id="board"></div>
+      <div id="split-line"></div>
+    </div>
+
+    <!-- Bottom player -->
+    <div class="player-strip" id="strip-bot">
+      <span class="ps-name">
+        <span class="ps-dot" id="dot-bot"></span>
+        <span id="name-bot">—</span>
+        <span class="thinking-indicator" id="think-bot"></span>
+      </span>
+      <span class="ps-captured" id="cap-bot"></span>
+      <span class="ps-score"    id="score-bot"></span>
+    </div>
+  </div>
+
+  <!-- Info column -->
+  <div id="info-col">
+    <div class="info-card">
+      <h3>Status</h3>
+      <div id="status-text">—</div>
+    </div>
+    <div class="info-card">
+      <h3>Moves</h3>
+      <div id="history-list"></div>
+    </div>
+    <div class="info-card" style="gap:8px">
+      <h3>Controls</h3>
+      <button class="ctrl-btn" onclick="pauseResume()" id="btn-pause">⏸ Pause</button>
+      <button class="ctrl-btn" onclick="goToSetup()"  >⚙ New matchup</button>
+      <button class="ctrl-btn primary" onclick="backToMenu()">✕ Back to bots</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT BANNER -->
+<div id="result-banner">
+  <div id="result-box">
+    <div id="result-trophy">🏆</div>
+    <div id="result-title">—</div>
+    <div id="result-subtitle">—</div>
+    <div class="result-actions">
+      <button class="result-btn primary"   onclick="rematch()">⟳ Rematch</button>
+      <button class="result-btn secondary" onclick="goToSetup()">⚙ New matchup</button>
+      <button class="result-btn secondary" onclick="backToMenu()">← Back to bots</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════
+const BOTS_JSON = 'bots.json';
+const FILES = ['a','b','c','d','e','f','g','h'];
+const PIECE_KEYS = ['wk','wq','wr','wb','wn','wp','bk','bq','br','bb','bn','bp'];
+const UNI = { wk:'♔',wq:'♕',wr:'♖',wb:'♗',wn:'♘',wp:'♙',bk:'♚',bq:'♛',br:'♜',bb:'♝',bn:'♞',bp:'♟' };
+const PIECE_VALUES = { p:1, n:3, b:3, r:5, q:9, k:0 };
+
+// Speed presets: [thinkMin, thinkMax, sfDepth]
+const SPEED_PRESETS = {
+  slow:    { thinkMin: 1200, thinkMax: 2400, depth: 14 },
+  normal:  { thinkMin: 400,  thinkMax: 900,  depth: 10 },
+  fast:    { thinkMin: 100,  thinkMax: 300,  depth: 7  },
+  instant: { thinkMin: 0,    thinkMax: 50,   depth: 5  },
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let allBots     = [];
+let botA        = null;   // first bot picked in setup
+let botB        = null;   // second bot picked in setup
+let whiteBot    = null;   // bot playing white this game
+let blackBot    = null;   // bot playing black this game
+let whiteProfile = null;
+let blackProfile = null;
+let whitePieces = {};     // preloaded images for white bot: 'wp' -> HTMLImageElement
+let blackPieces = {};     // preloaded images for black bot
+let whiteTiles  = {};     // { light: url, dark: url } for white bot (rows 5-8)
+let blackTiles  = {};     // { light: url, dark: url } for black bot (rows 1-4)
+let sfWhite     = null;   // Stockfish worker for white
+let sfBlack     = null;   // Stockfish worker for black
+let chess       = null;
+let lastMove    = null;
+let sqSize      = 64;
+let paused      = false;
+let gameActive  = false;
+let selectedSide = 'a';  // which bot plays white: 'a'|'b'|'random'
+let selectedSpeed = 'normal';
+let moveTimer   = null;
+
+// ══════════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  setLoadMsg('Loading bots…');
+  try {
+    const r = await fetch(BOTS_JSON);
+    if (!r.ok) throw new Error(r.status);
+    allBots = await r.json();
+  } catch(e) {
+    setLoadMsg('Failed to load bots.json: ' + e.message);
+    return;
+  }
+
+  buildSetupGrids();
+  document.getElementById('loading-overlay').classList.add('gone');
+  document.getElementById('setup-overlay').style.display = 'flex';
+});
+
+// ══════════════════════════════════════════════════════════════
+//  SETUP UI
+// ══════════════════════════════════════════════════════════════
+function buildSetupGrids() {
+  ['white-grid','black-grid'].forEach((gridId, gIdx) => {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = '';
+    allBots.forEach(bot => {
+      const card = document.createElement('div');
+      card.className = 'bot-select-card';
+      card.dataset.botId = bot.id;
+      card.innerHTML = `
+        <img class="bsc-img" src="${escHtml(bot.image)}" alt="${escHtml(bot.name)}"
+             onerror="this.src='https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=400&q=60'"/>
+        <div class="bsc-name">${escHtml(bot.name)}</div>
+      `;
+      card.addEventListener('click', () => selectBotForSlot(bot, gIdx === 0 ? 'A' : 'B', card, gridId));
+      grid.appendChild(card);
+    });
+  });
+}
+
+function selectBotForSlot(bot, slot, card, gridId) {
+  // slot: 'A' = white-grid, 'B' = black-grid
+  const grid = document.getElementById(gridId);
+  // Deselect same-slot previous
+  grid.querySelectorAll('.bot-select-card').forEach(c => {
+    c.classList.remove('selected-white', 'selected-black');
+    const b = c.querySelector('.bsc-badge');
+    if (b) b.remove();
+  });
+  const cssClass = slot === 'A' ? 'selected-white' : 'selected-black';
+  card.classList.add(cssClass);
+  const badge = document.createElement('span');
+  badge.className = 'bsc-badge ' + (slot === 'A' ? 'white' : 'black');
+  badge.textContent = slot;
+  card.appendChild(badge);
+
+  if (slot === 'A') botA = bot;
+  else botB = bot;
+
+  updateStartBtn();
+}
+
+function updateStartBtn() {
+  const btn = document.getElementById('start-btn');
+  if (botA && botB) {
+    btn.disabled = false;
+    btn.textContent = `⚔ ${botA.name} vs ${botB.name}`;
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Select two bots to begin';
+  }
+}
+
+function setSide(side) {
+  selectedSide = side;
+  document.querySelectorAll('.side-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.side === side);
+  });
+}
+
+function setSpeed(spd) {
+  selectedSpeed = spd;
+  document.querySelectorAll('.speed-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.spd === spd);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  START BATTLE
+// ══════════════════════════════════════════════════════════════
+async function startBattle() {
+  document.getElementById('setup-overlay').style.display = 'none';
+  document.getElementById('loading-overlay').classList.remove('gone');
+
+  // Resolve sides
+  let aIsWhite;
+  if (selectedSide === 'random') aIsWhite = Math.random() < 0.5;
+  else if (selectedSide === 'a')  aIsWhite = true;
+  else                            aIsWhite = false;
+
+  whiteBot = aIsWhite ? botA : botB;
+  blackBot = aIsWhite ? botB : botA;
+
+  // Load profiles
+  setLoadMsg(`Loading ${whiteBot.name} style…`);
+  whiteProfile = await loadProfile(whiteBot);
+  setLoadMsg(`Loading ${blackBot.name} style…`);
+  blackProfile = await loadProfile(blackBot);
+
+  // Preload pieces for both bots
+  setLoadMsg('Loading piece art…');
+  await Promise.all([
+    preloadPiecesFor(whiteBot.id, whitePieces),
+    preloadPiecesFor(blackBot.id, blackPieces),
+  ]);
+  whiteTiles = { light: `images/${whiteBot.id}/wt.png`, dark: `images/${whiteBot.id}/bt.png` };
+  blackTiles = { light: `images/${blackBot.id}/wt.png`, dark: `images/${blackBot.id}/bt.png` };
+
+  // Start two Stockfish workers
+  setLoadMsg('Starting engines…');
+  sfWhite = sfBlack = null;
+  const [ww, bw] = await Promise.allSettled([spawnSF(), spawnSF()]);
+  sfWhite = ww.status === 'fulfilled' ? ww.value : null;
+  sfBlack = bw.status === 'fulfilled' ? bw.value : null;
+  if (sfWhite) applyProfileToWorker(sfWhite, whiteProfile);
+  if (sfBlack) applyProfileToWorker(sfBlack, blackProfile);
+
+  // Init game
+  chess      = new Chess();
+  lastMove   = null;
+  paused     = false;
+  gameActive = true;
+
+  setupStrips();
+  computeSqSize();
+  buildBoard();
+  renderBoard();
+  updateHistory();
+  updateCaptured();
+
+  document.getElementById('loading-overlay').classList.add('gone');
+  document.getElementById('game-wrap').classList.add('visible');
+  document.getElementById('result-banner').classList.remove('show');
+
+  updateStatus(`${whiteBot.name} (White) to move`, 'thinking');
+  scheduleMove();
+}
+
+async function loadProfile(bot) {
+  if (bot.lichessGame && bot.cloneSide) {
+    try {
+      const pgn = await fetchLichessPgn(bot.lichessGame);
+      return buildProfile(pgn, bot.cloneSide, bot);
+    } catch(_) {}
+  }
+  return profileFromRating(bot.rating);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PRELOAD
+// ══════════════════════════════════════════════════════════════
+function preloadPiecesFor(botId, store) {
+  const folder = `images/${botId}/`;
+  return Promise.all(PIECE_KEYS.map(key => new Promise(res => {
+    const img = new Image();
+    img.onload  = () => { store[key] = img; res(); };
+    img.onerror = () => { store[key] = null; res(); };
+    img.src = `${folder}${key}.png`;
+  })));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STOCKFISH — two independent workers
+// ══════════════════════════════════════════════════════════════
+const SF_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js',
+  'https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js',
+];
+
+function spawnWorkerFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    let w;
+    try { w = new Worker(url); } catch(e) { return reject(e); }
+    const t = setTimeout(() => { w.terminate(); reject(new Error('timeout')); }, 10000);
+    w.onmessage = e => {
+      if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
+        clearTimeout(t); resolve(w);
+      }
+    };
+    w.onerror = e => { clearTimeout(t); w.terminate(); reject(e); };
+    w.postMessage('uci');
+  });
+}
+
+async function spawnBlobWorker(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const src  = await r.text();
+  const blob = new Blob([src], { type: 'application/javascript' });
+  return spawnWorkerFromUrl(URL.createObjectURL(blob));
+}
+
+async function spawnSF() {
+  for (const url of SF_URLS) {
+    try { return await spawnWorkerFromUrl(url); } catch(_) {}
+  }
+  for (const url of SF_URLS) {
+    try { return await spawnBlobWorker(url); } catch(_) {}
+  }
+  throw new Error('Stockfish unavailable');
+}
+
+function applyProfileToWorker(worker, p) {
+  worker.postMessage('ucinewgame');
+  worker.postMessage(`setoption name Skill Level value ${p.skillLevel}`);
+  worker.postMessage(`setoption name UCI_LimitStrength value true`);
+  worker.postMessage(`setoption name UCI_Elo value ${p.ratingElo}`);
+  worker.postMessage(`setoption name MultiPV value 5`);
+  worker.postMessage('isready');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BOARD SIZING & BUILD
+// ══════════════════════════════════════════════════════════════
+function computeSqSize() {
+  const maxW = Math.min(window.innerWidth - 32, 520);
+  const maxH = window.innerHeight - 180;
+  sqSize = Math.floor(Math.min(maxW, maxH) / 8);
+  const total = sqSize * 8;
+  const outer = document.getElementById('board-outer');
+  outer.style.width  = total + 'px';
+  outer.style.height = total + 'px';
+  const board = document.getElementById('board');
+  board.style.width  = total + 'px';
+  board.style.height = total + 'px';
+}
+window.addEventListener('resize', () => {
+  if (chess) { computeSqSize(); buildBoard(); renderBoard(); }
+});
+
+// Which half of the board (from top = row 0..7) belongs to which bot?
+// Rows 0-3 (ranks 8-5) = black bot's territory → blackTiles
+// Rows 4-7 (ranks 4-1) = white bot's territory → whiteTiles
+function tileForRow(row, isLight) {
+  // row 0 = top of board (rank 8), row 7 = bottom (rank 1)
+  const tiles = row < 4 ? blackTiles : whiteTiles;
+  return isLight ? tiles.light : tiles.dark;
+}
+
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const file = FILES[col];
+      const rank = 8 - row;
+      const sq   = file + rank;
+      const isLight = (col + row) % 2 === 0;
+
+      const div = document.createElement('div');
+      div.className = 'sq';
+      div.id        = 'sq-' + sq;
+      div.style.width  = sqSize + 'px';
+      div.style.height = sqSize + 'px';
+      div.style.backgroundImage = `url('${tileForRow(row, isLight)}')`;
+      div.style.backgroundSize  = 'cover';
+      div.classList.add(isLight ? 'light-fallback' : 'dark-fallback');
+
+      if (col === 0) {
+        const r = document.createElement('span');
+        r.className = 'coord coord-rank';
+        r.textContent = rank;
+        div.appendChild(r);
+      }
+      if (row === 7) {
+        const f = document.createElement('span');
+        f.className = 'coord coord-file';
+        f.textContent = file;
+        div.appendChild(f);
+      }
+
+      board.appendChild(div);
+    }
+  }
+
+  // Reposition the split line
+  const line = document.getElementById('split-line');
+  line.style.top = (sqSize * 4) + 'px';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER BOARD
+// The key innovation: each piece is rendered using ITS OWN BOT'S
+// piece images, regardless of which square it's on.
+// Piece owner = chess piece color (white pieces always use whiteBot's
+// images, black pieces always use blackBot's images).
+// ══════════════════════════════════════════════════════════════
+function renderBoard() {
+  const inCheck = chess.in_check();
+  const kingSq  = inCheck ? findKing(chess.turn()) : null;
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const file = FILES[col];
+      const rank = 8 - row;
+      const sq   = file + rank;
+      const div  = document.getElementById('sq-' + sq);
+      if (!div) continue;
+
+      div.classList.remove('hl-last','hl-check');
+      [...div.querySelectorAll('.piece-img, .owner-dot')].forEach(el => el.remove());
+
+      if (sq === lastMove?.from || sq === lastMove?.to) div.classList.add('hl-last');
+      if (sq === kingSq) div.classList.add('hl-check');
+
+      const piece = chess.get(sq);
+      if (piece) {
+        // Use the owning bot's piece image store
+        const store = piece.color === 'w' ? whitePieces : blackPieces;
+        const key   = piece.color + piece.type;
+        const img   = document.createElement('img');
+        img.className = 'piece-img';
+        img.alt = key;
+        if (store[key]) {
+          img.src = store[key].src;
+        } else {
+          // Unicode fallback
+          img.style.display = 'none';
+          const fb = document.createElement('span');
+          fb.style.cssText = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:${sqSize * 0.7}px;pointer-events:none;z-index:2;`;
+          fb.textContent = UNI[key] || '?';
+          div.appendChild(fb);
+        }
+        div.appendChild(img);
+      }
+    }
+  }
+}
+
+function findKing(color) {
+  for (const f of FILES) for (let r = 1; r <= 8; r++) {
+    const sq = f + r, p = chess.get(sq);
+    if (p && p.type === 'k' && p.color === color) return sq;
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PLAYER STRIPS
+// ══════════════════════════════════════════════════════════════
+function setupStrips() {
+  // Board is always shown from white's perspective (white at bottom)
+  // Top strip = black bot, bottom strip = white bot
+  document.getElementById('name-top').textContent = blackBot.name + ' (Black)';
+  document.getElementById('name-bot').textContent = whiteBot.name + ' (White)';
+  document.getElementById('dot-top').className = 'ps-dot black-dot';
+  document.getElementById('dot-bot').className = 'ps-dot white-dot';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MOVE SCHEDULING
+// ══════════════════════════════════════════════════════════════
+function scheduleMove() {
+  if (!gameActive || paused || chess.game_over()) return;
+
+  const speed   = SPEED_PRESETS[selectedSpeed];
+  const turn    = chess.turn();                // 'w' | 'b'
+  const profile = turn === 'w' ? whiteProfile : blackProfile;
+  const worker  = turn === 'w' ? sfWhite : sfBlack;
+
+  // Show thinking indicator
+  const topInd = document.getElementById('think-top');
+  const botInd = document.getElementById('think-bot');
+  topInd.classList.toggle('active', turn === 'b');
+  botInd.classList.toggle('active', turn === 'w');
+
+  const thinkMin = speed.thinkMin;
+  const thinkMax = speed.thinkMax;
+  const depth    = speed.depth;
+
+  if (worker) {
+    getBotMoveFromSF(worker, profile, depth, (move) => {
+      const delay = thinkMin + Math.random() * (thinkMax - thinkMin);
+      moveTimer = setTimeout(() => applyMove(move), delay);
+    });
+  } else {
+    // No engine — random move
+    const delay = thinkMin + Math.random() * (thinkMax - thinkMin);
+    moveTimer = setTimeout(() => {
+      const moves = chess.moves({ verbose: true });
+      if (moves.length) applyMove(moves[Math.floor(Math.random() * moves.length)]);
+    }, delay);
+  }
+}
+
+function getBotMoveFromSF(worker, profile, depth, callback) {
+  const fen = chess.fen();
+  const legalMvs = chess.moves({ verbose: true });
+  const candidates = [];
+
+  const handler = e => {
+    const line = e.data;
+    if (typeof line !== 'string') return;
+    const pvMatch = line.match(/multipv (\d+).*?score cp (-?\d+).*? pv (\S+)/);
+    if (pvMatch) {
+      const idx   = parseInt(pvMatch[1]) - 1;
+      const score = parseInt(pvMatch[2]);
+      const uci   = pvMatch[3];
+      candidates[idx] = { uci, score };
+    }
+    if (line.startsWith('bestmove')) {
+      worker.removeEventListener('message', handler);
+      const best = line.split(' ')[1];
+      const finalCandidates = candidates.filter(Boolean);
+      if (!finalCandidates.length) finalCandidates.push({ uci: best, score: 0 });
+      const move = pickStyleMove(legalMvs, finalCandidates, profile);
+      callback(move);
+    }
+  };
+
+  worker.addEventListener('message', handler);
+  worker.postMessage(`position fen ${fen}`);
+  worker.postMessage(`go depth ${depth}`);
+}
+
+function pickStyleMove(legalMvs, candidates, profile) {
+  const scored = candidates.map(c => {
+    const from = c.uci.slice(0,2), to = c.uci.slice(2,4);
+    const mv = legalMvs.find(m => m.from === from && m.to === to);
+    if (!mv) return null;
+    let bias = 0;
+    const isCapture  = mv.flags.includes('c') || mv.flags.includes('e');
+    const isCheck    = mv.san && (mv.san.includes('+') || mv.san.includes('#'));
+    const isCastle   = mv.flags.includes('k') || mv.flags.includes('q');
+    const toFile     = to[0];
+    const isKingside  = ['f','g','h'].includes(toFile);
+    const isQueenside = ['a','b','c'].includes(toFile);
+    if (isCapture) bias += profile.aggression * 0.4;
+    if (isCheck)   bias += profile.tactical   * 0.5;
+    if (isCastle && !profile.castledEarly) bias += profile.positional * 0.3;
+    if (!isCapture && mv.piece !== 'p') bias += profile.positional * 0.15;
+    if (isKingside  && profile.prefersKingside)  bias += 8;
+    if (isQueenside && !profile.prefersKingside) bias += 8;
+    if (mv.piece === 'k' && !isCastle) bias -= profile.defensive * 0.4;
+    const engineWeight = 1 - (profile.aggression / 200);
+    return { mv, total: c.score * engineWeight + bias * 10 };
+  }).filter(Boolean);
+
+  if (scored.length) {
+    scored.sort((a,b) => b.total - a.total);
+    // bot rating influences sloppiness
+    const bot = chess.turn() === 'w' ? whiteBot : blackBot;
+    const sloppiness = Math.max(0, (400-(bot.rating||200))/400);
+    const idx = Math.random() < sloppiness * 0.6
+      ? Math.floor(Math.random() * Math.min(scored.length, 3)) : 0;
+    return scored[idx].mv;
+  }
+  return legalMvs[Math.floor(Math.random() * legalMvs.length)];
+}
+
+// ══════════════════════════════════════════════════════════════
+//  APPLY MOVE
+// ══════════════════════════════════════════════════════════════
+function applyMove(move) {
+  if (!gameActive || chess.game_over()) return;
+
+  const result = chess.move({ from: move.from, to: move.to, promotion: move.promotion || 'q' });
+  if (!result) {
+    const fallback = chess.moves({ verbose: true })[0];
+    if (!fallback) return;
+    chess.move({ from: fallback.from, to: fallback.to, promotion: 'q' });
+    lastMove = { from: fallback.from, to: fallback.to };
+  } else {
+    lastMove = { from: move.from, to: move.to };
+  }
+
+  renderBoard();
+  updateHistory();
+  updateCaptured();
+
+  if (chess.game_over()) { handleGameOver(); return; }
+
+  const next = chess.turn() === 'w' ? whiteBot : blackBot;
+  updateStatus(`${next.name} is thinking…`, 'thinking');
+  scheduleMove();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  GAME OVER
+// ══════════════════════════════════════════════════════════════
+function handleGameOver() {
+  gameActive = false;
+  document.getElementById('think-top').classList.remove('active');
+  document.getElementById('think-bot').classList.remove('active');
+
+  let title, subtitle, trophy = '🏆';
+  if (chess.in_checkmate()) {
+    const winner = chess.turn() === 'w' ? blackBot : whiteBot;
+    const loser  = chess.turn() === 'w' ? whiteBot : blackBot;
+    title    = `${winner.name} wins!`;
+    subtitle = `${loser.name} was checkmated`;
+    trophy   = '🏆';
+  } else if (chess.in_stalemate()) {
+    title = 'Stalemate'; subtitle = 'The game is a draw'; trophy = '🤝';
+  } else if (chess.in_draw()) {
+    title = 'Draw'; subtitle = chess.in_threefold_repetition() ? 'Threefold repetition' : '50-move rule or insufficient material'; trophy = '🤝';
+  } else {
+    title = 'Game over'; subtitle = ''; trophy = '♟';
+  }
+
+  updateStatus(title, 'result');
+  document.getElementById('result-trophy').textContent   = trophy;
+  document.getElementById('result-title').textContent    = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+  document.getElementById('result-banner').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CONTROLS
+// ══════════════════════════════════════════════════════════════
+function pauseResume() {
+  if (!gameActive) return;
+  paused = !paused;
+  document.getElementById('btn-pause').textContent = paused ? '▶ Resume' : '⏸ Pause';
+  if (!paused) scheduleMove();
+  else if (moveTimer) { clearTimeout(moveTimer); moveTimer = null; }
+}
+
+function rematch() {
+  document.getElementById('result-banner').classList.remove('show');
+  // Swap sides
+  [whiteBot, blackBot] = [blackBot, whiteBot];
+  [whiteProfile, blackProfile] = [blackProfile, whiteProfile];
+  [whitePieces, blackPieces]   = [blackPieces, whitePieces];
+  [whiteTiles, blackTiles]     = [blackTiles, whiteTiles];
+  [sfWhite, sfBlack]           = [sfBlack, sfWhite];
+  if (sfWhite) applyProfileToWorker(sfWhite, whiteProfile);
+  if (sfBlack) applyProfileToWorker(sfBlack, blackProfile);
+
+  chess    = new Chess();
+  lastMove = null;
+  paused   = false;
+  gameActive = true;
+  document.getElementById('btn-pause').textContent = '⏸ Pause';
+
+  setupStrips();
+  buildBoard();
+  renderBoard();
+  updateHistory();
+  updateCaptured();
+  updateStatus(`${whiteBot.name} (White) to move`, 'thinking');
+  scheduleMove();
+}
+
+function goToSetup() {
+  gameActive = false;
+  if (moveTimer) { clearTimeout(moveTimer); moveTimer = null; }
+  document.getElementById('result-banner').classList.remove('show');
+  document.getElementById('game-wrap').classList.remove('visible');
+  document.getElementById('setup-overlay').style.display = 'flex';
+  // Reset bot selections
+  botA = botB = null;
+  updateStartBtn();
+  ['white-grid','black-grid'].forEach(id => {
+    document.querySelectorAll(`#${id} .bot-select-card`).forEach(c => {
+      c.classList.remove('selected-white','selected-black');
+      const b = c.querySelector('.bsc-badge');
+      if (b) b.remove();
+    });
+  });
+}
+
+function backToMenu() { location.href = 'index.html'; }
+
+// ══════════════════════════════════════════════════════════════
+//  STATUS, HISTORY, CAPTURED
+// ══════════════════════════════════════════════════════════════
+function updateStatus(msg, cls='') {
+  const el = document.getElementById('status-text');
+  el.textContent = msg; el.className = cls;
+}
+
+function updateHistory() {
+  const h  = chess.history();
+  const el = document.getElementById('history-list');
+  el.innerHTML = '';
+  for (let i = 0; i < h.length; i += 2) {
+    const row = document.createElement('div');
+    row.className = 'hist-row';
+    row.innerHTML = `<span class="hist-num">${i/2+1}.</span><span class="hist-w">${h[i]||''}</span><span class="hist-b">${h[i+1]||''}</span>`;
+    el.appendChild(row);
+  }
+  el.scrollTop = el.scrollHeight;
+}
+
+function updateCaptured() {
+  const onBoard = { w:{p:0,n:0,b:0,r:0,q:0,k:0}, b:{p:0,n:0,b:0,r:0,q:0,k:0} };
+  const start   = { p:8, n:2, b:2, r:2, q:1, k:1 };
+  for (const f of FILES) for (let r = 1; r <= 8; r++) {
+    const p = chess.get(f+r);
+    if (p) onBoard[p.color][p.type]++;
+  }
+  let wScore=0, bScore=0;
+  const wCap=[], bCap=[];
+  for (const t of ['p','n','b','r','q']) {
+    const wLost = start[t] - onBoard.w[t];
+    const bLost = start[t] - onBoard.b[t];
+    for (let i=0;i<wLost;i++) { bCap.push(UNI['w'+t]); bScore += PIECE_VALUES[t]; }
+    for (let i=0;i<bLost;i++) { wCap.push(UNI['b'+t]); wScore += PIECE_VALUES[t]; }
+  }
+  // Top = black bot, bottom = white bot
+  document.getElementById('cap-top').textContent   = wCap.join('');  // black captured white's pieces
+  document.getElementById('cap-bot').textContent   = bCap.join('');  // white captured black's pieces
+  const delta = wScore - bScore;
+  document.getElementById('score-top').textContent = wScore > bScore ? `+${delta}` : '';
+  document.getElementById('score-bot').textContent = bScore > wScore ? `+${-delta}` : '';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LICHESS + PROFILE (same logic as play.html)
+// ══════════════════════════════════════════════════════════════
+async function fetchLichessPgn(gameId) {
+  const r = await fetch(
+    `https://lichess.org/game/export/${gameId}?moves=true&opening=true&clocks=false`,
+    { headers: { Accept: 'application/x-chess-pgn' } }
+  );
+  if (!r.ok) throw new Error(`Lichess ${r.status}`);
+  return r.text();
+}
+
+function buildProfile(pgn, side, bot) {
+  let movesSection = pgn.replace(/\[.*?\]\s*/gs, '').trim();
+  movesSection = movesSection.replace(/\{[^}]*\}/g, '').replace(/\d+\./g, '')
+                             .replace(/1-0|0-1|1\/2-1\/2|\*/g, '').trim();
+  const all   = movesSection.split(/\s+/).filter(m => m && !/^\d/.test(m));
+  const moves = all.filter((_, i) => side === 'white' ? i % 2 === 0 : i % 2 === 1);
+  const n     = moves.length || 1;
+  const totalPly = all.length;
+  let captures=0,earlyCaptures=0,checks=0,ksAct=0,qsAct=0;
+  let pawnMoves=0,pieceMoves=0,castledEarly=false,sacrificeSigns=0,earlyQueenMove=false;
+  moves.forEach((mv, i) => {
+    if (!mv) return;
+    const cap = mv.includes('x'), chk = mv.includes('+') || mv.includes('#');
+    const file = mv.replace(/[^a-h]/g,'')[0];
+    if (cap) captures++;
+    if (cap && i < 20) earlyCaptures++;
+    if (chk) checks++;
+    if (/^[a-h]/.test(mv)) pawnMoves++;
+    if (/^[NBRQK]/.test(mv) && !cap) pieceMoves++;
+    if (mv === 'O-O' || mv === 'O-O-O') { if (i < 12) castledEarly = true; }
+    if (mv.startsWith('Q') && i < 6) earlyQueenMove = true;
+    if (file && ['f','g','h'].includes(file)) ksAct++;
+    if (file && ['a','b','c'].includes(file)) qsAct++;
+    if (/^[NBRQ]x/.test(mv) && i < 15) sacrificeSigns++;
+  });
+  const clamp = v => Math.round(Math.max(0,Math.min(100,v)));
+  const aggression = clamp((earlyCaptures/n)*120+(checks/n)*60+(earlyQueenMove?15:0)+(sacrificeSigns/n)*40);
+  const positional = clamp((pieceMoves/n)*30+(castledEarly?25:0)+(totalPly>80?20:0)+(pawnMoves/n)*20);
+  const tactical   = clamp((captures/n)*40+(checks/n)*50+(sacrificeSigns/n)*50+aggression*0.2);
+  const defensive  = clamp((castledEarly?30:0)+(totalPly>80?25:0)+(1-aggression/100)*45);
+  const prefersKingside = ksAct >= qsAct;
+  const ratingStrength = (400-(bot.rating||200))/400;
+  const styleStrength  = (positional*0.5+(100-aggression)*0.3+defensive*0.2)/100;
+  const blended = ratingStrength*0.6+styleStrength*0.4;
+  const ratingElo  = 600+Math.round(blended*2200);
+  const skillLevel = Math.round(blended*20);
+  return { aggression, positional, tactical, defensive, prefersKingside,
+           skillLevel, ratingElo, castledEarly };
+}
+
+function profileFromRating(rating) {
+  const strength   = (400-(rating||200))/400;
+  const skillLevel = Math.round(strength*20);
+  const ratingElo  = 600+Math.round(strength*2200);
+  const aggression = Math.round((1-strength)*70+10);
+  const positional = Math.round(strength*80);
+  const tactical   = Math.round(strength*60+20);
+  const defensive  = Math.round(strength*50+20);
+  return { aggression, positional, tactical, defensive, prefersKingside: true,
+           skillLevel, ratingElo, castledEarly: strength > 0.5 };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════
+function setLoadMsg(msg) { document.getElementById('loading-msg').textContent = msg; }
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
