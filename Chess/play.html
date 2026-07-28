@@ -2649,21 +2649,29 @@ function buildProfile(pgn, side) {
   const defensive   = clamp((castledEarly?30:0) + (totalPly>80?25:0) + (1 - aggression/100)*45);
   const prefersKingside = ksAct >= qsAct;
 
-  // Map to Stockfish params
-  // Rating 0-400: lower = stronger. Convert to UCI_Elo 600-2800
-  const ratingElo   = 600 + Math.round(((400 - (bot.rating||200)) / 400) * 2200);
-  // Skill 0-20: lower rating = higher skill
-  const skillLevel  = Math.round(((400 - (bot.rating||200)) / 400) * 20);
-  // Search depth: positional bots think deeper, aggressive bots play faster
-  const depth       = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
-  // MultiPV: how many candidate moves Stockfish returns for us to style-filter
-  const multiPV     = 5;
-  // Think time variance (ms): aggressive = fast, positional = slow
-  const thinkMin    = aggression > 60 ? 300  : 600;
-  const thinkMax    = aggression > 60 ? 900  : 2000;
+  // Derive engine strength from bot.rating (0–400 scale, lower = stronger),
+  // then blend with positional score from the PGN so the analysed game actually
+  // influences how well the engine plays — not just how it *picks* moves.
+  const ratingStrength = (400 - (bot.rating || 200)) / 400;          // 0=weakest,1=strongest
+  const styleStrength  = (positional * 0.5 + (100 - aggression) * 0.3 + defensive * 0.2) / 100;
+  const blended        = ratingStrength * 0.6 + styleStrength * 0.4;  // rating anchors, style modulates
+
+  // UCI_Elo range 600–2800
+  const ratingElo  = 600 + Math.round(blended * 2200);
+  // Skill Level range 0–20
+  const skillLevel = Math.round(blended * 20);
+
+  // Search depth: positional bots think deeper, aggressive bots play fast
+  const depth    = aggression > 60 ? 8 : aggression > 40 ? 12 : 16;
+  const multiPV  = 5;
+
+  // Think time (ms): positional = slow, aggressive = snappy
+  const thinkMin = aggression > 60 ? 300  : 600;
+  const thinkMax = aggression > 60 ? 900  : 2000;
 
   return { aggression, positional, tactical, defensive, prefersKingside,
-           skillLevel, ratingElo, depth, multiPV, thinkMin, thinkMax, castledEarly };
+           skillLevel, ratingElo, depth, multiPV, thinkMin, thinkMax, castledEarly,
+           _source: 'lichess-pgn' };  // tag so we can tell which path was used
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2690,50 +2698,60 @@ function profileFromRating(rating) {
 // ══════════════════════════════════════════════════════════════
 //  STOCKFISH
 // ══════════════════════════════════════════════════════════════
-function initStockfish() {
-  // Candidate worker URLs — tried in order until one works.
-  // We avoid blob+importScripts because blob workers cannot load
-  // cross-origin scripts via importScripts in most browsers/CSPs.
-  const WORKER_URLS = [
-    'https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16.js',
-    'https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js',
-    'https://unpkg.com/stockfish@16.0.0/src/stockfish-nnue-16.js',
-    'https://unpkg.com/stockfish@16.0.0/src/stockfish.js',
-  ];
 
-  function tryUrl(urls) {
-    if (urls.length === 0) return Promise.reject(new Error('All Stockfish URLs failed'));
-    const [url, ...rest] = urls;
-    return new Promise((resolve, reject) => {
-      let worker;
-      try {
-        worker = new Worker(url);
-      } catch(e) {
-        return tryUrl(rest).then(resolve, reject);
-      }
+// Fetch Stockfish JS source from one of several CDN candidates,
+// then wrap it in a blob worker so no importScripts is needed
+// (importScripts fails for cross-origin scripts in blob workers).
+const SF_CANDIDATES = [
+  'https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish.js',
+  'https://unpkg.com/stockfish@16.0.0/src/stockfish.js',
+  'https://cdn.jsdelivr.net/npm/stockfish@10.0.0/stockfish.js',
+  'https://unpkg.com/stockfish@10.0.0/stockfish.js',
+];
 
-      const timer = setTimeout(() => {
-        worker.terminate();
-        tryUrl(rest).then(resolve, reject);
-      }, 12000);
-
-      worker.onmessage = e => {
-        if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
-          clearTimeout(timer);
-          sfWorker = worker;
-          resolve();
-        }
-      };
-      worker.onerror = () => {
-        clearTimeout(timer);
-        worker.terminate();
-        tryUrl(rest).then(resolve, reject);
-      };
-      worker.postMessage('uci');
-    });
+async function fetchStockfishSrc() {
+  for (const url of SF_CANDIDATES) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) continue;
+      const text = await r.text();
+      if (text.length > 1000) return text; // sanity check
+    } catch(_) { /* try next */ }
   }
+  throw new Error('All Stockfish URLs failed');
+}
 
-  return tryUrl(WORKER_URLS);
+async function initStockfish() {
+  const sfSrc = await fetchStockfishSrc();
+
+  // The fetched source exposes a global `Stockfish` factory.
+  // We wrap it so the worker acts as a simple UCI bridge.
+  const workerSrc = sfSrc + `
+;(function(){
+  var sf = (typeof Stockfish === 'function') ? Stockfish() : STOCKFISH();
+  sf.onmessage = function(line){ postMessage(line); };
+  onmessage     = function(e)  { sf.postMessage(e.data); };
+})();
+`;
+  const blob = new Blob([workerSrc], { type: 'application/javascript' });
+  const worker = new Worker(URL.createObjectURL(blob));
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      worker.terminate();
+      reject(new Error('Stockfish worker timeout'));
+    }, 15000);
+
+    worker.onmessage = e => {
+      if (typeof e.data === 'string' && e.data.includes('Stockfish')) {
+        clearTimeout(timer);
+        sfWorker = worker;
+        resolve();
+      }
+    };
+    worker.onerror = e => { clearTimeout(timer); worker.terminate(); reject(e); };
+    worker.postMessage('uci');
+  });
 }
 
 function applyProfile(p) {
