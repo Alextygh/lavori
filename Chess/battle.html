@@ -2028,18 +2028,6 @@ return exports.Chess;
       position: relative;
     }
 
-    /* The split line in the middle of the board */
-    #split-line {
-      position: absolute;
-      left: 0; right: 0;
-      top: 50%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(230,201,122,0.6), transparent);
-      pointer-events: none;
-      z-index: 10;
-      transform: translateY(-1px);
-    }
-
     .sq {
       position: relative;
       background-size: cover;
@@ -2305,7 +2293,6 @@ return exports.Chess;
 
     <div id="board-outer">
       <div id="board"></div>
-      <div id="split-line"></div>
     </div>
 
     <!-- Bottom player -->
@@ -2701,10 +2688,6 @@ function buildBoard() {
     bottomRow.appendChild(span);
   }
   outer.appendChild(bottomRow);
-
-  // Reposition the split line
-  const line = document.getElementById('split-line');
-  line.style.top = (sqSize * 4) + 'px';
 }
 
 // ══════════════════════════════════════════════════════════════
