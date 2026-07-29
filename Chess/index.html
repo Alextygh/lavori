@@ -275,40 +275,6 @@
       line-height: 1.2;
     }
 
-    /* Difficulty bar — Lichess style: lower rating = harder = bar more empty */
-    .difficulty-row {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .difficulty-labels {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-    .difficulty-rating {
-      font-size: 13px;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      color: var(--text);
-    }
-    .difficulty-tag {
-      font-size: 11px;
-      color: var(--muted);
-    }
-    .difficulty-track {
-      height: 4px;
-      background: var(--surface2);
-      border-radius: 2px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .difficulty-fill {
-      height: 100%;
-      border-radius: 2px;
-      /* Width is computed in JS: higher rating = more fill (easier) */
-    }
-
     .card-desc {
       font-size: 13px;
       color: var(--muted);
@@ -436,45 +402,12 @@
     // ── Config ──────────────────────────────────────────────────────────────
     const BOTS_JSON = 'bots.json';
 
-    // Rating range for the difficulty bar (Lichess-style: 0 = strongest)
-    const MIN_RATING = 0;
-    const MAX_RATING = 200;
-
     // ── State ────────────────────────────────────────────────────────────────
     let allBots      = [];
     let activeFilter = 'All';
 
-    // ── Difficulty helpers ───────────────────────────────────────────────────
-    function difficultyFill(rating) {
-      // Lower rating = stronger = less bar fill (closer to 0 = hardest)
-      return Math.round(((MAX_RATING - rating) / (MAX_RATING - MIN_RATING)) * 100);
-    }
-
-    function difficultyColor(rating) {
-      if (rating >= 300) return '#3fb950'; // green  = easy
-      if (rating >= 200) return '#d2991a'; // yellow = medium
-      if (rating >= 100) return '#f85149'; // red    = hard
-      return '#bc64ff';                    // purple = expert (near 0)
-    }
-
-    function difficultyLabel(rating) {
-      if (rating >= 300) return 'Easy';
-      if (rating >= 200) return 'Medium';
-      if (rating >= 100) return 'Hard';
-      return 'Expert';
-    }
-
-    function formatRating(rating) {
-      // Lichess-style: space-separated thousands e.g. "2 150"
-      return rating.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
-    }
-
     // ── Card builder ─────────────────────────────────────────────────────────
     function buildCard(bot) {
-      const fill  = difficultyFill(bot.rating);
-      const color = difficultyColor(bot.rating);
-      const label = difficultyLabel(bot.rating);
-
       const card = document.createElement('a');
       card.className   = 'bot-card';
       card.href        = `play.html?bot=${encodeURIComponent(bot.id)}`;
@@ -494,15 +427,6 @@
         </div>
         <div class="card-body">
           <div class="card-name">${escHtml(bot.name)}</div>
-          <div class="difficulty-row">
-            <div class="difficulty-labels">
-              <span class="difficulty-rating">${formatRating(bot.rating)}</span>
-              <span class="difficulty-tag">${label}</span>
-            </div>
-            <div class="difficulty-track">
-              <div class="difficulty-fill" style="width:${fill}%;background:${color}"></div>
-            </div>
-          </div>
           <p class="card-desc">${escHtml(bot.description)}</p>
           <span class="card-cta">Play &rarr;</span>
         </div>
