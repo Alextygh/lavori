@@ -45,7 +45,9 @@
     "category": "Console",
     "rating": 41,
     "description": "Sega decided to not develop any more games and let Chessmaster do the work, though they nerfed him a little, probably because of the fact that you needed internet to get this game in the first place.",
-    "image": "images/chessmastergenesis/image.jpg"
+    "image": "images/chessmastergenesis/image.jpg",
+    "lichessGame": "iO5kYIVx",
+    "cloneSide": "black"
   },
   {
     "id": "chessmastersnes",
@@ -53,7 +55,9 @@
     "category": "Console",
     "rating": 26,
     "description": "You wouldn't believe it! Another Chessmaster, third and last time, also this is the strongest of them all.",
-    "image": "images/chessmastersnes/image.jpg"
+    "image": "images/chessmastersnes/image.jpg",
+    "lichessGame": "WKnFrOwY",
+    "cloneSide": "black"
   },
   {
     "id": "sargonchess",
@@ -61,7 +65,9 @@
     "category": "Console",
     "rating": 31,
     "description": "In my opinion the coolest one, even for the fact that Sargon commented on the game, the only downside is that the console itself was $799",
-    "image": "images/sargonchess/image.jpg"
+    "image": "images/sargonchess/image.jpg",
+    "lichessGame": "LXjc4cMj",
+    "cloneSide": "black"
   },
   {
     "id": "chess.com",
@@ -79,7 +85,9 @@
     "category": "Website",
     "rating": 4,
     "description": "You probably never heard of it but surprisingly enough it's the strongest bot.",
-    "image": "images/chessbase.com/image.jpg"
+    "image": "images/chessbase.com/image.jpg",
+    "lichessGame": "wh253RWo",
+    "cloneSide": "black"
   },
   {
     "id": "shredderchess.com",
@@ -87,7 +95,9 @@
     "category": "Website",
     "rating": 27,
     "description": "Built in 1993, it has beaten many computer competitions.",
-    "image": "images/shredderchess.com/image.jpg"
+    "image": "images/shredderchess.com/image.jpg",
+    "lichessGame": "b1u5FTJC",
+    "cloneSide": "black"
   },
   {
     "id": "cardgames.io",
@@ -95,14 +105,17 @@
     "category": "Website",
     "rating": 34,
     "description": "Even though it is a card games based website, it has a chess engine, it's pretty good.",
-    "image": "images/cardgames.io/image.jpg"
+    "image": "images/cardgames.io/image.jpg",
+    "lichessGame": "g2TGEC9m",
+    "cloneSide": "white"
   },
   {
     "id": "me",
     "name": "Myself",
-    "category": "",
     "rating": 63,
     "description": "I suck at this game, you can probably beat me easily",
-    "image": "images/me/image.jpg"
+    "image": "images/me/image.jpg",
+    "lichessGame": "FUBD8Dlj",
+    "cloneSide": "black"
   }
 ]
