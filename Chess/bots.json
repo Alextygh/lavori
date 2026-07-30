@@ -9,6 +9,15 @@
     "cloneSide": "black"
   },
   {
+    "id": "sargon",
+    "name": "Sargon",
+    "category": "Prehistoric",
+    "description": "The first version of Sargon, and one of the coolest design.",
+    "image": "images/sargon/image.jpg",
+    "lichessGame": "lB5BTkk1",
+    "cloneSide": "black"
+  },
+  {
     "id": "videochess",
     "name": "Video Chess (Atari 2600)",
     "category": "Console",
