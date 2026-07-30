@@ -2040,6 +2040,15 @@ return exports.Chess;
       display: block; position: absolute; inset: 0;
       pointer-events: none; object-fit: contain; padding: 4%;
     }
+    /* Aura for pieces in enemy territory — drop-shadow follows the piece shape */
+    .sq img.piece-img.aura-white {
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.95))
+              drop-shadow(0 0 6px rgba(255,255,255,0.6));
+    }
+    .sq img.piece-img.aura-black {
+      filter: drop-shadow(0 0 3px rgba(30,30,30,0.95))
+              drop-shadow(0 0 6px rgba(80,80,80,0.7));
+    }
     /* Piece owner badge — tiny colored dot on piece */
     .sq .owner-dot {
       position: absolute;
@@ -2720,8 +2729,15 @@ function renderBoard() {
         // Use the owning bot's piece image store
         const store = piece.color === 'w' ? whitePieces : blackPieces;
         const key   = piece.color + piece.type;
-        const img   = document.createElement('img');
+
+        // Is this piece in the opponent's half of the board?
+        // row 0-3 = black's territory (top), row 4-7 = white's territory (bottom)
+        const inEnemyHalf = (piece.color === 'w' && row < 4) ||
+                            (piece.color === 'b' && row >= 4);
+
+        const img = document.createElement('img');
         img.className = 'piece-img';
+        if (inEnemyHalf) img.classList.add(piece.color === 'w' ? 'aura-white' : 'aura-black');
         img.alt = key;
         if (store[key]) {
           img.src = store[key].src;
