@@ -18,6 +18,15 @@
     "cloneSide": "black"
   },
   {
+    "id": "sargon2",
+    "name": "Sargon II",
+    "category": "Prehistoric",
+    "description": "Sargon, now version 2, but in roman numerals cause it looks cooler.",
+    "image": "images/sargon2/image.jpg",
+    "lichessGame": "i9eBh1Rm",
+    "cloneSide": "black"
+  },
+  {
     "id": "videochess",
     "name": "Video Chess (Atari 2600)",
     "category": "Console",
