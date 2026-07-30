@@ -125,9 +125,19 @@
     "lichessGame": "g2TGEC9m",
     "cloneSide": "white"
   },
+    {
+    "id": "stockfish",
+    "name": "Stockfish",
+    "category": "Misc",
+    "description": "Good luck to try and beat Mr. Chess itself.",
+    "image": "images/stockfish/image.jpg",
+    "lichessGame": "wh253RWo",
+    "cloneSide": "white"
+  },
   {
     "id": "me",
     "name": "Myself",
+    "category": "Misc",
     "description": "I suck at this game, you can probably beat me easily",
     "image": "images/me/image.jpg",
     "lichessGame": "FUBD8Dlj",
