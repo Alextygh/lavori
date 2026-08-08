@@ -399,9 +399,6 @@ async function dispatch(){
     map.fitBounds(L.latLngBounds(pts),{padding:[40,320]});
   }
 
-  // Clear the persistent "Searching…" toast
-  document.getElementById('toast').classList.remove('on');
-
   // Render cards
   res.innerHTML='';
   if(!cards.length){ res.innerHTML='<div class="no-result">No results found.</div>'; document.getElementById('dispatch-btn').disabled=false; return; }
@@ -418,6 +415,7 @@ async function dispatch(){
         <div class="rc-name">${c.closest.name}</div>
         <div class="rc-row"><span>Distance</span><span>${c.distKm.toFixed(2)} km</span></div>
         <div class="rc-row"><span>Est. travel time</span><span>~${c.durMin} min${c.fallback?' (est.)':''}</span></div>
+        <div class="rc-row"><span>Search radius</span><span>${c.searchKm} km</span></div>
         <div class="rc-focus" onclick="focusRoute(${i})">→ Focus on route</div>`;
     }
     res.appendChild(card);
@@ -429,13 +427,6 @@ async function dispatch(){
 
 function focusRoute(i){
   const c=window._cards?.[i]; if(!c||c.error)return;
-  // Show only this route's layers, hide the others
-  routeLayers.forEach((l,idx)=>{
-    // routeLayers are stored in pairs: [poly0, ring0, poly1, ring1, …]
-    // card i owns indices i*2 and i*2+1
-    if(idx===i*2||idx===i*2+1) map.addLayer(l);
-    else map.removeLayer(l);
-  });
   const pts=c.coords||[[incidentLatLng.lat,incidentLatLng.lng],[c.closest.lat,c.closest.lon]];
   map.fitBounds(L.latLngBounds(pts),{padding:[60,320]});
 }
