@@ -19,37 +19,31 @@
         --accent: #4b0082;
       }
 
-body {
-  /* Layering: image first, then the background color fallback */
-  background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=trueE');
-  background-color: var(--bg);
-  background-repeat: no-repeat;
-  /* Positions the image on the right side, centered vertically */
-  background-position: right 40px center; 
-  /* Controls the size so it doesn't bleed into the center */
-  background-size: 300px auto; 
-  background-attachment: fixed; /* Keeps the image in place while scrolling */
-  
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  color: var(--text-primary);
-  min-height: 100vh;
-  padding: 80px 24px 100px;
-  transition: background-color 1.4s ease;
-}
+      body {
+        background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=trueE');
+        background-color: var(--bg);
+        background-repeat: no-repeat;
+        background-position: right 40px center;
+        background-size: 300px auto;
+        background-attachment: fixed;
+        font-family: 'Inter', sans-serif;
+        font-weight: 400;
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 80px 24px 100px;
+        transition: background-color 1.4s ease;
+      }
 
-body.shiny {
-  --bg: #64ccf3;
-  --surface: rgba(255,255,255,0.45);
-  --border: rgba(255,255,255,0.5);
-  --border-hover: rgba(255,255,255,0.85);
-  --text-primary: #002f44;
-  --text-secondary: #1a6a8a;
-  --accent: #004e72;
-  
-  /* Changes the image to a "shiny" version if the 1/4096 easter egg triggers! */
-  background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=true');
-}
+      body.shiny {
+        --bg: #64ccf3;
+        --surface: rgba(255,255,255,0.45);
+        --border: rgba(255,255,255,0.5);
+        --border-hover: rgba(255,255,255,0.85);
+        --text-primary: #002f44;
+        --text-secondary: #1a6a8a;
+        --accent: #004e72;
+        background-image: url('https://github.com/Alextygh/lavori/blob/main/ditto-removebg.png?raw=true');
+      }
 
       .flash {
         position: fixed; inset: 0;
@@ -90,6 +84,49 @@ body.shiny {
         margin: 20px 0;
       }
 
+      /* ── Tab switcher ── */
+      .tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 24px;
+      }
+
+      .tab-btn {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        background: transparent;
+        border: 0.5px solid transparent;
+        border-radius: 6px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: color 0.15s, background 0.15s, border-color 0.15s;
+        opacity: 0.5;
+      }
+
+      .tab-btn:hover {
+        opacity: 0.8;
+      }
+
+      .tab-btn.active {
+        opacity: 1;
+        background: var(--surface);
+        border-color: var(--border);
+        backdrop-filter: blur(6px);
+        color: var(--text-primary);
+      }
+
+      /* ── Section panels ── */
+      .section-panel {
+        display: none;
+      }
+      .section-panel.active {
+        display: block;
+      }
+
       .section-label {
         font-size: 11px;
         font-weight: 500;
@@ -107,9 +144,10 @@ body.shiny {
       }
 
       .list-item a {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto;
         align-items: center;
-        justify-content: space-between;
+        gap: 12px;
         padding: 14px 18px;
         background: var(--surface);
         border: 0.5px solid var(--border);
@@ -130,8 +168,9 @@ body.shiny {
 
       .item-left {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
+        min-width: 0;
       }
 
       .item-dot {
@@ -140,6 +179,7 @@ body.shiny {
         background: var(--text-secondary);
         opacity: 0.5;
         flex-shrink: 0;
+        margin-top: 5px;
         transition: opacity 0.15s, background 0.15s;
       }
 
@@ -148,10 +188,34 @@ body.shiny {
         background: var(--accent);
       }
 
+      .item-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .item-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item-desc {
+        font-size: 11px;
+        color: var(--text-secondary);
+        opacity: 0.75;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .item-arrow {
         font-size: 13px;
         color: var(--text-secondary);
         opacity: 0;
+        flex-shrink: 0;
         transition: opacity 0.15s, transform 0.15s;
       }
 
@@ -183,46 +247,76 @@ body.shiny {
       <header>
         <div class="wordmark">Lavori</div>
         <div class="divider"></div>
-        <div class="section-label">Projects</div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="freetime">Free Time</button>
+          <button class="tab-btn" data-tab="school">School</button>
+        </div>
       </header>
 
-      <ul class="list">
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/EVERYTHING.html"><div class="item-left"><span class="item-dot"></span><span>EVERYTHING</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_1.0.html"><div class="item-left"><span class="item-dot"></span><span>Anagrafica 1.0</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_1.1.html"><div class="item-left"><span class="item-dot"></span><span>Anagrafica 1.1</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_2.0.html"><div class="item-left"><span class="item-dot"></span><span>Anagrafica 2.0</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_3.0.html"><div class="item-left"><span class="item-dot"></span><span>Anagrafica 3.0</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_5.0.html"><div class="item-left"><span class="item-dot"></span><span>Anagrafica 5.0</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/calcolatrice/calc.html"><div class="item-left"><span class="item-dot"></span><span>Calcolatrice</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Characters Compendium/hub.html"><div class="item-left"><span class="item-dot"></span><span>Character Compendium</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/character-questionnaire-it.html"><div class="item-left"><span class="item-dot"></span><span>Character Questionnaire</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://chegg-game.netlify.app"><div class="item-left"><span class="item-dot"></span><span>CHEGG</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Chess/index.html"><div class="item-left"><span class="item-dot"></span><span>Chessverse</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/clock.html"><div class="item-left"><span class="item-dot"></span><span>Clock</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/index (1).html"><div class="item-left"><span class="item-dot"></span><span>Convertitore Decimale</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/cosmic-realty.html"><div class="item-left"><span class="item-dot"></span><span>Cosmic Realty</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/csv_anagrafica_viewer.html"><div class="item-left"><span class="item-dot"></span><span>CSV Viewer</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Duckapedia/index.html"><div class="item-left"><span class="item-dot"></span><span>Duckapedia</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/e-commerce/index.html"><div class="item-left"><span class="item-dot"></span><span>E-commerce</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/google.html"><div class="item-left"><span class="item-dot"></span><span>Google</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Louie's Recipes/index.html"><div class="item-left"><span class="item-dot"></span><span>Louie's Cookbook</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/passaggi.html"><div class="item-left"><span class="item-dot"></span><span>Passaggi</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Game/pokemon.html"><div class="item-left"><span class="item-dot"></span><span>Pokémon</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Skylandex/index.html"><div class="item-left"><span class="item-dot"></span><span>Skylandex</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/subnet_binaria.html"><div class="item-left"><span class="item-dot"></span><span>Subnet Binaria</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/subnet_mask_host.html"><div class="item-left"><span class="item-dot"></span><span>Subnet Binaria Host</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/Whisperheaven/index.html"><div class="item-left"><span class="item-dot"></span><span>Wishperheaven Library</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item"><a href="https://alextygh.github.io/lavori/π.html"><div class="item-left"><span class="item-dot"></span><span>π</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item wip"><a href="https://alextygh.github.io/lavori/Animals/index.html"><div class="item-left"><span class="item-dot"></span><span>Animals [BETA]</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item wip"><a href="https://alextygh.github.io/lavori/Beep Beep Vroom Vroom.html"><div class="item-left"><span class="item-dot"></span><span>Beep Beep Vroom Vroom [BETA]</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item wip"><a href="https://alextygh.github.io/lavori/ditto.html"><div class="item-left"><span class="item-dot"></span><span>Ditto?</span></div><span class="item-arrow">→</span></a></li>
-        <li class="list-item wip"><a href="https://alextygh.github.io/lavori/test.html"><div class="item-left"><span class="item-dot"></span><span>Horse</span></div><span class="item-arrow">→</span></a></li>
-      </ul>
+      <!-- ══════════════════════════════════════════
+           FREE TIME section
+           To add a link: copy a <li> block and fill in:
+             href        = the URL
+             item-name   = display name
+             item-desc   = short description
+           For WIP items add class="list-item wip"
+      ══════════════════════════════════════════ -->
+      <div class="section-panel active" id="tab-freetime">
+        <div class="section-label">Free Time</div>
+        <ul class="list">
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/EVERYTHING.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">EVERYTHING</span><span class="item-desc">A canvas with everything on it</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Characters Compendium/hub.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Character Compendium</span><span class="item-desc">A hub for original character profiles</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/character-questionnaire-it.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Character Questionnaire</span><span class="item-desc">Fill out a deep-dive questionnaire for your OC</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://chegg-game.netlify.app"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">CHEGG</span><span class="item-desc">A mystery game about a peculiar egg</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Chess/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Chessverse</span><span class="item-desc">Play chess against a friend or the computer</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/clock.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Clock</span><span class="item-desc">A clean minimal clock</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/cosmic-realty.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Cosmic Realty</span><span class="item-desc">Buy and sell property across the galaxy</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Duckapedia/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Duckapedia</span><span class="item-desc">An encyclopedia of ducks</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/e-commerce/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">E-commerce</span><span class="item-desc">A mock online shop prototype</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/google.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Google</span><span class="item-desc">A handcrafted Google homepage replica</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Louie's Recipes/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Louie's Cookbook</span><span class="item-desc">Recipes from the one and only Louie</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/passaggi.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Passaggi</span><span class="item-desc">A writing tool for narrative passages</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Game/pokemon.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Pokémon</span><span class="item-desc">A Pokémon-themed mini game</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Skylandex/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Skylandex</span><span class="item-desc">Explore the skyland index</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/Whisperheaven/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Wishperheaven Library</span><span class="item-desc">Browse the Whisperheaven book collection</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/π.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">π</span><span class="item-desc">How many digits of pi can you memorize?</span></div></div><span class="item-arrow">→</span></a></li>
+          <!-- WIP items -->
+          <li class="list-item wip"><a href="https://alextygh.github.io/lavori/Animals/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Animals [BETA]</span><span class="item-desc">An animal encyclopedia, still in progress</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item wip"><a href="https://alextygh.github.io/lavori/Beep Beep Vroom Vroom.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Beep Beep Vroom Vroom [BETA]</span><span class="item-desc">Something car-related is cooking</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item wip"><a href="https://alextygh.github.io/lavori/ditto.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Ditto?</span><span class="item-desc">Is it really Ditto?</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item wip"><a href="https://alextygh.github.io/lavori/test.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Horse [BETA]</span><span class="item-desc">A horse. That's it.</span></div></div><span class="item-arrow">→</span></a></li>
+        </ul>
+      </div>
 
-      <footer><a href="https://github.com/Alextygh/lavori">alextygh · github.io</footer>
+      <!-- ══════════════════════════════════════════
+           SCHOOL section
+           To add a link: copy a <li> block and fill in:
+             href        = the URL
+             item-name   = display name
+             item-desc   = short description
+           For WIP items add class="list-item wip"
+      ══════════════════════════════════════════ -->
+      <div class="section-panel" id="tab-school">
+        <div class="section-label">School</div>
+        <ul class="list">
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_1.0.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Anagrafica 1.0</span><span class="item-desc">First version of the registry app</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_1.1.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Anagrafica 1.1</span><span class="item-desc">Minor updates and fixes to 1.0</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_2.0.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Anagrafica 2.0</span><span class="item-desc">Redesigned registry with new features</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_3.0.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Anagrafica 3.0</span><span class="item-desc">Further improvements to the registry</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/anagrafica_5.0.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Anagrafica 5.0</span><span class="item-desc">The most complete version of the registry</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/calcolatrice/calc.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Calcolatrice</span><span class="item-desc">A simple calculator built for class</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/csv_anagrafica_viewer.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">CSV Viewer</span><span class="item-desc">View and filter CSV registry exports</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/index (1).html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Convertitore Decimale</span><span class="item-desc">Convert numbers between decimal and binary</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/subnet_binaria.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Subnet Binaria</span><span class="item-desc">Binary subnet mask calculator</span></div></div><span class="item-arrow">→</span></a></li>
+          <li class="list-item"><a href="https://alextygh.github.io/lavori/subnet_mask_host.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Subnet Binaria Host</span><span class="item-desc">Calculate hosts from a subnet mask</span></div></div><span class="item-arrow">→</span></a></li>
+        </ul>
+      </div>
+
+      <footer><a href="https://github.com/Alextygh/lavori">alextygh · github.io</a></footer>
     </div>
 
     <script>
+      // ── Shiny easter egg (1/4096 chance) ──────────────────────────
       if (Math.random() < 1 / 4096) {
         const flash = document.getElementById('flash');
         flash.classList.add('active');
@@ -231,6 +325,19 @@ body.shiny {
           flash.classList.remove('active');
         }, 420);
       }
+
+      // ── Tab switcher ───────────────────────────────────────────────
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.tab;
+
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+
+          btn.classList.add('active');
+          document.getElementById('tab-' + target).classList.add('active');
+        });
+      });
     </script>
   </body>
 </html>
