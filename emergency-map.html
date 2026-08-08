@@ -10,7 +10,6 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
-    /* ── Header ── */
     header{background:#151820;border-bottom:1px solid #252a38;padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;z-index:1000;flex-shrink:0}
     .logo{font-size:1.05rem;font-weight:700;letter-spacing:.04em;color:#fff;white-space:nowrap}
     .logo span{color:#e05252}
@@ -24,21 +23,17 @@
     .legend-item{display:flex;align-items:center;gap:5px;font-size:.8rem;color:#9aa0b8}
     .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-    /* ── Layout ── */
     .main{display:flex;flex:1;overflow:hidden}
     #map{flex:1}
 
-    /* ── Side panel ── */
     #panel{width:300px;background:#151820;border-left:1px solid #252a38;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:500}
     .panel-header{padding:14px 16px 10px;border-bottom:1px solid #252a38;flex-shrink:0}
     .panel-header h2{font-size:.92rem;font-weight:700;color:#e8eaf0;margin-bottom:2px}
     .panel-header p{font-size:.75rem;color:#5a6070}
 
-    /* ── Incident section ── */
     .section{padding:12px 16px;border-bottom:1px solid #252a38}
     .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5a6070;margin-bottom:8px}
 
-    /* Address row */
     .addr-row{display:flex;gap:6px;margin-bottom:6px}
     #addr-input{flex:1;background:#1e2230;border:1px solid #2e3448;border-radius:7px;padding:7px 11px;color:#e8eaf0;font-size:.82rem;outline:none;transition:border-color .2s}
     #addr-input::placeholder{color:#5a6070}
@@ -47,11 +42,9 @@
     #addr-btn:hover{background:#3a6ec4}
 
     .or-row{text-align:center;font-size:.72rem;color:#3a4060;margin:4px 0}
-
-    .click-hint{font-size:.75rem;color:#5a6070;background:#1e2230;border:1px dashed #2e3448;border-radius:7px;padding:7px 10px;text-align:center}
+    .click-hint{font-size:.75rem;color:#5a6070;background:#1e2230;border:1px dashed #2e3448;border-radius:7px;padding:7px 10px;text-align:center;cursor:pointer;transition:all .18s}
     .click-hint.active{border-color:#f59e0b;color:#f59e0b;background:#1e180a}
 
-    /* Emergency type toggles */
     .type-toggles{display:flex;flex-direction:column;gap:6px}
     .type-toggle{display:flex;align-items:center;gap:9px;background:#1e2230;border:1.5px solid #2e3448;border-radius:8px;padding:8px 11px;cursor:pointer;transition:all .18s;user-select:none}
     .type-toggle:hover{border-color:#3a4468}
@@ -62,12 +55,10 @@
     .type-toggle.selected .t-check{background:var(--c);border-color:var(--c)}
     .type-toggle.selected .t-check::after{content:'✓';font-size:.65rem;color:#fff}
 
-    /* Dispatch button */
     #dispatch-btn{margin:12px 16px;background:linear-gradient(135deg,#e05252,#c03030);border:none;border-radius:9px;padding:11px;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0}
     #dispatch-btn:hover{opacity:.88}
     #dispatch-btn:disabled{background:#2a2a3a;color:#5a6070;cursor:default;opacity:1}
 
-    /* Results */
     #results{flex:1;overflow-y:auto;padding:10px 16px 16px}
     #results::-webkit-scrollbar{width:4px}
     #results::-webkit-scrollbar-thumb{background:#2e3448;border-radius:2px}
@@ -80,16 +71,11 @@
     .result-card .rc-focus{margin-top:8px;font-size:.75rem;color:#4a80d4;cursor:pointer;text-decoration:underline}
     .result-card .rc-focus:hover{color:#7ab0ff}
 
-    .no-result{text-align:center;color:#5a6070;font-size:.82rem;padding:20px 0}
+    .no-result{text-align:center;color:#5a6070;font-size:.82rem;padding:20px 8px;line-height:1.5}
 
-    /* Incident pin */
-    .incident-icon{filter:drop-shadow(0 2px 6px #000a)}
-
-    /* Status toast */
-    #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1e2230ee;border:1px solid #2e3448;border-radius:9px;padding:9px 18px;font-size:.82rem;color:#9aa0b8;z-index:2000;display:none;backdrop-filter:blur(8px);white-space:nowrap;pointer-events:none}
+    #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1e2230ee;border:1px solid #2e3448;border-radius:9px;padding:9px 18px;font-size:.82rem;color:#9aa0b8;z-index:2000;display:none;backdrop-filter:blur(8px);white-space:nowrap;pointer-events:none;max-width:90vw;text-overflow:ellipsis;overflow:hidden}
     #toast.on{display:block}
 
-    /* Popup */
     .leaflet-popup-content-wrapper{background:#1e2230;border:1px solid #2e3448;border-radius:10px;box-shadow:0 4px 24px #000a}
     .leaflet-popup-tip{background:#1e2230}
     .leaflet-popup-content{color:#e8eaf0;font-family:'Segoe UI',system-ui,sans-serif;font-size:.85rem;margin:10px 13px}
@@ -115,14 +101,12 @@
 <div class="main">
   <div id="map"></div>
 
-  <!-- Side panel -->
   <div id="panel">
     <div class="panel-header">
       <h2>🚨 Dispatch Emergency</h2>
       <p>Set incident location &amp; select services</p>
     </div>
 
-    <!-- Incident location -->
     <div class="section">
       <div class="section-label">Incident Location</div>
       <div class="addr-row">
@@ -133,7 +117,6 @@
       <div class="click-hint" id="click-hint">Click anywhere on the map to place incident pin</div>
     </div>
 
-    <!-- Emergency types -->
     <div class="section">
       <div class="section-label">Emergency Type</div>
       <div class="type-toggles">
@@ -159,358 +142,297 @@
       <span>⚡</span> Find Closest &amp; Route
     </button>
 
-    <div id="results"><div class="no-result" style="padding-top:30px">Set an incident location and select at least one emergency type, then hit dispatch.</div></div>
+    <div id="results">
+      <div class="no-result" style="padding-top:30px">Set an incident location and select at least one emergency type, then hit dispatch.</div>
+    </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────────────────────
-const COLORS   = { hospital:'#22c55e', fire_station:'#ef4444', police:'#3b82f6' };
-const LABELS   = { hospital:'Hospital', fire_station:'Fire Station', police:'Police Station' };
-const OSRM     = 'https://router.project-osrm.org/route/v1/driving';
-const NOMINATIM= 'https://nominatim.openstreetmap.org';
-const OVERPASS = 'https://overpass-api.de/api/interpreter';
+// ── Constants ─────────────────────────────────────────────────────────────────
+const COLORS = { hospital:'#22c55e', fire_station:'#ef4444', police:'#3b82f6' };
+const LABELS = { hospital:'Hospital', fire_station:'Fire Station', police:'Police Station' };
+// Nominatim amenity tag → what we search for
+const NOMINATIM_TAG = { hospital:'hospital', fire_station:'fire_station', police:'police' };
+const NOMINATIM = 'https://nominatim.openstreetmap.org';
+const OSRM = 'https://router.project-osrm.org/route/v1/driving';
 
-// ── Map ──────────────────────────────────────────────────────────────────────
+// ── Map ───────────────────────────────────────────────────────────────────────
 const map = L.map('map').setView([48.8566, 2.3522], 13);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
   attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
   subdomains:'abcd', maxZoom:19
 }).addTo(map);
 
-// ── Icon factory ─────────────────────────────────────────────────────────────
-function makeIcon(svgInner, color, size=36){
+// ── Icons ─────────────────────────────────────────────────────────────────────
+function makeIcon(inner, color, size=36){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 40 40">
     <circle cx="20" cy="20" r="18" fill="${color}" opacity=".92"/>
     <circle cx="20" cy="20" r="18" fill="none" stroke="#fff" stroke-width="1.5" opacity=".35"/>
-    ${svgInner}</svg>`;
+    ${inner}</svg>`;
   return L.divIcon({html:`<div style="filter:drop-shadow(0 2px 6px #0009)">${svg}</div>`,className:'',iconSize:[size,size],iconAnchor:[size/2,size/2],popupAnchor:[0,-size/2]});
 }
-
 const ICONS = {
   hospital:    makeIcon(`<rect x="17" y="10" width="6" height="20" rx="2" fill="#fff"/><rect x="10" y="17" width="20" height="6" rx="2" fill="#fff"/>`, COLORS.hospital),
-  fire_station:makeIcon(`<path d="M20 10 C20 10 26 15 26 21 C26 25.4 23.3 28.8 20 29.5 C16.7 28.8 14 25.4 14 21 C14 17 17 13 18 11 C18 13.5 19.5 15 21 16 C20 13 20 10 20 10Z" fill="#fff"/><path d="M20 19 C20 19 23 22 23 24.5 C23 26.4 21.7 28 20 28 C18.3 28 17 26.4 17 24.5 C17 22 20 19 20 19Z" fill="#fca5a5"/>`, COLORS.fire_station),
-  police:      makeIcon(`<path d="M20 11 L27 14.5 L27 22 C27 26 23.5 29 20 30 C16.5 29 13 26 13 22 L13 14.5 Z" fill="#fff" opacity=".9"/><path d="M20 17 L21.2 20.6 L25 20.6 L22 22.8 L23.1 26.4 L20 24.2 L16.9 26.4 L18 22.8 L15 20.6 L18.8 20.6 Z" fill="#3b82f6"/>`, COLORS.police),
+  fire_station:makeIcon(`<path d="M20 10C20 10 26 15 26 21c0 4.4-2.7 7.8-6 8.5C16.7 28.8 14 25.4 14 21c0-4 3-8 4-10 0 2.5 1.5 4 3 5C20 13 20 10 20 10z" fill="#fff"/><path d="M20 19c0 0 3 3 3 5.5C23 26.4 21.7 28 20 28c-1.7 0-3-1.6-3-3.5C17 22 20 19 20 19z" fill="#fca5a5"/>`, COLORS.fire_station),
+  police:      makeIcon(`<path d="M20 11L27 14.5V22c0 4-3.5 7-7 8-3.5-1-7-4-7-8v-7.5z" fill="#fff" opacity=".9"/><path d="M20 17l1.2 3.6H25l-3 2.2 1.1 3.6L20 24.2l-3.1 2.2L18 22.8 15 20.6h3.8z" fill="#3b82f6"/>`, COLORS.police),
 };
-
-// Incident pin icon
 const INCIDENT_ICON = L.divIcon({
-  html:`<div style="filter:drop-shadow(0 3px 8px #000c)">
-    <svg width="36" height="44" viewBox="0 0 36 44" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18 0 C8 0 0 8 0 18 C0 30 18 44 18 44 C18 44 36 30 36 18 C36 8 28 0 18 0Z" fill="#f59e0b"/>
-      <circle cx="18" cy="18" r="8" fill="#fff" opacity=".9"/>
-      <text x="18" y="23" text-anchor="middle" font-size="13" fill="#f59e0b" font-weight="900">!</text>
-    </svg></div>`,
-  className:'',iconSize:[36,44],iconAnchor:[18,44],popupAnchor:[0,-44]
+  html:`<div style="filter:drop-shadow(0 3px 8px #000c)"><svg width="34" height="42" viewBox="0 0 34 42" xmlns="http://www.w3.org/2000/svg"><path d="M17 0C7.6 0 0 7.6 0 17c0 11.5 17 25 17 25S34 28.5 34 17C34 7.6 26.4 0 17 0z" fill="#f59e0b"/><circle cx="17" cy="17" r="8" fill="#fff" opacity=".9"/><text x="17" y="22" text-anchor="middle" font-size="13" fill="#f59e0b" font-weight="900">!</text></svg></div>`,
+  className:'', iconSize:[34,42], iconAnchor:[17,42], popupAnchor:[0,-42]
 });
 
-// ── State ────────────────────────────────────────────────────────────────────
-let serviceLayers = { hospital:L.layerGroup().addTo(map), fire_station:L.layerGroup().addTo(map), police:L.layerGroup().addTo(map) };
-let serviceData   = { hospital:[], fire_station:[], police:[] };
-let incidentMarker= null;
-let incidentLatLng= null;
-let routeLayers   = [];
-let resultMarkers = [];
-let selectedTypes = new Set();
-let clickMode     = false;
+// ── State ─────────────────────────────────────────────────────────────────────
+const serviceLayers = { hospital:L.layerGroup().addTo(map), fire_station:L.layerGroup().addTo(map), police:L.layerGroup().addTo(map) };
+// Stores all fetched stations for map display (from viewport search)
+const serviceData = { hospital:[], fire_station:[], police:[] };
+let incidentMarker=null, incidentLatLng=null;
+let routeLayers=[], selectedTypes=new Set(), clickMode=false;
 
-// ── Toast ────────────────────────────────────────────────────────────────────
+// ── Toast ─────────────────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg, persist=false){
   const el=document.getElementById('toast');
   el.textContent=msg; el.classList.add('on');
   clearTimeout(toastTimer);
-  if(!persist) toastTimer=setTimeout(()=>el.classList.remove('on'),3000);
+  if(!persist) toastTimer=setTimeout(()=>el.classList.remove('on'),3500);
 }
 
-// ── Type toggles ─────────────────────────────────────────────────────────────
-function toggleType(el){
-  const t=el.dataset.type;
-  if(selectedTypes.has(t)){selectedTypes.delete(t);el.classList.remove('selected');}
-  else{selectedTypes.add(t);el.classList.add('selected');}
-  updateDispatchBtn();
-}
-function updateDispatchBtn(){
-  const btn=document.getElementById('dispatch-btn');
-  btn.disabled=!(incidentLatLng && selectedTypes.size>0);
-}
+// ── Type toggles ──────────────────────────────────────────────────────────────
+function toggleType(el){ const t=el.dataset.type; selectedTypes.has(t)?selectedTypes.delete(t)&&el.classList.remove('selected'):(selectedTypes.add(t),el.classList.add('selected')); updateBtn(); }
+function updateBtn(){ document.getElementById('dispatch-btn').disabled=!(incidentLatLng&&selectedTypes.size>0); }
 
-// ── Click-mode toggle ────────────────────────────────────────────────────────
+// ── Click mode ────────────────────────────────────────────────────────────────
 const clickHint=document.getElementById('click-hint');
 clickHint.addEventListener('click',()=>{
   clickMode=!clickMode;
   clickHint.classList.toggle('active',clickMode);
-  clickHint.textContent=clickMode?'🎯 Click mode ON – click the map to place pin':'Click anywhere on the map to place incident pin';
+  clickHint.textContent=clickMode?'🎯 Click mode ON – click map to place pin':'Click anywhere on the map to place incident pin';
   map.getContainer().style.cursor=clickMode?'crosshair':'';
 });
-
 map.on('click',e=>{
   if(!clickMode)return;
-  setIncident(e.latlng);
-  clickMode=false;
-  clickHint.classList.remove('active');
+  placeIncident(e.latlng);
+  clickMode=false; clickHint.classList.remove('active');
   clickHint.textContent='Click anywhere on the map to place incident pin';
   map.getContainer().style.cursor='';
 });
 
-// ── Incident marker ───────────────────────────────────────────────────────────
-function setIncident(latlng){
+function placeIncident(latlng){
   if(incidentMarker) map.removeLayer(incidentMarker);
   incidentMarker=L.marker(latlng,{icon:INCIDENT_ICON,zIndexOffset:1000}).addTo(map)
     .bindPopup('<div class="popup-name" style="color:#f59e0b">📍 Incident Location</div>');
-  incidentLatLng=latlng;
-  updateDispatchBtn();
-  toast('Incident pin placed');
+  incidentLatLng=latlng; updateBtn(); toast('Incident pin placed');
 }
 
-// ── Address → set incident ────────────────────────────────────────────────────
-document.getElementById('addr-btn').addEventListener('click', setIncidentFromAddr);
-document.getElementById('addr-input').addEventListener('keydown',e=>{ if(e.key==='Enter') setIncidentFromAddr(); });
+// ── Address → incident ────────────────────────────────────────────────────────
 async function setIncidentFromAddr(){
-  const q=document.getElementById('addr-input').value.trim();
-  if(!q)return;
+  const q=document.getElementById('addr-input').value.trim(); if(!q)return;
   toast('Geocoding…',true);
   try{
     const r=await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
-    const d=await r.json();
-    if(!d.length){toast('Address not found');return;}
+    const d=await r.json(); if(!d.length){toast('Address not found');return;}
     const ll=L.latLng(+d[0].lat,+d[0].lon);
-    map.setView(ll,15);
-    setIncident(ll);
-  }catch{toast('Geocoding failed');}
+    map.setView(ll,15); placeIncident(ll);
+  }catch{ toast('Geocoding failed'); }
 }
+document.getElementById('addr-btn').addEventListener('click',setIncidentFromAddr);
+document.getElementById('addr-input').addEventListener('keydown',e=>e.key==='Enter'&&setIncidentFromAddr());
 
-// ── Map nav search ────────────────────────────────────────────────────────────
-document.getElementById('loc-btn').addEventListener('click', navSearch);
-document.getElementById('loc-input').addEventListener('keydown',e=>{ if(e.key==='Enter') navSearch(); });
+// ── Nav search ────────────────────────────────────────────────────────────────
 async function navSearch(){
-  const q=document.getElementById('loc-input').value.trim();
-  if(!q)return;
+  const q=document.getElementById('loc-input').value.trim(); if(!q)return;
   toast('Searching…',true);
   try{
     const r=await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
-    const d=await r.json();
-    if(!d.length){toast('Location not found');return;}
+    const d=await r.json(); if(!d.length){toast('Location not found');return;}
     map.setView([+d[0].lat,+d[0].lon],14);
-    toast(`Navigated to ${d[0].display_name.split(',').slice(0,2).join(',')}`);
-  }catch{toast('Search failed');}
+    toast(d[0].display_name.split(',').slice(0,2).join(','));
+  }catch{ toast('Search failed'); }
+}
+document.getElementById('loc-btn').addEventListener('click',navSearch);
+document.getElementById('loc-input').addEventListener('keydown',e=>e.key==='Enter'&&navSearch());
+
+// ── Nominatim amenity search ──────────────────────────────────────────────────
+// Uses Nominatim /search with amenity tag + viewbox centred on a point.
+// Expands the viewbox progressively until results are found.
+async function nominatimSearch(amenityTag, lat, lon, radiusKm){
+  // Convert radius km → degrees (rough: 1deg lat ≈ 111km)
+  const d = radiusKm / 111;
+  const viewbox = `${lon-d},${lat+d},${lon+d},${lat-d}`; // left,top,right,bottom
+  const url = `${NOMINATIM}/search?amenity=${encodeURIComponent(amenityTag)}&format=json&limit=20&viewbox=${viewbox}&bounded=1`;
+  const r = await fetch(url, {headers:{'Accept-Language':'en'}});
+  return await r.json(); // array of nominatim results
 }
 
-// ── Overpass load ─────────────────────────────────────────────────────────────
-let overpassCtrl=null, debounceT;
+// Search for one amenity type, expanding radius until we get at least 1 result
+async function findNearby(amenityTag, lat, lon){
+  const radii = [2, 5, 10, 20]; // km
+  for(const km of radii){
+    toast(`Searching ${amenityTag.replace('_',' ')} within ${km}km…`, true);
+    const results = await nominatimSearch(amenityTag, lat, lon, km);
+    if(results.length > 0) return { results, km };
+  }
+  return { results:[], km:20 };
+}
+
+// Parse a Nominatim result into a station object
+function parseStation(r, type){
+  return {
+    lat: +r.lat, lon: +r.lon,
+    name: r.display_name.split(',')[0] || LABELS[type]
+  };
+}
+
+// ── Viewport marker load (on map move) ───────────────────────────────────────
+// Uses Nominatim viewbox search to populate the visible map with markers.
+let debounceT;
 map.on('moveend zoomend',()=>{
   clearTimeout(debounceT);
-  if(map.getZoom()<11){
-    Object.values(serviceLayers).forEach(l=>l.clearLayers());
-    Object.keys(serviceData).forEach(k=>serviceData[k]=[]);
-    toast('Zoom in to load services (zoom ≥ 11)');return;
-  }
-  debounceT=setTimeout(()=>loadServices(map.getBounds()),450);
+  if(map.getZoom()<11){ Object.values(serviceLayers).forEach(l=>l.clearLayers()); return; }
+  debounceT=setTimeout(loadViewport, 600);
 });
 
-async function loadServices(bounds){
-  const {_southWest:sw,_northEast:ne}=bounds;
-  const bb=`${sw.lat},${sw.lng},${ne.lat},${ne.lng}`;
-  const q=`[out:json][timeout:25];(node[amenity=hospital](${bb});way[amenity=hospital](${bb});node[amenity=fire_station](${bb});way[amenity=fire_station](${bb});node[amenity=police](${bb});way[amenity=police](${bb}););out center;`;
-  if(overpassCtrl) overpassCtrl.abort();
-  overpassCtrl=new AbortController();
-  toast('Loading services…',true);
-  try{
-    const r=await fetch(OVERPASS,{method:'POST',body:q,signal:overpassCtrl.signal});
-    const d=await r.json();
-    Object.values(serviceLayers).forEach(l=>l.clearLayers());
-    Object.keys(serviceData).forEach(k=>serviceData[k]=[]);
-    const cnt={hospital:0,fire_station:0,police:0};
-    d.elements.forEach(el=>{
-      const type=el.tags?.amenity; if(!type||!serviceLayers[type])return;
-      const lat=el.lat??el.center?.lat, lon=el.lon??el.center?.lon; if(!lat||!lon)return;
-      const name=el.tags.name||LABELS[type];
-      const m=L.marker([lat,lon],{icon:ICONS[type]}).bindPopup(
-        `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${name}</div>`);
-      serviceLayers[type].addLayer(m);
-      serviceData[type].push({lat,lon,name,marker:m});
-      cnt[type]++;
-    });
-    toast(`${cnt.hospital} hospitals · ${cnt.fire_station} fire stations · ${cnt.police} police`);
-  }catch(e){ if(e.name!=='AbortError') toast('Failed to load services'); }
+async function loadViewport(){
+  const b=map.getBounds();
+  const viewbox=`${b.getWest()},${b.getNorth()},${b.getEast()},${b.getSouth()}`;
+  const types=['hospital','fire_station','police'];
+  // Fire parallel requests for all three types
+  await Promise.all(types.map(async type=>{
+    try{
+      const url=`${NOMINATIM}/search?amenity=${NOMINATIM_TAG[type]}&format=json&limit=50&viewbox=${viewbox}&bounded=1`;
+      const r=await fetch(url,{headers:{'Accept-Language':'en'}});
+      const data=await r.json();
+      serviceLayers[type].clearLayers();
+      serviceData[type]=[];
+      data.forEach(item=>{
+        const s=parseStation(item,type);
+        const m=L.marker([s.lat,s.lon],{icon:ICONS[type]}).bindPopup(
+          `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${s.name}</div>`);
+        serviceLayers[type].addLayer(m);
+        serviceData[type].push(s);
+      });
+    }catch(e){ console.warn('Viewport load failed for',type,e); }
+  }));
 }
 
-// ── Haversine distance ────────────────────────────────────────────────────────
+// ── Haversine ─────────────────────────────────────────────────────────────────
 function haversine(a,b){
-  const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180;
-  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  const R=6371,φ1=a.lat*Math.PI/180,φ2=b.lat*Math.PI/180,
+    Δφ=(b.lat-a.lat)*Math.PI/180,Δλ=(b.lon-a.lon)*Math.PI/180,
+    x=Math.sin(Δφ/2)**2+Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
   return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
 // ── Clear routes ──────────────────────────────────────────────────────────────
-function clearRoutes(){
-  routeLayers.forEach(l=>map.removeLayer(l));
-  routeLayers=[];
-  resultMarkers.forEach(l=>map.removeLayer(l));
-  resultMarkers=[];
-}
+function clearRoutes(){ routeLayers.forEach(l=>map.removeLayer(l)); routeLayers=[]; }
 
-// ── Fresh Overpass search around a point, expanding radius until found ────────
-// Returns {hospital:[], fire_station:[], police:[]} for the requested types only.
-async function searchNearIncident(lat, lon, types, statusFn){
-  const radii = [2000, 5000, 10000, 20000]; // metres, expanding rings
-  const amenityTags = types.map(t=>`node[amenity=${t}](around:RADIUS,${lat},${lon});way[amenity=${t}](around:RADIUS,${lat},${lon});`).join('');
-
-  for(const radius of radii){
-    statusFn(`Searching within ${radius>=1000?(radius/1000)+'km':radius+'m'} of incident…`, true);
-    const q=`[out:json][timeout:20];(${amenityTags.replaceAll('RADIUS', radius)});out center;`;
-    try{
-      const r=await fetch(OVERPASS,{method:'POST',body:q});
-      const d=await r.json();
-      const found={};
-      types.forEach(t=>found[t]=[]);
-      d.elements.forEach(el=>{
-        const type=el.tags?.amenity; if(!type||!found[type])return;
-        const elat=el.lat??el.center?.lat, elon=el.lon??el.center?.lon; if(!elat||!elon)return;
-        found[type].push({lat:elat,lon:elon,name:el.tags.name||LABELS[type]});
-      });
-      // Only continue if every requested type has at least one result
-      if(types.every(t=>found[t].length>0)) return {found, radius};
-      // If some types are missing but we have others, keep expanding only for missing ones
-      // But for simplicity expand until all found or exhausted
-    }catch(e){ statusFn('Overpass query failed'); throw e; }
-  }
-  // Last attempt: return whatever we got (may be empty for some types)
-  statusFn(`Searching within 20km of incident…`, true);
-  const q=`[out:json][timeout:20];(${amenityTags.replaceAll('RADIUS', 20000)});out center;`;
-  const r=await fetch(OVERPASS,{method:'POST',body:q});
-  const d=await r.json();
-  const found={};
-  types.forEach(t=>found[t]=[]);
-  d.elements.forEach(el=>{
-    const type=el.tags?.amenity; if(!type||!found[type])return;
-    const elat=el.lat??el.center?.lat, elon=el.lon??el.center?.lon; if(!elat||!elon)return;
-    found[type].push({lat:elat,lon:elon,name:el.tags.name||LABELS[type]});
-  });
-  return {found, radius:20000};
-}
-
-// ── Dispatch ──────────────────────────────────────────────────────────────────
+// ── DISPATCH ──────────────────────────────────────────────────────────────────
 async function dispatch(){
-  if(!incidentLatLng||selectedTypes.size===0)return;
+  if(!incidentLatLng||!selectedTypes.size) return;
   clearRoutes();
   const res=document.getElementById('results');
-  res.innerHTML='<div class="no-result">🔍 Querying nearby emergency services…</div>';
+  res.innerHTML='<div class="no-result">🔍 Searching for nearby services…</div>';
   document.getElementById('dispatch-btn').disabled=true;
 
-  const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
+  const inc={lat:incidentLatLng.lat, lon:incidentLatLng.lng};
   const types=[...selectedTypes];
-
-  let found, searchRadius;
-  try{
-    ({found, radius:searchRadius}=await searchNearIncident(inc.lat,inc.lon,types,toast));
-  }catch{
-    res.innerHTML='<div class="no-result">Failed to query Overpass API. Check connection.</div>';
-    document.getElementById('dispatch-btn').disabled=false;
-    return;
-  }
-
-  // Also refresh the visible map layer with these results so the user sees them
-  types.forEach(type=>{
-    serviceLayers[type].clearLayers();
-    serviceData[type]=[];
-    found[type].forEach(s=>{
-      const m=L.marker([s.lat,s.lon],{icon:ICONS[type]}).bindPopup(
-        `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${s.name}</div>`);
-      serviceLayers[type].addLayer(m);
-      serviceData[type].push(s);
-    });
-  });
-
-  const missing=types.filter(t=>found[t].length===0);
-  if(missing.length===types.length){
-    res.innerHTML=`<div class="no-result">No emergency services found within 20 km of this location.</div>`;
-    document.getElementById('dispatch-btn').disabled=false;
-    return;
-  }
-  if(missing.length>0){
-    toast(`No ${missing.map(t=>LABELS[t]).join(', ')} found within ${searchRadius/1000}km`);
-  }
-
-  res.innerHTML='<div class="no-result">🗺 Calculating routes…</div>';
   const cards=[];
 
   for(const type of types){
-    const stations=found[type];
-    if(!stations.length) continue;
+    // Always do a fresh Nominatim search centred on the incident pin
+    let stations, searchKm;
+    try{
+      const {results, km}=await findNearby(NOMINATIM_TAG[type], inc.lat, inc.lon);
+      searchKm=km;
+      stations=results.map(r=>parseStation(r,type));
+    }catch(e){
+      toast(`Failed to search for ${LABELS[type]}`); continue;
+    }
+
+    if(!stations.length){
+      cards.push({type, error:`No ${LABELS[type]} found within 20 km`});
+      continue;
+    }
 
     // Find closest by haversine
     let closest=null, minD=Infinity;
+    stations.forEach(s=>{ const d=haversine(inc,s); if(d<minD){minD=d;closest=s;} });
+
+    // Also add all found stations to the map layer so user sees them
+    serviceLayers[type].clearLayers();
     stations.forEach(s=>{
-      const d=haversine(inc,s);
-      if(d<minD){minD=d;closest=s;}
+      const m=L.marker([s.lat,s.lon],{icon:ICONS[type]}).bindPopup(
+        `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${s.name}</div>`);
+      serviceLayers[type].addLayer(m);
     });
 
-    // OSRM driving route
+    // OSRM route
+    res.innerHTML=`<div class="no-result">🗺 Routing to ${LABELS[type]}…</div>`;
     try{
       const url=`${OSRM}/${inc.lon},${inc.lat};${closest.lon},${closest.lat}?overview=full&geometries=geojson`;
       const r=await fetch(url);
       const d=await r.json();
       const route=d.routes?.[0];
       const coords=route?.geometry?.coordinates?.map(([ln,lt])=>[lt,ln])||[[inc.lat,inc.lon],[closest.lat,closest.lon]];
-      const distKm=(route?.distance||minD*1000)/1000;
-      const durMin=Math.round((route?.duration||((minD/50)*3600))/60);
+      const distKm=(route?.distance??minD*1000)/1000;
+      const durMin=Math.round((route?.duration??((minD/50)*3600))/60);
 
-      const poly=L.polyline(coords,{color:COLORS[type],weight:4.5,opacity:.9,dashArray:type==='police'?null:'8,5'}).addTo(map);
+      const poly=L.polyline(coords,{color:COLORS[type],weight:4.5,opacity:.9}).addTo(map);
       routeLayers.push(poly);
-      const pulse=L.circleMarker([closest.lat,closest.lon],{radius:18,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.7}).addTo(map);
-      routeLayers.push(pulse);
+      const ring=L.circleMarker([closest.lat,closest.lon],{radius:18,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.8}).addTo(map);
+      routeLayers.push(ring);
 
-      cards.push({type,closest,distKm,durMin,coords,searchRadius});
+      cards.push({type,closest,distKm,durMin,coords,searchKm});
     }catch{
-      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null,searchRadius});
+      // OSRM failed — fall back to straight-line estimate
+      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null,searchKm,fallback:true});
     }
   }
 
-  // Fit map to all routes + incident
+  // Fit map to show everything
   if(routeLayers.length){
-    const allPts=[[inc.lat,inc.lon]];
-    cards.forEach(c=>{if(c.coords)c.coords.forEach(p=>allPts.push(p));else allPts.push([c.closest.lat,c.closest.lon]);});
-    map.fitBounds(L.latLngBounds(allPts),{padding:[40,320]});
+    const pts=[[inc.lat,inc.lon]];
+    cards.forEach(c=>{ if(c.coords)c.coords.forEach(p=>pts.push(p)); else if(c.closest)pts.push([c.closest.lat,c.closest.lon]); });
+    map.fitBounds(L.latLngBounds(pts),{padding:[40,320]});
   }
 
+  // Render cards
   res.innerHTML='';
-  if(cards.length===0){res.innerHTML='<div class="no-result">No routes found.</div>';document.getElementById('dispatch-btn').disabled=false;return;}
-
-  // Search radius badge
-  const badge=document.createElement('div');
-  badge.style='font-size:.72rem;color:#5a6070;text-align:center;padding:6px 0 2px;';
-  badge.textContent=`Searched within ${searchRadius>=1000?(searchRadius/1000)+'km':searchRadius+'m'} of incident`;
-  res.appendChild(badge);
+  if(!cards.length){ res.innerHTML='<div class="no-result">No results found.</div>'; document.getElementById('dispatch-btn').disabled=false; return; }
 
   cards.forEach((c,i)=>{
     const card=document.createElement('div');
     card.className='result-card';
     card.style.setProperty('--c',COLORS[c.type]);
-    card.innerHTML=`
-      <div class="rc-type">${LABELS[c.type]}</div>
-      <div class="rc-name">${c.closest.name}</div>
-      <div class="rc-row"><span>Distance</span><span>${c.distKm.toFixed(2)} km</span></div>
-      <div class="rc-row"><span>Est. travel time</span><span>~${c.durMin} min</span></div>
-      <div class="rc-focus" onclick="focusRoute(${i})">→ Focus on route</div>`;
+    if(c.error){
+      card.innerHTML=`<div class="rc-type">${LABELS[c.type]}</div><div style="font-size:.8rem;color:#9aa0b8">${c.error}</div>`;
+    } else {
+      card.innerHTML=`
+        <div class="rc-type">${LABELS[c.type]}</div>
+        <div class="rc-name">${c.closest.name}</div>
+        <div class="rc-row"><span>Distance</span><span>${c.distKm.toFixed(2)} km</span></div>
+        <div class="rc-row"><span>Est. travel time</span><span>~${c.durMin} min${c.fallback?' (est.)':''}</span></div>
+        <div class="rc-row"><span>Search radius</span><span>${c.searchKm} km</span></div>
+        <div class="rc-focus" onclick="focusRoute(${i})">→ Focus on route</div>`;
+    }
     res.appendChild(card);
   });
 
-  window._dispatchCards=cards;
+  window._cards=cards;
   document.getElementById('dispatch-btn').disabled=false;
 }
 
 function focusRoute(i){
-  const c=window._dispatchCards?.[i]; if(!c)return;
-  const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
-  const pts=c.coords||[[inc.lat,inc.lon],[c.closest.lat,c.closest.lon]];
+  const c=window._cards?.[i]; if(!c||c.error)return;
+  const pts=c.coords||[[incidentLatLng.lat,incidentLatLng.lng],[c.closest.lat,c.closest.lon]];
   map.fitBounds(L.latLngBounds(pts),{padding:[60,320]});
 }
 
-// ── Initial load ──────────────────────────────────────────────────────────────
-loadServices(map.getBounds());
+// ── Initial viewport load ─────────────────────────────────────────────────────
+loadViewport();
 </script>
 </body>
 </html>
