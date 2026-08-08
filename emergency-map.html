@@ -1,153 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Emergency Services Map</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f1117;
-      color: #e8eaf0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    /* ── Header ── */
+    header{background:#151820;border-bottom:1px solid #252a38;padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;z-index:1000;flex-shrink:0}
+    .logo{font-size:1.05rem;font-weight:700;letter-spacing:.04em;color:#fff;white-space:nowrap}
+    .logo span{color:#e05252}
+    .search-wrap{display:flex;flex:1;max-width:400px;gap:8px}
+    #loc-input{flex:1;background:#1e2230;border:1px solid #2e3448;border-radius:8px;padding:8px 13px;color:#e8eaf0;font-size:.88rem;outline:none;transition:border-color .2s}
+    #loc-input::placeholder{color:#5a6070}
+    #loc-input:focus{border-color:#4a80d4}
+    #loc-btn{background:#4a80d4;border:none;border-radius:8px;padding:8px 15px;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
+    #loc-btn:hover{background:#3a6ec4}
+    .legend{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap;align-items:center}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:.8rem;color:#9aa0b8}
+    .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-    header {
-      background: #151820;
-      border-bottom: 1px solid #252a38;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      z-index: 1000;
-    }
+    /* ── Layout ── */
+    .main{display:flex;flex:1;overflow:hidden}
+    #map{flex:1}
 
-    .logo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #fff;
-      white-space: nowrap;
-    }
+    /* ── Side panel ── */
+    #panel{width:300px;background:#151820;border-left:1px solid #252a38;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:500}
+    .panel-header{padding:14px 16px 10px;border-bottom:1px solid #252a38;flex-shrink:0}
+    .panel-header h2{font-size:.92rem;font-weight:700;color:#e8eaf0;margin-bottom:2px}
+    .panel-header p{font-size:.75rem;color:#5a6070}
 
-    .logo span { color: #e05252; }
+    /* ── Incident section ── */
+    .section{padding:12px 16px;border-bottom:1px solid #252a38}
+    .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5a6070;margin-bottom:8px}
 
-    .search-wrap {
-      display: flex;
-      flex: 1;
-      max-width: 440px;
-      gap: 8px;
-    }
+    /* Address row */
+    .addr-row{display:flex;gap:6px;margin-bottom:6px}
+    #addr-input{flex:1;background:#1e2230;border:1px solid #2e3448;border-radius:7px;padding:7px 11px;color:#e8eaf0;font-size:.82rem;outline:none;transition:border-color .2s}
+    #addr-input::placeholder{color:#5a6070}
+    #addr-input:focus{border-color:#4a80d4}
+    #addr-btn{background:#4a80d4;border:none;border-radius:7px;padding:7px 11px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap}
+    #addr-btn:hover{background:#3a6ec4}
 
-    #search-input {
-      flex: 1;
-      background: #1e2230;
-      border: 1px solid #2e3448;
-      border-radius: 8px;
-      padding: 9px 14px;
-      color: #e8eaf0;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    .or-row{text-align:center;font-size:.72rem;color:#3a4060;margin:4px 0}
 
-    #search-input::placeholder { color: #5a6070; }
-    #search-input:focus { border-color: #4a80d4; }
+    .click-hint{font-size:.75rem;color:#5a6070;background:#1e2230;border:1px dashed #2e3448;border-radius:7px;padding:7px 10px;text-align:center}
+    .click-hint.active{border-color:#f59e0b;color:#f59e0b;background:#1e180a}
 
-    #search-btn {
-      background: #4a80d4;
-      border: none;
-      border-radius: 8px;
-      padding: 9px 18px;
-      color: #fff;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
+    /* Emergency type toggles */
+    .type-toggles{display:flex;flex-direction:column;gap:6px}
+    .type-toggle{display:flex;align-items:center;gap:9px;background:#1e2230;border:1.5px solid #2e3448;border-radius:8px;padding:8px 11px;cursor:pointer;transition:all .18s;user-select:none}
+    .type-toggle:hover{border-color:#3a4468}
+    .type-toggle.selected{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,#1e2230)}
+    .type-toggle .t-icon{width:26px;height:26px;flex-shrink:0}
+    .type-toggle .t-name{font-size:.83rem;font-weight:600;color:#c8cad8}
+    .type-toggle .t-check{margin-left:auto;width:16px;height:16px;border-radius:4px;border:1.5px solid #3a4468;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+    .type-toggle.selected .t-check{background:var(--c);border-color:var(--c)}
+    .type-toggle.selected .t-check::after{content:'✓';font-size:.65rem;color:#fff}
 
-    #search-btn:hover { background: #3a6ec4; }
-    #search-btn:disabled { background: #2a3a5a; cursor: default; }
+    /* Dispatch button */
+    #dispatch-btn{margin:12px 16px;background:linear-gradient(135deg,#e05252,#c03030);border:none;border-radius:9px;padding:11px;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0}
+    #dispatch-btn:hover{opacity:.88}
+    #dispatch-btn:disabled{background:#2a2a3a;color:#5a6070;cursor:default;opacity:1}
 
-    .legend {
-      display: flex;
-      gap: 16px;
-      margin-left: auto;
-      flex-wrap: wrap;
-    }
+    /* Results */
+    #results{flex:1;overflow-y:auto;padding:10px 16px 16px}
+    #results::-webkit-scrollbar{width:4px}
+    #results::-webkit-scrollbar-thumb{background:#2e3448;border-radius:2px}
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: #9aa0b8;
-    }
+    .result-card{background:#1e2230;border:1px solid #2e3448;border-radius:10px;padding:12px;margin-bottom:10px;border-left:3px solid var(--c)}
+    .result-card .rc-type{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--c);margin-bottom:3px;font-weight:700}
+    .result-card .rc-name{font-size:.88rem;font-weight:700;color:#e8eaf0;margin-bottom:6px}
+    .result-card .rc-row{display:flex;justify-content:space-between;font-size:.78rem;color:#9aa0b8;margin-bottom:2px}
+    .result-card .rc-row span:last-child{color:#e8eaf0;font-weight:600}
+    .result-card .rc-focus{margin-top:8px;font-size:.75rem;color:#4a80d4;cursor:pointer;text-decoration:underline}
+    .result-card .rc-focus:hover{color:#7ab0ff}
 
-    .legend-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .no-result{text-align:center;color:#5a6070;font-size:.82rem;padding:20px 0}
 
-    #map { flex: 1; }
+    /* Incident pin */
+    .incident-icon{filter:drop-shadow(0 2px 6px #000a)}
 
-    #status-bar {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e2230ee;
-      border: 1px solid #2e3448;
-      border-radius: 10px;
-      padding: 10px 20px;
-      font-size: 0.85rem;
-      color: #9aa0b8;
-      z-index: 1000;
-      display: none;
-      backdrop-filter: blur(8px);
-      white-space: nowrap;
-    }
+    /* Status toast */
+    #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1e2230ee;border:1px solid #2e3448;border-radius:9px;padding:9px 18px;font-size:.82rem;color:#9aa0b8;z-index:2000;display:none;backdrop-filter:blur(8px);white-space:nowrap;pointer-events:none}
+    #toast.on{display:block}
 
-    #status-bar.visible { display: block; }
-
-    /* Leaflet popup tweaks */
-    .leaflet-popup-content-wrapper {
-      background: #1e2230;
-      border: 1px solid #2e3448;
-      border-radius: 10px;
-      box-shadow: 0 4px 24px #000a;
-    }
-
-    .leaflet-popup-tip { background: #1e2230; }
-
-    .leaflet-popup-content {
-      color: #e8eaf0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      font-size: 0.88rem;
-      margin: 10px 14px;
-    }
-
-    .popup-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-    }
-
-    .popup-type {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      opacity: 0.65;
-    }
+    /* Popup */
+    .leaflet-popup-content-wrapper{background:#1e2230;border:1px solid #2e3448;border-radius:10px;box-shadow:0 4px 24px #000a}
+    .leaflet-popup-tip{background:#1e2230}
+    .leaflet-popup-content{color:#e8eaf0;font-family:'Segoe UI',system-ui,sans-serif;font-size:.85rem;margin:10px 13px}
+    .popup-type{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;margin-bottom:2px}
+    .popup-name{font-weight:700;font-size:.92rem}
   </style>
 </head>
 <body>
@@ -155,194 +102,345 @@
 <header>
   <div class="logo">Emergency<span>Map</span></div>
   <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Search a city or address…" />
-    <button id="search-btn">Search</button>
+    <input id="loc-input" type="text" placeholder="Search city or address to navigate…"/>
+    <button id="loc-btn">Go</button>
   </div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Hospital</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Fire Station</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Police</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Hospital</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Fire Station</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Police</div>
   </div>
 </header>
 
-<div id="map"></div>
-<div id="status-bar">Loading…</div>
+<div class="main">
+  <div id="map"></div>
+
+  <!-- Side panel -->
+  <div id="panel">
+    <div class="panel-header">
+      <h2>🚨 Dispatch Emergency</h2>
+      <p>Set incident location &amp; select services</p>
+    </div>
+
+    <!-- Incident location -->
+    <div class="section">
+      <div class="section-label">Incident Location</div>
+      <div class="addr-row">
+        <input id="addr-input" type="text" placeholder="Type an address…"/>
+        <button id="addr-btn">Set</button>
+      </div>
+      <div class="or-row">— or —</div>
+      <div class="click-hint" id="click-hint">Click anywhere on the map to place incident pin</div>
+    </div>
+
+    <!-- Emergency types -->
+    <div class="section">
+      <div class="section-label">Emergency Type</div>
+      <div class="type-toggles">
+        <div class="type-toggle" data-type="hospital" style="--c:#22c55e" onclick="toggleType(this)">
+          <svg class="t-icon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#22c55e" opacity=".9"/><rect x="17" y="10" width="6" height="20" rx="2" fill="#fff"/><rect x="10" y="17" width="20" height="6" rx="2" fill="#fff"/></svg>
+          <span class="t-name">Medical / Hospital</span>
+          <div class="t-check"></div>
+        </div>
+        <div class="type-toggle" data-type="fire_station" style="--c:#ef4444" onclick="toggleType(this)">
+          <svg class="t-icon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#ef4444" opacity=".9"/><path d="M20 10 C20 10 26 15 26 21 C26 25.4 23.3 28.8 20 29.5 C16.7 28.8 14 25.4 14 21 C14 17 17 13 18 11 C18 13.5 19.5 15 21 16 C20 13 20 10 20 10Z" fill="#fff"/><path d="M20 19 C20 19 23 22 23 24.5 C23 26.4 21.7 28 20 28 C18.3 28 17 26.4 17 24.5 C17 22 20 19 20 19Z" fill="#fca5a5"/></svg>
+          <span class="t-name">Fire / Fire Station</span>
+          <div class="t-check"></div>
+        </div>
+        <div class="type-toggle" data-type="police" style="--c:#3b82f6" onclick="toggleType(this)">
+          <svg class="t-icon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#3b82f6" opacity=".9"/><path d="M20 11 L27 14.5 L27 22 C27 26 23.5 29 20 30 C16.5 29 13 26 13 22 L13 14.5 Z" fill="#fff" opacity=".9"/><path d="M20 17 L21.2 20.6 L25 20.6 L22 22.8 L23.1 26.4 L20 24.2 L16.9 26.4 L18 22.8 L15 20.6 L18.8 20.6 Z" fill="#3b82f6"/></svg>
+          <span class="t-name">Crime / Police</span>
+          <div class="t-check"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="dispatch-btn" disabled onclick="dispatch()">
+      <span>⚡</span> Find Closest &amp; Route
+    </button>
+
+    <div id="results"><div class="no-result" style="padding-top:30px">Set an incident location and select at least one emergency type, then hit dispatch.</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-  // ── Map setup ──────────────────────────────────────────────────────────────
-  const map = L.map('map').setView([48.8566, 2.3522], 13);
+// ── Config ──────────────────────────────────────────────────────────────────
+const COLORS   = { hospital:'#22c55e', fire_station:'#ef4444', police:'#3b82f6' };
+const LABELS   = { hospital:'Hospital', fire_station:'Fire Station', police:'Police Station' };
+const OSRM     = 'https://router.project-osrm.org/route/v1/driving';
+const NOMINATIM= 'https://nominatim.openstreetmap.org';
+const OVERPASS = 'https://overpass-api.de/api/interpreter';
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 19
-  }).addTo(map);
+// ── Map ──────────────────────────────────────────────────────────────────────
+const map = L.map('map').setView([48.8566, 2.3522], 13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains:'abcd', maxZoom:19
+}).addTo(map);
 
-  // ── SVG icon factory ───────────────────────────────────────────────────────
-  function makeIcon(svgContent, color) {
-    const size = 38;
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r="18" fill="${color}" opacity="0.92"/>
-        <circle cx="20" cy="20" r="18" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/>
-        ${svgContent}
-      </svg>`;
-    return L.divIcon({
-      html: `<div style="filter:drop-shadow(0 2px 6px #0008)">${svg}</div>`,
-      className: '',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -size / 2]
+// ── Icon factory ─────────────────────────────────────────────────────────────
+function makeIcon(svgInner, color, size=36){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="18" fill="${color}" opacity=".92"/>
+    <circle cx="20" cy="20" r="18" fill="none" stroke="#fff" stroke-width="1.5" opacity=".35"/>
+    ${svgInner}</svg>`;
+  return L.divIcon({html:`<div style="filter:drop-shadow(0 2px 6px #0009)">${svg}</div>`,className:'',iconSize:[size,size],iconAnchor:[size/2,size/2],popupAnchor:[0,-size/2]});
+}
+
+const ICONS = {
+  hospital:    makeIcon(`<rect x="17" y="10" width="6" height="20" rx="2" fill="#fff"/><rect x="10" y="17" width="20" height="6" rx="2" fill="#fff"/>`, COLORS.hospital),
+  fire_station:makeIcon(`<path d="M20 10 C20 10 26 15 26 21 C26 25.4 23.3 28.8 20 29.5 C16.7 28.8 14 25.4 14 21 C14 17 17 13 18 11 C18 13.5 19.5 15 21 16 C20 13 20 10 20 10Z" fill="#fff"/><path d="M20 19 C20 19 23 22 23 24.5 C23 26.4 21.7 28 20 28 C18.3 28 17 26.4 17 24.5 C17 22 20 19 20 19Z" fill="#fca5a5"/>`, COLORS.fire_station),
+  police:      makeIcon(`<path d="M20 11 L27 14.5 L27 22 C27 26 23.5 29 20 30 C16.5 29 13 26 13 22 L13 14.5 Z" fill="#fff" opacity=".9"/><path d="M20 17 L21.2 20.6 L25 20.6 L22 22.8 L23.1 26.4 L20 24.2 L16.9 26.4 L18 22.8 L15 20.6 L18.8 20.6 Z" fill="#3b82f6"/>`, COLORS.police),
+};
+
+// Incident pin icon
+const INCIDENT_ICON = L.divIcon({
+  html:`<div style="filter:drop-shadow(0 3px 8px #000c)">
+    <svg width="36" height="44" viewBox="0 0 36 44" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 0 C8 0 0 8 0 18 C0 30 18 44 18 44 C18 44 36 30 36 18 C36 8 28 0 18 0Z" fill="#f59e0b"/>
+      <circle cx="18" cy="18" r="8" fill="#fff" opacity=".9"/>
+      <text x="18" y="23" text-anchor="middle" font-size="13" fill="#f59e0b" font-weight="900">!</text>
+    </svg></div>`,
+  className:'',iconSize:[36,44],iconAnchor:[18,44],popupAnchor:[0,-44]
+});
+
+// ── State ────────────────────────────────────────────────────────────────────
+let serviceLayers = { hospital:L.layerGroup().addTo(map), fire_station:L.layerGroup().addTo(map), police:L.layerGroup().addTo(map) };
+let serviceData   = { hospital:[], fire_station:[], police:[] };
+let incidentMarker= null;
+let incidentLatLng= null;
+let routeLayers   = [];
+let resultMarkers = [];
+let selectedTypes = new Set();
+let clickMode     = false;
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, persist=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(toastTimer);
+  if(!persist) toastTimer=setTimeout(()=>el.classList.remove('on'),3000);
+}
+
+// ── Type toggles ─────────────────────────────────────────────────────────────
+function toggleType(el){
+  const t=el.dataset.type;
+  if(selectedTypes.has(t)){selectedTypes.delete(t);el.classList.remove('selected');}
+  else{selectedTypes.add(t);el.classList.add('selected');}
+  updateDispatchBtn();
+}
+function updateDispatchBtn(){
+  const btn=document.getElementById('dispatch-btn');
+  btn.disabled=!(incidentLatLng && selectedTypes.size>0);
+}
+
+// ── Click-mode toggle ────────────────────────────────────────────────────────
+const clickHint=document.getElementById('click-hint');
+clickHint.addEventListener('click',()=>{
+  clickMode=!clickMode;
+  clickHint.classList.toggle('active',clickMode);
+  clickHint.textContent=clickMode?'🎯 Click mode ON – click the map to place pin':'Click anywhere on the map to place incident pin';
+  map.getContainer().style.cursor=clickMode?'crosshair':'';
+});
+
+map.on('click',e=>{
+  if(!clickMode)return;
+  setIncident(e.latlng);
+  clickMode=false;
+  clickHint.classList.remove('active');
+  clickHint.textContent='Click anywhere on the map to place incident pin';
+  map.getContainer().style.cursor='';
+});
+
+// ── Incident marker ───────────────────────────────────────────────────────────
+function setIncident(latlng){
+  if(incidentMarker) map.removeLayer(incidentMarker);
+  incidentMarker=L.marker(latlng,{icon:INCIDENT_ICON,zIndexOffset:1000}).addTo(map)
+    .bindPopup('<div class="popup-name" style="color:#f59e0b">📍 Incident Location</div>');
+  incidentLatLng=latlng;
+  updateDispatchBtn();
+  toast('Incident pin placed');
+}
+
+// ── Address → set incident ────────────────────────────────────────────────────
+document.getElementById('addr-btn').addEventListener('click', setIncidentFromAddr);
+document.getElementById('addr-input').addEventListener('keydown',e=>{ if(e.key==='Enter') setIncidentFromAddr(); });
+async function setIncidentFromAddr(){
+  const q=document.getElementById('addr-input').value.trim();
+  if(!q)return;
+  toast('Geocoding…',true);
+  try{
+    const r=await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
+    const d=await r.json();
+    if(!d.length){toast('Address not found');return;}
+    const ll=L.latLng(+d[0].lat,+d[0].lon);
+    map.setView(ll,15);
+    setIncident(ll);
+  }catch{toast('Geocoding failed');}
+}
+
+// ── Map nav search ────────────────────────────────────────────────────────────
+document.getElementById('loc-btn').addEventListener('click', navSearch);
+document.getElementById('loc-input').addEventListener('keydown',e=>{ if(e.key==='Enter') navSearch(); });
+async function navSearch(){
+  const q=document.getElementById('loc-input').value.trim();
+  if(!q)return;
+  toast('Searching…',true);
+  try{
+    const r=await fetch(`${NOMINATIM}/search?q=${encodeURIComponent(q)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
+    const d=await r.json();
+    if(!d.length){toast('Location not found');return;}
+    map.setView([+d[0].lat,+d[0].lon],14);
+    toast(`Navigated to ${d[0].display_name.split(',').slice(0,2).join(',')}`);
+  }catch{toast('Search failed');}
+}
+
+// ── Overpass load ─────────────────────────────────────────────────────────────
+let overpassCtrl=null, debounceT;
+map.on('moveend zoomend',()=>{
+  clearTimeout(debounceT);
+  if(map.getZoom()<11){
+    Object.values(serviceLayers).forEach(l=>l.clearLayers());
+    Object.keys(serviceData).forEach(k=>serviceData[k]=[]);
+    toast('Zoom in to load services (zoom ≥ 11)');return;
+  }
+  debounceT=setTimeout(()=>loadServices(map.getBounds()),450);
+});
+
+async function loadServices(bounds){
+  const {_southWest:sw,_northEast:ne}=bounds;
+  const bb=`${sw.lat},${sw.lng},${ne.lat},${ne.lng}`;
+  const q=`[out:json][timeout:25];(node[amenity=hospital](${bb});way[amenity=hospital](${bb});node[amenity=fire_station](${bb});way[amenity=fire_station](${bb});node[amenity=police](${bb});way[amenity=police](${bb}););out center;`;
+  if(overpassCtrl) overpassCtrl.abort();
+  overpassCtrl=new AbortController();
+  toast('Loading services…',true);
+  try{
+    const r=await fetch(OVERPASS,{method:'POST',body:q,signal:overpassCtrl.signal});
+    const d=await r.json();
+    Object.values(serviceLayers).forEach(l=>l.clearLayers());
+    Object.keys(serviceData).forEach(k=>serviceData[k]=[]);
+    const cnt={hospital:0,fire_station:0,police:0};
+    d.elements.forEach(el=>{
+      const type=el.tags?.amenity; if(!type||!serviceLayers[type])return;
+      const lat=el.lat??el.center?.lat, lon=el.lon??el.center?.lon; if(!lat||!lon)return;
+      const name=el.tags.name||LABELS[type];
+      const m=L.marker([lat,lon],{icon:ICONS[type]}).bindPopup(
+        `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${name}</div>`);
+      serviceLayers[type].addLayer(m);
+      serviceData[type].push({lat,lon,name,marker:m});
+      cnt[type]++;
     });
+    toast(`${cnt.hospital} hospitals · ${cnt.fire_station} fire stations · ${cnt.police} police`);
+  }catch(e){ if(e.name!=='AbortError') toast('Failed to load services'); }
+}
+
+// ── Haversine distance ────────────────────────────────────────────────────────
+function haversine(a,b){
+  const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+// ── Clear routes ──────────────────────────────────────────────────────────────
+function clearRoutes(){
+  routeLayers.forEach(l=>map.removeLayer(l));
+  routeLayers=[];
+  resultMarkers.forEach(l=>map.removeLayer(l));
+  resultMarkers=[];
+}
+
+// ── Dispatch ──────────────────────────────────────────────────────────────────
+async function dispatch(){
+  if(!incidentLatLng||selectedTypes.size===0)return;
+  clearRoutes();
+  document.getElementById('results').innerHTML='';
+
+  const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
+  const tasks=[...selectedTypes].map(type=>({type,stations:serviceData[type]}));
+
+  // Check all requested types have data
+  const missing=tasks.filter(t=>t.stations.length===0).map(t=>LABELS[t.type]);
+  if(missing.length){
+    document.getElementById('results').innerHTML=`<div class="no-result">No ${missing.join(', ')} data loaded in this area.<br>Pan/zoom the map so they appear first.</div>`;
+    return;
   }
 
-  // Hospital: white cross
-  const hospitalIcon = makeIcon(`
-    <rect x="17" y="10" width="6" height="20" rx="2" fill="#fff"/>
-    <rect x="10" y="17" width="20" height="6" rx="2" fill="#fff"/>`, '#3b82f6');
+  document.getElementById('results').innerHTML='<div class="no-result">Routing…</div>';
+  const cards=[];
 
-  // Fire station: flame
-  const fireIcon = makeIcon(`
-    <path d="M20 10 C20 10 26 15 26 21 C26 25.4 23.3 28.8 20 29.5 C16.7 28.8 14 25.4 14 21 C14 17 17 13 18 11 C18 13.5 19.5 15 21 16 C20 13 20 10 20 10Z" fill="#fff" opacity="0.95"/>
-    <path d="M20 19 C20 19 23 22 23 24.5 C23 26.4 21.7 28 20 28 C18.3 28 17 26.4 17 24.5 C17 22 20 19 20 19Z" fill="#fca5a5"/>`, '#ef4444');
+  for(const {type,stations} of tasks){
+    // Find closest by haversine
+    let closest=null, minD=Infinity;
+    stations.forEach(s=>{
+      const d=haversine(inc,s);
+      if(d<minD){minD=d;closest=s;}
+    });
+    if(!closest)continue;
 
-  // Police: shield + star
-  const policeIcon = makeIcon(`
-    <path d="M20 11 L27 14.5 L27 22 C27 26 23.5 29 20 30 C16.5 29 13 26 13 22 L13 14.5 Z" fill="#fff" opacity="0.9"/>
-    <path d="M20 17 L21.2 20.6 L25 20.6 L22 22.8 L23.1 26.4 L20 24.2 L16.9 26.4 L18 22.8 L15 20.6 L18.8 20.6 Z" fill="#3b82f6"/>`, '#22c55e');
+    // OSRM route
+    try{
+      const url=`${OSRM}/${inc.lon},${inc.lat};${closest.lon},${closest.lat}?overview=full&geometries=geojson`;
+      const r=await fetch(url);
+      const d=await r.json();
+      const route=d.routes?.[0];
+      const coords=route?.geometry?.coordinates?.map(([ln,lt])=>[lt,ln])||[[inc.lat,inc.lon],[closest.lat,closest.lon]];
+      const distKm=(route?.distance||minD*1000)/1000;
+      const durMin=Math.round((route?.duration||((minD/50)*3600))/60);
 
-  // ── Layer groups ───────────────────────────────────────────────────────────
-  const layers = {
-    hospital: L.layerGroup().addTo(map),
-    fire_station: L.layerGroup().addTo(map),
-    police: L.layerGroup().addTo(map),
-  };
+      // Draw route polyline
+      const poly=L.polyline(coords,{color:COLORS[type],weight:4,opacity:.85,dashArray:type==='police'?null:'6,4'}).addTo(map);
+      routeLayers.push(poly);
 
-  const iconMap = { hospital: hospitalIcon, fire_station: fireIcon, police: policeIcon };
-  const labelMap = { hospital: 'Hospital', fire_station: 'Fire Station', police: 'Police Station' };
-  const colorMap = { hospital: '#3b82f6', fire_station: '#ef4444', police: '#22c55e' };
+      // Pulse circle at station
+      const pulse=L.circleMarker([closest.lat,closest.lon],{radius:16,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.7}).addTo(map);
+      routeLayers.push(pulse);
 
-  // ── Overpass query ─────────────────────────────────────────────────────────
-  let lastRequest = null;
-
-  function setStatus(msg, persist = false) {
-    const el = document.getElementById('status-bar');
-    el.textContent = msg;
-    el.classList.add('visible');
-    if (!persist) setTimeout(() => el.classList.remove('visible'), 3000);
-  }
-
-  async function loadEmergencyServices(bounds) {
-    const { _southWest: sw, _northEast: ne } = bounds;
-    const bbox = `${sw.lat},${sw.lng},${ne.lat},${ne.lng}`;
-
-    const query = `
-      [out:json][timeout:25];
-      (
-        node[amenity=hospital](${bbox});
-        way[amenity=hospital](${bbox});
-        node[amenity=fire_station](${bbox});
-        way[amenity=fire_station](${bbox});
-        node[amenity=police](${bbox});
-        way[amenity=police](${bbox});
-      );
-      out center;
-    `;
-
-    const url = 'https://overpass-api.de/api/interpreter';
-    const ctrl = new AbortController();
-    if (lastRequest) lastRequest.abort();
-    lastRequest = ctrl;
-
-    setStatus('Fetching emergency services…', true);
-    document.getElementById('search-btn').disabled = true;
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        body: query,
-        signal: ctrl.signal
-      });
-      const data = await res.json();
-
-      // Clear layers
-      Object.values(layers).forEach(l => l.clearLayers());
-
-      let counts = { hospital: 0, fire_station: 0, police: 0 };
-
-      data.elements.forEach(el => {
-        const type = el.tags?.amenity;
-        if (!type || !layers[type]) return;
-
-        const lat = el.lat ?? el.center?.lat;
-        const lon = el.lon ?? el.center?.lon;
-        if (!lat || !lon) return;
-
-        const name = el.tags.name || labelMap[type];
-
-        const marker = L.marker([lat, lon], { icon: iconMap[type] });
-        marker.bindPopup(`
-          <div class="popup-type" style="color:${colorMap[type]}">${labelMap[type]}</div>
-          <div class="popup-title">${name}</div>
-          ${el.tags['addr:street'] ? `<div style="opacity:.6;margin-top:3px">${el.tags['addr:street']}${el.tags['addr:housenumber'] ? ' ' + el.tags['addr:housenumber'] : ''}</div>` : ''}
-        `);
-
-        layers[type].addLayer(marker);
-        counts[type]++;
-      });
-
-      const total = counts.hospital + counts.fire_station + counts.police;
-      setStatus(`Found: ${counts.hospital} hospitals · ${counts.fire_station} fire stations · ${counts.police} police stations`);
-      if (total === 0) setStatus('No emergency services found in this area. Try zooming out.');
-
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        setStatus('Failed to load data. Try again.');
-      }
-    } finally {
-      document.getElementById('search-btn').disabled = false;
+      cards.push({type,closest,distKm,durMin,coords});
+    }catch{
+      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null});
     }
   }
 
-  // ── Map events ─────────────────────────────────────────────────────────────
-  let debounceTimer;
-  map.on('moveend zoomend', () => {
-    clearTimeout(debounceTimer);
-    if (map.getZoom() < 11) {
-      Object.values(layers).forEach(l => l.clearLayers());
-      setStatus('Zoom in to load emergency services (zoom ≥ 11)');
-      return;
-    }
-    debounceTimer = setTimeout(() => loadEmergencyServices(map.getBounds()), 400);
+  // Fit map to all routes
+  if(routeLayers.length){
+    const allPts=[[inc.lat,inc.lon]];
+    cards.forEach(c=>{if(c.coords)c.coords.forEach(p=>allPts.push(p));else allPts.push([c.closest.lat,c.closest.lon]);});
+    map.fitBounds(L.latLngBounds(allPts),{padding:[40,40]});
+  }
+
+  // Render result cards
+  const res=document.getElementById('results');
+  res.innerHTML='';
+  if(cards.length===0){res.innerHTML='<div class="no-result">No routes found.</div>';return;}
+
+  cards.forEach((c,i)=>{
+    const card=document.createElement('div');
+    card.className='result-card';
+    card.style.setProperty('--c',COLORS[c.type]);
+    card.innerHTML=`
+      <div class="rc-type">${LABELS[c.type]}</div>
+      <div class="rc-name">${c.closest.name}</div>
+      <div class="rc-row"><span>Distance</span><span>${c.distKm.toFixed(2)} km</span></div>
+      <div class="rc-row"><span>Est. travel time</span><span>~${c.durMin} min</span></div>
+      <div class="rc-focus" onclick="focusRoute(${i})">→ Focus on route</div>`;
+    res.appendChild(card);
   });
 
-  // ── Search ─────────────────────────────────────────────────────────────────
-  async function searchLocation() {
-    const q = document.getElementById('search-input').value.trim();
-    if (!q) return;
+  window._dispatchCards=cards;
+}
 
-    setStatus('Searching…', true);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`,
-        { headers: { 'Accept-Language': 'en' } }
-      );
-      const data = await res.json();
-      if (!data.length) { setStatus('Location not found. Try a different query.'); return; }
-      const { lat, lon, display_name } = data[0];
-      map.setView([+lat, +lon], 14);
-      setStatus(`Showing: ${display_name.split(',').slice(0, 2).join(',')}`);
-    } catch {
-      setStatus('Search failed. Check your connection.');
-    }
-  }
+function focusRoute(i){
+  const c=window._dispatchCards?.[i]; if(!c)return;
+  const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
+  const pts=c.coords||[[inc.lat,inc.lon],[c.closest.lat,c.closest.lon]];
+  map.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
+}
 
-  document.getElementById('search-btn').addEventListener('click', searchLocation);
-  document.getElementById('search-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') searchLocation();
-  });
-
-  // ── Initial load ───────────────────────────────────────────────────────────
-  loadEmergencyServices(map.getBounds());
+// ── Initial load ──────────────────────────────────────────────────────────────
+loadServices(map.getBounds());
 </script>
 </body>
 </html>
