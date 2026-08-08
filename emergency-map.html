@@ -352,35 +352,103 @@ function clearRoutes(){
   resultMarkers=[];
 }
 
+// ── Fresh Overpass search around a point, expanding radius until found ────────
+// Returns {hospital:[], fire_station:[], police:[]} for the requested types only.
+async function searchNearIncident(lat, lon, types, statusFn){
+  const radii = [2000, 5000, 10000, 20000]; // metres, expanding rings
+  const amenityTags = types.map(t=>`node[amenity=${t}](around:RADIUS,${lat},${lon});way[amenity=${t}](around:RADIUS,${lat},${lon});`).join('');
+
+  for(const radius of radii){
+    statusFn(`Searching within ${radius>=1000?(radius/1000)+'km':radius+'m'} of incident…`, true);
+    const q=`[out:json][timeout:20];(${amenityTags.replaceAll('RADIUS', radius)});out center;`;
+    try{
+      const r=await fetch(OVERPASS,{method:'POST',body:q});
+      const d=await r.json();
+      const found={};
+      types.forEach(t=>found[t]=[]);
+      d.elements.forEach(el=>{
+        const type=el.tags?.amenity; if(!type||!found[type])return;
+        const elat=el.lat??el.center?.lat, elon=el.lon??el.center?.lon; if(!elat||!elon)return;
+        found[type].push({lat:elat,lon:elon,name:el.tags.name||LABELS[type]});
+      });
+      // Only continue if every requested type has at least one result
+      if(types.every(t=>found[t].length>0)) return {found, radius};
+      // If some types are missing but we have others, keep expanding only for missing ones
+      // But for simplicity expand until all found or exhausted
+    }catch(e){ statusFn('Overpass query failed'); throw e; }
+  }
+  // Last attempt: return whatever we got (may be empty for some types)
+  statusFn(`Searching within 20km of incident…`, true);
+  const q=`[out:json][timeout:20];(${amenityTags.replaceAll('RADIUS', 20000)});out center;`;
+  const r=await fetch(OVERPASS,{method:'POST',body:q});
+  const d=await r.json();
+  const found={};
+  types.forEach(t=>found[t]=[]);
+  d.elements.forEach(el=>{
+    const type=el.tags?.amenity; if(!type||!found[type])return;
+    const elat=el.lat??el.center?.lat, elon=el.lon??el.center?.lon; if(!elat||!elon)return;
+    found[type].push({lat:elat,lon:elon,name:el.tags.name||LABELS[type]});
+  });
+  return {found, radius:20000};
+}
+
 // ── Dispatch ──────────────────────────────────────────────────────────────────
 async function dispatch(){
   if(!incidentLatLng||selectedTypes.size===0)return;
   clearRoutes();
-  document.getElementById('results').innerHTML='';
+  const res=document.getElementById('results');
+  res.innerHTML='<div class="no-result">🔍 Querying nearby emergency services…</div>';
+  document.getElementById('dispatch-btn').disabled=true;
 
   const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
-  const tasks=[...selectedTypes].map(type=>({type,stations:serviceData[type]}));
+  const types=[...selectedTypes];
 
-  // Check all requested types have data
-  const missing=tasks.filter(t=>t.stations.length===0).map(t=>LABELS[t.type]);
-  if(missing.length){
-    document.getElementById('results').innerHTML=`<div class="no-result">No ${missing.join(', ')} data loaded in this area.<br>Pan/zoom the map so they appear first.</div>`;
+  let found, searchRadius;
+  try{
+    ({found, radius:searchRadius}=await searchNearIncident(inc.lat,inc.lon,types,toast));
+  }catch{
+    res.innerHTML='<div class="no-result">Failed to query Overpass API. Check connection.</div>';
+    document.getElementById('dispatch-btn').disabled=false;
     return;
   }
 
-  document.getElementById('results').innerHTML='<div class="no-result">Routing…</div>';
+  // Also refresh the visible map layer with these results so the user sees them
+  types.forEach(type=>{
+    serviceLayers[type].clearLayers();
+    serviceData[type]=[];
+    found[type].forEach(s=>{
+      const m=L.marker([s.lat,s.lon],{icon:ICONS[type]}).bindPopup(
+        `<div class="popup-type" style="color:${COLORS[type]}">${LABELS[type]}</div><div class="popup-name">${s.name}</div>`);
+      serviceLayers[type].addLayer(m);
+      serviceData[type].push(s);
+    });
+  });
+
+  const missing=types.filter(t=>found[t].length===0);
+  if(missing.length===types.length){
+    res.innerHTML=`<div class="no-result">No emergency services found within 20 km of this location.</div>`;
+    document.getElementById('dispatch-btn').disabled=false;
+    return;
+  }
+  if(missing.length>0){
+    toast(`No ${missing.map(t=>LABELS[t]).join(', ')} found within ${searchRadius/1000}km`);
+  }
+
+  res.innerHTML='<div class="no-result">🗺 Calculating routes…</div>';
   const cards=[];
 
-  for(const {type,stations} of tasks){
+  for(const type of types){
+    const stations=found[type];
+    if(!stations.length) continue;
+
     // Find closest by haversine
     let closest=null, minD=Infinity;
     stations.forEach(s=>{
       const d=haversine(inc,s);
       if(d<minD){minD=d;closest=s;}
     });
-    if(!closest)continue;
 
-    // OSRM route
+    // OSRM driving route
     try{
       const url=`${OSRM}/${inc.lon},${inc.lat};${closest.lon},${closest.lat}?overview=full&geometries=geojson`;
       const r=await fetch(url);
@@ -390,31 +458,32 @@ async function dispatch(){
       const distKm=(route?.distance||minD*1000)/1000;
       const durMin=Math.round((route?.duration||((minD/50)*3600))/60);
 
-      // Draw route polyline
-      const poly=L.polyline(coords,{color:COLORS[type],weight:4,opacity:.85,dashArray:type==='police'?null:'6,4'}).addTo(map);
+      const poly=L.polyline(coords,{color:COLORS[type],weight:4.5,opacity:.9,dashArray:type==='police'?null:'8,5'}).addTo(map);
       routeLayers.push(poly);
-
-      // Pulse circle at station
-      const pulse=L.circleMarker([closest.lat,closest.lon],{radius:16,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.7}).addTo(map);
+      const pulse=L.circleMarker([closest.lat,closest.lon],{radius:18,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.7}).addTo(map);
       routeLayers.push(pulse);
 
-      cards.push({type,closest,distKm,durMin,coords});
+      cards.push({type,closest,distKm,durMin,coords,searchRadius});
     }catch{
-      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null});
+      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null,searchRadius});
     }
   }
 
-  // Fit map to all routes
+  // Fit map to all routes + incident
   if(routeLayers.length){
     const allPts=[[inc.lat,inc.lon]];
     cards.forEach(c=>{if(c.coords)c.coords.forEach(p=>allPts.push(p));else allPts.push([c.closest.lat,c.closest.lon]);});
-    map.fitBounds(L.latLngBounds(allPts),{padding:[40,40]});
+    map.fitBounds(L.latLngBounds(allPts),{padding:[40,320]});
   }
 
-  // Render result cards
-  const res=document.getElementById('results');
   res.innerHTML='';
-  if(cards.length===0){res.innerHTML='<div class="no-result">No routes found.</div>';return;}
+  if(cards.length===0){res.innerHTML='<div class="no-result">No routes found.</div>';document.getElementById('dispatch-btn').disabled=false;return;}
+
+  // Search radius badge
+  const badge=document.createElement('div');
+  badge.style='font-size:.72rem;color:#5a6070;text-align:center;padding:6px 0 2px;';
+  badge.textContent=`Searched within ${searchRadius>=1000?(searchRadius/1000)+'km':searchRadius+'m'} of incident`;
+  res.appendChild(badge);
 
   cards.forEach((c,i)=>{
     const card=document.createElement('div');
@@ -430,13 +499,14 @@ async function dispatch(){
   });
 
   window._dispatchCards=cards;
+  document.getElementById('dispatch-btn').disabled=false;
 }
 
 function focusRoute(i){
   const c=window._dispatchCards?.[i]; if(!c)return;
   const inc={lat:incidentLatLng.lat,lon:incidentLatLng.lng};
   const pts=c.coords||[[inc.lat,inc.lon],[c.closest.lat,c.closest.lon]];
-  map.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
+  map.fitBounds(L.latLngBounds(pts),{padding:[60,320]});
 }
 
 // ── Initial load ──────────────────────────────────────────────────────────────
