@@ -110,6 +110,7 @@
     <button id="loc-btn">Go</button>
   </div>
   <button id="my-loc-btn" title="Show my location">📍</button>
+  <button id="unit-btn" onclick="toggleUnit()" title="Switch units" style="background:#1e2230;border:1px solid #2e3448;border-radius:8px;padding:6px 12px;color:#9aa0b8;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0">km → mi</button>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Hospital</div>
     <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Fire Station</div>
@@ -183,6 +184,31 @@ const NOMINATIM = 'https://nominatim.openstreetmap.org';
 const OSRM      = 'https://router.project-osrm.org/route/v1/driving';
 // Helicopter speed km/h (cruise ~250, but response is ~120–150 for HEMS)
 const HELI_KMH  = 140;
+
+// ── Units ─────────────────────────────────────────────────────────────────────
+let useMiles=false;
+function toggleUnit(){
+  useMiles=!useMiles;
+  const btn=document.getElementById('unit-btn');
+  btn.textContent=useMiles?'mi → km':'km → mi';
+  btn.style.borderColor=useMiles?'#f59e0b':'#2e3448';
+  btn.style.color=useMiles?'#f59e0b':'#9aa0b8';
+  refreshCards();
+}
+function fmtDist(km){ return useMiles?(km*0.621371).toFixed(2)+' mi':km.toFixed(2)+' km'; }
+function fmtDistStraight(km){ return fmtDist(km); }
+// Rerender distance rows in existing cards without rebuilding the whole card
+function refreshCards(){
+  const cards=window._cards; if(!cards) return;
+  cards.forEach((c,i)=>{
+    if(c.error) return;
+    const heliMin=Math.round((c.straightDist/HELI_KMH)*60);
+    const roadEl=document.getElementById(`road-dist-${i}`);
+    const heliEl=document.getElementById(`heli-dist-val-${i}`);
+    if(roadEl) roadEl.textContent=fmtDist(c.distKm);
+    if(heliEl) heliEl.textContent=fmtDistStraight(c.straightDist);
+  });
+}
 
 const COLORS = { hospital:'#22c55e', fire_station:'#ef4444', police:'#3b82f6' };
 const LABELS = { hospital:'Hospital', fire_station:'Fire Station', police:'Police Station' };
@@ -476,9 +502,9 @@ async function dispatch(){
       card.innerHTML=`
         <div class="rc-type">${LABELS[c.type]}</div>
         <div class="rc-name">${c.closest.name}</div>
-        <div class="rc-row"><span>Road distance</span><span>${c.distKm.toFixed(2)} km</span></div>
+        <div class="rc-row"><span>Road distance</span><span id="road-dist-${i}">${fmtDist(c.distKm)}</span></div>
         <div class="rc-row"><span>Est. road time</span><span>~${c.durMin} min${c.fallback?' (est.)':''}</span></div>
-        <div class="rc-row" id="heli-row-${i}" style="display:none"><span>🚁 Aerial distance</span><span>${c.straightDist.toFixed(2)} km</span></div>
+        <div class="rc-row" id="heli-row-${i}" style="display:none"><span>🚁 Aerial distance</span><span id="heli-dist-val-${i}">${fmtDistStraight(c.straightDist)}</span></div>
         <div class="rc-row" id="heli-time-${i}" style="display:none"><span>🚁 Aerial time</span><span>~${heliMin} min</span></div>
         <div class="rc-actions">
           <button class="rc-link" onclick="focusRoute(${i})">→ Focus on route</button>
@@ -536,8 +562,7 @@ function focusRoute(i){
     el.onclick=j===i?()=>showAllRoutes():()=>focusRoute(j);
   });
 
-  const pts=c.coords||[[inc.lat,inc.lon],[c.closest.lat,c.closest.lon]];
-  map.fitBounds(L.latLngBounds(pts),{padding:[60,320]});
+  // No map fly — user controls the view
 }
 
 function showAllRoutes(){
@@ -552,9 +577,7 @@ function showAllRoutes(){
   document.querySelectorAll('.rc-actions .rc-link:first-child').forEach((el,j)=>{
     el.textContent='→ Focus on route'; el.onclick=()=>focusRoute(j);
   });
-  const pts=[[inc.lat,inc.lon]];
-  window._cards?.forEach(c=>{ if(c.coords)c.coords.forEach(p=>pts.push(p)); else if(c.closest)pts.push([c.closest.lat,c.closest.lon]); });
-  map.fitBounds(L.latLngBounds(pts),{padding:[40,320]});
+  // No map fly — user controls the view
 }
 </script>
 </body>
