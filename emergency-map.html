@@ -271,7 +271,6 @@ async function nominatimSearch(amenityTag, lat, lon, radiusKm){
 async function findNearby(amenityTag, lat, lon){
   const radii = [2, 5, 10, 20]; // km
   for(const km of radii){
-    toast(`Searching ${amenityTag.replace('_',' ')} within ${km}km…`, true);
     const results = await nominatimSearch(amenityTag, lat, lon, km);
     if(results.length > 0) return { results, km };
   }
@@ -385,10 +384,10 @@ async function dispatch(){
       const ring=L.circleMarker([closest.lat,closest.lon],{radius:18,color:COLORS[type],weight:2.5,fillOpacity:.15,opacity:.8}).addTo(map);
       routeLayers.push(ring);
 
-      cards.push({type,closest,distKm,durMin,coords,searchKm});
+      cards.push({type,closest,distKm,durMin,coords,poly,ring});
     }catch{
       // OSRM failed — fall back to straight-line estimate
-      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null,searchKm,fallback:true});
+      cards.push({type,closest,distKm:minD,durMin:Math.round((minD/50)*60),coords:null,poly:null,ring:null,fallback:true});
     }
   }
 
@@ -415,7 +414,6 @@ async function dispatch(){
         <div class="rc-name">${c.closest.name}</div>
         <div class="rc-row"><span>Distance</span><span>${c.distKm.toFixed(2)} km</span></div>
         <div class="rc-row"><span>Est. travel time</span><span>~${c.durMin} min${c.fallback?' (est.)':''}</span></div>
-        <div class="rc-row"><span>Search radius</span><span>${c.searchKm} km</span></div>
         <div class="rc-focus" onclick="focusRoute(${i})">→ Focus on route</div>`;
     }
     res.appendChild(card);
@@ -427,8 +425,40 @@ async function dispatch(){
 
 function focusRoute(i){
   const c=window._cards?.[i]; if(!c||c.error)return;
+  // Show only this card's route layers, hide all others
+  window._cards.forEach((card,j)=>{
+    if(card.error) return;
+    const visible = j===i;
+    if(card.poly) { visible ? map.addLayer(card.poly) : map.removeLayer(card.poly); }
+    if(card.ring) { visible ? map.addLayer(card.ring) : map.removeLayer(card.ring); }
+    // Highlight/dim the result cards
+    const el=document.querySelectorAll('.result-card')[j];
+    if(el) el.style.opacity = visible ? '1' : '0.35';
+  });
+  // Update focus links
+  document.querySelectorAll('.rc-focus').forEach((el,j)=>{
+    el.textContent = j===i ? '← Show all routes' : '→ Focus on route';
+    el.onclick = j===i ? ()=>showAllRoutes() : ()=>focusRoute(j);
+  });
   const pts=c.coords||[[incidentLatLng.lat,incidentLatLng.lng],[c.closest.lat,c.closest.lon]];
   map.fitBounds(L.latLngBounds(pts),{padding:[60,320]});
+}
+
+function showAllRoutes(){
+  window._cards?.forEach(card=>{
+    if(card.error) return;
+    if(card.poly) map.addLayer(card.poly);
+    if(card.ring) map.addLayer(card.ring);
+  });
+  document.querySelectorAll('.result-card').forEach(el=>el.style.opacity='1');
+  document.querySelectorAll('.rc-focus').forEach((el,j)=>{
+    el.textContent='→ Focus on route';
+    el.onclick=()=>focusRoute(j);
+  });
+  // Fit all routes
+  const pts=[[incidentLatLng.lat,incidentLatLng.lng]];
+  window._cards?.forEach(c=>{ if(c.coords)c.coords.forEach(p=>pts.push(p)); else if(c.closest)pts.push([c.closest.lat,c.closest.lon]); });
+  map.fitBounds(L.latLngBounds(pts),{padding:[40,320]});
 }
 
 // ── Initial viewport load ─────────────────────────────────────────────────────
