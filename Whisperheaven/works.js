@@ -22,6 +22,14 @@ const WORKS = [
 
   // ── EXAMPLE ENTRIES (replace or delete these) ──────────────────
   {
+   title:   "Mr. Bobbin Knows",
+   genre:   "Story",          // e.g. "Story", "Lore", "Poetry", "Essay", "Codex", "History"
+   year:    "August 2026",   // e.g. "2025" or an in-universe date
+   summary: "7 people missing.",
+   tags:    ["I.S.P."], // Optional short keywords.
+   link:    "",               // URL to read the full transcription. Leave "" if not yet uploaded.
+  },
+  {
     title:   "Rain at 3:47 AM",
     genre:   "Story",
     year:    "February 2026",
