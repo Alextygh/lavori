@@ -1,9 +1,26 @@
 <head>
   <title>Please do something</title>
 </head>
-<div style="background:#000;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;box-sizing:border-box;font-family:var(--font-sans);">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #000; }
+#wrap {
+  background: #000;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: none;
+  outline: none;
+}
+</style>
+<div id="wrap">
   <h2 class="sr-only">A counter of intentional human attacks recorded in Wikidata</h2>
-  <p id="main-text" style="color:#fff;font-size:clamp(1.8rem,4vw,3rem);font-weight:500;text-align:center;line-height:1.4;margin:0 0 1.5rem;">
+  <p style="color:#fff;font-size:clamp(1.8rem,4vw,3rem);font-weight:500;text-align:center;line-height:1.4;margin:0 0 1.5rem;">
     The phone has rung <span id="count" style="color:#e24b4a;">…</span> times
   </p>
   <p style="color:rgba(255,255,255,0.3);font-size:clamp(1rem,2.5vw,1.6rem);font-weight:400;text-align:center;margin:0;font-style:italic;">Make it stop</p>
@@ -11,44 +28,23 @@
 <script>
 (async () => {
   const countEl = document.getElementById('count');
-
   const query = `
 SELECT (COUNT(DISTINCT ?attack) AS ?count) WHERE {
   ?attack wdt:P31 ?type .
   VALUES ?type {
-    wd:Q82821
-    wd:Q7283
-    wd:Q116
-    wd:Q2250451
-    wd:Q15276937
-    wd:Q4887852
-    wd:Q1318693
-    wd:Q16397579
-    wd:Q3839081
-    wd:Q1199744
-    wd:Q853967
-    wd:Q10431430
-    wd:Q41397
-    wd:Q878123
-    wd:Q2727213
-    wd:Q1365942
-    wd:Q2166269
-    wd:Q1340894
-    wd:Q2001305
-    wd:Q189155
-    wd:Q1392115
-    wd:Q30249
-    wd:Q4026292
-    wd:Q1763090
+    wd:Q82821 wd:Q7283 wd:Q116 wd:Q2250451 wd:Q15276937
+    wd:Q4887852 wd:Q1318693 wd:Q16397579 wd:Q3839081
+    wd:Q1199744 wd:Q853967 wd:Q10431430 wd:Q41397
+    wd:Q878123 wd:Q2727213 wd:Q1365942 wd:Q2166269
+    wd:Q1340894 wd:Q2001305 wd:Q189155 wd:Q1392115
+    wd:Q30249 wd:Q4026292 wd:Q1763090
   }
   FILTER NOT EXISTS { ?attack wdt:P31 wd:Q4167410 }
 }`;
-
-  const url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(query) + '&format=json';
-
   try {
-    const res = await fetch(url, { headers: { 'Accept': 'application/sparql-results+json' } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const res = await fetch('https://query.wikidata.org/sparql?query=' + encodeURIComponent(query) + '&format=json', {
+      headers: { 'Accept': 'application/sparql-results+json' }
+    });
     const data = await res.json();
     const n = parseInt(data.results.bindings[0]?.count?.value ?? '0', 10);
     countEl.textContent = n.toLocaleString();
