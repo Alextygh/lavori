@@ -1,0 +1,41 @@
+
+<div style="background:#000;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;box-sizing:border-box;font-family:var(--font-sans);">
+  <h2 class="sr-only">A counter of intentional human attacks recorded in Wikidata</h2>
+  <p id="main-text" style="color:#fff;font-size:clamp(1.8rem,4vw,3rem);font-weight:500;text-align:center;line-height:1.4;margin:0 0 1.5rem;">
+    The phone has rung <span id="count" style="color:#e24b4a;">…</span> times
+  </p>
+  <p id="sub" style="color:rgba(255,255,255,0.35);font-size:clamp(1rem,2.5vw,1.6rem);font-weight:400;text-align:center;margin:0;font-style:italic;">Make it stop</p>
+  <p id="status" style="color:rgba(255,255,255,0.18);font-size:0.75rem;margin-top:2.5rem;text-align:center;max-width:480px;"></p>
+</div>
+<script>
+(async () => {
+  const statusEl = document.getElementById('status');
+  const countEl  = document.getElementById('count');
+
+  const query = `
+SELECT (COUNT(*) AS ?count) WHERE {
+  ?attack wdt:P31 ?type .
+  VALUES ?type {
+    wd:Q82821       wd:Q7283       wd:Q116         wd:Q2250451
+    wd:Q15276937    wd:Q4887852    wd:Q1318693      wd:Q16397579
+    wd:Q3839081     wd:Q1199744    wd:Q853967
+  }
+  FILTER NOT EXISTS { ?attack wdt:P31 wd:Q4167410 }
+}`;
+
+  const url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(query) + '&format=json';
+  statusEl.textContent = 'Querying Wikidata…';
+
+  try {
+    const res = await fetch(url, { headers: { 'Accept': 'application/sparql-results+json', 'User-Agent': 'PhoneCounter/1.0' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const n = parseInt(data.results.bindings[0]?.count?.value ?? '0', 10);
+    countEl.textContent = n.toLocaleString();
+    statusEl.textContent = 'Includes terrorist attacks, suicide bombings, missile strikes, assassinations, massacres and more — sourced live from Wikidata.';
+  } catch(e) {
+    countEl.textContent = '?';
+    statusEl.textContent = 'Could not reach Wikidata: ' + e.message;
+  }
+})();
+</script>
