@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fighter Index</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface-hover: #1e1e24;
+      --border: #2a2a32;
+      --gold: #c9a227;
+      --gold-dim: rgba(201, 162, 39, 0.12);
+      --text: #e8e8ec;
+      --text-muted: #6b6b78;
+      --text-dim: #9898a6;
+      --radius: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Index page ── */
+    #index-page { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 4px 14px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .filter-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+    .roster { display: flex; flex-direction: column; gap: 2px; }
+
+    .char-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.12s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .char-row:hover { background: var(--surface-hover); }
+
+    .char-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .char-icon-fallback {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .char-info { flex: 1; min-width: 0; }
+    .char-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .char-archetype {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .game-logo {
+      height: 20px;
+      width: auto;
+      max-width: 100px;
+      object-fit: contain;
+      filter: brightness(0.6) saturate(0);
+      transition: filter 0.15s;
+      flex-shrink: 0;
+    }
+    .char-row:hover .game-logo { filter: brightness(0.9) saturate(0.4); }
+
+    .chevron {
+      color: var(--border);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .char-row:hover .chevron { color: var(--gold); }
+
+    /* ── Character page ── */
+    #char-page { display: none; max-width: 560px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 2rem;
+      transition: color 0.12s;
+    }
+    .back-btn:hover { color: var(--gold); }
+
+    .char-hero {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .char-hero-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .char-hero-name {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .char-hero-game {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .char-hero-arch {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      padding: 2px 10px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      border-radius: 99px;
+      background: var(--gold-dim);
+    }
+
+    .game-logo-hero {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0.75) saturate(0.3);
+      margin-top: 8px;
+      display: block;
+    }
+
+    .stats-section { margin-bottom: 3rem; }
+    .stats-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .stat-track {
+      flex: 1;
+      height: 4px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .stat-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--gold);
+      transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .stat-val {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+      width: 18px;
+      text-align: right;
+    }
+
+    .wiki-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      transition: all 0.15s;
+    }
+    .wiki-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .divider { height: 1px; background: var(--border); margin: 2.5rem 0; }
+
+    @media (max-width: 480px) {
+      .char-row { padding: 0.65rem 0.5rem; }
+      .game-logo { max-width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Fighter Index</h1>
+    <p id="header-sub">Loading roster…</p>
+  </header>
+
+  <!-- Index page -->
+  <div id="index-page">
+    <div class="filter-row" id="filter-row"></div>
+    <div class="roster" id="roster"></div>
+  </div>
+
+  <!-- Character detail page -->
+  <div id="char-page">
+    <button class="back-btn" id="back-btn">&#8592; Back to roster</button>
+
+    <div class="char-hero">
+      <img class="char-hero-img" id="cp-icon" src="" alt="" />
+      <div>
+        <div class="char-hero-name" id="cp-name"></div>
+        <div class="char-hero-game" id="cp-game"></div>
+        <span class="char-hero-arch" id="cp-arch"></span>
+        <img class="game-logo-hero" id="cp-game-logo" src="" alt="" />
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-title">Stats</div>
+      <div id="cp-stats"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <a class="wiki-link" id="cp-wiki" href="#" target="_blank" rel="noopener">
+      &#8599; View on wiki
+    </a>
+  </div>
+
+  <script>
+    const STAT_LABELS = { power: 'Power', speed: 'Speed', defense: 'Defense', range: 'Range', combo: 'Combo', difficulty: 'Difficulty' };
+    let allChars = [];
+
+    async function loadData() {
+      const res = await fetch('characters.json');
+      allChars = await res.json();
+      renderIndex(allChars);
+      buildFilters(allChars);
+      const sub = document.getElementById('header-sub');
+      sub.textContent = `${allChars.length} fighters across ${new Set(allChars.map(c => c.game)).size} games`;
+    }
+
+    function buildFilters(chars) {
+      const games = ['All', ...new Set(chars.map(c => c.game))];
+      const row = document.getElementById('filter-row');
+      row.innerHTML = '';
+      games.forEach((g, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn' + (i === 0 ? ' active' : '');
+        btn.textContent = g;
+        btn.onclick = () => {
+          row.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderIndex(g === 'All' ? allChars : allChars.filter(c => c.game === g));
+        };
+        row.appendChild(btn);
+      });
+    }
+
+    function renderIndex(chars) {
+      const roster = document.getElementById('roster');
+      roster.innerHTML = '';
+      chars.forEach(char => {
+        const row = document.createElement('div');
+        row.className = 'char-row';
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('aria-label', `${char.name} from ${char.game}`);
+
+        const imgEl = char.icon
+          ? `<img class="char-icon" src="${char.icon}" alt="${char.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="char-icon-fallback" style="display:none">🥊</div>`
+          : `<div class="char-icon-fallback">🥊</div>`;
+
+        const logoEl = char.gameLogo
+          ? `<img class="game-logo" src="${char.gameLogo}" alt="${char.game}" />`
+          : `<span style="font-size:0.72rem;color:var(--text-muted)">${char.game}</span>`;
+
+        row.innerHTML = `
+          ${imgEl}
+          <div class="char-info">
+            <div class="char-name">${char.name}</div>
+            <div class="char-archetype">${char.archetype}</div>
+          </div>
+          ${logoEl}
+          <span class="chevron">›</span>
+        `;
+        row.onclick = () => showChar(char);
+        row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') showChar(char); };
+        roster.appendChild(row);
+      });
+    }
+
+    function showChar(char) {
+      document.getElementById('index-page').style.display = 'none';
+      const cp = document.getElementById('char-page');
+      cp.style.display = 'block';
+
+      document.getElementById('cp-icon').src = char.icon || '';
+      document.getElementById('cp-icon').alt = char.name;
+      document.getElementById('cp-name').textContent = char.name;
+      document.getElementById('cp-game').textContent = char.game;
+      document.getElementById('cp-arch').textContent = char.archetype;
+      document.getElementById('cp-game-logo').src = char.gameLogo || '';
+      document.getElementById('cp-game-logo').alt = char.game;
+      document.getElementById('cp-game-logo').style.display = char.gameLogo ? 'block' : 'none';
+      document.getElementById('cp-wiki').href = char.wiki || '#';
+
+      const statsEl = document.getElementById('cp-stats');
+      statsEl.innerHTML = '';
+      Object.entries(char.stats).forEach(([key, val]) => {
+        statsEl.innerHTML += `
+          <div class="stat-row">
+            <span class="stat-label">${STAT_LABELS[key] || key}</span>
+            <div class="stat-track"><div class="stat-fill" style="width:${val * 10}%"></div></div>
+            <span class="stat-val">${val}</span>
+          </div>`;
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('back-btn').onclick = () => {
+      document.getElementById('char-page').style.display = 'none';
+      document.getElementById('index-page').style.display = 'block';
+    };
+
+    loadData();
+  </script>
+</body>
+</html>

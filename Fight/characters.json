@@ -1,0 +1,87 @@
+[
+  {
+    "id": "ryu",
+    "name": "Ryu",
+    "game": "Street Fighter 6",
+    "archetype": "All-rounder",
+    "icon": "https://www.fightersgeneration.com/np6/char/ryu-sf6art.png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Street_Fighter_6_logo.svg/320px-Street_Fighter_6_logo.svg.png",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 7,
+      "range": 6,
+      "combo": 6,
+      "difficulty": 4
+    },
+    "wiki": "https://streetfighter.fandom.com/wiki/Ryu"
+  },
+  {
+    "id": "zangief",
+    "name": "Zangief",
+    "game": "Street Fighter 6",
+    "archetype": "Grappler",
+    "icon": "https://www.fightersgeneration.com/np6/char/zangief-sf6art.png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Street_Fighter_6_logo.svg/320px-Street_Fighter_6_logo.svg.png",
+    "stats": {
+      "power": 9,
+      "speed": 3,
+      "defense": 9,
+      "range": 3,
+      "combo": 4,
+      "difficulty": 6
+    },
+    "wiki": "https://streetfighter.fandom.com/wiki/Zangief"
+  },
+  {
+    "id": "kazuya",
+    "name": "Kazuya Mishima",
+    "game": "Tekken 8",
+    "archetype": "Rushdown",
+    "icon": "https://www.fightersgeneration.com/np6/char/kazuya-t8art.png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Tekken_8_logo.svg/320px-Tekken_8_logo.svg.png",
+    "stats": {
+      "power": 8,
+      "speed": 8,
+      "defense": 7,
+      "range": 5,
+      "combo": 8,
+      "difficulty": 9
+    },
+    "wiki": "https://tekken.fandom.com/wiki/Kazuya_Mishima"
+  },
+  {
+    "id": "scorpion",
+    "name": "Scorpion",
+    "game": "Mortal Kombat 1",
+    "archetype": "Zoner",
+    "icon": "https://www.fightersgeneration.com/np6/char/scorpion-mk1art.png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Mortal_Kombat_1_logo.svg/320px-Mortal_Kombat_1_logo.svg.png",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Scorpion"
+  },
+  {
+    "id": "king",
+    "name": "King",
+    "game": "Tekken 8",
+    "archetype": "Grappler",
+    "icon": "https://www.fightersgeneration.com/np6/char/king-t8art.png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Tekken_8_logo.svg/320px-Tekken_8_logo.svg.png",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 8,
+      "range": 4,
+      "combo": 6,
+      "difficulty": 7
+    },
+    "wiki": "https://tekken.fandom.com/wiki/King"
+  }
+]
