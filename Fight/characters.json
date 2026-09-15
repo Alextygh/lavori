@@ -2,10 +2,10 @@
   {
     "id": "ryu",
     "name": "Ryu",
-    "game": "Street Fighter 6",
+    "game": "Street Fighter",
     "archetype": "All-rounder",
-    "icon": "https://www.fightersgeneration.com/np6/char/ryu-sf6art.png",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Street_Fighter_6_logo.svg/320px-Street_Fighter_6_logo.svg.png",
+    "icon": "https://static.wikia.nocookie.net/streetfighter/images/e/ed/RyuSF6Outfit2.png/revision/latest?cb=20230619153804",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/7/71/Street_Fighter_old_logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 7,
       "speed": 6,
