@@ -1,87 +1,1753 @@
 [
   {
-    "id": "ryu",
-    "name": "Ryu",
-    "game": "Street Fighter",
+    "id": "johnny_cage",
+    "name": "Johnny Cage",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "Rushdown",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/2/2a/Johnnycage.gif/revision/latest?cb=20110513192050",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Johnny_Cage"
+  },
+  {
+    "id": "kano",
+    "name": "Kano",
+    "game": "Mortal Kombat (1992)",
     "archetype": "All-rounder",
-    "icon": "https://static.wikia.nocookie.net/streetfighter/images/e/ed/RyuSF6Outfit2.png/revision/latest?cb=20230619153804",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/7/71/Street_Fighter_old_logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/c/c6/Kanowert.gif/revision/latest?cb=20110513192443",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 6,
+      "speed": 6,
+      "defense": 7,
+      "range": 5,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kano"
+  },
+  {
+    "id": "liu_kang",
+    "name": "Liu Kang",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "Rushdown",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/0/03/Liukang.gif/revision/latest?cb=20110513191035",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 7,
+      "speed": 9,
+      "defense": 6,
+      "range": 5,
+      "combo": 8,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Liu_Kang"
+  },
+  {
+    "id": "raiden",
+    "name": "Raiden",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "Zoner",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/a/a4/Raiden34.gif/revision/latest?cb=20110513192017",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 7,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Raiden"
+  },
+  {
+    "id": "scorpion",
+    "name": "Scorpion",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "All-rounder",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/4/40/MK1_Scorpion_Portrait.gif/revision/latest?cb=20130216022559",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Hanzo_Hasashi"
+  },
+  {
+    "id": "sonya",
+    "name": "Sonya",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "Rushdown",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/5/5d/Sonyamk11.gif/revision/latest?cb=20110513192351",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sonya_Blade"
+  },
+  {
+    "id": "sub_zero_bihan",
+    "name": "Sub-Zero (Bi-Han)",
+    "game": "Mortal Kombat (1992)",
+    "archetype": "Zoner",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/f/fe/Subzero.gif/revision/latest?cb=20110513192129",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/5/56/Mk1_logo.png/revision/latest?cb=20140316000633",
     "stats": {
       "power": 7,
       "speed": 6,
       "defense": 7,
       "range": 6,
       "combo": 6,
-      "difficulty": 4
+      "difficulty": 5
     },
-    "wiki": "https://streetfighter.fandom.com/wiki/Ryu"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Bi-Han"
   },
   {
-    "id": "zangief",
-    "name": "Zangief",
-    "game": "Street Fighter 6",
-    "archetype": "Grappler",
-    "icon": "https://www.fightersgeneration.com/np6/char/zangief-sf6art.png",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Street_Fighter_6_logo.svg/320px-Street_Fighter_6_logo.svg.png",
-    "stats": {
-      "power": 9,
-      "speed": 3,
-      "defense": 9,
-      "range": 3,
-      "combo": 4,
-      "difficulty": 6
-    },
-    "wiki": "https://streetfighter.fandom.com/wiki/Zangief"
-  },
-  {
-    "id": "kazuya",
-    "name": "Kazuya Mishima",
-    "game": "Tekken 8",
+    "id": "baraka",
+    "name": "Baraka",
+    "game": "Mortal Kombat II",
     "archetype": "Rushdown",
-    "icon": "https://www.fightersgeneration.com/np6/char/kazuya-t8art.png",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Tekken_8_logo.svg/320px-Tekken_8_logo.svg.png",
-    "stats": {
-      "power": 8,
-      "speed": 8,
-      "defense": 7,
-      "range": 5,
-      "combo": 8,
-      "difficulty": 9
-    },
-    "wiki": "https://tekken.fandom.com/wiki/Kazuya_Mishima"
-  },
-  {
-    "id": "scorpion",
-    "name": "Scorpion",
-    "game": "Mortal Kombat 1",
-    "archetype": "Zoner",
-    "icon": "https://www.fightersgeneration.com/np6/char/scorpion-mk1art.png",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Mortal_Kombat_1_logo.svg/320px-Mortal_Kombat_1_logo.svg.png",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
     "stats": {
       "power": 7,
       "speed": 7,
       "defense": 6,
-      "range": 8,
+      "range": 5,
       "combo": 7,
       "difficulty": 5
     },
-    "wiki": "https://mortalkombat.fandom.com/wiki/Scorpion"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Baraka"
   },
   {
-    "id": "king",
-    "name": "King",
-    "game": "Tekken 8",
+    "id": "jax_briggs",
+    "name": "Jax Briggs",
+    "game": "Mortal Kombat II",
     "archetype": "Grappler",
-    "icon": "https://www.fightersgeneration.com/np6/char/king-t8art.png",
-    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Tekken_8_logo.svg/320px-Tekken_8_logo.svg.png",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 6,
+      "defense": 8,
+      "range": 4,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Jax_Briggs"
+  },
+  {
+    "id": "kitana",
+    "name": "Kitana",
+    "game": "Mortal Kombat II",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kitana"
+  },
+  {
+    "id": "kung_lao",
+    "name": "Kung Lao",
+    "game": "Mortal Kombat II",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 9,
+      "defense": 6,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kung_Lao"
+  },
+  {
+    "id": "mileena",
+    "name": "Mileena",
+    "game": "Mortal Kombat II",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 9,
+      "defense": 5,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Mileena"
+  },
+  {
+    "id": "shang_tsung",
+    "name": "Shang Tsung",
+    "game": "Mortal Kombat II",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Shang_Tsung"
+  },
+  {
+    "id": "reptile",
+    "name": "Reptile",
+    "game": "Mortal Kombat II",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Reptile"
+  },
+  {
+    "id": "sub_zero_kuai",
+    "name": "Sub-Zero (Kuai Liang)",
+    "game": "Mortal Kombat II",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sub-Zero"
+  },
+  {
+    "id": "noob_saibot",
+    "name": "Noob Saibot",
+    "game": "Mortal Kombat 3",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Noob_Saibot"
+  },
+  {
+    "id": "smoke",
+    "name": "Smoke",
+    "game": "Mortal Kombat 3",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 9,
+      "defense": 5,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Smoke"
+  },
+  {
+    "id": "cyrax",
+    "name": "Cyrax",
+    "game": "Mortal Kombat 3",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 6,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Cyrax"
+  },
+  {
+    "id": "kabal",
+    "name": "Kabal",
+    "game": "Mortal Kombat 3",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 10,
+      "defense": 6,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kabal"
+  },
+  {
+    "id": "nightwolf",
+    "name": "Nightwolf",
+    "game": "Mortal Kombat 3",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Nightwolf"
+  },
+  {
+    "id": "sektor",
+    "name": "Sektor",
+    "game": "Mortal Kombat 3",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sektor"
+  },
+  {
+    "id": "sheeva",
+    "name": "Sheeva",
+    "game": "Mortal Kombat 3",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 4,
+      "defense": 9,
+      "range": 3,
+      "combo": 5,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sheeva"
+  },
+  {
+    "id": "sindel",
+    "name": "Sindel",
+    "game": "Mortal Kombat 3",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 8,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sindel"
+  },
+  {
+    "id": "kurtis_stryker",
+    "name": "Kurtis Stryker",
+    "game": "Mortal Kombat 3",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 5,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 5,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Stryker"
+  },
+  {
+    "id": "jade",
+    "name": "Jade",
+    "game": "Ultimate Mortal Kombat 3",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Jade"
+  },
+  {
+    "id": "ermac",
+    "name": "Ermac",
+    "game": "Ultimate Mortal Kombat 3",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 7,
+      "range": 8,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Ermac"
+  },
+  {
+    "id": "rain",
+    "name": "Rain",
+    "game": "Ultimate Mortal Kombat 3",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Rain"
+  },
+  {
+    "id": "chameleon",
+    "name": "Chameleon",
+    "game": "Mortal Kombat Trilogy",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Chameleon"
+  },
+  {
+    "id": "khameleon",
+    "name": "Khameleon",
+    "game": "Mortal Kombat Trilogy",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Khameleon"
+  },
+  {
+    "id": "fujin",
+    "name": "Fujin",
+    "game": "Mortal Kombat 4",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Fujin"
+  },
+  {
+    "id": "jarek",
+    "name": "Jarek",
+    "game": "Mortal Kombat 4",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 7,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Jarek"
+  },
+  {
+    "id": "kai",
+    "name": "Kai",
+    "game": "Mortal Kombat 4",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kai"
+  },
+  {
+    "id": "reiko",
+    "name": "Reiko",
+    "game": "Mortal Kombat 4",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Reiko"
+  },
+  {
+    "id": "quan_chi",
+    "name": "Quan Chi",
+    "game": "Mortal Kombat 4",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 6,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Quan_Chi"
+  },
+  {
+    "id": "shinnok",
+    "name": "Shinnok",
+    "game": "Mortal Kombat 4",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 5,
+      "defense": 7,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Shinnok"
+  },
+  {
+    "id": "tanya",
+    "name": "Tanya",
+    "game": "Mortal Kombat 4",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Tanya"
+  },
+  {
+    "id": "meat",
+    "name": "Meat",
+    "game": "Mortal Kombat 4",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 6,
+      "defense": 6,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Meat"
+  },
+  {
+    "id": "goro",
+    "name": "Goro",
+    "game": "Mortal Kombat 4",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 4,
+      "defense": 9,
+      "range": 4,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Goro"
+  },
+  {
+    "id": "blaze",
+    "name": "Blaze",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 8,
+      "range": 5,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Blaze"
+  },
+  {
+    "id": "bo_rai_cho",
+    "name": "Bo' Rai Cho",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
     "stats": {
       "power": 8,
       "speed": 5,
       "defense": 8,
       "range": 4,
       "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Bo%27_Rai_Cho"
+  },
+  {
+    "id": "drahmin",
+    "name": "Drahmin",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 4,
+      "defense": 8,
+      "range": 4,
+      "combo": 4,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Drahmin"
+  },
+  {
+    "id": "frost",
+    "name": "Frost",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Frost"
+  },
+  {
+    "id": "hsu_hao",
+    "name": "Hsu Hao",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 8,
+      "range": 4,
+      "combo": 5,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Hsu_Hao"
+  },
+  {
+    "id": "kenshi",
+    "name": "Kenshi",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 8,
+      "combo": 7,
       "difficulty": 7
     },
-    "wiki": "https://tekken.fandom.com/wiki/King"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kenshi"
+  },
+  {
+    "id": "li_mei",
+    "name": "Li Mei",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Li_Mei"
+  },
+  {
+    "id": "mavado",
+    "name": "Mavado",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Mavado"
+  },
+  {
+    "id": "mokap",
+    "name": "Mokap",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 5,
+      "speed": 6,
+      "defense": 6,
+      "range": 5,
+      "combo": 5,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Mokap"
+  },
+  {
+    "id": "nitara",
+    "name": "Nitara",
+    "game": "Mortal Kombat: Deadly Alliance",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 5,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Nitara"
+  },
+  {
+    "id": "sareena",
+    "name": "Sareena",
+    "game": "Mortal Kombat: Tournament Edition",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Sareena"
+  },
+  {
+    "id": "ashrah",
+    "name": "Ashrah",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Ashrah"
+  },
+  {
+    "id": "dariou",
+    "name": "Dariou",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Dairou"
+  },
+  {
+    "id": "darrius",
+    "name": "Darrius",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Darrius"
+  },
+  {
+    "id": "havik",
+    "name": "Havik",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Havik"
+  },
+  {
+    "id": "hotaru",
+    "name": "Hotaru",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 5,
+      "defense": 8,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Hotaru"
+  },
+  {
+    "id": "kira",
+    "name": "Kira",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kira"
+  },
+  {
+    "id": "kobra",
+    "name": "Kobra",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kobra"
+  },
+  {
+    "id": "shujinko",
+    "name": "Shujinko",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 6,
+      "defense": 7,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Shujinko"
+  },
+  {
+    "id": "shao_kahn",
+    "name": "Shao Kahn",
+    "game": "Mortal Kombat: Deception",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 5,
+      "defense": 9,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Shao_Kahn"
+  },
+  {
+    "id": "taven",
+    "name": "Taven",
+    "game": "Mortal Kombat: Armageddon",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Taven"
+  },
+  {
+    "id": "daegon",
+    "name": "Daegon",
+    "game": "Mortal Kombat: Armageddon",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 6,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Daegon"
+  },
+  {
+    "id": "kintaro",
+    "name": "Kintaro",
+    "game": "Mortal Kombat: Armageddon",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 5,
+      "defense": 9,
+      "range": 4,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kintaro"
+  },
+  {
+    "id": "motaro",
+    "name": "Motaro",
+    "game": "Mortal Kombat: Armageddon",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 6,
+      "defense": 9,
+      "range": 7,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Motaro"
+  },
+  {
+    "id": "onaga",
+    "name": "Onaga",
+    "game": "Mortal Kombat: Armageddon",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 10,
+      "speed": 4,
+      "defense": 10,
+      "range": 5,
+      "combo": 5,
+      "difficulty": 4
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Onaga"
+  },
+  {
+    "id": "batman",
+    "name": "Batman",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 7,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Batman"
+  },
+  {
+    "id": "the_flash",
+    "name": "The Flash",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 10,
+      "defense": 6,
+      "range": 5,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/The_Flash"
+  },
+  {
+    "id": "catwoman",
+    "name": "Catwoman",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 9,
+      "defense": 5,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Catwoman"
+  },
+  {
+    "id": "captain_marvel",
+    "name": "Captain Marvel",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 7,
+      "defense": 8,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Captain_Marvel"
+  },
+  {
+    "id": "green_lantern",
+    "name": "Green Lantern",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Green_Lantern"
+  },
+  {
+    "id": "wonder_woman",
+    "name": "Wonder Woman",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 7,
+      "defense": 8,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Wonder_Woman"
+  },
+  {
+    "id": "lex_luthor",
+    "name": "Lex Luthor",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 8,
+      "range": 6,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Lex_Luthor"
+  },
+  {
+    "id": "the_joker",
+    "name": "The Joker",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/The_Joker"
+  },
+  {
+    "id": "superman",
+    "name": "Superman",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 8,
+      "defense": 9,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Superman"
+  },
+  {
+    "id": "deathstroke",
+    "name": "Deathstroke",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 7,
+      "range": 7,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Deathstroke"
+  },
+  {
+    "id": "darkseid",
+    "name": "Darkseid",
+    "game": "Mortal Kombat vs. DC Universe",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 10,
+      "speed": 5,
+      "defense": 9,
+      "range": 7,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Darkseid"
+  },
+  {
+    "id": "skarlet",
+    "name": "Skarlet",
+    "game": "Mortal Kombat (2011)",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 8,
+      "combo": 8,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Skarlet"
+  },
+  {
+    "id": "freddy_krueger",
+    "name": "Freddy Krueger",
+    "game": "Mortal Kombat (2011)",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Freddy_Krueger"
+  },
+  {
+    "id": "kratos",
+    "name": "Kratos",
+    "game": "Mortal Kombat (2011)",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 7,
+      "defense": 7,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kratos"
+  },
+  {
+    "id": "cassie_cage",
+    "name": "Cassie Cage",
+    "game": "Mortal Kombat X",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 7,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Cassie_Cage"
+  },
+  {
+    "id": "dvorah",
+    "name": "D'Vorah",
+    "game": "Mortal Kombat X",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/D%27Vorah"
+  },
+  {
+    "id": "erron_black",
+    "name": "Erron Black",
+    "game": "Mortal Kombat X",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Erron_Black"
+  },
+  {
+    "id": "ferra_torr",
+    "name": "Ferra/Torr",
+    "game": "Mortal Kombat X",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 6,
+      "defense": 8,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Ferra/Torr"
+  },
+  {
+    "id": "jacqui_briggs",
+    "name": "Jacqui Briggs",
+    "game": "Mortal Kombat X",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 7,
+      "range": 5,
+      "combo": 8,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Jacqui_Briggs"
+  },
+  {
+    "id": "kotal_kahn",
+    "name": "Kotal Kahn",
+    "game": "Mortal Kombat X",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 5,
+      "defense": 9,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kotal_Kahn"
+  },
+  {
+    "id": "kung_jin",
+    "name": "Kung Jin",
+    "game": "Mortal Kombat X",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 8,
+      "defense": 6,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kung_Jin"
+  },
+  {
+    "id": "takeda_takahashi",
+    "name": "Takeda Takahashi",
+    "game": "Mortal Kombat X",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Takeda_Takahashi"
+  },
+  {
+    "id": "jason_voorhees",
+    "name": "Jason Voorhees",
+    "game": "Mortal Kombat X",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 4,
+      "defense": 9,
+      "range": 4,
+      "combo": 5,
+      "difficulty": 3
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Jason_Voorhees"
+  },
+  {
+    "id": "tremor",
+    "name": "Tremor",
+    "game": "Mortal Kombat X",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 8,
+      "range": 6,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Tremor"
+  },
+  {
+    "id": "alien",
+    "name": "Alien",
+    "game": "Mortal Kombat X",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 9,
+      "defense": 5,
+      "range": 6,
+      "combo": 9,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Alien"
+  },
+  {
+    "id": "leatherface",
+    "name": "Leatherface",
+    "game": "Mortal Kombat X",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 5,
+      "defense": 8,
+      "range": 4,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Leatherface"
+  },
+  {
+    "id": "triborg",
+    "name": "Triborg",
+    "game": "Mortal Kombat X",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 6,
+      "range": 7,
+      "combo": 8,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Triborg"
+  },
+  {
+    "id": "cetrion",
+    "name": "Cetrion",
+    "game": "Mortal Kombat 11",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 6,
+      "speed": 6,
+      "defense": 7,
+      "range": 9,
+      "combo": 6,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Cetrion"
+  },
+  {
+    "id": "geras",
+    "name": "Geras",
+    "game": "Mortal Kombat 11",
+    "archetype": "Grappler",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 6,
+      "defense": 8,
+      "range": 5,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Geras"
+  },
+  {
+    "id": "kollector",
+    "name": "Kollector",
+    "game": "Mortal Kombat 11",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 6,
+      "range": 7,
+      "combo": 8,
+      "difficulty": 8
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kollector"
+  },
+  {
+    "id": "the_terminator",
+    "name": "The Terminator",
+    "game": "Mortal Kombat 11",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 5,
+      "defense": 9,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/The_Terminator"
+  },
+  {
+    "id": "spawn",
+    "name": "Spawn",
+    "game": "Mortal Kombat 11",
+    "archetype": "All-rounder",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 7,
+      "defense": 7,
+      "range": 7,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Spawn"
+  },
+  {
+    "id": "robocop",
+    "name": "Robocop",
+    "game": "Mortal Kombat 11",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 5,
+      "defense": 8,
+      "range": 8,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/RoboCop"
+  },
+  {
+    "id": "john_rambo",
+    "name": "John Rambo",
+    "game": "Mortal Kombat 11",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 6,
+      "defense": 7,
+      "range": 8,
+      "combo": 6,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/John_Rambo"
+  },
+  {
+    "id": "omni_man",
+    "name": "Omni-Man",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 9,
+      "defense": 8,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Omni-Man"
+  },
+  {
+    "id": "peacemaker",
+    "name": "Peacemaker",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Zoner",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 7,
+      "defense": 7,
+      "range": 8,
+      "combo": 7,
+      "difficulty": 6
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Peacemaker"
+  },
+  {
+    "id": "homelander",
+    "name": "Homelander",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 8,
+      "defense": 9,
+      "range": 7,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Homelander"
+  },
+  {
+    "id": "ghostface",
+    "name": "Ghostface",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Rushdown",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 7,
+      "speed": 8,
+      "defense": 6,
+      "range": 6,
+      "combo": 8,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Ghostface"
+  },
+  {
+    "id": "conan_the_barbarian",
+    "name": "Conan the Barbarian",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Tank",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 9,
+      "speed": 6,
+      "defense": 8,
+      "range": 5,
+      "combo": 6,
+      "difficulty": 5
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/Conan_the_Barbarian"
+  },
+  {
+    "id": "t_1000",
+    "name": "The T-1000",
+    "game": "Mortal Kombat 1 (2023)",
+    "archetype": "Tricky",
+    "icon": "PLACEHOLDER_ICON",
+    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "stats": {
+      "power": 8,
+      "speed": 7,
+      "defense": 8,
+      "range": 6,
+      "combo": 7,
+      "difficulty": 7
+    },
+    "wiki": "https://mortalkombat.fandom.com/wiki/T-1000"
   }
 ]
