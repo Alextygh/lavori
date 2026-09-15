@@ -1,4 +1,4 @@
-[ 
+[
   {
     "id": "johnny_cage",
     "name": "Johnny Cage",
@@ -123,8 +123,8 @@
     "name": "Baraka",
     "game": "Mortal Kombat II",
     "archetype": "Rushdown",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/3/3b/Baraka_Close-up.gif/revision/latest?cb=20110815012924",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 7,
       "speed": 7,
@@ -140,8 +140,8 @@
     "name": "Jax Briggs",
     "game": "Mortal Kombat II",
     "archetype": "Grappler",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/c/cc/Jax.gif/revision/latest?cb=20110513192901",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 8,
       "speed": 6,
@@ -157,8 +157,8 @@
     "name": "Kitana",
     "game": "Mortal Kombat II",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/8/81/Kitana23.gif/revision/latest?cb=20110513193204",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 6,
       "speed": 8,
@@ -174,8 +174,8 @@
     "name": "Kung Lao",
     "game": "Mortal Kombat II",
     "archetype": "Rushdown",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/9/91/Kunglaoselect.gif/revision/latest?cb=20190604040906",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 7,
       "speed": 9,
@@ -191,8 +191,8 @@
     "name": "Mileena",
     "game": "Mortal Kombat II",
     "archetype": "Rushdown",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/f/f9/Mileena.gif/revision/latest?cb=20190604041146",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 7,
       "speed": 9,
@@ -208,8 +208,8 @@
     "name": "Shang Tsung",
     "game": "Mortal Kombat II",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/6/65/Shang_Tsung_Icon_%28MKII%29.png/revision/latest?cb=20260728030222",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 6,
       "speed": 7,
@@ -225,8 +225,8 @@
     "name": "Reptile",
     "game": "Mortal Kombat II",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/0/05/ReptileMKII.gif/revision/latest?cb=20180408220124",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 6,
       "speed": 8,
@@ -242,8 +242,8 @@
     "name": "Sub-Zero (Kuai Liang)",
     "game": "Mortal Kombat II",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/f/f4/0004.png/revision/latest?cb=20180408220835",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/8/89/Mk2_logo.png/revision/latest?cb=20140315235821",
     "stats": {
       "power": 7,
       "speed": 7,
@@ -252,15 +252,15 @@
       "combo": 7,
       "difficulty": 5
     },
-    "wiki": "https://mortalkombat.fandom.com/wiki/Sub-Zero"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kuai_Liang"
   },
   {
     "id": "noob_saibot",
     "name": "Noob Saibot",
     "game": "Mortal Kombat 3",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/9/9d/Noobsaibot.gif/revision/latest?cb=20190604050645",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 7,
       "speed": 7,
@@ -269,15 +269,15 @@
       "combo": 7,
       "difficulty": 7
     },
-    "wiki": "https://mortalkombat.fandom.com/wiki/Noob_Saibot"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Bi_Han"
   },
   {
     "id": "smoke",
     "name": "Smoke",
     "game": "Mortal Kombat 3",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/4/47/Smoke_Icon_%28MK3%29.png/revision/latest?cb=20260728052843",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 6,
       "speed": 9,
@@ -293,8 +293,8 @@
     "name": "Cyrax",
     "game": "Mortal Kombat 3",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/4/40/Cyrax.gif/revision/latest?cb=20190605142329",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 7,
       "speed": 6,
@@ -310,8 +310,8 @@
     "name": "Kabal",
     "game": "Mortal Kombat 3",
     "archetype": "Rushdown",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/1/1a/Kabal.gif/revision/latest?cb=20190605141341",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 7,
       "speed": 10,
@@ -327,8 +327,8 @@
     "name": "Nightwolf",
     "game": "Mortal Kombat 3",
     "archetype": "All-rounder",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/c/c2/Nightwolf.gif/revision/latest?cb=20190605135559",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 7,
       "speed": 7,
@@ -344,8 +344,8 @@
     "name": "Sektor",
     "game": "Mortal Kombat 3",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/5/54/Sektorselectscreen.gif/revision/latest?cb=20190605142527",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 7,
       "speed": 7,
@@ -361,8 +361,8 @@
     "name": "Sheeva",
     "game": "Mortal Kombat 3",
     "archetype": "Grappler",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/b/b1/Sheeva.gif/revision/latest?cb=20190605143951",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 8,
       "speed": 4,
@@ -378,8 +378,8 @@
     "name": "Sindel",
     "game": "Mortal Kombat 3",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/b/b6/Sindelselectscreen.gif/revision/latest?cb=20190605141858",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 6,
       "speed": 7,
@@ -395,8 +395,8 @@
     "name": "Kurtis Stryker",
     "game": "Mortal Kombat 3",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/9/9f/Strykerselectscreen.gif/revision/latest?cb=20190605143300",
+    "gameLogo": "https://static.wikia.nocookie.net/logopedia/images/0/0b/Mk3.png/revision/latest?cb=20140315230225",
     "stats": {
       "power": 5,
       "speed": 7,
@@ -405,15 +405,15 @@
       "combo": 5,
       "difficulty": 5
     },
-    "wiki": "https://mortalkombat.fandom.com/wiki/Stryker"
+    "wiki": "https://mortalkombat.fandom.com/wiki/Kurtis_Stryker"
   },
   {
     "id": "jade",
     "name": "Jade",
     "game": "Ultimate Mortal Kombat 3",
     "archetype": "All-rounder",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/1/19/JadeSelect.gif/revision/latest?cb=20190604042215",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/7/70/UltimateMortalKombat3Logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 6,
       "speed": 8,
@@ -429,8 +429,8 @@
     "name": "Ermac",
     "game": "Ultimate Mortal Kombat 3",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/4/4f/ErmacCloseUp.gif/revision/latest?cb=20190605135102",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/7/70/UltimateMortalKombat3Logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 7,
       "speed": 6,
@@ -446,8 +446,8 @@
     "name": "Rain",
     "game": "Ultimate Mortal Kombat 3",
     "archetype": "Zoner",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://static.wikia.nocookie.net/mkwikia/images/c/c1/MKT_rain.gif/revision/latest?cb=20110902170844",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/7/70/UltimateMortalKombat3Logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 6,
       "speed": 8,
@@ -463,8 +463,8 @@
     "name": "Chameleon",
     "game": "Mortal Kombat Trilogy",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://mortalkombat.fandom.com/wiki/File:Chameleon_Icon_(MKT).png",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0a/MortalKombatTrilogyLogo.png?utm_source=fr.wikipedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 7,
       "speed": 8,
@@ -480,8 +480,8 @@
     "name": "Khameleon",
     "game": "Mortal Kombat Trilogy",
     "archetype": "Tricky",
-    "icon": "PLACEHOLDER_ICON",
-    "gameLogo": "PLACEHOLDER_GAME_LOGO",
+    "icon": "https://mortalkombat.fandom.com/wiki/File:Khameleon.gif",
+    "gameLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0a/MortalKombatTrilogyLogo.png?utm_source=fr.wikipedia.org&utm_campaign=index&utm_content=original",
     "stats": {
       "power": 6,
       "speed": 8,
