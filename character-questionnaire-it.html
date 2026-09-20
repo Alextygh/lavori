@@ -362,7 +362,7 @@
 <div class="hero">
   <p class="hero-eyebrow" data-it="Creazione Personaggio" data-en="Character Creator">Character Creator</p>
   <h1 data-it="Crea il tuo <span>Personaggio</span>" data-en="Create your <span>Character</span>">Create your <span>Character</span></h1>
-  <p class="hero-sub" data-it="Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore." data-en="Fill in what you know — leave blank what you don't. Every detail helps build a better character.">Fill in what you know — leave blank what you don't. Every detail helps build a better character.</p>
+  <p class="hero-sub" data-it="Compila i campi che conosci, lascia vuoti quelli che non sai. Ogni dettaglio aiuta a costruire un personaggio migliore." data-en="Fill in what you know  leave blank what you don't. Every detail helps build a better character.">Fill in what you know  leave blank what you don't. Every detail helps build a better character.</p>
 </div>
 
 <!-- Progress -->
@@ -397,7 +397,7 @@
       <div class="field">
         <label data-it="Genere" data-en="Gender">Gender</label>
         <select id="gender">
-          <option value="" data-it="— seleziona —" data-en="— select —">— select —</option>
+          <option value="" data-it="seleziona" data-en="select">select</option>
           <option data-it="Maschio" data-en="Male">Male</option>
           <option data-it="Femmina" data-en="Female">Female</option>
           <option data-it="Non-binario" data-en="Non-binary">Non-binary</option>
@@ -443,7 +443,7 @@
 
     <div class="field">
       <label data-it="Abbigliamento / stile" data-en="Outfit / clothing style">Outfit / clothing style</label>
-      <textarea id="outfit" data-placeholder-it="Descrivi cosa indossa — colori, materiali, accessori, maschere..." data-placeholder-en="Describe what they wear — colors, materials, accessories, masks..." placeholder="Describe what they wear — colors, materials, accessories, masks..."></textarea>
+      <textarea id="outfit" data-placeholder-it="Descrivi cosa indossa  colori, materiali, accessori, maschere..." data-placeholder-en="Describe what they wear  colors, materials, accessories, masks..." placeholder="Describe what they wear  colors, materials, accessories, masks..."></textarea>
     </div>
 
     <div class="field">
@@ -534,7 +534,7 @@
 
     <div class="field">
       <label data-it="Relazioni importanti" data-en="Important relationships">Important relationships</label>
-      <textarea id="relations" data-placeholder-it="Partner, rivali, famiglia, mentori — chi conta per loro e perché?" data-placeholder-en="Partners, rivals, family, mentors — who matters to them and why?" placeholder="Partners, rivals, family, mentors — who matters to them and why?" style="min-height:64px"></textarea>
+      <textarea id="relations" data-placeholder-it="Partner, rivali, famiglia, mentori  chi conta per loro e perché?" data-placeholder-en="Partners, rivals, family, mentors  who matters to them and why?" placeholder="Partners, rivals, family, mentors  who matters to them and why?" style="min-height:64px"></textarea>
     </div>
   </div>
 
@@ -544,19 +544,6 @@
       <div class="section-icon">◆</div>
       <div class="section-title" data-it="Poteri & Abilità" data-en="Powers & Abilities">Powers & Abilities</div>
       <div class="section-line"></div>
-    </div>
-
-    <div class="field">
-      <label data-it="Livello di potere" data-en="Power tier / strength level">Power tier / strength level</label>
-      <div class="chip-group">
-        <span class="chip" data-group="tier" data-it="Livello strada" data-en="Street level">Street level</span>
-        <span class="chip" data-group="tier" data-it="Livello città" data-en="City level">City level</span>
-        <span class="chip" data-group="tier" data-it="Livello isola" data-en="Island level">Island level</span>
-        <span class="chip" data-group="tier" data-it="Livello nazione" data-en="Country level">Country level</span>
-        <span class="chip" data-group="tier" data-it="Continentale" data-en="Continental">Continental</span>
-        <span class="chip" data-group="tier" data-it="Planetario" data-en="Planetary">Planetary</span>
-        <span class="chip" data-group="tier" data-it="Multiversale" data-en="Multiversal">Multiversal</span>
-      </div>
     </div>
 
     <div class="field">
@@ -579,7 +566,7 @@
 
     <div class="field">
       <label data-it="Altro? (stranezze, segreti, curiosità...)" data-en="Anything else? (quirks, secrets, trivia...)">Anything else? (quirks, secrets, trivia...)</label>
-      <textarea id="extra" data-placeholder-it="Spazio libero — aggiungi tutto quello che non entra sopra." data-placeholder-en="Free space — add whatever doesn't fit above." placeholder="Free space — add whatever doesn't fit above."></textarea>
+      <textarea id="extra" data-placeholder-it="Spazio libero  aggiungi tutto quello che non entra sopra." data-placeholder-en="Free space  add whatever doesn't fit above." placeholder="Free space  add whatever doesn't fit above."></textarea>
     </div>
   </div>
 
@@ -640,7 +627,7 @@
     let filled = 0;
     allInputs.forEach(el => { if (el.value.trim()) filled++; });
     const chipCount = document.querySelectorAll('.chip.selected').length;
-    const total = allInputs.length + 6;
+    const total = allInputs.length + 5;
     const pct = Math.min(100, Math.round(((filled + chipCount) / total) * 100));
     prog.style.width = pct + '%';
     progPct.textContent = pct + '%';
@@ -679,7 +666,7 @@
 
     const genderEl = document.getElementById('gender');
     const genderVal = genderEl.options[genderEl.selectedIndex]?.getAttribute('data-' + lang);
-    if (genderVal && genderVal !== (isIt ? '— seleziona —' : '— select —')) {
+    if (genderVal && genderVal !== (isIt ? 'seleziona' : 'select')) {
       lines.push((isIt ? 'Genere: ' : 'Gender: ') + genderVal);
     }
 
@@ -687,14 +674,11 @@
     if (val('race'))   lines.push((isIt ? 'Razza / Specie: ' : 'Race / Species: ') + val('race'));
     if (val('role'))   lines.push((isIt ? 'Ruolo: ' : 'Role: ') + val('role'));
     if (val('origin')) lines.push((isIt ? 'Luogo di nascita: ' : 'Place of birth: ') + val('origin'));
-
-    const tier = getChips('tier');
-    if (tier) lines.push((isIt ? 'Livello di potere: ' : 'Power tier: ') + tier);
     const align = getChips('alignment');
     if (align) lines.push((isIt ? 'Allineamento: ' : 'Alignment: ') + align);
 
     lines.push('');
-    lines.push(isIt ? '— Aspetto —' : '— Appearance —');
+    lines.push(isIt ? 'Aspetto' : 'Appearance');
     if (val('build'))  lines.push((isIt ? 'Altezza/corporatura: ' : 'Height & build: ') + val('build'));
     if (val('looks'))  lines.push((isIt ? 'Capelli/occhi: ' : 'Hair & eyes: ') + val('looks'));
     const vibe = getChips('vibe');
@@ -702,25 +686,25 @@
     if (val('outfit')) lines.push((isIt ? 'Abbigliamento: ' : 'Outfit: ') + val('outfit'));
 
     lines.push('');
-    lines.push(isIt ? '— Personalità —' : '— Personality —');
+    lines.push(isIt ? 'Personalità' : 'Personality');
     const personality = getChips('personality');
     if (personality) lines.push((isIt ? 'Tratti: ' : 'Traits: ') + personality);
     if (val('likes'))    lines.push((isIt ? 'Piace: ' : 'Likes: ') + val('likes'));
     if (val('dislikes')) lines.push((isIt ? 'Non piace: ' : 'Dislikes: ') + val('dislikes'));
 
     lines.push('');
-    lines.push(isIt ? '— Storia —' : '— Backstory —');
+    lines.push(isIt ? 'Storia' : 'Backstory');
     if (val('backstory')) lines.push(val('backstory'));
     if (val('relations')) lines.push((isIt ? 'Relazioni: ' : 'Relationships: ') + val('relations'));
 
     lines.push('');
-    lines.push(isIt ? '— Poteri & Abilità —' : '— Powers & Abilities —');
+    lines.push(isIt ? 'Poteri & Abilità' : 'Powers & Abilities');
     if (val('powers'))    lines.push(val('powers'));
     if (val('weaknesses')) lines.push((isIt ? 'Debolezze: ' : 'Weaknesses: ') + val('weaknesses'));
 
     if (val('extra')) {
       lines.push('');
-      lines.push(isIt ? '— Extra —' : '— Extra —');
+      lines.push(isIt ? 'Extra' : 'Extra');
       lines.push(val('extra'));
     }
 
