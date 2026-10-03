@@ -176,9 +176,9 @@
 <script>
 // ── Constants ─────────────────────────────────────────────────────────────────
 const OVERPASS_MIRRORS = [
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.openstreetmap.ru/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter'
 ];
 const NOMINATIM = 'https://nominatim.openstreetmap.org';
 const OSRM      = 'https://router.project-osrm.org/route/v1/driving';
@@ -371,21 +371,38 @@ document.getElementById('loc-input').addEventListener('keydown',e=>e.key==='Ente
 
 // ── Overpass ──────────────────────────────────────────────────────────────────
 async function overpassQuery(q){
-  for(const mirror of OVERPASS_MIRRORS){
+  // Ask all mirrors at once; the first good answer wins and the rest are cancelled
+  const ctrls=OVERPASS_MIRRORS.map(()=>new AbortController());
+  const body='data='+encodeURIComponent(q);
+  const attempts=OVERPASS_MIRRORS.map(async(mirror,i)=>{
+    const timer=setTimeout(()=>ctrls[i].abort(),20000);
     try{
-      const r=await fetch(mirror,{method:'POST',body:q,signal:AbortSignal.timeout(12000)});
+      const r=await fetch(mirror,{
+        method:'POST', body,
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        signal:ctrls[i].signal
+      });
       if(!r.ok) throw new Error(`HTTP ${r.status}`);
-      return await r.json();
-    }catch(e){ console.warn(`Mirror ${mirror} failed:`,e.message); }
-  }
-  throw new Error('All Overpass mirrors failed');
+      const data=await r.json();
+      if(!data.elements) throw new Error('Bad response (server busy?)');
+      return data;
+    }catch(e){
+      console.warn(`Mirror ${mirror} failed:`,e.message);
+      throw e;
+    }finally{ clearTimeout(timer); }
+  });
+  try{
+    const data=await Promise.any(attempts);
+    ctrls.forEach(c=>c.abort());
+    return data;
+  }catch{ throw new Error('All Overpass mirrors failed'); }
 }
 
 async function findNearby(amenityTag, lat, lon){
   const radii=[2000,5000,10000,20000];
   for(const r of radii){
     if(dispatchAborted) return [];
-    const q=`[out:json][timeout:15];(node[amenity=${amenityTag}](around:${r},${lat},${lon});way[amenity=${amenityTag}](around:${r},${lat},${lon}););out center;`;
+    const q=`[out:json][timeout:25];(node[amenity=${amenityTag}](around:${r},${lat},${lon});way[amenity=${amenityTag}](around:${r},${lat},${lon}););out center;`;
     try{
       const data=await overpassQuery(q);
       const items=data.elements
