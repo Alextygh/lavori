@@ -1,0 +1,7 @@
+bgm.mp3: Dark Sci-Fi Wind by thisusernameis -- https://freesound.org/s/432839/ -- License: Creative Commons 0
+crisis.mp3: notify.wav by martcraft -- https://freesound.org/s/651629/ -- License: Creative Commons 0
+click.mp3: Generic Metallic Click 3 by Cpfcfan10 -- https://freesound.org/s/797644/ -- License: Attribution 4.0
+success.mp3: success2 by Kenneth_Cooney -- https://freesound.org/s/779817/ -- License: Creative Commons 0
+fail.mp3: Error_01.wav by distillerystudio -- https://freesound.org/s/327738/ -- License: Attribution 3.0
+gameover.mp3: ReactOS shutdown.ogg by jobro -- https://freesound.org/s/244603/ -- License: Creative Commons 0
+win.mp3: win.ogg by Yoshicakes77 -- https://freesound.org/s/703543/ -- License: Attribution 4.0

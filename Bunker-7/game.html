@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUNKER-7</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root {
+  --green: #39ff14;
+  --green-dim: #4a7a4a;
+  --green-dark: #1a3d1a;
+  --green-bg: #0b150b;
+  --bg: #050a05;
+  --orange: #ff6600;
+  --red: #ff3232;
+  --blue: #00bfff;
+  --yellow: #ffb300;
+  --font: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #020402;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font);
+}
+#G {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--green);
+  width: 900px;
+  height: 640px;
+  border: 1px solid var(--green-dark);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(57,255,20,0.08), 0 0 80px rgba(57,255,20,0.04);
+}
+#G::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none;
+  z-index: 999;
+}
+.corner { position: absolute; width: 14px; height: 14px; border-color: var(--green-dim); border-style: solid; opacity: 0.4; z-index: 1000; }
+.corner.tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.corner.tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+/* HEADER */
+#hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--green-bg);
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+}
+.ht { font-size: 16px; letter-spacing: 4px; }
+.hstats { display: flex; gap: 20px; align-items: center; }
+.stat-block { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.stat-lbl { font-size: 8px; color: var(--green-dim); letter-spacing: 1px; }
+.stat-val { color: var(--green); font-size: 14px; }
+
+/* BODY */
+#body { display: grid; grid-template-columns: 1fr 280px; flex: 1; min-height: 0; }
+#left { display: flex; flex-direction: column; padding: 10px; gap: 8px; overflow: hidden; border-right: 1px solid var(--green-dark); }
+#right { background: var(--green-bg); padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+.slbl { font-size: 9px; letter-spacing: 3px; color: var(--green-dim); margin-bottom: 5px; padding-bottom: 4px; border-bottom: 1px solid var(--green-dark); }
+
+/* RESIDENTS */
+#res-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.res { background: var(--green-bg); border: 1px solid var(--green-dark); padding: 8px 6px; border-radius: 4px; cursor: pointer; transition: border-color 0.2s, transform 0.1s; position: relative; }
+.res:hover { border-color: var(--green); transform: translateY(-1px); }
+.res.alert { border-color: var(--orange); animation: pa 0.7s infinite; }
+.res.dead { opacity: 0.2; cursor: default; border-color: #222; }
+.res.mgon { border-color: var(--blue); animation: pb 0.5s infinite; cursor: pointer; }
+.res.flash-hurt { animation: phurt 0.4s ease-out !important; }
+@keyframes pa { 0%,100%{box-shadow:0 0 0 0 rgba(255,102,0,0.4)} 50%{box-shadow:0 0 8px 3px rgba(255,102,0,0.4)} }
+@keyframes pb { 0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,0.4)} 50%{box-shadow:0 0 8px 3px rgba(0,191,255,0.4)} }
+@keyframes phurt { 0%{background:#3a0000;border-color:#ff3232} 100%{background:var(--green-bg);border-color:var(--green-dark)} }
+.rn { font-size: 10px; color: var(--green); font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.rr { font-size: 8px; color: var(--green-dim); margin-bottom: 4px; }
+.rhb { height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
+.rhf { height: 100%; border-radius: 2px; transition: width 0.4s, background 0.4s; }
+.rst { font-size: 8px; color: var(--green-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* SYSTEMS */
+#sys-grid { display: flex; flex-direction: column; gap: 5px; }
+.sr { display: flex; align-items: center; gap: 8px; }
+.sn { width: 72px; color: var(--green-dim); font-size: 9px; letter-spacing: 1px; }
+.sb { flex: 1; height: 7px; background: #111; border-radius: 3px; overflow: hidden; }
+.sf { height: 100%; border-radius: 3px; transition: width 0.5s, background 0.4s; }
+.sv { width: 36px; text-align: right; font-size: 10px; font-weight: bold; }
+
+/* LOG */
+#log { flex: 1; min-height: 80px; max-height: 110px; background: var(--green-bg); border: 1px solid var(--green-dark); padding: 6px 8px; overflow: hidden; display: flex; flex-direction: column; gap: 2px; }
+.ll { font-size: 9px; color: var(--green-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 0 1px 7px; border-left: 2px solid transparent; flex-shrink: 0; }
+.ll.w { color: var(--orange); border-left-color: var(--orange); }
+.ll.c { color: var(--red); border-left-color: var(--red); }
+.ll.g { color: var(--green); border-left-color: var(--green); }
+
+/* CRISES */
+#qlist { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 6px; }
+#qlist::-webkit-scrollbar { width: 3px; }
+#qlist::-webkit-scrollbar-thumb { background: var(--green-dark); }
+.q { background: #0a120a; border: 1px solid var(--green-dark); padding: 10px; border-radius: 4px; flex-shrink: 0; }
+.q.urg { border-color: var(--red); animation: pu 0.6s infinite; }
+.q.warn { border-color: var(--orange); animation: pw 0.9s infinite; }
+@keyframes pu { 0%,100%{box-shadow:0 0 0 0 rgba(255,50,50,0.3)} 50%{box-shadow:0 0 8px 3px rgba(255,50,50,0.3)} }
+@keyframes pw { 0%,100%{box-shadow:0 0 0 0 rgba(255,100,0,0.2)} 50%{box-shadow:0 0 5px 2px rgba(255,100,0,0.2)} }
+.qh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.qt { font-size: 11px; color: var(--green); letter-spacing: 1px; font-weight: bold; }
+.qtm { font-size: 12px; font-weight: bold; font-variant-numeric: tabular-nums; }
+.qd { font-size: 9px; color: var(--green-dim); margin-bottom: 6px; line-height: 1.4; }
+.qpb { height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.qpf { height: 100%; border-radius: 2px; transition: width 0.2s; }
+.qa { display: flex; gap: 4px; flex-wrap: wrap; }
+.qb { background: transparent; border: 1px solid var(--green-dark); color: var(--green); font-family: var(--font); font-size: 10px; padding: 6px 6px; cursor: pointer; border-radius: 3px; letter-spacing: 1px; transition: all 0.15s; flex: 1; min-width: 60px; text-align: center; }
+.qb:hover { background: var(--green-dark); border-color: var(--green); }
+#nq { font-size: 11px; color: var(--green-dim); text-align: center; padding: 30px 10px; letter-spacing: 2px; }
+#paused-note { font-size: 9px; color: var(--blue); text-align: center; padding: 5px; letter-spacing: 2px; display: none; border: 1px solid rgba(0,191,255,0.4); border-radius: 3px; animation: pb 1s infinite; }
+
+/* MINIGAME OVERLAY */
+#overlay { position: absolute; inset: 0; background: rgba(2,6,2,0.96); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+#overlay.show { display: flex; }
+#mg-wrap { background: var(--green-bg); border: 2px solid var(--blue); padding: 18px; border-radius: 6px; width: 340px; box-shadow: 0 0 20px rgba(0,191,255,0.2); }
+#mg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+#mg-title { font-size: 13px; letter-spacing: 2px; color: var(--blue); flex: 1; min-width: 0; white-space: nowrap; overflow: visible; }
+#mg-back { background: transparent; border: 1px solid var(--orange); color: var(--orange); font-family: var(--font); font-size: 9px; padding: 5px 12px; cursor: pointer; border-radius: 3px; letter-spacing: 1px; transition: all 0.15s; }
+#mg-back:hover { background: #3d1a00; color: var(--yellow); }
+#mg-sub { font-size: 10px; color: var(--green-dim); margin-bottom: 8px; line-height: 1.4; }
+#mg-timer { font-size: 12px; color: var(--red); margin-bottom: 6px; text-align: center; letter-spacing: 2px; font-weight: bold; }
+#mg-area { position: relative; height: 180px; background: #060e06; border: 1px solid var(--green-dark); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+#mg-result { font-size: 14px; letter-spacing: 3px; text-align: center; display: none; padding: 6px; font-weight: bold; }
+
+/* RESULT SCREENS */
+.rscreen { position: absolute; inset: 0; background: rgba(2,6,2,0.97); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.rscreen.show { display: flex; }
+.rs-title { font-size: 30px; letter-spacing: 8px; text-align: center; }
+.rs-sub { font-size: 11px; letter-spacing: 3px; color: var(--orange); text-align: center; }
+.rs-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.rs-stat { background: var(--green-bg); border: 1px solid var(--green-dark); padding: 10px 20px; border-radius: 4px; text-align: center; }
+.rs-stat .sv { font-size: 22px; color: var(--green); }
+.rs-stat .sl { font-size: 8px; color: var(--green-dim); letter-spacing: 2px; margin-top: 3px; }
+.rs-btns { display: flex; gap: 10px; margin-top: 6px; }
+.rs-btn { background: transparent; border: 1px solid var(--green-dark); color: var(--green); font-family: var(--font); font-size: 12px; padding: 11px 0; cursor: pointer; letter-spacing: 3px; width: 180px; text-align: center; transition: all 0.2s; text-decoration: none; display: block; }
+.rs-btn:hover { border-color: var(--green); background: rgba(57,255,20,0.05); }
+.rs-btn.primary { border-color: var(--green); }
+
+/* SCREEN SHAKE */
+@keyframes shake { 0%{transform:translate(0,0)} 10%{transform:translate(-4px,2px)} 20%{transform:translate(4px,-2px)} 30%{transform:translate(-3px,3px)} 40%{transform:translate(3px,-1px)} 50%{transform:translate(-2px,2px)} 60%{transform:translate(2px,-2px)} 70%{transform:translate(-1px,1px)} 80%{transform:translate(1px,-1px)} 90%{transform:translate(-1px,0)} 100%{transform:translate(0,0)} }
+#G.shake { animation: shake 0.45s ease-out; }
+
+/* RED VIGNETTE */
+#vignette { position: absolute; inset: 0; pointer-events: none; z-index: 998; border-radius: 0; opacity: 0; transition: opacity 0.15s; background: radial-gradient(ellipse at center, transparent 45%, rgba(255,30,30,0.55) 100%); }
+#vignette.flash { opacity: 1; }
+#vignette.critical { opacity: 0.45; animation: vig-pulse 1.2s infinite; }
+@keyframes vig-pulse { 0%,100%{opacity:0.25} 50%{opacity:0.55} }
+
+/* ACHIEVEMENT TOAST */
+#ach-toast-wrap {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  pointer-events: none;
+}
+.ach-toast {
+  background: #030b03;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow: 0 0 18px rgba(57,255,20,0.2);
+  animation: toast-in 0.35s ease-out;
+  pointer-events: none;
+}
+@keyframes toast-in {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.ach-toast.toast-out {
+  animation: toast-fade 0.4s ease-in forwards;
+}
+@keyframes toast-fade {
+  from { opacity:1; transform: translateY(0); }
+  to   { opacity:0; transform: translateY(8px); }
+}
+.ach-toast-icon { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.ach-toast-body { flex: 1; }
+.ach-toast-label { font-size: 7px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 2px; }
+.ach-toast-name  { font-size: 10px; color: var(--green); letter-spacing: 2px; font-weight: bold; }
+
+/* MUTE BUTTON */
+#mute-btn { background: transparent; border: 1px solid var(--green-dark); color: var(--green-dim); font-family: var(--font); font-size: 9px; padding: 4px 8px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; border-radius: 2px; }
+#mute-btn:hover { border-color: var(--green); color: var(--green); }
+#mute-btn.muted { border-color: var(--red); color: var(--red); }
+
+/* CAUSE OF DEATH SCREEN */
+#go-cod { font-size: 10px; color: var(--red); letter-spacing: 2px; text-align: center; background: rgba(40,0,0,0.7); border: 1px solid var(--red); padding: 10px 18px; border-radius: 4px; max-width: 460px; line-height: 1.7; margin: 4px 0; }
+
+/* MINIGAME - PRESSURE GAUGE (DR. CHEN) */
+.mg-gauge-ring { fill: none; stroke-width: 14; }
+.mg-gauge-arc  { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.1s; }
+
+/* MINIGAME - CIRCUIT TRACE (MALIK) */
+.ct-cell { width: 36px; height: 36px; background: #060e06; border: 1px solid #1a3d1a; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #2a5a2a; transition: all 0.12s; user-select: none; }
+.ct-cell.active { background: #0a2a0a; border-color: var(--green); color: var(--green); }
+.ct-cell.wrong  { background: #2a0000; border-color: var(--red); color: var(--red); animation: phurt 0.3s ease-out; }
+.ct-cell.start  { border-color: var(--blue); color: var(--blue); background: #001a2a; }
+.ct-cell.end    { border-color: var(--yellow); color: var(--yellow); background: #1a1000; }
+
+/* MINIGAME - PRESSURE VALVE SEQUENCE (SARA) */
+.pv-valve { width: 44px; height: 44px; background: #060e06; border: 2px solid #1a3d1a; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #2a5a2a; transition: all 0.15s; letter-spacing: 1px; }
+.pv-valve.open   { background: #0a2a0a; border-color: var(--green); color: var(--green); box-shadow: 0 0 6px rgba(57,255,20,0.3); }
+.pv-valve.closed { background: #1a0000; border-color: var(--red); color: var(--red); }
+.pv-valve.locked { opacity: 0.3; cursor: not-allowed; }
+
+/* MINIGAME - MORSE CODE (BLAKE) */
+.mc-btn { background: #060e06; border: 2px solid var(--green-dark); color: var(--green); font-family: var(--font); font-size: 11px; padding: 8px 14px; cursor: pointer; border-radius: 3px; letter-spacing: 1px; transition: all 0.1s; }
+.mc-btn:active, .mc-btn.pressed { background: var(--green-dark); border-color: var(--green); }
+
+/* MINIGAME - DATA CORRUPTION (YUKI) */
+.dc-row { display: flex; gap: 2px; font-family: var(--font); font-size: 10px; line-height: 1.6; }
+.dc-byte { padding: 1px 3px; border-radius: 2px; cursor: pointer; transition: background 0.1s; }
+.dc-byte:hover { background: #1a3d1a; }
+.dc-byte.selected { background: #0a2a0a; color: var(--green); border: 1px solid var(--green); }
+.dc-byte.corrupt { color: var(--orange); }
+.dc-byte.fixed { color: var(--green); background: #0a1a0a; cursor: default; }
+
+/* RADIO CHATTER */
+#radio-wrap { flex-shrink: 0; }
+#radio { background: var(--green-bg); border: 1px solid var(--green-dark); height: 56px; overflow: hidden; position: relative; }
+#radio-inner { position: absolute; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; gap: 2px; padding: 4px 8px; }
+.rl { font-size: 8px; color: #2a5a2a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px; transition: color 0.4s; padding: 1px 0; }
+.rl.new { color: var(--green-dim); }
+
+/* RESIDENT PORTRAIT DEGRADATION */
+.res-face { font-size: 18px; line-height: 1; text-align: center; margin-bottom: 2px; transition: filter 0.5s; }
+.res.dead .res-face { filter: grayscale(1) brightness(0.3); }
+
+/* WAVE DOWNTIME SHOP */
+#shop-overlay { position: absolute; inset: 0; background: rgba(2,6,2,0.97); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+#shop-overlay.show { display: flex; }
+#shop-box { background: var(--green-bg); border: 2px solid var(--green); padding: 22px 26px; border-radius: 6px; width: 480px; box-shadow: 0 0 30px rgba(57,255,20,0.1); }
+#shop-title { font-size: 16px; letter-spacing: 4px; color: var(--green); margin-bottom: 4px; }
+#shop-sub { font-size: 9px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 14px; }
+#shop-pts { font-size: 13px; color: var(--yellow); letter-spacing: 2px; margin-bottom: 12px; }
+#shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.shop-card { background: #060e06; border: 1px solid var(--green-dark); padding: 10px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+.shop-card:hover:not(.shop-disabled) { border-color: var(--green); background: #0a1a0a; }
+.shop-card.shop-disabled { opacity: 0.35; cursor: not-allowed; }
+.shop-card.shop-bought { border-color: var(--green); opacity: 0.5; cursor: default; }
+.shop-card-name { font-size: 11px; color: var(--green); letter-spacing: 1px; margin-bottom: 3px; }
+.shop-card-desc { font-size: 8px; color: var(--green-dim); line-height: 1.4; margin-bottom: 5px; }
+.shop-card-cost { font-size: 10px; color: var(--yellow); }
+#shop-continue { background: transparent; border: 1px solid var(--green); color: var(--green); font-family: var(--font); font-size: 12px; padding: 10px 40px; cursor: pointer; letter-spacing: 3px; border-radius: 3px; transition: all 0.2s; }
+#shop-continue:hover { background: rgba(57,255,20,0.06); }
+#shop-sys-status { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.shop-sys-bar { flex: 1; min-width: 60px; background: #060e06; border: 1px solid var(--green-dark); border-radius: 3px; padding: 5px 7px; }
+.shop-sys-name { font-size: 7px; color: var(--green-dim); letter-spacing: 1px; margin-bottom: 3px; }
+.shop-sys-track { height: 5px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; }
+.shop-sys-fill { height: 100%; border-radius: 2px; transition: width 0.4s, background 0.4s; }
+.shop-sys-val { font-size: 9px; font-weight: bold; text-align: right; }
+
+/* RUN HISTORY OVERLAY */
+#history-btn { background: transparent; border: 1px solid var(--green-dark); color: var(--green-dim); font-family: var(--font); font-size: 9px; padding: 4px 8px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; border-radius: 2px; }
+#history-btn:hover { border-color: var(--green); color: var(--green); }
+#history-overlay { position: absolute; inset: 0; background: rgba(2,6,2,0.97); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+#history-overlay.show { display: flex; }
+#history-box { background: var(--green-bg); border: 2px solid var(--green-dark); padding: 20px 24px; border-radius: 6px; width: 500px; max-height: 480px; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(57,255,20,0.06); }
+#history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+#history-title { font-size: 14px; letter-spacing: 4px; color: var(--green); }
+#history-close { background: transparent; border: 1px solid var(--green-dark); color: var(--green-dim); font-family: var(--font); font-size: 9px; padding: 4px 10px; cursor: pointer; letter-spacing: 1px; border-radius: 2px; transition: all 0.15s; }
+#history-close:hover { border-color: var(--green); color: var(--green); }
+#history-records { font-size: 10px; color: var(--green-dim); letter-spacing: 1px; margin-bottom: 10px; }
+#history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+#history-list::-webkit-scrollbar { width: 3px; }
+#history-list::-webkit-scrollbar-thumb { background: var(--green-dark); }
+.hist-row { background: #060e06; border: 1px solid var(--green-dark); border-radius: 3px; padding: 8px 12px; flex-shrink: 0; }
+.hist-row.hist-best { border-color: var(--yellow); }
+.hist-row.hist-win { border-color: var(--green); }
+.hist-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.hist-date { font-size: 8px; color: #2a5a2a; }
+.hist-outcome { font-size: 9px; font-weight: bold; letter-spacing: 2px; }
+.hist-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+.hist-stat { font-size: 8px; color: var(--green-dim); }
+.hist-stat span { color: var(--green); }
+.hist-cod { font-size: 8px; color: var(--red); margin-top: 3px; letter-spacing: 0; line-height: 1.4; }
+#history-clear { background: transparent; border: 1px solid #333; color: #444; font-family: var(--font); font-size: 9px; padding: 6px 16px; cursor: pointer; letter-spacing: 1px; border-radius: 2px; margin-top: 10px; transition: all 0.2s; align-self: flex-end; }
+#history-clear:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+<div id="G">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- GAME OVER -->
+  <div class="rscreen" id="sc-go">
+    <div class="rs-title" style="color:var(--red);text-shadow:0 0 20px rgba(255,50,50,0.4)">FAILURE</div>
+    <div class="rs-sub" id="go-reason"></div>
+    <div id="go-cod"></div>
+    <div class="rs-stats" id="go-stats"></div>
+    <div class="rs-btns">
+      <button class="rs-btn primary" onclick="startGame()">RESTART</button>
+      <a class="rs-btn" href="menu.html">MAIN MENU</a>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div class="rscreen" id="sc-win">
+    <div class="rs-title" style="color:var(--green);text-shadow:0 0 30px rgba(57,255,20,0.5)">MISSION COMPLETE</div>
+    <div class="rs-sub" style="color:var(--green-dim)">ALL 10 WAVES SURVIVED</div>
+    <div class="rs-stats" id="win-stats"></div>
+    <div class="rs-btns">
+      <button class="rs-btn primary" onclick="startGame()">PLAY AGAIN</button>
+      <a class="rs-btn" href="menu.html">MAIN MENU</a>
+    </div>
+  </div>
+
+  <!-- VIGNETTE / SCREEN FLASH -->
+  <div id="vignette"></div>
+
+  <!-- MINIGAME OVERLAY -->
+  <div id="overlay">
+    <div id="mg-wrap">
+      <div id="mg-header">
+        <div id="mg-title"></div>
+        <button id="mg-back" onclick="closeMG()">ABANDON</button>
+      </div>
+      <div id="mg-sub"></div>
+      <div id="mg-timer"></div>
+      <div id="mg-area"></div>
+      <div id="mg-result"></div>
+    </div>
+  </div>
+
+  <!-- WAVE DOWNTIME SHOP -->
+  <div id="shop-overlay">
+    <div id="shop-box">
+      <div id="shop-title">WAVE COMPLETE</div>
+      <div id="shop-sub">SPEND REPAIR POINTS BEFORE THE NEXT WAVE</div>
+      <div id="shop-pts"></div>
+      <div id="shop-sys-status"></div>
+      <div id="shop-grid"></div>
+      <div style="display:flex;align-items:center;gap:20px">
+        <button id="shop-continue" onclick="endShop()">CONTINUE TO NEXT WAVE</button>
+        <div id="shop-timer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUN HISTORY OVERLAY -->
+  <div id="history-overlay">
+    <div id="history-box">
+      <div id="history-head">
+        <div id="history-title">RUN HISTORY</div>
+        <button id="history-close" onclick="closeHistory()">CLOSE</button>
+      </div>
+      <div id="history-records"></div>
+      <div id="history-list"></div>
+      <button id="history-clear" onclick="clearHistory()">CLEAR ALL RECORDS</button>
+    </div>
+  </div>
+
+
+  <!-- ACHIEVEMENT TOASTS -->
+  <div id="ach-toast-wrap"></div>
+
+  <div id="hdr">
+    <div class="ht">BUNKER-7</div>
+    <div class="hstats">
+      <div class="stat-block"><div class="stat-val" id="hd">DAY 0</div><div class="stat-lbl">DAY</div></div>
+      <div class="stat-block"><div class="stat-val" id="hs2">5<span style="font-size:10px;color:var(--green-dim)">/5</span></div><div class="stat-lbl">ALIVE</div></div>
+      <div class="stat-block"><div class="stat-val" id="hw">WAVE 1</div><div class="stat-lbl">WAVE</div></div>
+      <div class="stat-block"><div class="stat-val" id="hsc" style="color:var(--yellow)">0 PTS</div><div class="stat-lbl">SCORE</div></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="mute-btn" onclick="toggleMute()">SFX ON</button>
+      <button id="history-btn" onclick="openHistory()">RECORDS</button>
+      <a href="menu.html" style="font-size:9px;color:var(--green-dim);letter-spacing:2px;text-decoration:none;border:1px solid var(--green-dark);padding:4px 10px;transition:all 0.2s" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--green-dim)';this.style.borderColor='var(--green-dark)'">MENU</a>
+    </div>
+  </div>
+
+  <!-- GAME BODY -->
+  <div id="body">
+    <div id="left">
+      <div>
+        <div class="slbl">RESIDENTS - click blue glow for emergency</div>
+        <div id="res-grid"></div>
+      </div>
+      <div>
+        <div class="slbl">SYSTEMS - RAD must stay LOW, others HIGH</div>
+        <div id="sys-grid"></div>
+      </div>
+      <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div class="slbl">ACTIVITY LOG</div>
+        <div id="log"></div>
+      </div>
+      <div id="radio-wrap">
+        <div class="slbl">RADIO CHATTER <span style="font-size:7px;color:#1a4a1a;letter-spacing:0">[PRESS 1/2/3 TO ANSWER FIRST CRISIS]</span></div>
+        <div id="radio"><div id="radio-inner"></div></div>
+      </div>
+    </div>
+    <div id="right">
+      <div class="slbl">ACTIVE CRISES</div>
+      <div id="paused-note">MINIGAME ACTIVE - CRISES PAUSED</div>
+      <div id="qlist"></div>
+      <div id="nq">ALL CLEAR</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SETTINGS =====
+const GAME_DEFAULTS = {
+  waves: 10, infinite: false, waveDur: 40, difficulty: 'NORMAL',
+  startHp: 100, bgmVol: 40, sfxVol: 100, bgmEnabled: true,
+  sfxEnabled: true, scanlines: true, crisisMax: 5
+};
+function loadSettings() {
+  try { const r = localStorage.getItem('bunker7_settings'); return r ? {...GAME_DEFAULTS,...JSON.parse(r)} : {...GAME_DEFAULTS}; }
+  catch(e) { return {...GAME_DEFAULTS}; }
+}
+const CFG = loadSettings();
+
+// Difficulty multipliers
+const DIFF_MUL = { EASY: 0.6, NORMAL: 1.0, HARD: 1.4, BRUTAL: 2.0 };
+const diffMul = DIFF_MUL[CFG.difficulty] || 1.0;
+
+// ===== AUDIO MANAGER =====
+const SFX = {
+  bgm: new Audio('./sound/bgm.mp3'),
+  crisis: new Audio('./sound/crisis.mp3'),
+  click: new Audio('./sound/click.mp3'),
+  success: new Audio('./sound/success.mp3'),
+  fail: new Audio('./sound/fail.mp3'),
+  gameover: new Audio('./sound/gameover.mp3'),
+  win: new Audio('./sound/win.mp3')
+};
+
+SFX.bgm.loop = true;
+SFX.bgm.volume = CFG.bgmVol / 100;
+
+// Restore BGM position from previous page
+(function() {
+  const pos = parseFloat(sessionStorage.getItem('bgmPos') || '0');
+  SFX.bgm.currentTime = pos;
+})();
+
+setInterval(() => {
+  if (!SFX.bgm.paused) sessionStorage.setItem('bgmPos', SFX.bgm.currentTime);
+}, 500);
+
+function playSound(name) {
+  try {
+    if (name === 'bgm') { SFX.bgm.play().catch(()=>{}); return; }
+    if (!CFG.sfxEnabled) return;
+    if (SFX[name]) {
+      SFX[name].volume = CFG.sfxVol / 100;
+      SFX[name].currentTime = 0;
+      SFX[name].play().catch(e => {});
+    }
+  } catch (e) {}
+}
+
+// ===== DATA =====
+const RES_TEMPLATE = [
+  {n:'DR. CHEN', r:'Medic',    mg:'heartrate'},
+  {n:'MALIK',   r:'Engineer', mg:'wires'},
+  {n:'SARA',    r:'Botanist', mg:'sequence'},
+  {n:'BLAKE',   r:'Security', mg:'reflex'},
+  {n:'YUKI',    r:'Analyst',  mg:'decrypt'}
+];
+const SYS_TEMPLATE = {
+  O2:    {n:'OXYGEN',    v:100, d:0.22},
+  FOOD:  {n:'FOOD',      v:100, d:0.14},
+  PWR:   {n:'POWER',     v:100, d:0.12},
+  H2O:   {n:'WATER',     v:100, d:0.18},
+  RAD:   {n:'RADIATION', v:0,   d:-0.1},
+  MORALE:{n:'MORALE',    v:100, d:0.1}
+};
+const QTPL = [
+  // OXYGEN
+  {t:'O2 PIPE BURST',    s:'O2',  desc:'Oxygen venting in sector 3. Act fast.',              opts:[{l:'SEAL CLAMP',fix:true},{l:'VENT MORE',fix:false},{l:'PATCH FOAM',fix:false}],    dmgS:28,dmgR:16},
+  {t:'FIRE SECTOR 2',    s:'O2',  desc:'Uncontrolled combustion depleting air.',              opts:[{l:'CO2 SUPPRES',fix:true},{l:'OPEN DOOR',fix:false},{l:'WATER DUMP',fix:false}],   dmgS:32,dmgR:18},
+  {t:'GAS POCKET',       s:'O2',  desc:'Methane pockets near vents.',                        opts:[{l:'IGNITE SAFE',fix:false},{l:'PURGE PUMP',fix:true},{l:'SEAL VENTS',fix:false}],  dmgS:24,dmgR:14},
+  {t:'SCRUBBER FAIL',    s:'O2',  desc:'CO2 scrubber offline. Air quality dropping.',        opts:[{l:'BYPASS FAN',fix:false},{l:'SWAP FILTER',fix:true},{l:'OPEN SHAFT',fix:false}],  dmgS:26,dmgR:12},
+  {t:'VENT COLLAPSE',    s:'O2',  desc:'Primary ventilation duct crushed by debris.',        opts:[{l:'REROUTE DUCT',fix:true},{l:'SEAL SECTOR',fix:false},{l:'INCREASE FAN',fix:false}],dmgS:22,dmgR:14},
+  {t:'AIR LOCK BREACH',  s:'O2',  desc:'Outer air lock seal compromised.',                   opts:[{l:'MANUAL SEAL',fix:true},{l:'PRESSURIZE',fix:false},{l:'EVACUATE',fix:false}],    dmgS:30,dmgR:20},
+  {t:'SMOKE BUILDUP',    s:'O2',  desc:'Dense smoke from electrical fire filling corridors.',opts:[{l:'HALON FLOOD',fix:true},{l:'OPEN VENTS',fix:false},{l:'FAN REVERSE',fix:false}],  dmgS:20,dmgR:10},
+  {t:'O2 GENERATOR FAIL',s:'O2',  desc:'Electrolysis unit producing no output.',             opts:[{l:'RESET CELL',fix:false},{l:'SWITCH TANK',fix:true},{l:'INCREASE VOLT',fix:false}],dmgS:24,dmgR:16},
+  // FOOD
+  {t:'FOOD ROT',         s:'FOOD', desc:'Contamination spreading in stores.',                 opts:[{l:'INCINERATE',fix:true},{l:'SPREAD OUT',fix:false},{l:'IGNORE',fix:false}],       dmgS:24,dmgR:10},
+  {t:'FUNGAL OUTBREAK',  s:'FOOD', desc:'Spores eating through rations.',                    opts:[{l:'QUARANTINE',fix:false},{l:'UV PULSE',fix:true},{l:'REPLANT',fix:false}],        dmgS:20,dmgR:8},
+  {t:'VERMIN',           s:'FOOD', desc:'Unknown creature consuming rations.',                opts:[{l:'SONIC PULSE',fix:true},{l:'OPEN HATCH',fix:false},{l:'BAIT TRAP',fix:false}],   dmgS:16,dmgR:6},
+  {t:'CROP BLIGHT',      s:'FOOD', desc:'Hydroponics bay infected with blight.',             opts:[{l:'CULL PLANTS',fix:true},{l:'ADD WATER',fix:false},{l:'BOOST LIGHT',fix:false}],  dmgS:22,dmgR:8},
+  {t:'STORAGE FLOOD',    s:'FOOD', desc:'Coolant leak soaking dry food supplies.',            opts:[{l:'DRAIN FAST',fix:true},{l:'SEAL CRATE',fix:false},{l:'MOVE STOCK',fix:false}],   dmgS:18,dmgR:6},
+  {t:'NUTRIENT IMBAL.',  s:'FOOD', desc:'Hydroponic solution pH critically off.',             opts:[{l:'BUFFER ADD',fix:true},{l:'DRAIN LOOP',fix:false},{l:'REDUCE LIGHT',fix:false}], dmgS:14,dmgR:8},
+  {t:'INSECT SWARM',     s:'FOOD', desc:'Unknown insect species swarming rations bay.',       opts:[{l:'FUMIGATE',fix:true},{l:'SEAL VENTS',fix:false},{l:'FREEZE BAY',fix:false}],     dmgS:20,dmgR:10},
+  {t:'FREEZER FAIL',     s:'FOOD', desc:'Cold storage unit temperature rising fast.',         opts:[{l:'BYPASS COMP',fix:false},{l:'REROUTE COOL',fix:true},{l:'MOVE STORES',fix:false}],dmgS:22,dmgR:8},
+  // POWER
+  {t:'POWER SURGE',      s:'PWR',  desc:'Grid overload, life support at risk.',               opts:[{l:'DIVERT CELL',fix:false},{l:'SHUT BREAKER',fix:true},{l:'LOAD BAL.',fix:false}],  dmgS:26,dmgR:12},
+  {t:'COOLANT BREACH',   s:'PWR',  desc:'Reactor temp climbing fast.',                        opts:[{l:'VENT STEAM',fix:false},{l:'INJECT COOL',fix:true},{l:'SHUTDOWN',fix:false}],    dmgS:24,dmgR:10},
+  {t:'EMP PULSE',        s:'PWR',  desc:'Electronic systems disrupted.',                      opts:[{l:'SHIELDING',fix:false},{l:'REBOOT CORE',fix:true},{l:'MANUAL MODE',fix:false}],  dmgS:28,dmgR:6},
+  {t:'GENERATOR FAIL',   s:'PWR',  desc:'Backup generator refused to start.',                 opts:[{l:'PRIME FUEL',fix:true},{l:'RESET CTRL',fix:false},{l:'HAND CRANK',fix:false}],   dmgS:30,dmgR:14},
+  {t:'BATTERY DRAIN',    s:'PWR',  desc:'Reserve cells discharging at 10x normal rate.',     opts:[{l:'ISOLATE BUS',fix:true},{l:'ADD LOAD',fix:false},{l:'RECHARGE NOW',fix:false}],  dmgS:22,dmgR:8},
+  {t:'REACTOR SCRAM',    s:'PWR',  desc:'Automatic shutdown triggered by sensor fault.',      opts:[{l:'OVERRIDE',fix:false},{l:'INSPECT ROD',fix:true},{l:'FULL RESTART',fix:false}],  dmgS:28,dmgR:10},
+  {t:'CABLE FIRE',       s:'PWR',  desc:'Electrical fire in power distribution room.',        opts:[{l:'CO2 SPRAY',fix:true},{l:'WATER HOSE',fix:false},{l:'SMOTHER',fix:false}],      dmgS:24,dmgR:12},
+  {t:'VOLTAGE COLLAPSE', s:'PWR',  desc:'Bus voltage dropping below safe threshold.',         opts:[{l:'LOAD SHED',fix:true},{l:'ADD CAPS',fix:false},{l:'FULL REGEN',fix:false}],      dmgS:20,dmgR:8},
+  // WATER
+  {t:'WATER TOXINS',     s:'H2O',  desc:'Chemical trace in recycle loop.',                   opts:[{l:'FILTER BOOST',fix:true},{l:'PURGE LOOP',fix:false},{l:'DILUTE',fix:false}],     dmgS:22,dmgR:14},
+  {t:'PIPE FLOOD',       s:'H2O',  desc:'Lower quarters filling with coolant.',               opts:[{l:'PUMP DRAIN',fix:true},{l:'SEAL HATCH',fix:false},{l:'BREAK VALVE',fix:false}],  dmgS:22,dmgR:12},
+  {t:'ACID LEAK',        s:'H2O',  desc:'Chemical storage rupture near recycler.',            opts:[{l:'NEUTRALIZE',fix:true},{l:'DILUTE',fix:false},{l:'ABSORB PAD',fix:false}],      dmgS:26,dmgR:16},
+  {t:'PUMP SEIZED',      s:'H2O',  desc:'Main water pump bearing failure.',                   opts:[{l:'LUBE SHAFT',fix:false},{l:'SWAP PUMP',fix:true},{l:'BYPASS LINE',fix:false}],  dmgS:20,dmgR:10},
+  {t:'FILTER CLOG',      s:'H2O',  desc:'Particulate filter at 0% flow.',                    opts:[{l:'BACKFLUSH',fix:true},{l:'REMOVE MESH',fix:false},{l:'ADD PRESSURE',fix:false}], dmgS:18,dmgR:8},
+  {t:'PIPE FREEZE',      s:'H2O',  desc:'Deep sector pipe frozen solid.',                     opts:[{l:'HEAT TRACE',fix:true},{l:'BREAK ICE',fix:false},{l:'REROUTE',fix:false}],      dmgS:20,dmgR:10},
+  {t:'SEWAGE BACKUP',    s:'H2O',  desc:'Waste processing overflow into corridors.',          opts:[{l:'VALVE CLOSE',fix:true},{l:'PUMP UP',fix:false},{l:'SEAL DRAIN',fix:false}],    dmgS:16,dmgR:12},
+  {t:'DESAL FAILURE',    s:'H2O',  desc:'Desalination membrane torn. Salt water in loop.',   opts:[{l:'BYPASS DESIL',fix:false},{l:'SWAP MEMBR.',fix:true},{l:'FLUSH SALT',fix:false}], dmgS:24,dmgR:14},
+  // RADIATION
+  {t:'RAD SPIKE',        s:'RAD',  desc:'Geiger readings critical. Sector exposed.',          opts:[{l:'DECON SPRAY',fix:false},{l:'SEAL WALLS',fix:true},{l:'OPEN VENTS',fix:false}],  dmgS:30,dmgR:20},
+  {t:'SOLAR FLARE',      s:'RAD',  desc:'Radiation storm hitting the surface.',               opts:[{l:'SURFACE RUN',fix:false},{l:'DEEP SHELTER',fix:true},{l:'PARTIAL SEAL',fix:false}],dmgS:34,dmgR:22},
+  {t:'ROD EXPOSURE',     s:'RAD',  desc:'Fuel rod housing cracked in reactor bay.',           opts:[{l:'BORON INJECT',fix:true},{l:'COOL WATER',fix:false},{l:'EVACUATE',fix:false}],   dmgS:36,dmgR:24},
+  {t:'WASTE BREACH',     s:'RAD',  desc:'Radioactive waste container seal broken.',           opts:[{l:'LEAD SEAL',fix:true},{l:'WATER DUMP',fix:false},{l:'VENT OUTSIDE',fix:false}],  dmgS:28,dmgR:18},
+  {t:'SENSOR GHOST',     s:'RAD',  desc:'Rad sensors spiking. Real or false alarm?',         opts:[{l:'TRUST SENSOR',fix:false},{l:'CROSS CHECK',fix:true},{l:'IGNORE',fix:false}],    dmgS:20,dmgR:8},
+  {t:'ISOTOPE SPILL',    s:'RAD',  desc:'Medical isotope storage cracked open.',              opts:[{l:'CHELATE DOSE',fix:true},{l:'OPEN DOOR',fix:false},{l:'MOPUP',fix:false}],      dmgS:26,dmgR:16},
+  {t:'GEIGER SURGE',     s:'RAD',  desc:'Unexplained neutron flux in lower deck.',            opts:[{l:'SCATTER RODS',fix:false},{l:'BORATE LOOP',fix:true},{l:'REDUCE CORE',fix:false}],dmgS:30,dmgR:18},
+  // MORALE
+  {t:'MASS PANIC',       s:'MORALE',  desc:'Residents losing psychological control.',            opts:[{l:'BROADCAST',fix:true},{l:'SIREN TEST',fix:false},{l:'SILENCE',fix:false}],       dmgS:18,dmgR:8},
+  {t:'SUICIDE RISK',     s:'MORALE',  desc:'Resident showing critical distress signals.',        opts:[{l:'ISOLATE',fix:false},{l:'COUNSELOR',fix:true},{l:'MEDICATE',fix:false}],         dmgS:20,dmgR:18},
+  {t:'FIGHT BREAK OUT',  s:'MORALE',  desc:'Violent altercation in common area.',                opts:[{l:'RESTRAIN',fix:true},{l:'IGNORE',fix:false},{l:'BROADCAST',fix:false}],          dmgS:16,dmgR:14},
+  {t:'RUMOR SPREAD',     s:'MORALE',  desc:'False information causing paranoia.',                opts:[{l:'ADDRESS ALL',fix:true},{l:'CENSOR',fix:false},{l:'WAIT OUT',fix:false}],        dmgS:14,dmgR:6},
+  {t:'FOOD HOARD',       s:'MORALE',  desc:'Resident hoarding supplies, others starving.',       opts:[{l:'RATION LOCK',fix:true},{l:'PERSUADE',fix:false},{l:'IGNORE',fix:false}],        dmgS:18,dmgR:10},
+  {t:'GRIEF SPIRAL',     s:'MORALE',  desc:'Death of a resident sending others into shock.',     opts:[{l:'GROUP TALK',fix:true},{l:'WORK DUTY',fix:false},{l:'SILENCE',fix:false}],       dmgS:16,dmgR:8},
+  {t:'MUTINY THREAT',    s:'MORALE',  desc:'Residents demanding control of the bunker.',         opts:[{l:'NEGOTIATE',fix:false},{l:'SHOW DATA',fix:true},{l:'LOCK DOWN',fix:false}],      dmgS:22,dmgR:12},
+  {t:'ISOLATION BREAK',  s:'MORALE',  desc:'Resident refusing quarantine protocol.',             opts:[{l:'SEDATE',fix:false},{l:'EXPLAIN',fix:true},{l:'FORCE LOCK',fix:false}],          dmgS:16,dmgR:10},
+];
+
+// ===== STATE =====
+let RES, SYS;
+let quests=[], qid=0, logs=[], score=0, wave=1, sec=0;
+let gTimer=null, running=false, mgActive=false, mgTimer=null;
+let lastLethalEvent = '';
+let vigTimeout = null;
+let radioLines = [];
+let repairPoints = 0;
+let shopTimer = null;
+let shopPending = false;
+
+// ===== SCREEN SHAKE =====
+function triggerShake() {
+  const G = document.getElementById('G');
+  G.classList.remove('shake');
+  void G.offsetWidth;
+  G.classList.add('shake');
+  setTimeout(() => G.classList.remove('shake'), 500);
+}
+
+// ===== VIGNETTE / CRITICAL FLASH =====
+function triggerVignette(persist) {
+  const v = document.getElementById('vignette');
+  v.classList.remove('critical');
+  v.classList.add('flash');
+  if (vigTimeout) clearTimeout(vigTimeout);
+  if (persist) { v.classList.add('critical'); return; }
+  vigTimeout = setTimeout(() => { v.classList.remove('flash'); }, 600);
+}
+
+function updateCriticalVignette() {
+  const v = document.getElementById('vignette');
+  const hasCritical = Object.entries(SYS).some(([k,s]) =>
+    k === 'RAD' ? s.v >= 70 : s.v <= 15
+  ) || RES.some(r => r.alive && r.hp < 25);
+  if (hasCritical) {
+    if (!v.classList.contains('critical')) { v.classList.add('critical','flash'); }
+  } else {
+    v.classList.remove('critical','flash');
+  }
+}
+
+// ===== MUTE TOGGLE =====
+function toggleMute() {
+  CFG.sfxEnabled = !CFG.sfxEnabled;
+  CFG.bgmEnabled = !CFG.bgmEnabled;
+  const btn = document.getElementById('mute-btn');
+  if (CFG.sfxEnabled) {
+    btn.textContent = 'SFX ON'; btn.classList.remove('muted');
+    SFX.bgm.play().catch(()=>{});
+  } else {
+    btn.textContent = 'MUTED'; btn.classList.add('muted');
+    SFX.bgm.pause();
+  }
+}
+
+// ===== RADIO CHATTER =====
+const RADIO_LINES = {
+  ok:       ['Signal clear. Proceeding.','Copy that. Executing now.','Roger. On it.','Acknowledged. Stand by.','Confirmed. Action taken.'],
+  crisis:   ['Alert level rising.','Something is wrong down here.','We need eyes on sector 3.','Pressure dropping fast.','Do you copy? Repeat: do you copy?'],
+  critical: ['This is not good. This is really not good.','Mayday. Mayday. All hands.','Systems failing. Need override NOW.','She is gonna blow if we do not act.','All personnel, emergency protocol.'],
+  low_o2:   ['Air tastes wrong. You smell that?','Getting dizzy. O2 levels off.','Someone get a mask down here.','Carbon readings are climbing.','Scrubbers better kick in soon.'],
+  low_food: ['Rations are running short.','Someone counted the cans again. It is not good.','Last meal stretcher deployed.','We might need to start rationing.','Stomach says wave 6 is not going well.'],
+  low_pwr:  ['Lights flickered in sector 2.','Generator sounds rough tonight.','Emergency lighting only in corridor B.','Keep non-essentials off. Power is thin.','Back-up cells at low charge.'],
+  high_rad: ['Geiger is singing. Stay out of the lower deck.','Radiation suit inventory: three. People: five.','Dosimeter is not happy.','Keep away from sector 4. Seriously.','Lead shielding held. Barely.'],
+  low_h2o:  ['Water pressure dropped in habitat ring.','Someone needs to fix that recycler.','Hydration packs going fast.','Taps ran dry in sector 1.','Do not waste a drop.'],
+  low_morale:['People are scared. Not sure I blame them.','Heard crying through the wall last night.','Morale is on the floor, boss.','We need some good news. Anything.','Keep it together, people.'],
+  idle:     ['Static on channel 7. Checking...','Bunker-7 holding. For now.','Exterior is quiet. Too quiet.','All sectors nominal... mostly.','Day '+0+'. Still here.','Perimeter secure. Barely.','Wind picking up on surface. Irrelevant.','No signals from topside. As expected.'],
+  death:    ['One of us is gone. Moment of silence.','Casualty confirmed. We go on.','Another name on the wall.','Committing to memory. Moving on.'],
+};
+
+function addRadioLine(category) {
+  const pool = RADIO_LINES[category] || RADIO_LINES.idle;
+  const line = pool[Math.floor(Math.random() * pool.length)];
+  radioLines.unshift({text: line, fresh: true});
+  if (radioLines.length > 5) radioLines.pop();
+  renderRadio();
+  setTimeout(() => {
+    const r = radioLines.find(l => l.text === line && l.fresh);
+    if (r) r.fresh = false;
+    renderRadio();
+  }, 2000);
+}
+
+function renderRadio() {
+  const inner = document.getElementById('radio-inner');
+  if (!inner) return;
+  inner.innerHTML = [...radioLines].reverse().map(l =>
+    `<div class="rl${l.fresh ? ' new' : ''}">// ${l.text}</div>`
+  ).join('');
+}
+
+function pickRadioCategory() {
+  if (!SYS) return 'idle';
+  if (SYS.RAD.v > 65) return 'high_rad';
+  if (SYS.O2.v < 20) return 'low_o2';
+  if (SYS.PWR.v < 20) return 'low_pwr';
+  if (SYS.H2O.v < 20) return 'low_h2o';
+  if (SYS.FOOD.v < 20) return 'low_food';
+  if (SYS.MORALE.v < 20) return 'low_morale';
+  if (quests.length > 2) return 'crisis';
+  const hasCrit = Object.entries(SYS).some(([k,s]) => k==='RAD'?s.v>70:s.v<15);
+  if (hasCrit) return 'critical';
+  return 'idle';
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', e => {
+  if (!running || mgActive) return;
+  const n = parseInt(e.key);
+  if (n >= 1 && n <= 3) {
+    const visible = quests.slice(0, CFG.crisisMax);
+    const q = visible[0];
+    if (!q) return;
+    const optIdx = n - 1;
+    const opt = q.shuffledOpts[optIdx];
+    if (opt) { answerQ(q.id, opt.l, opt.fix); }
+  }
+});
+
+// ===== UTILS =====
+function colorFor(v) { return v > 55 ? '#39ff14' : v > 25 ? '#ffb300' : '#ff3232'; }
+
+function addLog(m, t='') {
+  logs.unshift({m, t});
+  if (logs.length > 40) logs.pop();
+  renderLog();
+}
+
+function flashResident(idx) {
+  const cards = document.querySelectorAll('.res');
+  if (cards[idx]) {
+    cards[idx].classList.remove('flash-hurt');
+    void cards[idx].offsetWidth;
+    cards[idx].classList.add('flash-hurt');
+    setTimeout(() => cards[idx].classList.remove('flash-hurt'), 450);
+  }
+}
+
+function showResult(id) {
+  document.querySelectorAll('.rscreen').forEach(s => s.classList.remove('show'));
+  if (id) document.getElementById(id).classList.add('show');
+}
+
+// ===== RENDER =====
+function renderLog() {
+  document.getElementById('log').innerHTML = logs.slice(0, 10).map(l =>
+    `<div class="ll ${l.t}">> ${l.m}</div>`
+  ).join('');
+}
+
+function renderRes() {
+  const PORTRAITS = {
+    healthy: ['(^_^)', '(-_-)','(o_o)','(._.)','(*_*)'],
+    hurt:    ['(>_<)', '(@_@)','(x_x)','(T_T)','(o_O)'],
+    critical:['(X_X)', '(;_;)','(>.<)','(-.-)','(x_x)'],
+    dead:    ['(+_+)', '(x_x)','(T_T)','(R.I.P)','(###)']
+  };
+  document.getElementById('res-grid').innerHTML = RES.map((r, i) => {
+    const cls = r.alive ? (r.personal ? 'mgon' : r.hp < 35 ? 'alert' : '') : 'dead';
+    const badge = r.alive ? (r.personal ? '?' : r.hp < 35 ? '!' : 'o') : 'x';
+    const badgeColor = r.personal ? '#00bfff' : r.hp < 35 ? '#ff6600' : '#39ff14';
+    let portrait, portraitColor;
+    if (!r.alive) { portrait = PORTRAITS.dead[i]; portraitColor = '#333'; }
+    else if (r.hp > 65) { portrait = PORTRAITS.healthy[i]; portraitColor = '#39ff14'; }
+    else if (r.hp > 35) { portrait = PORTRAITS.hurt[i]; portraitColor = '#ffb300'; }
+    else { portrait = PORTRAITS.critical[i]; portraitColor = '#ff3232'; }
+    const portraitStyle = r.alive && r.hp <= 35 ? `filter:drop-shadow(0 0 3px ${portraitColor});` : '';
+    // Show countdown if personal crisis is pending
+    let statusText = r.alive ? r.st : '[deceased]';
+    if (r.alive && r.personal && r._mgDeadline) {
+      const left = Math.max(0, Math.ceil((r._mgDeadline - Date.now()) / 1000));
+      statusText = 'HELP NOW - ' + left + 's';
+    }
+    return `<div class="res ${cls}" onclick="clickRes(${i})">
+      <div class="res-face" style="color:${portraitColor};${portraitStyle}">${portrait}</div>
+      <div class="rn">${(()=>{const p=r.n.split(' ');return(p[0]==='DR.'&&p[1])?p[0]+' '+p[1]:p[0];})()}<span style="color:${badgeColor};font-weight:bold">${badge}</span></div>
+      <div class="rr">${r.r}</div>
+      <div class="rhb"><div class="rhf" style="width:${Math.max(0,r.hp)}%;background:${r.alive ? colorFor(r.hp) : '#222'}"></div></div>
+      <div class="rst">${statusText}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSys() {
+  document.getElementById('sys-grid').innerHTML = Object.entries(SYS).map(([k, s]) => {
+    const isRad = k === 'RAD';
+    const color = isRad ? (s.v < 30 ? '#39ff14' : s.v < 60 ? '#ffb300' : '#ff3232') : colorFor(s.v);
+    const width = isRad ? Math.min(100, s.v) : Math.max(0, s.v);
+    return `<div class="sr">
+      <div class="sn">${s.n}</div>
+      <div class="sb"><div class="sf" style="width:${width}%;background:${color}"></div></div>
+      <div class="sv" style="color:${color}">${Math.round(s.v)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderQ() {
+  const el = document.getElementById('qlist');
+  const nq = document.getElementById('nq');
+  const pn = document.getElementById('paused-note');
+  pn.style.display = mgActive ? 'block' : 'none';
+  if (!quests.length) { el.innerHTML = ''; nq.style.display = 'block'; return; }
+  nq.style.display = 'none';
+  el.innerHTML = quests.slice(0, CFG.crisisMax).map((q, qi) => {
+    const pct = q.tl / q.tt;
+    const col = pct > 0.5 ? '#39ff14' : pct > 0.25 ? '#ffb300' : '#ff3232';
+    const cls = pct < 0.25 ? 'urg' : pct < 0.5 ? 'warn' : '';
+    const isFirst = qi === 0;
+    // Title decorators
+    let titleDisplay = q.t;
+    let titleColor = 'var(--green)';
+    let badge = '';
+    if (q.unknown) {
+      titleColor = '#ff6600';
+      titleDisplay = '[UNKNOWN SIGNAL]';
+      badge = `<span style="font-size:8px;color:#ff6600;border:1px solid #ff6600;padding:1px 4px;border-radius:2px;margin-left:6px;letter-spacing:1px">DEDUCE</span>`;
+    }
+    if (q.multistep) {
+      badge += `<span style="font-size:8px;color:var(--blue);border:1px solid var(--blue);padding:1px 4px;border-radius:2px;margin-left:4px;letter-spacing:1px">STEP ${q.stepIdx + 1}/2</span>`;
+    }
+    if (q.cross) {
+      const sys1 = SYS[q.s] ? SYS[q.s].n : q.s;
+      const sys2 = SYS[q.s2] ? SYS[q.s2].n : q.s2;
+      badge += `<span style="font-size:8px;color:var(--yellow);border:1px solid var(--yellow);padding:1px 4px;border-radius:2px;margin-left:4px;letter-spacing:0">${sys1} + ${sys2}</span>`;
+    }
+    return `<div class="q ${cls}">
+      <div class="qh">
+        <div class="qt" style="color:${titleColor}">${titleDisplay}${badge}</div>
+        <div class="qtm" style="color:${col}">${Math.ceil(q.tl)}s</div>
+      </div>
+      <div class="qd">${q.desc}</div>
+      <div class="qpb"><div class="qpf" style="width:${pct*100}%;background:${col}"></div></div>
+      <div class="qa">${q.shuffledOpts.map((o, oi) =>
+        `<button class="qb" onclick="answerQ(${q.id},'${o.l}',${o.fix})">${isFirst ? `<span style="color:#1a4a1a;font-size:8px">[${oi+1}] </span>` : ''}${o.l}</button>`
+      ).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateH() {
+  document.getElementById('hd').textContent = 'DAY ' + Math.floor(sec / 60);
+  const alive = RES.filter(r => r.alive).length;
+  document.getElementById('hs2').innerHTML = `${alive}<span style="font-size:10px;color:var(--green-dim)">/5</span>`;
+  document.getElementById('hw').textContent = 'WAVE ' + wave + (CFG.infinite ? '' : '/' + CFG.waves);
+  document.getElementById('hsc').textContent = score + ' PTS';
+}
+
+// ===== HARD/BRUTAL CRISIS POOLS =====
+// Multi-step crises: each step has desc + opts; player must get BOTH right in sequence
+const MULTI_STEP_QTPL = [
+  { t:'REACTOR MELTDOWN', s:'RAD',
+    steps:[
+      {desc:'Core temp rising fast. First priority: shut down primary loop.',
+       opts:[{l:'OPEN COOLANT',fix:false},{l:'SCRAM RODS',fix:true},{l:'BOOST PUMP',fix:false}]},
+      {desc:'Rods inserted. Now purge the residual heat from the secondary loop.',
+       opts:[{l:'VENT STEAM',fix:true},{l:'ADD WATER',fix:false},{l:'SEAL LOOP',fix:false}]}
+    ], dmgS:40, dmgR:26 },
+  { t:'HULL FRACTURE', s:'O2',
+    steps:[
+      {desc:'Structural crack detected in outer shell. Depressurisation starting.',
+       opts:[{l:'BLOW SEAL',fix:false},{l:'FOAM INJECT',fix:true},{l:'EVACUATE',fix:false}]},
+      {desc:'Foam applied. Now reinforce with emergency bracing before it spreads.',
+       opts:[{l:'WELD BRACE',fix:true},{l:'INCREASE AIR',fix:false},{l:'MONITOR ONLY',fix:false}]}
+    ], dmgS:36, dmgR:22 },
+  { t:'CHEMICAL FLOOD', s:'H2O',
+    steps:[
+      {desc:'Industrial solvent breached into the water supply. Stop the source.',
+       opts:[{l:'OPEN DRAIN',fix:false},{l:'CLAMP VALVE',fix:true},{l:'FLUSH FAST',fix:false}]},
+      {desc:'Source clamped. Now neutralize what entered the recycler loop.',
+       opts:[{l:'DILUTE ONLY',fix:false},{l:'ALKALI DOSE',fix:true},{l:'BOIL WATER',fix:false}]}
+    ], dmgS:34, dmgR:20 },
+  { t:'GRID COLLAPSE', s:'PWR',
+    steps:[
+      {desc:'Main bus voltage dropped to zero. Find the fault before batteries die.',
+       opts:[{l:'RESTART ALL',fix:false},{l:'TRACE FAULT',fix:true},{l:'BYPASS BUS',fix:false}]},
+      {desc:'Fault found: shorted capacitor bank. Isolate it to restore the grid.',
+       opts:[{l:'DISCONNECT CAP',fix:true},{l:'RECHARGE CAP',fix:false},{l:'IGNORE IT',fix:false}]}
+    ], dmgS:36, dmgR:18 },
+  { t:'FOOD CHAIN BREAK', s:'FOOD',
+    steps:[
+      {desc:'Primary crop strain wiped by unknown pathogen. Quarantine it now.',
+       opts:[{l:'SEAL BAY',fix:true},{l:'SPRAY WATER',fix:false},{l:'HARVEST NOW',fix:false}]},
+      {desc:'Bay sealed. Switch nutrition load to emergency backup protein vats.',
+       opts:[{l:'OPEN VATS',fix:true},{l:'PLANT MORE',fix:false},{l:'REDUCE RATIONS',fix:false}]}
+    ], dmgS:30, dmgR:16 },
+];
+
+// Cross-system crises: hit two systems simultaneously
+const CROSS_QTPL = [
+  { t:'FIRE OUTBREAK', s:'O2', s2:'MORALE',
+    desc:'Uncontrolled fire in corridor C. Smoke and panic spreading fast.',
+    opts:[{l:'CO2 FLOOD',fix:true},{l:'OPEN HATCHES',fix:false},{l:'SOUND ALARM',fix:false}],
+    dmgS:30, dmgR:18, dmgS2:22 },
+  { t:'COOLANT BURST', s:'PWR', s2:'H2O',
+    desc:'Reactor coolant line ruptured. Both power and water recycler are affected.',
+    opts:[{l:'ISOLATE LINE',fix:true},{l:'ADD COOLANT',fix:false},{l:'SHUT REACTOR',fix:false}],
+    dmgS:28, dmgR:16, dmgS2:24 },
+  { t:'MASS EXPOSURE', s:'RAD', s2:'MORALE',
+    desc:'Residents exposed to radiation leak. Fear and contamination spreading.',
+    opts:[{l:'DECON DRILL',fix:true},{l:'SILENCE ALERT',fix:false},{l:'OPEN SHELTER',fix:false}],
+    dmgS:32, dmgR:20, dmgS2:20 },
+  { t:'PIPE RUPTURE CASCADE', s:'H2O', s2:'O2',
+    desc:'High-pressure pipe failure flooding corridors and venting air pockets.',
+    opts:[{l:'MAIN SHUTOFF',fix:true},{l:'PUMP FASTER',fix:false},{l:'OPEN VENTS',fix:false}],
+    dmgS:26, dmgR:18, dmgS2:24 },
+  { t:'PSYCHOGENIC OUTBREAK', s:'MORALE', s2:'FOOD',
+    desc:'Group hysteria. Residents barricading food stores and refusing orders.',
+    opts:[{l:'CALM ADDRESS',fix:true},{l:'LOCK THEM IN',fix:false},{l:'CUT POWER',fix:false}],
+    dmgS:24, dmgR:14, dmgS2:20 },
+];
+
+function spawnQ() {
+  if (!running) return;
+  const isHardPlus = (CFG.difficulty === 'HARD' || CFG.difficulty === 'BRUTAL');
+  const baseT = Math.max(8, 26 - wave * 2);
+
+  // Hard/Brutal: weighted roll among normal, multi-step, cross-system, unknown
+  if (isHardPlus) {
+    const roll = Math.random();
+    // 15% unknown, 20% multi-step, 20% cross-system, rest normal
+    if (roll < 0.15) {
+      // Unknown crisis: pick a real template but hide title and system
+      const tpl = QTPL[Math.floor(Math.random() * QTPL.length)];
+      const q = {id: qid++, t:'[UNKNOWN SIGNAL]', s: tpl.s, desc: tpl.desc,
+        opts: tpl.opts, shuffledOpts: [...tpl.opts].sort(() => Math.random() - 0.5),
+        tl: baseT, tt: baseT, unknown: true, dmgS: tpl.dmgS, dmgR: tpl.dmgR};
+      quests.push(q);
+      addLog('UNKNOWN SIGNAL DETECTED - classify and respond', 'c');
+      playSound('crisis');
+      renderQ();
+      return;
+    }
+    if (roll < 0.35) {
+      // Multi-step crisis
+      const tpl = MULTI_STEP_QTPL[Math.floor(Math.random() * MULTI_STEP_QTPL.length)];
+      const q = {id: qid++, t: tpl.t, s: tpl.s,
+        desc: tpl.steps[0].desc,
+        opts: tpl.steps[0].opts,
+        shuffledOpts: [...tpl.steps[0].opts].sort(() => Math.random() - 0.5),
+        tl: baseT + 8, tt: baseT + 8,
+        multistep: true, steps: tpl.steps, stepIdx: 0,
+        dmgS: tpl.dmgS, dmgR: tpl.dmgR};
+      quests.push(q);
+      addLog('MULTI-PHASE CRISIS: ' + tpl.t + ' [STEP 1/2]', 'c');
+      playSound('crisis');
+      renderQ();
+      return;
+    }
+    if (roll < 0.55) {
+      // Cross-system crisis
+      const tpl = CROSS_QTPL[Math.floor(Math.random() * CROSS_QTPL.length)];
+      const q = {id: qid++, ...tpl,
+        shuffledOpts: [...tpl.opts].sort(() => Math.random() - 0.5),
+        tl: baseT, tt: baseT, cross: true};
+      quests.push(q);
+      addLog('DUAL-SYSTEM CRISIS: ' + tpl.t, 'c');
+      playSound('crisis');
+      renderQ();
+      return;
+    }
+  }
+
+  // Normal crisis
+  const tpl = QTPL[Math.floor(Math.random() * QTPL.length)];
+  quests.push({id: qid++, ...tpl, shuffledOpts: [...tpl.opts].sort(() => Math.random() - 0.5), tl: baseT, tt: baseT});
+  addLog('CRISIS: ' + tpl.t, 'w');
+  playSound('crisis');
+  renderQ();
+}
+
+// ===== GAME LOGIC =====
+function applySystemDamage(sKey, dmg, isFail) {
+  const s = SYS[sKey];
+  if (!s) return;
+  if (sKey === 'RAD') s.v = Math.min(100, s.v + dmg);
+  else s.v = Math.max(0, s.v - dmg);
+}
+
+function applySystemHeal(sKey, amount) {
+  const s = SYS[sKey];
+  if (!s) return;
+  if (sKey === 'RAD') s.v = Math.max(0, s.v - amount);
+  else s.v = Math.min(100, s.v + amount);
+}
+
+function answerQ(id, label, fix) {
+  playSound('click');
+  const qi = quests.findIndex(q => q.id === id);
+  if (qi < 0) return;
+  const q = quests[qi];
+
+  if (fix) {
+    // Multi-step: advance to next step instead of resolving
+    if (q.multistep && q.stepIdx < q.steps.length - 1) {
+      playSound('success');
+      q.stepIdx++;
+      const nextStep = q.steps[q.stepIdx];
+      q.desc = nextStep.desc;
+      q.opts = nextStep.opts;
+      q.shuffledOpts = [...nextStep.opts].sort(() => Math.random() - 0.5);
+      // Partial heal for getting step 1 right
+      applySystemHeal(q.s, 8);
+      score += Math.round(20 * wave * (q.tl / q.tt));
+      addLog('[STEP ' + q.stepIdx + ' OK] ' + q.t + ' - proceed to step ' + (q.stepIdx + 1), 'w');
+      addRadioLine('ok');
+      renderSys(); renderQ(); updateH();
+      return;
+    }
+    // Fully resolved
+    quests.splice(qi, 1);
+    playSound('success');
+    applySystemHeal(q.s, 20);
+    if (q.cross) applySystemHeal(q.s2, 16);
+    score += Math.round(40 * wave * (q.tl / q.tt));
+    if (q.multistep) score += Math.round(30 * wave); // bonus for completing multi-step
+    addLog('[OK] ' + q.t + ' resolved', 'g');
+    if (q.unknown) addLog('Signal identified as: ' + q.s + ' event', 'g');
+    addRadioLine('ok');
+    // Achievement: Quick Thinking
+    if (q.tl <= 3) unlockAch('quick_thinking');
+    // Achievement: Analyst (unknown signals)
+    if (q.unknown) {
+      achRunState.unknownResolved++;
+      if (achRunState.unknownResolved >= 3) unlockAch('analyst');
+    }
+    // Achievement: Cascade Controller (multi-step fully done)
+    if (q.multistep) unlockAch('cascade_ctrl');
+  } else {
+    quests.splice(qi, 1);
+    playSound('fail');
+    // On a multi-step wrong answer: extra system damage
+    const dmgMult = q.multistep ? 0.8 : 0.6;
+    applySystemDamage(q.s, q.dmgS * dmgMult);
+    if (q.cross) applySystemDamage(q.s2, q.dmgS2 * 0.6);
+    const alive = RES.filter(r => r.alive);
+    if (alive.length) {
+      const r = alive[Math.floor(Math.random() * alive.length)];
+      r.hp = Math.max(0, r.hp - q.dmgR * 0.5);
+      r.st = 'Hurt by ' + label.toLowerCase();
+      flashResident(RES.indexOf(r));
+      if (r.hp <= 0 && r.alive) killRes(r);
+    }
+    const isCrit = q.s === 'RAD' ? SYS.RAD.v >= 70 : SYS[q.s].v <= 15;
+    if (isCrit) {
+      triggerShake(); triggerVignette(false);
+      lastLethalEvent = (SYS[q.s].n || q.s) + ' DESTABILIZED ON WAVE ' + wave + ' - WRONG CALL: ' + label.toUpperCase();
+    } else {
+      addRadioLine('crisis');
+    }
+    addLog('[FAIL] Wrong call: ' + label, 'c');
+    renderRes();
+  }
+  renderSys(); renderQ(); updateH();
+}
+
+function failQ(q) {
+  playSound('fail');
+  quests = quests.filter(x => x.id !== q.id);
+  applySystemDamage(q.s, q.dmgS);
+  if (q.cross) applySystemDamage(q.s2, q.dmgS2);
+  const alive = RES.filter(r => r.alive);
+  if (alive.length) {
+    const r = alive[Math.floor(Math.random() * alive.length)];
+    r.hp = Math.max(0, r.hp - q.dmgR);
+    r.st = 'Hurt by ' + q.t.toLowerCase();
+    flashResident(RES.indexOf(r));
+    if (r.hp <= 0 && r.alive) killRes(r);
+  }
+  const isCrit = q.s === 'RAD' ? SYS.RAD.v >= 70 : SYS[q.s].v <= 15;
+  if (isCrit) {
+    triggerShake();
+    triggerVignette(false);
+    lastLethalEvent = (SYS[q.s].n || q.s) + ' COLLAPSED ON WAVE ' + wave + ' AFTER ' + q.t + ' WENT UNANSWERED';
+    addRadioLine('critical');
+  } else {
+    addRadioLine('crisis');
+  }
+  const label = q.unknown ? '[UNKNOWN SIGNAL]' : q.t;
+  addLog('[TIMEOUT] ' + label + ' expired!', 'c');
+  renderRes(); renderSys(); renderQ(); updateH();
+}
+
+function killRes(r) {
+  r.alive = false; r.hp = 0; r.st = 'Deceased'; r.personal = false;
+  lastLethalEvent = r.n + ' DIED ON WAVE ' + wave + ' - ' + (r.st !== 'Deceased' ? r.st.toUpperCase() : 'HEALTH COLLAPSED');
+  addLog('FATAL: ' + r.n + ' has died', 'c');
+  addRadioLine('death');
+  triggerShake();
+  triggerVignette(false);
+  renderRes();
+  if (!RES.some(x => x.alive)) gameOver('All residents perished');
+}
+
+function statHTML(label, val, color) {
+  return `<div class="rs-stat"><div class="sv" style="color:${color||'var(--green)'}">${val}</div><div class="sl">${label}</div></div>`;
+}
+
+function gameOver(reason) {
+  running = false; clearInterval(gTimer);
+  SFX.bgm.pause();
+  playSound('gameover');
+  triggerShake(); triggerVignette(true);
+  checkAchievementsLoss();
+  saveRun('LOSS');
+  document.getElementById('go-reason').textContent = reason.toUpperCase();
+  const cod = lastLethalEvent
+    ? lastLethalEvent
+    : reason.toUpperCase() + ' ON WAVE ' + wave;
+  document.getElementById('go-cod').textContent = 'CAUSE OF DEATH: ' + cod;
+  document.getElementById('go-stats').innerHTML =
+    statHTML('DAYS', Math.floor(sec/60)) +
+    statHTML('SCORE', score, 'var(--yellow)') +
+    statHTML('WAVE REACHED', 'WAVE ' + wave) +
+    statHTML('SURVIVORS', RES.filter(r=>r.alive).length + '/5');
+  showResult('sc-go');
+}
+
+function winGame() {
+  running = false; clearInterval(gTimer);
+  SFX.bgm.pause();
+  playSound('win');
+  checkAchievementsWin();
+  saveRun('WIN');
+  document.getElementById('win-stats').innerHTML =
+    statHTML('DAYS', Math.floor(sec/60)) +
+    statHTML('SCORE', score, 'var(--yellow)') +
+    statHTML('WAVES', CFG.waves + ' / ' + CFG.waves) +
+    statHTML('SURVIVORS', RES.filter(r=>r.alive).length + '/5');
+  showResult('sc-win');
+}
+
+function tick() {
+  if (!running) return;
+  sec++;
+  const prevWave = wave;
+  wave = CFG.infinite ? 1 + Math.floor(sec / CFG.waveDur) : Math.min(CFG.waves, 1 + Math.floor(sec / CFG.waveDur));
+  // Between-wave shop trigger (not in Brutal, not in infinite)
+  if (!CFG.infinite && wave > prevWave && wave <= CFG.waves && CFG.difficulty !== 'BRUTAL') {
+    const pts = earnRepairPoints();
+    addLog('WAVE ' + prevWave + ' COMPLETE. +' + pts + ' repair points earned.', 'g');
+    if (mgActive) {
+      shopPending = true; // minigame is open — open shop after it closes
+    } else {
+      openShop();
+    }
+    return;
+  }
+  const filterMod = shopUpgrades.filters ? 0.75 : 1.0;
+  const dm = (1 + wave * 0.35) * diffMul;
+  Object.entries(SYS).forEach(([k, s]) => {
+    if (k === 'RAD') s.v = Math.max(0, s.v + s.d * dm * filterMod);
+    else if (k === 'O2') s.v = Math.max(0, s.v - s.d * dm * filterMod);
+    else s.v = Math.max(0, s.v - s.d * dm);
+  });
+  if (SYS.RAD.v > 60) RES.filter(r => r.alive).forEach(r => { r.hp = Math.max(0, r.hp - 0.5); if (r.hp <= 0 && r.alive) killRes(r); });
+  Object.entries(SYS).forEach(([k, s]) => {
+    if (k !== 'RAD' && s.v < 15) RES.filter(r => r.alive).forEach(r => {
+      r.hp = Math.max(0, r.hp - 1.0);
+      if (r.hp <= 0 && r.alive) {
+        lastLethalEvent = SYS[k].n + ' DEPLETED ON WAVE ' + wave + ' - RESIDENTS STARVED/SUFFOCATED';
+        killRes(r);
+      }
+    });
+  });
+  quests.forEach(q => { if (!mgActive) q.tl = Math.max(0, q.tl - 1); });
+  quests.filter(q => q.tl <= 0).forEach(q => failQ(q));
+  quests = quests.filter(q => q.tl > 0);
+  if (sec % 30 === 0) addLog(['Geothermal stable','Ext temp: -14C','No surface signals','Structural integrity OK','Air scrubbers nominal'][Math.floor(Math.random()*5)]);
+  if (sec % 14 === 0) addRadioLine(pickRadioCategory());
+  updateCriticalVignette();
+  checkAchievementsTick();
+  if (!CFG.infinite && wave >= CFG.waves && sec > CFG.waves * CFG.waveDur) { winGame(); return; }
+  renderRes(); renderSys(); renderQ(); updateH();
+}
+
+function scheduleNextCrisis() {
+  if (!running) return;
+  const minD = Math.max(2000, 8000 - wave * 700);
+  const maxD = Math.max(4000, 16000 - wave * 1000);
+  setTimeout(() => {
+    if (!running) return;
+    spawnQ();
+    if (Math.random() < 0.3 + wave * 0.08) setTimeout(spawnQ, 1000 + Math.random() * 1500);
+    if (Math.random() < 0.1 + wave * 0.05) setTimeout(spawnQ, 2500 + Math.random() * 1500);
+    scheduleNextCrisis();
+  }, minD + Math.random() * (maxD - minD));
+}
+
+function schedulePersonal() {
+  if (!running) return;
+  setTimeout(() => {
+    if (!running) return;
+    const alive = RES.filter(r => r.alive && !r.personal);
+    if (alive.length) {
+      const r = alive[Math.floor(Math.random() * alive.length)];
+      r.personal = true; r.st = 'NEEDS ATTENTION';
+      r._mgDeadline = Date.now() + 20000; // 20s deadline starts NOW
+      r._mgFailMsg = 'Deteriorated - no response';
+      playSound('crisis');
+      achRunState.personalCrisesTotal++;
+      addLog('PERSONAL: ' + r.n + ' needs help (click them)', 'w');
+      // Start a background countdown that fires mgFail if ignored
+      const bgTick = () => {
+        if (!r.personal || !r.alive) return; // resolved or dead
+        const left = r._mgDeadline - Date.now();
+        if (left <= 0) { mgFail(r, r._mgFailMsg); return; }
+        setTimeout(bgTick, 500);
+      };
+      setTimeout(bgTick, 500);
+      renderRes();
+    }
+    schedulePersonal();
+  }, 14000 + Math.random() * 18000);
+}
+
+function clickRes(i) {
+  const r = RES[i];
+  if (!r.alive || !r.personal) return;
+  r.personal = false;
+  openMG(r);
+}
+
+// ===== MINIGAME SYSTEM =====
+function openMG(r) {
+  playSound('click');
+  mgActive = true;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('mg-title').textContent = r.n + ' - PERSONAL CRISIS';
+  document.getElementById('mg-result').style.display = 'none';
+  document.getElementById('mg-sub').textContent = '';
+  document.getElementById('mg-timer').textContent = '';
+  const area = document.getElementById('mg-area');
+  area.innerHTML = ''; area.style.cssText = '';
+  area.style.pointerEvents = 'auto';
+  document.getElementById('mg-back').style.pointerEvents = 'auto';
+  renderQ();
+  const isHardPlus = (CFG.difficulty === 'HARD' || CFG.difficulty === 'BRUTAL');
+  if (r.mg === 'heartrate') { if (isHardPlus) buildMG_heartrate(r, area); else buildMG_heartrate_easy(r, area); }
+  else if (r.mg === 'wires') { if (isHardPlus) buildMG_wires(r, area); else buildMG_wires_easy(r, area); }
+  else if (r.mg === 'sequence') { if (isHardPlus) buildMG_sequence(r, area); else buildMG_sequence_easy(r, area); }
+  else if (r.mg === 'reflex') { if (isHardPlus) buildMG_reflex(r, area); else buildMG_reflex_easy(r, area); }
+  else if (r.mg === 'decrypt') { if (isHardPlus) buildMG_decrypt(r, area); else buildMG_decrypt_easy(r, area); }
+}
+
+function mgSuccess(r) {
+  playSound('success');
+  clearTimeout(mgTimer);
+  r.hp = Math.min(100, r.hp + 25); r.st = 'Recovered'; score += 80 * wave;
+
+  // Achievement tracking
+  achRunState.mgSuccessCount++;
+  achRunState.personalCrisesHelped++;
+  if (achRunState.mgSuccessCount === 1) unlockAch('first_responder');
+  if (achRunState.mgSuccessCount >= 10) unlockAch('therapist');
+  if (achRunState.personalCrisesTotal > 0 && achRunState.personalCrisesHelped >= achRunState.personalCrisesTotal) {
+    unlockAch('no_one_left');
+  }
+  const res = document.getElementById('mg-result');
+  res.style.display = 'block'; res.style.color = '#39ff14'; res.textContent = 'STABILIZED +25 HP';
+  document.getElementById('mg-timer').textContent = '';
+  // Immediately block the minigame area from further interaction
+  const area = document.getElementById('mg-area');
+  area.style.pointerEvents = 'none';
+  document.getElementById('mg-back').style.pointerEvents = 'none';
+  addLog('[MG OK] ' + r.n + ' stabilized', 'g');
+  renderRes(); updateH();
+  setTimeout(() => { document.getElementById('overlay').classList.remove('show'); mgActive = false; renderQ(); checkShopPending(); }, 1400);
+}
+
+function mgFail(r, msg) {
+  playSound('fail');
+  clearTimeout(mgTimer);
+  r.personal = false; // always clear the personal flag
+  r.hp = Math.max(0, r.hp - 30); r.st = msg || 'Deteriorated';
+  if (r.hp <= 0 && r.alive) killRes(r);
+  addLog('[MG FAIL] ' + r.n + ' deteriorated', 'c');
+  renderRes(); updateH();
+  if (mgActive) {
+    // Overlay is open — show red result then auto-close
+    const res = document.getElementById('mg-result');
+    res.style.display = 'block'; res.style.color = '#ff3232'; res.textContent = 'FAILED -30 HP';
+    document.getElementById('mg-timer').textContent = '';
+    const area = document.getElementById('mg-area');
+    area.style.pointerEvents = 'none';
+    document.getElementById('mg-back').style.pointerEvents = 'none';
+    document.getElementById('mg-wrap').style.borderColor = '#ff3232';
+    setTimeout(() => {
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('mg-wrap').style.borderColor = '';
+      mgActive = false; renderQ(); checkShopPending();
+    }, 1400);
+  }
+  // If overlay was never opened, just silently apply the penalty (already done above)
+}
+
+function closeMG() {
+  playSound('click');
+  clearTimeout(mgTimer);
+  document.getElementById('overlay').classList.remove('show');
+  mgActive = false; renderQ(); checkShopPending();
+}
+
+function setMGTimer(r, secs, failMsg) {
+  // Use the deadline already set when the personal crisis was assigned
+  // so the timer ticks even if the overlay is closed
+  const tick = () => {
+    if (!r.alive || !r.personal && !mgActive) return; // resolved already
+    const el = document.getElementById('mg-timer');
+    const left = Math.max(0, Math.ceil((r._mgDeadline - Date.now()) / 1000));
+    if (el) el.textContent = left + 's REMAINING';
+    if (left <= 0) { mgFail(r, failMsg); return; }
+    mgTimer = setTimeout(tick, 250);
+  };
+  tick();
+}
+
+// ===== MINIGAMES =====
+
+// DR. CHEN - PRESSURE GAUGE: keep a moving needle inside a safe zone by clicking to brake it
+function buildMG_heartrate(r, area) {
+  document.getElementById('mg-sub').textContent = 'DR. CHEN - Keep the pressure needle inside the SAFE ZONE. Click to apply brake. Need 6 stable readings.';
+  area.innerHTML = `<canvas id="pg-c" width="300" height="160" style="display:block;margin:0 auto;cursor:pointer"></canvas>
+    <div style="text-align:center;font-size:9px;color:#4a7a4a;margin-top:3px;letter-spacing:1px">CLICK to slow the needle. Keep it in the GREEN arc.</div>`;
+  const canvas = area.querySelector('#pg-c'), ctx = canvas.getContext('2d');
+  // Needle state: angle in degrees, velocity, stable counter
+  let angle = 220, vel = (1.4 + wave * 0.12) * (Math.random() < 0.5 ? 1 : -1);
+  let stable = 0, needed = 6, animId, done = false;
+  const safeL = 100, safeR = 180; // safe arc in degrees (bottom-ish region)
+  const cx = 150, cy = 130, rad = 90;
+  function degToXY(deg) {
+    const rad2 = (deg - 90) * Math.PI / 180;
+    return [cx + Math.cos(rad2) * rad, cy + Math.sin(rad2) * rad];
+  }
+  function arcPath(a1, a2) {
+    const r1 = (a1 - 90) * Math.PI / 180, r2 = (a2 - 90) * Math.PI / 180;
+    const [x1,y1] = [cx + Math.cos(r1)*rad, cy + Math.sin(r1)*rad];
+    const [x2,y2] = [cx + Math.cos(r2)*rad, cy + Math.sin(r2)*rad];
+    return `M ${x1} ${y1} A ${rad} ${rad} 0 0 1 ${x2} ${y2}`;
+  }
+  function draw() {
+    ctx.clearRect(0, 0, 300, 160);
+    ctx.fillStyle = '#060e06'; ctx.fillRect(0, 0, 300, 160);
+    // Background arc
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    ctx.strokeStyle = '#1a3d1a'; ctx.lineWidth = 14; ctx.stroke();
+    // Safe zone arc
+    const aStart = (safeL - 90) * Math.PI / 180, aEnd = (safeR - 90) * Math.PI / 180;
+    ctx.beginPath(); ctx.arc(cx, cy, rad, aStart, aEnd);
+    ctx.strokeStyle = '#0a4a0a'; ctx.lineWidth = 14; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, rad, aStart, aEnd);
+    ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 3; ctx.stroke();
+    // Stable counter pips
+    for (let i = 0; i < needed; i++) {
+      ctx.beginPath(); ctx.arc(cx - (needed/2)*14 + i*14 + 7, cy - 70, 4, 0, Math.PI*2);
+      ctx.fillStyle = i < stable ? '#39ff14' : '#1a3d1a'; ctx.fill();
+    }
+    // Needle
+    const nAngle = (angle - 90) * Math.PI / 180;
+    const nx = cx + Math.cos(nAngle) * (rad - 6), ny = cy + Math.sin(nAngle) * (rad - 6);
+    const inSafe = angle >= safeL && angle <= safeR;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(nx, ny);
+    ctx.strokeStyle = inSafe ? '#39ff14' : '#ff3232'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2);
+    ctx.fillStyle = '#39ff14'; ctx.fill();
+    // Tick physics
+    angle += vel;
+    if (angle > 350) { angle = 350; vel *= -0.9; }
+    if (angle < 10)  { angle = 10;  vel *= -0.9; }
+    vel += (Math.random() - 0.48) * 0.4; // slight random drift
+    if (Math.abs(vel) > 5) vel = Math.sign(vel) * 5;
+    if (inSafe) {
+      stable++;
+      if (stable >= needed) { done = true; cancelAnimationFrame(animId); mgSuccess(r); return; }
+    } else {
+      stable = Math.max(0, stable - 0.5);
+    }
+    animId = requestAnimationFrame(draw);
+  }
+  canvas.onclick = () => { if (done) return; playSound('click'); vel *= 0.4; };
+  draw();
+  setMGTimer(r, 20, 'Pressure event');
+}
+
+// MALIK - CIRCUIT TRACE: find a valid path from START to END through a grid
+function buildMG_wires(r, area) {
+  document.getElementById('mg-sub').textContent = 'MALIK - Trace a connected path from S (blue) to E (yellow). Click cells to toggle. No diagonals.';
+  const COLS = 7, ROWS = 4;
+  // Generate a guaranteed solvable path, then add noise
+  const grid = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+  // Random walk from (0,0) to (ROWS-1,COLS-1)
+  const path = new Set();
+  let pr = 0, pc = 0;
+  path.add(pr + ',' + pc);
+  while (pr < ROWS-1 || pc < COLS-1) {
+    const moves = [];
+    if (pc < COLS-1) moves.push([pr, pc+1]);
+    if (pr < ROWS-1) moves.push([pr+1, pc]);
+    if (moves.length) { const [nr,nc] = moves[Math.floor(Math.random()*moves.length)]; pr=nr; pc=nc; path.add(pr+','+pc); }
+  }
+  // Some extra live cells as red herrings
+  for (let i = 0; i < 5; i++) {
+    const rr = Math.floor(Math.random()*ROWS), rc = Math.floor(Math.random()*COLS);
+    if ((rr===0&&rc===0)||(rr===ROWS-1&&rc===COLS-1)) continue;
+    grid[rr][rc] = true;
+  }
+  let selected = new Set();
+  function isAdjacent(a, b) {
+    const [r1,c1] = a.split(',').map(Number), [r2,c2] = b.split(',').map(Number);
+    return Math.abs(r1-r2) + Math.abs(c1-c2) === 1;
+  }
+  function pathConnects() {
+    // BFS from 0,0 to ROWS-1,COLS-1 using selected cells only (plus endpoints)
+    const all = new Set(selected); all.add('0,0'); all.add((ROWS-1)+','+(COLS-1));
+    if (!all.has('0,0') || !all.has((ROWS-1)+','+(COLS-1))) return false;
+    const visited = new Set(), queue = ['0,0'];
+    visited.add('0,0');
+    while (queue.length) {
+      const cur = queue.shift();
+      if (cur === (ROWS-1)+','+(COLS-1)) return true;
+      const [cr,cc] = cur.split(',').map(Number);
+      [[cr-1,cc],[cr+1,cc],[cr,cc-1],[cr,cc+1]].forEach(([nr,nc]) => {
+        const key = nr+','+nc;
+        if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&!visited.has(key)&&all.has(key)) { visited.add(key); queue.push(key); }
+      });
+    }
+    return false;
+  }
+  function render() {
+    area.innerHTML = `<div style="padding:8px 6px">
+      <div style="display:grid;grid-template-columns:repeat(${COLS},1fr);gap:3px;margin-bottom:6px" id="ct-grid"></div>
+      <div id="ct-msg" style="font-size:9px;color:#4a7a4a;text-align:center;letter-spacing:1px">Select cells to build a path from S to E</div>
+    </div>`;
+    const gridEl = area.querySelector('#ct-grid');
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const key = row+','+col;
+        const isStart = row===0 && col===0, isEnd = row===ROWS-1 && col===COLS-1;
+        const cls = isStart ? 'ct-cell start' : isEnd ? 'ct-cell end' : selected.has(key) ? 'ct-cell active' : 'ct-cell';
+        const label = isStart ? 'S' : isEnd ? 'E' : (selected.has(key) ? '+' : '.');
+        const cell = document.createElement('div');
+        cell.className = cls; cell.textContent = label;
+        if (!isStart && !isEnd) {
+          cell.onclick = () => {
+            playSound('click');
+            if (selected.has(key)) selected.delete(key); else selected.add(key);
+            if (pathConnects()) { mgSuccess(r); return; }
+            render();
+          };
+        }
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+  render();
+  setMGTimer(r, 20, 'Circuit overload');
+}
+
+// SARA - VALVE SEQUENCE: open valves in the correct order indicated by pressure arrows
+function buildMG_sequence(r, area) {
+  document.getElementById('mg-sub').textContent = 'SARA - Open the valves in the correct pressure order. Follow the flow direction shown.';
+  // 5 valves, a random correct order, player must click them in that order
+  const COUNT = 5;
+  const labels = ['V1','V2','V3','V4','V5'];
+  const correct = [...labels].sort(() => Math.random() - 0.5);
+  let step = 0;
+  // Show arrow hints: correct[i] -> correct[i+1]
+  function render() {
+    const hintPairs = correct.slice(0, -1).map((v,i) => v + ' > ' + correct[i+1]).join('  ');
+    area.innerHTML = `<div style="padding:10px">
+      <div style="font-size:8px;color:#1a5a1a;letter-spacing:1px;margin-bottom:8px;text-align:center">FLOW: ${hintPairs}</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px" id="pv-row"></div>
+      <div id="pv-msg" style="font-size:10px;color:#4a7a4a;text-align:center;letter-spacing:1px">Open valve ${step+1} of ${COUNT}: ${correct[step]}</div>
+    </div>`;
+    const row = area.querySelector('#pv-row');
+    labels.forEach(lbl => {
+      const opened = correct.indexOf(lbl) < step;
+      const isCurrent = correct[step] === lbl;
+      const div = document.createElement('div');
+      div.className = 'pv-valve' + (opened ? ' open' : isCurrent ? '' : ' closed');
+      div.textContent = lbl;
+      if (!opened) {
+        div.onclick = () => {
+          playSound('click');
+          if (lbl === correct[step]) {
+            step++;
+            if (step >= COUNT) { mgSuccess(r); return; }
+            render();
+          } else {
+            div.className = 'pv-valve closed';
+            div.style.animation = 'phurt 0.3s ease-out';
+            addLog('Wrong valve order - pressure lost', 'c');
+            mgFail(r, 'Wrong valve sequence');
+          }
+        };
+      }
+      row.appendChild(div);
+    });
+  }
+  render();
+  setMGTimer(r, 20, 'Pressure cascade failure');
+}
+
+// BLAKE - MORSE CODE: tap out a short distress code before time runs out
+function buildMG_reflex(r, area) {
+  // Generate a 3-letter code with simple dots/dashes per letter
+  const MORSE = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+  const letters = Object.keys(MORSE);
+  // Pick 2 simple letters (short morse)
+  const pool = letters.filter(l => MORSE[l].length <= 3);
+  const word = [pool[Math.floor(Math.random()*pool.length)], pool[Math.floor(Math.random()*pool.length)]];
+  const target = word.map(l => MORSE[l]).join(' ');
+  let input = '', lastTap = 0, tapTimer = null;
+  document.getElementById('mg-sub').textContent = 'BLAKE - Tap the distress code in morse. DOT = short tap, DASH = hold. Space between letters.';
+  area.innerHTML = `<div style="padding:10px;text-align:center">
+    <div style="font-size:13px;color:var(--blue);letter-spacing:4px;margin-bottom:4px">${word.join(' ')}</div>
+    <div style="font-size:10px;color:#2a5a2a;letter-spacing:2px;margin-bottom:8px">${word.map(l=>l+': '+MORSE[l]).join('   ')}</div>
+    <div id="mc-disp" style="font-size:18px;letter-spacing:6px;color:#39ff14;min-height:28px;margin-bottom:8px"></div>
+    <div id="mc-input" style="font-size:11px;color:#4a7a4a;letter-spacing:2px;margin-bottom:10px">Your input: --</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="mc-btn" id="mc-dot" onmousedown="window.mcTap('.')">DOT (.)</button>
+      <button class="mc-btn" id="mc-dash" onmousedown="window.mcTap('-')">DASH (-)</button>
+      <button class="mc-btn" id="mc-space" onmousedown="window.mcTap(' ')">SPACE</button>
+      <button class="mc-btn" id="mc-clear" onmousedown="window.mcClear()">CLEAR</button>
+    </div>
+  </div>`;
+  function update() {
+    const disp = area.querySelector('#mc-disp');
+    const inp = area.querySelector('#mc-input');
+    if (disp) disp.textContent = input;
+    if (inp) inp.textContent = 'Your input: ' + (input || '--');
+  }
+  window.mcTap = (c) => {
+    playSound('click');
+    input += c;
+    update();
+    if (input.trim() === target.trim()) { mgSuccess(r); return; }
+    // Partial wrong check: if input is longer than target and still wrong
+    if (input.replace(/ /g,'').length > target.replace(/ /g,'').length) {
+      addLog('Code mismatch - retrying', 'c');
+      input = '';
+      update();
+    }
+  };
+  window.mcClear = () => { playSound('click'); input = ''; update(); };
+  setMGTimer(r, 20, 'Distress signal lost');
+}
+
+// YUKI - CORRUPTED DATA STREAM: find and click all corrupted bytes in a hex dump
+function buildMG_decrypt(r, area) {
+  document.getElementById('mg-sub').textContent = 'YUKI - Click every ORANGE corrupted byte in the data stream to patch it.';
+  const ROWS = 5, COLS = 8;
+  // Each cell: value, corrupt flag
+  const totalCorrupt = 4 + Math.min(wave, 4);
+  const cells = [];
+  const corruptIdxSet = new Set();
+  while (corruptIdxSet.size < totalCorrupt) corruptIdxSet.add(Math.floor(Math.random() * ROWS * COLS));
+  for (let i = 0; i < ROWS * COLS; i++) {
+    const isCorrupt = corruptIdxSet.has(i);
+    const val = isCorrupt
+      ? (Math.floor(Math.random() * 0x80) + 0x80).toString(16).toUpperCase().padStart(2,'0')
+      : (Math.floor(Math.random() * 0x7F)).toString(16).toUpperCase().padStart(2,'0');
+    cells.push({ val, corrupt: isCorrupt, fixed: false });
+  }
+  let fixedCount = 0;
+  function render() {
+    area.innerHTML = `<div style="padding:8px 6px">
+      <div id="dc-stream" style="font-family:var(--font)"></div>
+      <div style="font-size:9px;color:#4a7a4a;text-align:center;margin-top:4px;letter-spacing:1px">${fixedCount}/${totalCorrupt} patched</div>
+    </div>`;
+    const stream = area.querySelector('#dc-stream');
+    for (let row = 0; row < ROWS; row++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'dc-row';
+      // Offset label
+      const off = document.createElement('span');
+      off.style.cssText = 'color:#1a3d1a;font-size:9px;width:28px;flex-shrink:0';
+      off.textContent = (row * COLS).toString(16).toUpperCase().padStart(4,'0') + ':';
+      rowDiv.appendChild(off);
+      for (let col = 0; col < COLS; col++) {
+        const idx = row * COLS + col;
+        const c = cells[idx];
+        const span = document.createElement('span');
+        span.className = 'dc-byte' + (c.corrupt && !c.fixed ? ' corrupt' : c.fixed ? ' fixed' : '');
+        span.textContent = c.val;
+        if (c.corrupt && !c.fixed) {
+          span.onclick = () => {
+            playSound('click');
+            c.fixed = true; fixedCount++;
+            c.val = (Math.floor(Math.random() * 0x7F)).toString(16).toUpperCase().padStart(2,'0');
+            if (fixedCount >= totalCorrupt) { mgSuccess(r); return; }
+            render();
+          };
+        }
+        rowDiv.appendChild(span);
+      }
+      stream.appendChild(rowDiv);
+    }
+  }
+  render();
+  setMGTimer(r, 20, 'Data stream unrecoverable');
+}
+
+// ===== RUN HISTORY =====
+const HISTORY_KEY = 'bunker7_history';
+
+function loadHistory() {
+  try { const r = localStorage.getItem(HISTORY_KEY); return r ? JSON.parse(r) : []; }
+  catch(e) { return []; }
+}
+
+function saveRun(outcome) {
+  const history = loadHistory();
+  const entry = {
+    date: new Date().toISOString(),
+    outcome: outcome, // 'WIN' or 'LOSS'
+    score: score,
+    wave: wave,
+    days: Math.floor(sec / 60),
+    survivors: RES.filter(r => r.alive).length,
+    difficulty: CFG.difficulty,
+    cod: outcome === 'LOSS' ? (lastLethalEvent || 'Unknown') : null,
+  };
+  history.unshift(entry);
+  if (history.length > 30) history.pop(); // cap at 30 runs
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
+  return history;
+}
+
+function openHistory() {
+  playSound('click');
+  renderHistory();
+  document.getElementById('history-overlay').classList.add('show');
+}
+
+function closeHistory() {
+  document.getElementById('history-overlay').classList.remove('show');
+}
+
+function clearHistory() {
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e) {}
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  const recEl = document.getElementById('history-records');
+  const listEl = document.getElementById('history-list');
+  if (!history.length) {
+    recEl.textContent = 'NO RUNS RECORDED YET';
+    listEl.innerHTML = '<div style="font-size:9px;color:#2a5a2a;text-align:center;padding:30px;letter-spacing:2px">Complete a run to see it here</div>';
+    return;
+  }
+  const wins = history.filter(r => r.outcome === 'WIN').length;
+  const bestScore = Math.max(...history.map(r => r.score));
+  const bestWave = Math.max(...history.map(r => r.wave));
+  const longest = Math.max(...history.map(r => r.days));
+  recEl.innerHTML = `<span style="color:var(--green-dim)">${history.length} RUNS</span>  <span style="color:var(--green)">${wins}W/${history.length-wins}L</span>  <span style="color:var(--yellow)">BEST: ${bestScore}PTS</span>  <span style="color:var(--green-dim)">WAVE ${bestWave} MAX  /  DAY ${longest} LONGEST</span>`;
+  listEl.innerHTML = history.map((r, i) => {
+    const d = new Date(r.date);
+    const ds = d.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'2-digit'}) + ' ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const isBestScore = r.score === bestScore;
+    const cls = r.outcome === 'WIN' ? 'hist-win' : (isBestScore ? 'hist-best' : '');
+    const outColor = r.outcome === 'WIN' ? 'var(--green)' : 'var(--red)';
+    return `<div class="hist-row ${cls}">
+      <div class="hist-meta">
+        <div class="hist-outcome" style="color:${outColor}">${r.outcome}${isBestScore && r.outcome!=='WIN' ? ' [BEST SCORE]' : ''}</div>
+        <div class="hist-date">${ds} / ${r.difficulty}</div>
+      </div>
+      <div class="hist-stats">
+        <div class="hist-stat">SCORE <span>${r.score}</span></div>
+        <div class="hist-stat">WAVE <span>${r.wave}</span></div>
+        <div class="hist-stat">DAYS <span>${r.days}</span></div>
+        <div class="hist-stat">SURVIVORS <span>${r.survivors}/5</span></div>
+      </div>
+      ${r.cod ? `<div class="hist-cod">CAUSE: ${r.cod}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ===== WAVE DOWNTIME SHOP =====
+const SHOP_ITEMS = [
+  { id: 'filters',   name: 'BETTER FILTERS',   desc: 'Upgrade air scrubbers. Oxygen and Radiation degrade 25% slower for the next wave.', cost: 3, bought: false },
+  { id: 'rations',   name: 'EXTRA RATIONS',     desc: 'Stock emergency food caches. Restore Food and Water by 20 each.', cost: 2, bought: false },
+  { id: 'shielding', name: 'RAD SHIELDING',     desc: 'Install lead panels. Radiation reduced by 25 immediately.', cost: 3, bought: false },
+  { id: 'medkit',    name: 'MEDKIT SUPPLIES',   desc: 'Distribute medical supplies. All living residents gain 20 HP.', cost: 2, bought: false },
+  { id: 'backup',    name: 'BACKUP GENERATOR',  desc: 'Bring a spare cell online. Power restored to 80.', cost: 2, bought: false },
+  { id: 'morale',    name: 'MORALE BROADCAST',  desc: 'Broadcast a motivational message. Morale and HP each +15.', cost: 2, bought: false },
+];
+let shopUpgrades = {}; // active upgrades this session
+let shopCountdown = 0;
+
+function earnRepairPoints() {
+  const aliveCount = RES.filter(r => r.alive).length;
+  const pts = 2 + Math.floor(aliveCount / 2);
+  repairPoints += pts;
+  achRunState.shopPointsEarned += pts;
+  return pts;
+}
+
+function checkShopPending() {
+  if (shopPending && !mgActive) {
+    shopPending = false;
+    openShop();
+  }
+}
+
+function openShop() {
+  if (CFG.difficulty === 'BRUTAL') return; // not available in Brutal
+  running = false;
+  clearInterval(gTimer);
+  // Reset bought flags for this shop visit
+  SHOP_ITEMS.forEach(item => item.bought = false);
+  achRunState.shopVisitPoints = repairPoints;
+  achRunState.shopVisitSpent = 0;
+  renderShop();
+  document.getElementById('shop-overlay').classList.add('show');
+  // 30s auto-continue timer
+  shopCountdown = 30;
+  shopTimer = setInterval(() => {
+    shopCountdown--;
+    const el = document.getElementById('shop-timer');
+    if (el) el.textContent = 'AUTO-CONTINUE IN ' + shopCountdown + 's';
+    if (shopCountdown <= 0) endShop();
+  }, 1000);
+}
+
+function renderShop() {
+  const el = document.getElementById('shop-pts');
+  if (el) el.innerHTML = 'REPAIR POINTS: <span style="color:var(--yellow);font-size:16px">' + repairPoints + '</span>';
+  // Render system status bars
+  const sysEl = document.getElementById('shop-sys-status');
+  if (sysEl && SYS) {
+    sysEl.innerHTML = Object.entries(SYS).map(([k, s]) => {
+      const isRad = k === 'RAD';
+      const color = isRad ? (s.v < 30 ? '#39ff14' : s.v < 60 ? '#ffb300' : '#ff3232') : (s.v > 55 ? '#39ff14' : s.v > 25 ? '#ffb300' : '#ff3232');
+      const width = Math.min(100, Math.max(0, isRad ? s.v : s.v));
+      return `<div class="shop-sys-bar">
+        <div class="shop-sys-name">${s.n}</div>
+        <div class="shop-sys-track"><div class="shop-sys-fill" style="width:${width}%;background:${color}"></div></div>
+        <div class="shop-sys-val" style="color:${color}">${Math.round(s.v)}%</div>
+      </div>`;
+    }).join('');
+  }
+  const grid = document.getElementById('shop-grid');
+  if (!grid) return;
+  grid.innerHTML = SHOP_ITEMS.map(item => {
+    const canAfford = repairPoints >= item.cost;
+    const cls = item.bought ? 'shop-bought' : (!canAfford ? 'shop-disabled' : '');
+    return `<div class="shop-card ${cls}" onclick="buyShopItem('${item.id}')">
+      <div class="shop-card-name">${item.name}${item.bought ? ' [PURCHASED]' : ''}</div>
+      <div class="shop-card-desc">${item.desc}</div>
+      <div class="shop-card-cost">${item.bought ? 'APPLIED' : item.cost + ' RP'}</div>
+    </div>`;
+  }).join('');
+  const timerEl = document.getElementById('shop-timer');
+  if (timerEl) timerEl.textContent = 'AUTO-CONTINUE IN ' + shopCountdown + 's';
+}
+
+function buyShopItem(id) {
+  const item = SHOP_ITEMS.find(i => i.id === id);
+  if (!item || item.bought || repairPoints < item.cost) return;
+  playSound('click');
+  repairPoints -= item.cost;
+  item.bought = true;
+  achRunState.shopPointsSpent += item.cost;
+  achRunState.shopVisitSpent += item.cost;
+  // Shopaholic: spent all available points in this visit
+  if (achRunState.shopVisitSpent >= achRunState.shopVisitPoints && achRunState.shopVisitPoints > 0) {
+    unlockAch('shopaholic');
+  }
+  // Apply effect immediately
+  if (id === 'filters')   { shopUpgrades.filters = true; addLog('UPGRADE: Better filters installed', 'g'); }
+  if (id === 'rations')   { SYS.FOOD.v = Math.min(100, SYS.FOOD.v + 20); SYS.H2O.v = Math.min(100, SYS.H2O.v + 20); addLog('UPGRADE: Food and Water +20', 'g'); }
+  if (id === 'shielding') { SYS.RAD.v = Math.max(0, SYS.RAD.v - 25); addLog('UPGRADE: Radiation reduced by 25', 'g'); }
+  if (id === 'medkit')    { RES.filter(r => r.alive).forEach(r => { r.hp = Math.min(100, r.hp + 20); r.st = 'Recovered'; }); addLog('UPGRADE: All residents +20 HP', 'g'); }
+  if (id === 'backup')    { SYS.PWR.v = Math.max(SYS.PWR.v, 80); addLog('UPGRADE: Power restored to 80', 'g'); }
+  if (id === 'morale')    { SYS.MORALE.v = Math.min(100, SYS.MORALE.v + 15); RES.filter(r => r.alive).forEach(r => r.hp = Math.min(100, r.hp + 15)); addLog('UPGRADE: Morale broadcast sent', 'g'); }
+  renderShop();
+}
+
+function endShop() {
+  clearInterval(shopTimer);
+  document.getElementById('shop-overlay').classList.remove('show');
+  // Start next wave
+  running = true;
+  gTimer = setInterval(tick, 1000);
+  scheduleNextCrisis();
+  renderRes(); renderSys(); updateH();
+}
+
+// ===== ACHIEVEMENT SYSTEM =====
+const ACH_KEY = 'bunker7_achievements';
+const ACH_DEFS = [
+  { id:'bunker_secured',     icon:'bunker_secured.png',     name:'BUNKER SECURED' },
+  { id:'iron_operator',      icon:'iron_operator.png',      name:'IRON OPERATOR' },
+  { id:'no_mercy',           icon:'no_mercy.png',           name:'NO MERCY' },
+  { id:'full_crew',          icon:'full_crew.png',          name:'FULL CREW' },
+  { id:'perfect_run',        icon:'perfect_run.png',        name:'PERFECT RUN' },
+  { id:'first_responder',    icon:'first_responder.png',    name:'FIRST RESPONDER' },
+  { id:'therapist',          icon:'therapist.png',          name:'THERAPIST' },
+  { id:'no_one_left',        icon:'no_one_left.png',        name:'NO ONE LEFT BEHIND' },
+  { id:'flatline',           icon:'flatline.png',           name:'FLATLINE' },
+  { id:'quick_thinking',     icon:'quick_thinking.png',     name:'QUICK THINKING' },
+  { id:'five_alarm',         icon:'five_alarm.png',         name:'FIVE ALARM' },
+  { id:'analyst',            icon:'analyst.png',            name:'ANALYST' },
+  { id:'cascade_ctrl',       icon:'cascade_ctrl.png',       name:'CASCADE CONTROLLER' },
+  { id:'breathing_room',     icon:'breathing_room.png',     name:'BREATHING ROOM' },
+  { id:'zero_contamination', icon:'zero_contamination.png', name:'ZERO CONTAMINATION' },
+  { id:'well_fed',           icon:'well_fed.png',           name:'WELL FED' },
+  { id:'blackout',           icon:'blackout.png',           name:'BLACKOUT' },
+  { id:'good_vibes',         icon:'good_vibes.png',         name:'GOOD VIBES ONLY' },
+  { id:'point_hoarder',      icon:'point_hoarder.png',      name:'POINT HOARDER' },
+  { id:'high_roller',        icon:'high_roller.png',        name:'HIGH ROLLER' },
+  { id:'shopaholic',         icon:'shopaholic.png',         name:'SHOPAHOLIC' },
+  { id:'penny_pincher',      icon:'penny_pincher.png',      name:'PENNY PINCHER' },
+];
+
+function loadAch() {
+  try { const r = localStorage.getItem(ACH_KEY); return r ? JSON.parse(r) : {}; } catch(e) { return {}; }
+}
+
+function saveAch(data) {
+  try { localStorage.setItem(ACH_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function unlockAch(id) {
+  const data = loadAch();
+  if (data[id]) return; // already unlocked
+  data[id] = new Date().toISOString();
+  saveAch(data);
+  const def = ACH_DEFS.find(a => a.id === id);
+  if (def) showAchToast(def);
+}
+
+const SFX_ACH = new Audio('./sound/success.mp3');
+
+function showAchToast(def) {
+  // Play success sound
+  try {
+    if (CFG.sfxEnabled) {
+      SFX_ACH.volume = CFG.sfxVol / 100;
+      SFX_ACH.currentTime = 0;
+      SFX_ACH.play().catch(() => {});
+    }
+  } catch(e) {}
+
+  const wrap = document.getElementById('ach-toast-wrap');
+  const toast = document.createElement('div');
+  toast.className = 'ach-toast';
+  toast.innerHTML = `
+    <div class="ach-toast-icon"><img src="./achievements/${def.icon}" alt="${def.name}" style="width:28px;height:28px;object-fit:contain;display:block;"></div>
+    <div class="ach-toast-body">
+      <div class="ach-toast-label">ACHIEVEMENT UNLOCKED</div>
+      <div class="ach-toast-name">${def.name}</div>
+    </div>`;
+  wrap.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    setTimeout(() => toast.remove(), 420);
+  }, 3500);
+}
+
+// Per-run tracking state
+let achRunState = {};
+
+function resetAchRunState() {
+  achRunState = {
+    mgSuccessCount: 0,       // total successful minigames this run
+    personalCrisesTotal: 0,  // how many personal crises spawned
+    personalCrisesHelped: 0, // how many resolved successfully
+    unknownResolved: 0,      // unknown signals correctly answered
+    multistepCompleted: 0,   // multi-step crises completed
+    shopPointsEarned: 0,     // total repair points accumulated
+    shopPointsSpent: 0,      // total repair points spent
+    shopVisitPoints: 0,      // points available at shop open
+    shopVisitSpent: 0,       // points spent in this shop visit
+    o2Failed: false,         // O2 ever dropped below 80
+    radFailed: false,        // RAD ever went above 10
+    foodFailed: false,       // Food ever dropped below 30
+    blackoutAchieved: false, // Power hit 0 and survived
+    powerWasZero: false,     // flag: power hit 0 this run
+  };
+}
+
+// Call each game tick to check persistent conditions
+function checkAchievementsTick() {
+  if (!SYS || !running) return;
+
+  // Breathing Room — O2 always above 80
+  if (SYS.O2.v < 80) achRunState.o2Failed = true;
+
+  // Zero Contamination — RAD always below 10
+  if (SYS.RAD.v >= 10) achRunState.radFailed = true;
+
+  // Well Fed — Food never below 30
+  if (SYS.FOOD.v < 30) achRunState.foodFailed = true;
+
+  // Blackout — Power hit 0 and player survived
+  if (SYS.PWR.v <= 0) {
+    achRunState.powerWasZero = true;
+  }
+  if (achRunState.powerWasZero && SYS.PWR.v > 0 && !achRunState.blackoutAchieved) {
+    achRunState.blackoutAchieved = true;
+    unlockAch('blackout');
+  }
+
+  // Five Alarm — 5 crises at once
+  if (quests.length >= 5) unlockAch('five_alarm');
+
+  // Point thresholds
+  if (score >= 5000) unlockAch('point_hoarder');
+  if (score >= 10000) unlockAch('high_roller');
+}
+
+// Call after winning
+function checkAchievementsWin() {
+  unlockAch('bunker_secured');
+
+  if (CFG.difficulty === 'HARD' || CFG.difficulty === 'BRUTAL') unlockAch('iron_operator');
+  if (CFG.difficulty === 'BRUTAL') unlockAch('no_mercy');
+
+  if (RES.every(r => r.alive)) unlockAch('full_crew');
+
+  const allGood = Object.entries(SYS).every(([k, s]) =>
+    k === 'RAD' ? s.v <= 50 : s.v >= 50
+  );
+  if (allGood) unlockAch('perfect_run');
+
+  if (SYS.MORALE.v > 90) unlockAch('good_vibes');
+
+  if (!achRunState.o2Failed) unlockAch('breathing_room');
+  if (!achRunState.radFailed) unlockAch('zero_contamination');
+  if (!achRunState.foodFailed) unlockAch('well_fed');
+
+  if (achRunState.shopPointsEarned > 0 && achRunState.shopPointsSpent === 0) unlockAch('penny_pincher');
+}
+
+// Call after game over
+function checkAchievementsLoss() {
+  if (RES.some(r => !r.alive)) unlockAch('flatline');
+}
+
+// ===== START =====
+function startGame() {
+  playSound('click');
+  // Reload settings in case they changed
+  Object.assign(CFG, loadSettings());
+  // Start or resume BGM
+  if (CFG.bgmEnabled) {
+    SFX.bgm.play().catch(e => {});
+  }
+
+  RES = RES_TEMPLATE.map(t => ({...t, hp: CFG.startHp, alive:true, st:'Ready', personal:false}));
+  SYS = {}; Object.entries(SYS_TEMPLATE).forEach(([k,s])=>{SYS[k]={...s,v:s.v};});
+  quests=[]; logs=[]; score=0; wave=1; sec=0; running=true; qid=0;
+  lastLethalEvent = '';
+  radioLines = [];
+  repairPoints = 0;
+  shopUpgrades = {};
+  resetAchRunState();
+  clearInterval(shopTimer);
+  clearInterval(gTimer); mgActive=false;
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('shop-overlay').classList.remove('show');
+  document.querySelectorAll('.rscreen').forEach(s=>s.classList.remove('show'));
+  const v = document.getElementById('vignette');
+  v.classList.remove('flash','critical');
+  const muteBtn = document.getElementById('mute-btn');
+  if (muteBtn) { muteBtn.textContent = CFG.sfxEnabled ? 'SFX ON' : 'MUTED'; muteBtn.classList.toggle('muted', !CFG.sfxEnabled); }
+  addLog('BUNKER-7 ONLINE. 5 residents detected.', 'g');
+  addLog('Wave 1 active. Good luck, operator.', 'g');
+  addRadioLine('idle');
+  renderRes(); renderSys(); renderQ(); updateH();
+  gTimer = setInterval(tick, 1000);
+  setTimeout(spawnQ, 5000); setTimeout(spawnQ, 8000);
+  scheduleNextCrisis(); schedulePersonal();
+}
+
+// ===== EASY/NORMAL MINIGAMES =====
+
+// DR. CHEN (EASY/NORMAL) - HEARTBEAT: click when the marker hits the green zone
+function buildMG_heartrate_easy(r, area) {
+  document.getElementById('mg-sub').textContent = 'DR. CHEN - Click when the marker hits the GREEN zone. Need 5 hits.';
+  area.innerHTML = `<canvas id="hr-c" width="320" height="150" style="display:block;margin:0 auto;cursor:pointer"></canvas>
+  <div style="text-align:center;font-size:9px;color:#4a7a4a;margin-top:4px;letter-spacing:1px">CLICK when marker is in the GREEN zone</div>`;
+  let hits = 0, needed = 5, x = 0, speed = 2.8 + wave * 0.15, dir = 1, animId;
+  const canvas = area.querySelector('#hr-c'), ctx = canvas.getContext('2d');
+  const zL = 115, zR = 195;
+  function draw() {
+    ctx.clearRect(0,0,320,150); ctx.fillStyle='#060e06'; ctx.fillRect(0,0,320,150);
+    ctx.fillStyle='#0a2a0a'; ctx.fillRect(zL,0,zR-zL,150);
+    ctx.strokeStyle='#39ff14'; ctx.lineWidth=2; ctx.strokeRect(zL,0,zR-zL,150);
+    for (let i=0;i<needed;i++) { ctx.fillStyle=i<hits?'#39ff14':'#1a3d1a'; ctx.fillRect(8+i*14,8,10,10); }
+    ctx.fillStyle='#ff3232'; ctx.fillRect(x-4,0,8,150);
+    x+=speed*dir; if(x>=318||x<=2) dir*=-1;
+    animId=requestAnimationFrame(draw);
+  }
+  draw();
+  canvas.onclick=()=>{ playSound('click'); if(x>zL&&x<zR){hits++;if(hits>=needed){cancelAnimationFrame(animId);mgSuccess(r);}}else hits=Math.max(0,hits-1); };
+  setMGTimer(r, 14, 'Cardiac event');
+}
+
+// MALIK (EASY/NORMAL) - WIRE MATCHING: connect matching color wires
+function buildMG_wires_easy(r, area) {
+  document.getElementById('mg-sub').textContent = 'MALIK - Connect matching color wires. Click left then right.';
+  const colors=['#ff3232','#39ff14','#00bfff','#ffb300'];
+  const rightOrder=[...colors].sort(()=>Math.random()-0.5);
+  let selected=null, matched=0;
+  const canvas=document.createElement('canvas'); canvas.width=320; canvas.height=178;
+  canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none';
+  area.style.position='relative';
+  const lDiv=document.createElement('div'); lDiv.style.cssText='position:absolute;left:10px;top:0;height:178px;display:flex;flex-direction:column;justify-content:space-around;align-items:flex-start';
+  const rDiv=document.createElement('div'); rDiv.style.cssText='position:absolute;right:10px;top:0;height:178px;display:flex;flex-direction:column;justify-content:space-around;align-items:flex-end';
+  const lBtns={}, rBtns={};
+  function makeBtn(c,side,div,map){ const b=document.createElement('button'); b.style.cssText=`width:52px;height:28px;background:${c};border:3px solid #fff;cursor:pointer;border-radius:4px;outline:none;transition:transform 0.1s`; b.onclick=()=>handleClick(c,side,b); div.appendChild(b); map[c]=b; }
+  colors.forEach(c=>makeBtn(c,'L',lDiv,lBtns)); rightOrder.forEach(c=>makeBtn(c,'R',rDiv,rBtns));
+  area.appendChild(lDiv); area.appendChild(rDiv); area.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  function getCenter(el,side){ const ar=area.getBoundingClientRect(),br=el.getBoundingClientRect(); return{x:side==='L'?br.right-ar.left:br.left-ar.left,y:br.top-ar.top+br.height/2}; }
+  function drawLines(){ ctx.clearRect(0,0,320,178); colors.forEach(c=>{ if(lBtns[c]?.dataset.matched){ const lp=getCenter(lBtns[c],'L'),rp=getCenter(rBtns[c],'R'); ctx.beginPath();ctx.strokeStyle=c;ctx.lineWidth=4;ctx.moveTo(lp.x,lp.y);ctx.lineTo(rp.x,rp.y);ctx.stroke(); } }); if(selected){ const p=getCenter(selected.btn,selected.side); ctx.beginPath();ctx.strokeStyle=selected.c;ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+(selected.side==='L'?50:-50),p.y);ctx.stroke();ctx.setLineDash([]); } }
+  function handleClick(c,side,btn){ playSound('click'); if(btn.dataset.matched)return; if(!selected){ selected={c,side,btn};btn.style.transform='scale(1.1)'; }else{ if(selected.c===c&&selected.side!==side){ matched++; lBtns[c].dataset.matched='1';rBtns[c].dataset.matched='1'; lBtns[c].style.opacity='0.5';rBtns[c].style.opacity='0.5'; lBtns[c].style.cursor='default';rBtns[c].style.cursor='default'; lBtns[c].style.transform='';rBtns[c].style.transform=''; selected=null;drawLines(); if(matched>=4)mgSuccess(r); }else if(selected.btn===btn){ btn.style.transform='';selected=null;drawLines(); }else{ selected.btn.style.transform='';selected={c,side,btn};btn.style.transform='scale(1.1)'; } } drawLines(); }
+  setMGTimer(r, 16, 'Circuit overload');
+  const loop=setInterval(()=>{if(!mgActive){clearInterval(loop);return;}drawLines();},100);
+}
+
+// SARA (EASY/NORMAL) - SIMON SAYS: watch the sequence, then repeat it
+function buildMG_sequence_easy(r, area) {
+  document.getElementById('mg-sub').textContent = 'SARA - Watch the sequence carefully, then repeat it exactly.';
+  const btns=['A','B','C','D'], len=4+Math.min(2,Math.floor(wave/2));
+  const seq=Array.from({length:len},()=>btns[Math.floor(Math.random()*4)]);
+  let showing=true, sIdx=0, pIdx=0;
+  area.innerHTML=`<div style="padding:10px;text-align:center"><div id="sq-d" style="font-size:22px;letter-spacing:8px;color:#39ff14;height:32px;margin-bottom:10px"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:180px;margin:0 auto">${btns.map(b=>`<button id="sq-${b}" onclick="window.sqClick('${b}')" style="background:#0a200a;border:2px solid #2a5a2a;color:#39ff14;font-family:'Share Tech Mono',monospace;font-size:20px;padding:12px;cursor:pointer;border-radius:4px">${b}</button>`).join('')}</div><div id="sq-p" style="font-size:10px;color:#4a7a4a;margin-top:8px">Watch the sequence...</div></div>`;
+  window.sqClick=(v)=>{ playSound('click'); if(showing)return; if(v===seq[pIdx]){ const el=document.getElementById('sq-'+v); if(el){el.style.background='#1a5a1a';setTimeout(()=>el.style.background='#0a200a',200);} pIdx++; document.getElementById('sq-p').textContent=pIdx+'/'+len+' correct'; if(pIdx>=len)mgSuccess(r); }else mgFail(r,'Wrong sequence'); };
+  function showNext(){ if(sIdx>=seq.length){showing=false;document.getElementById('sq-d').textContent='';document.getElementById('sq-p').textContent='YOUR TURN - 0/'+len;return;} const b=seq[sIdx++],el=document.getElementById('sq-'+b); document.getElementById('sq-d').textContent=b; playSound('click'); if(el){el.style.background='#1a5a1a';setTimeout(()=>{el.style.background='#0a200a';setTimeout(showNext,400);},500);}else setTimeout(showNext,600); }
+  setTimeout(showNext, 600);
+  setMGTimer(r, 20, 'Plant system failure');
+}
+
+// BLAKE (EASY/NORMAL) - WHACK-A-MOLE: hit 6 targets before they vanish
+function buildMG_reflex_easy(r, area) {
+  document.getElementById('mg-sub').textContent = 'BLAKE - Hit 6 targets before they vanish.';
+  let hits=0, needed=6;
+  area.innerHTML=`<div id="rf" style="position:relative;width:100%;height:148px;background:#060e06"></div><div id="rf-s" style="text-align:center;font-size:11px;color:#39ff14;margin-top:4px;letter-spacing:2px">0/${needed} hits</div>`;
+  const field=area.querySelector('#rf');
+  function spawn(){ if(!mgActive||hits>=needed)return; const t=document.createElement('button'); const sz=34; t.style.cssText=`position:absolute;left:${Math.random()*(280-sz)}px;top:${Math.random()*(130-sz)}px;width:${sz}px;height:${sz}px;background:#ff3232;border-radius:50%;cursor:pointer;border:2px solid #ff8888;color:#fff;font-family:monospace;font-size:13px;padding:0;font-weight:bold`; t.textContent='!'; t.onclick=()=>{ playSound('click'); if(t.parentNode)field.removeChild(t); hits++; document.getElementById('rf-s').textContent=hits+'/'+needed+' hits'; if(hits>=needed)mgSuccess(r); }; field.appendChild(t); setTimeout(()=>{if(t.parentNode)field.removeChild(t);},Math.max(500,1100-wave*60)); setTimeout(spawn,450+Math.random()*350); }
+  spawn();
+  setMGTimer(r, 14, 'Threat not neutralized');
+}
+
+// YUKI (EASY/NORMAL) - ANOMALY DETECTION: find the dangerously wrong sensor reading
+function buildMG_decrypt_easy(r, area) {
+  const fields=['SYS.TEMP','O2.FLOW','PWR.HZ','H2O.PH','RAD.mSv','CPU.LOAD','NET.MS','MEM.GB'];
+  const units=['C','L/s','Hz','pH','mSv','%','ms','GB'];
+  const normalRanges=[[18,24],[0.8,1.2],[49.8,50.2],[6.8,7.2],[0.1,0.4],[20,60],[10,50],[4,8]];
+  const anomalyIdx=Math.floor(Math.random()*fields.length);
+  const entries=fields.map((f,i)=>{ const [lo,hi]=normalRanges[i]; let v; if(i===anomalyIdx){v=i===4?(15+Math.random()*10).toFixed(1):i===2?(45+Math.random()*2).toFixed(1):i===3?(4+Math.random()*0.5).toFixed(1):(hi*2+Math.random()*hi).toFixed(1);}else{v=(lo+Math.random()*(hi-lo)).toFixed(1);} return{f,u:units[i],v,bad:i===anomalyIdx}; });
+  document.getElementById('mg-sub').textContent='YUKI - One reading is dangerously wrong. Click it.';
+  area.innerHTML=`<div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px" id="dc-grid"></div>`;
+  const grid=area.querySelector('#dc-grid');
+  entries.forEach(e=>{ const btn=document.createElement('button'); btn.style.cssText=`background:#060e06;border:1px solid #1a3d1a;color:#39ff14;font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 8px;cursor:pointer;border-radius:3px;text-align:left;transition:border-color 0.15s`; btn.innerHTML=`<span style="color:#4a7a4a;font-size:8px">${e.f}</span><br><strong>${e.v} ${e.u}</strong>`; btn.onclick=()=>{ playSound('click'); if(e.bad)mgSuccess(r); else{btn.style.borderColor='#ff3232';btn.style.color='#ff3232';addLog('Wrong reading selected','c');} }; grid.appendChild(btn); });
+  setMGTimer(r, 12, 'Anomaly undetected');
+}
+
+startGame();
+</script>
+</body>
+</html>

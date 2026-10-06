@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUNKER-7 - BRIEFING</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root {
+  --green: #39ff14;
+  --green-dim: #4a7a4a;
+  --green-dark: #1a3d1a;
+  --green-bg: #0b150b;
+  --bg: #050a05;
+  --orange: #ff6600;
+  --red: #ff3232;
+  --blue: #00bfff;
+  --yellow: #ffb300;
+  --font: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #020402;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font);
+}
+#G {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--green);
+  width: 900px;
+  height: 640px;
+  border: 1px solid var(--green-dark);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(57,255,20,0.07);
+}
+#G::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none;
+  z-index: 999;
+}
+.corner { position: absolute; width: 14px; height: 14px; border-color: var(--green-dim); border-style: solid; opacity: 0.4; z-index: 1000; }
+.corner.tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.corner.tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+/* HEADER */
+#hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--green-bg);
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+}
+.ht { font-size: 15px; letter-spacing: 4px; }
+.hright { display: flex; align-items: center; gap: 16px; }
+.step-info { font-size: 10px; color: var(--green-dim); letter-spacing: 2px; }
+.step-info span { color: var(--green); }
+#back-btn {
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 5px 14px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+#back-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* BODY */
+#body {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* LEFT - interactive demo area */
+#demo-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--green-dark);
+}
+
+/* RIGHT - instruction panel */
+#instruction-panel {
+  background: var(--green-bg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.slbl {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--green-dark);
+}
+
+/* STEP PILLS */
+#step-nav {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--green-bg);
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+}
+.step-pill {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 8px;
+  padding: 5px 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.step-pill:hover { border-color: var(--green-dim); color: var(--green); }
+.step-pill.active { border-color: var(--green); color: var(--green); background: rgba(57,255,20,0.06); }
+
+/* DEMO CONTENT */
+#demo-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* step sections */
+.step-section { display: none; width: 100%; height: 100%; flex-direction: column; }
+.step-section.active { display: flex; }
+
+/* ---- STEP 1: CRISES ---- */
+#step-crises { padding: 10px; gap: 8px; overflow-y: auto; }
+.demo-crisis {
+  background: #0a120a;
+  border: 1px solid var(--green-dark);
+  padding: 10px;
+  border-radius: 4px;
+  cursor: default;
+}
+.demo-crisis.urg { border-color: var(--red); animation: pu 0.6s infinite; }
+.demo-crisis.warn { border-color: var(--orange); animation: pw 0.9s infinite; }
+@keyframes pu { 0%,100%{box-shadow:0 0 0 0 rgba(255,50,50,0.3)} 50%{box-shadow:0 0 8px 3px rgba(255,50,50,0.3)} }
+@keyframes pw { 0%,100%{box-shadow:0 0 0 0 rgba(255,100,0,0.2)} 50%{box-shadow:0 0 5px 2px rgba(255,100,0,0.2)} }
+.demo-crisis .ch { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.demo-crisis .ct { font-size: 12px; letter-spacing: 1px; }
+.demo-crisis .ctm { font-size: 13px; font-weight: bold; }
+.demo-crisis .cd { font-size: 9px; color: var(--green-dim); margin-bottom: 6px; line-height: 1.4; }
+.demo-crisis .cpb { height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.demo-crisis .cpf { height: 100%; border-radius: 2px; }
+.demo-crisis .ca { display: flex; gap: 5px; }
+.dcb {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+  text-align: center;
+}
+.dcb:hover { background: var(--green-dark); border-color: var(--green); }
+.dcb.correct { border-color: var(--green); background: rgba(57,255,20,0.1); }
+.dcb.wrong { border-color: var(--red); color: var(--red); }
+.demo-feedback {
+  font-size: 10px;
+  text-align: center;
+  padding: 5px;
+  margin-top: 4px;
+  display: none;
+  letter-spacing: 1px;
+}
+.demo-feedback.show { display: block; }
+
+/* ---- STEP 2: RESIDENTS ---- */
+#step-residents { padding: 10px; gap: 10px; }
+.demo-res-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.demo-res {
+  background: var(--green-bg);
+  border: 1px solid var(--green-dark);
+  padding: 10px 7px;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+  cursor: default;
+}
+.demo-res.alert { border-color: var(--orange); animation: pa 0.7s infinite; }
+.demo-res.mgon { border-color: var(--blue); animation: pb 0.5s infinite; cursor: pointer; }
+.demo-res.dead { opacity: 0.2; border-color: #222; }
+@keyframes pa { 0%,100%{box-shadow:0 0 0 0 rgba(255,102,0,0.4)} 50%{box-shadow:0 0 8px 3px rgba(255,102,0,0.4)} }
+@keyframes pb { 0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,0.4)} 50%{box-shadow:0 0 8px 3px rgba(0,191,255,0.4)} }
+.demo-res .rn { font-size: 10px; color: var(--green); font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 3px; }
+.demo-res .rr { font-size: 8px; color: var(--green-dim); margin-bottom: 5px; }
+.demo-res .rhb { height: 5px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
+.demo-res .rhf { height: 100%; border-radius: 2px; transition: width 0.5s, background 0.5s; }
+.demo-res .rst { font-size: 8px; color: var(--green-dim); }
+.res-legend { display: flex; flex-direction: column; gap: 6px; }
+.res-legend-row { display: flex; align-items: center; gap: 10px; font-size: 9px; color: var(--green-dim); letter-spacing: 1px; }
+.legend-swatch { width: 40px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.legend-border { width: 40px; height: 18px; border-radius: 3px; flex-shrink: 0; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+.click-hint { font-size: 9px; color: var(--blue); letter-spacing: 1px; text-align: center; padding: 6px; border: 1px solid rgba(0,191,255,0.3); border-radius: 3px; animation: pb 1.5s infinite; }
+
+/* ---- STEP 3: SYSTEMS ---- */
+#step-systems { padding: 10px; gap: 8px; }
+.demo-sys-grid { display: flex; flex-direction: column; gap: 7px; }
+.demo-sr { display: flex; align-items: center; gap: 10px; }
+.demo-sn { width: 80px; color: var(--green-dim); font-size: 10px; letter-spacing: 1px; }
+.demo-sb { flex: 1; height: 10px; background: #111; border-radius: 4px; overflow: hidden; }
+.demo-sf { height: 100%; border-radius: 4px; transition: width 1.5s, background 1.5s; }
+.demo-sv { width: 44px; text-align: right; font-size: 11px; font-weight: bold; }
+.demo-sys-note { font-size: 9px; color: var(--green-dim); line-height: 1.6; letter-spacing: 0.5px; padding: 8px; background: #0a120a; border: 1px solid var(--green-dark); border-radius: 3px; }
+.demo-sys-note span { color: var(--green); }
+.demo-sys-note span.r { color: var(--red); }
+
+/* ---- STEP 4: MINIGAMES ---- */
+#step-minigames { padding: 10px; gap: 8px; overflow-y: auto; }
+.mg-preview-list { display: flex; flex-direction: column; gap: 7px; }
+.mg-preview {
+  background: #0a120a;
+  border: 1px solid var(--green-dark);
+  padding: 10px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: default;
+  transition: border-color 0.2s;
+}
+.mg-preview:hover { border-color: var(--green-dim); }
+.mg-who { font-size: 11px; color: var(--green); letter-spacing: 1px; min-width: 90px; }
+.mg-role { font-size: 8px; color: var(--green-dim); }
+.mg-divider { width: 1px; height: 30px; background: var(--green-dark); flex-shrink: 0; }
+.mg-task { font-size: 9px; color: var(--green-dim); letter-spacing: 0.5px; line-height: 1.5; flex: 1; }
+.mg-badge {
+  font-size: 8px;
+  padding: 3px 8px;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  border-radius: 2px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ---- STEP 5: WIN ---- */
+#step-win { padding: 16px; gap: 12px; align-items: center; justify-content: center; }
+.wave-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 420px; }
+.wave-cell {
+  background: var(--green-bg);
+  border: 1px solid var(--green-dark);
+  padding: 8px 4px;
+  border-radius: 3px;
+  text-align: center;
+}
+.wave-cell .wnum { font-size: 14px; color: var(--green); }
+.wave-cell .wlbl { font-size: 8px; color: var(--green-dim); margin-top: 2px; letter-spacing: 1px; }
+.wave-cell.done { border-color: var(--green); background: rgba(57,255,20,0.05); }
+.wave-cell.done .wnum { text-shadow: 0 0 8px rgba(57,255,20,0.5); }
+.wave-cell.target { border-color: var(--yellow); background: rgba(255,179,0,0.05); }
+.wave-cell.target .wnum { color: var(--yellow); }
+.gameover-scenarios { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 420px; }
+.go-scenario { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--green-dark); border-radius: 3px; font-size: 9px; }
+.go-scenario .go-icon { font-size: 11px; color: var(--red); min-width: 14px; }
+.go-scenario span { color: var(--green-dim); }
+
+/* INSTRUCTION PANEL CONTENT */
+.instr-title { font-size: 14px; letter-spacing: 3px; color: var(--green); margin-bottom: 6px; }
+.instr-body { font-size: 10px; color: var(--green-dim); line-height: 1.8; letter-spacing: 0.5px; flex: 1; }
+.instr-body strong { color: var(--green); }
+.instr-body .r { color: var(--red); }
+.instr-body .o { color: var(--orange); }
+.instr-body .b { color: var(--blue); }
+.instr-body .y { color: var(--yellow); }
+.instr-highlight {
+  background: #0a120a;
+  border: 1px solid var(--green-dark);
+  border-left: 3px solid var(--green);
+  padding: 8px 10px;
+  font-size: 9px;
+  color: var(--green-dim);
+  line-height: 1.7;
+  border-radius: 0 3px 3px 0;
+  margin: 6px 0;
+}
+.instr-highlight span { color: var(--green); }
+.instr-highlight.warn { border-left-color: var(--orange); }
+.instr-highlight.warn span { color: var(--orange); }
+.instr-highlight.crit { border-left-color: var(--red); }
+.instr-highlight.crit span { color: var(--red); }
+
+.nav-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.nav-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 8px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  text-align: center;
+}
+.nav-btn:hover { border-color: var(--green); color: var(--green); }
+.nav-btn.primary { border-color: var(--green); color: var(--green); }
+.nav-btn a { color: inherit; text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="G">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div id="hdr">
+    <div class="ht">OPERATOR BRIEFING</div>
+    <div class="hright">
+      <div class="step-info">MODULE <span id="step-num">1</span> OF 5</div>
+      <button onclick="navTo('menu.html')" id="back-btn">BACK TO MENU</button>
+    </div>
+  </div>
+
+  <!-- Step nav pills -->
+  <div id="step-nav">
+    <button class="step-pill active" onclick="goStep(0)">CRISES</button>
+    <button class="step-pill" onclick="goStep(1)">RESIDENTS</button>
+    <button class="step-pill" onclick="goStep(2)">SYSTEMS</button>
+    <button class="step-pill" onclick="goStep(3)">MINIGAMES</button>
+    <button class="step-pill" onclick="goStep(4)">WAVES</button>
+  </div>
+
+  <div id="body">
+    <!-- LEFT: interactive demos -->
+    <div id="demo-area">
+      <div id="demo-content">
+
+        <!-- STEP 1: CRISES -->
+        <div class="step-section active" id="step-crises">
+          <div class="slbl" style="padding:8px 10px 0;margin-bottom:0">LIVE DEMO - TRY CLICKING THE BUTTONS BELOW</div>
+
+          <!-- Crisis 1: easy timer, clear right answer -->
+          <div class="demo-crisis" id="dc1" style="margin:8px 10px 0">
+            <div class="ch">
+              <div class="ct" style="color:var(--green)">O2 PIPE BURST</div>
+              <div class="ctm" id="dc1-timer" style="color:#39ff14">20s</div>
+            </div>
+            <div class="cd">Oxygen venting in sector 3. Act fast.</div>
+            <div class="cpb"><div class="cpf" id="dc1-bar" style="width:100%;background:#39ff14"></div></div>
+            <div class="ca">
+              <button class="dcb" id="dc1-a" onclick="demoAnswer(1,'a',true)">SEAL CLAMP</button>
+              <button class="dcb" id="dc1-b" onclick="demoAnswer(1,'b',false)">VENT MORE</button>
+              <button class="dcb" id="dc1-c" onclick="demoAnswer(1,'c',false)">PATCH FOAM</button>
+            </div>
+            <div class="demo-feedback" id="dc1-fb"></div>
+          </div>
+
+          <!-- Crisis 2: urgent (orange) -->
+          <div class="demo-crisis warn" id="dc2" style="margin:8px 10px 0">
+            <div class="ch">
+              <div class="ct" style="color:var(--green)">POWER SURGE</div>
+              <div class="ctm" id="dc2-timer" style="color:var(--orange)">8s</div>
+            </div>
+            <div class="cd">Grid overload. Life support at risk.</div>
+            <div class="cpb"><div class="cpf" id="dc2-bar" style="width:35%;background:var(--orange)"></div></div>
+            <div class="ca">
+              <button class="dcb" id="dc2-a" onclick="demoAnswer(2,'a',false)">DIVERT CELL</button>
+              <button class="dcb" id="dc2-b" onclick="demoAnswer(2,'b',true)">SHUT BREAKER</button>
+              <button class="dcb" id="dc2-c" onclick="demoAnswer(2,'c',false)">LOAD BAL.</button>
+            </div>
+            <div class="demo-feedback" id="dc2-fb"></div>
+          </div>
+
+          <!-- Crisis 3: critical (red) -->
+          <div class="demo-crisis urg" id="dc3" style="margin:8px 10px 0">
+            <div class="ch">
+              <div class="ct" style="color:var(--green)">RAD SPIKE</div>
+              <div class="ctm" id="dc3-timer" style="color:var(--red)">3s</div>
+            </div>
+            <div class="cd">Geiger readings critical. Sector exposed.</div>
+            <div class="cpb"><div class="cpf" id="dc3-bar" style="width:12%;background:var(--red)"></div></div>
+            <div class="ca">
+              <button class="dcb" id="dc3-a" onclick="demoAnswer(3,'a',false)">DECON SPRAY</button>
+              <button class="dcb" id="dc3-b" onclick="demoAnswer(3,'b',true)">SEAL WALLS</button>
+              <button class="dcb" id="dc3-c" onclick="demoAnswer(3,'c',false)">OPEN VENTS</button>
+            </div>
+            <div class="demo-feedback" id="dc3-fb"></div>
+          </div>
+        </div>
+
+        <!-- STEP 2: RESIDENTS -->
+        <div class="step-section" id="step-residents">
+          <div class="slbl" style="padding:8px 10px 0;margin-bottom:0">LIVE DEMO - CLICK THE BLUE GLOWING RESIDENT</div>
+          <div style="padding:8px 10px 0">
+            <div class="demo-res-grid" id="demo-res-grid"></div>
+          </div>
+          <div style="padding:10px;">
+            <div class="res-legend">
+              <div class="res-legend-row">
+                <div class="legend-border" style="border-color:var(--green-dark);color:var(--green-dim)">75%</div>
+                Normal state, HP above 35%
+              </div>
+              <div class="res-legend-row">
+                <div class="legend-border" style="border-color:var(--orange);color:var(--orange)">!</div>
+                Low HP (below 35%) - orange pulse
+              </div>
+              <div class="res-legend-row">
+                <div class="legend-border" style="border-color:var(--blue);color:var(--blue)">?</div>
+                Personal emergency - click to help
+              </div>
+              <div class="res-legend-row">
+                <div class="legend-border" style="border-color:#222;color:#333">x</div>
+                Deceased - no longer active
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 10px">
+            <div class="click-hint" id="res-click-hint">CLICK THE BLUE GLOWING RESIDENT ABOVE</div>
+            <div id="res-click-result" style="font-size:10px;color:var(--green);text-align:center;padding:6px;display:none;letter-spacing:1px"></div>
+          </div>
+        </div>
+
+        <!-- STEP 3: SYSTEMS -->
+        <div class="step-section" id="step-systems">
+          <div class="slbl" style="padding:8px 10px 0;margin-bottom:0">LIVE DEMO - SYSTEMS DECAYING IN REAL TIME</div>
+          <div style="padding:10px">
+            <div class="demo-sys-grid" id="demo-sys-grid"></div>
+          </div>
+          <div style="padding:0 10px">
+            <div class="demo-sys-note">
+              <span>OXYGEN, FOOD, POWER, WATER, MORALE</span> must stay HIGH.<br>
+              <span class="r">RADIATION</span> must stay LOW - the bar fills as danger rises.<br>
+              Below 15% on a vital system: all residents take constant damage.<br>
+              Above 60% radiation: all residents irradiated until shields restored.
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: MINIGAMES -->
+        <div class="step-section" id="step-minigames">
+          <div class="slbl" style="padding:8px 10px 0;margin-bottom:0">PERSONAL CRISIS MINIGAMES - ONE PER RESIDENT</div>
+          <div style="padding:8px 10px 0;">
+            <div class="mg-preview-list">
+              <div class="mg-preview">
+                <div><div class="mg-who">DR. CHEN</div><div class="mg-role">Medic</div></div>
+                <div class="mg-divider"></div>
+                <div class="mg-task">A marker slides left and right. Click when it enters the green zone. Need 5 hits.</div>
+                <div class="mg-badge">TIMING</div>
+              </div>
+              <div class="mg-preview">
+                <div><div class="mg-who">MALIK</div><div class="mg-role">Engineer</div></div>
+                <div class="mg-divider"></div>
+                <div class="mg-task">Four colored wires on each side, scrambled. Click a left wire then its matching right wire to connect.</div>
+                <div class="mg-badge">MATCHING</div>
+              </div>
+              <div class="mg-preview">
+                <div><div class="mg-who">SARA</div><div class="mg-role">Botanist</div></div>
+                <div class="mg-divider"></div>
+                <div class="mg-task">Watch a sequence of button flashes. Then repeat it exactly. Length increases with wave.</div>
+                <div class="mg-badge">MEMORY</div>
+              </div>
+              <div class="mg-preview">
+                <div><div class="mg-who">BLAKE</div><div class="mg-role">Security</div></div>
+                <div class="mg-divider"></div>
+                <div class="mg-task">Red targets appear and vanish fast. Click 6 before they disappear. Speed scales with wave.</div>
+                <div class="mg-badge">REFLEX</div>
+              </div>
+              <div class="mg-preview">
+                <div><div class="mg-who">YUKI</div><div class="mg-role">Analyst</div></div>
+                <div class="mg-divider"></div>
+                <div class="mg-task">Eight system readings shown. One value is dangerously out of range. Click the anomaly fast.</div>
+                <div class="mg-badge">ANALYSIS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: WAVES / WIN -->
+        <div class="step-section" id="step-win">
+          <div class="slbl" style="padding:8px 10px 0;margin-bottom:0;width:100%">WIN CONDITION AND DIFFICULTY</div>
+          <div style="padding:10px;width:100%">
+            <div class="wave-grid" style="margin-bottom:10px">
+              <div class="wave-cell done"><div class="wnum">W1</div><div class="wlbl">SLOW</div></div>
+              <div class="wave-cell done"><div class="wnum">W2</div><div class="wlbl">+SPEED</div></div>
+              <div class="wave-cell done"><div class="wnum">W3</div><div class="wlbl">+MULTI</div></div>
+              <div class="wave-cell"><div class="wnum">W4</div><div class="wlbl">HEAVY</div></div>
+              <div class="wave-cell"><div class="wnum">W5</div><div class="wlbl">STORM</div></div>
+              <div class="wave-cell"><div class="wnum">W6</div><div class="wlbl">SURGE</div></div>
+              <div class="wave-cell"><div class="wnum">W7</div><div class="wlbl">CRISIS</div></div>
+              <div class="wave-cell"><div class="wnum">W8</div><div class="wlbl">CRITICAL</div></div>
+              <div class="wave-cell"><div class="wnum">W9</div><div class="wlbl">EXTREME</div></div>
+              <div class="wave-cell target"><div class="wnum">W10</div><div class="wlbl">SURVIVE</div></div>
+            </div>
+            <div style="font-size:9px;color:var(--green-dim);margin-bottom:10px;line-height:1.7">A new wave begins every 40 seconds. Each wave spawns crises faster and shortens timers. The crisis panel can stack up to 5 at once. Score more by resolving crises early.</div>
+            <div class="gameover-scenarios">
+              <div class="go-scenario"><div class="go-icon">X</div><span>All 5 residents reach 0 HP</span></div>
+              <div class="go-scenario"><div class="go-icon">X</div><span>Oxygen, Food, Power, Water or Morale hits 0%</span></div>
+              <div class="go-scenario"><div class="go-icon">X</div><span>Radiation reaches 100% and irradiates everyone</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: instruction panel -->
+    <div id="instruction-panel">
+      <div class="slbl">OPERATOR NOTES</div>
+
+      <div id="instr-1">
+        <div class="instr-title">CRISES</div>
+        <div class="instr-body">
+          Crises appear in the right panel during play. Each has a <strong>countdown timer</strong> and three response options.<br><br>
+          <strong>Only one option resolves the crisis correctly.</strong> The others make things worse.<br><br>
+          A correct answer repairs the affected system and earns points. A wrong answer damages the system and injures a random resident.<br><br>
+          If the timer hits zero the crisis expires - full system damage, no points.
+          <div class="instr-highlight">
+            <span>GREEN timer:</span> plenty of time<br>
+            <span style="color:var(--orange)">ORANGE timer:</span> hurry up<br>
+            <span style="color:var(--red)">RED timer:</span> critical - act now
+          </div>
+          Try clicking the buttons on the crises to the left. See what happens when you pick correctly or wrongly.
+        </div>
+      </div>
+
+      <div id="instr-2" style="display:none">
+        <div class="instr-title">RESIDENTS</div>
+        <div class="instr-body">
+          Five people live in the bunker. Each has an HP bar that depletes from bad crisis decisions, failing systems, or radiation.<br><br>
+          <strong>If all residents die the mission fails.</strong><br><br>
+          Watch their border color:
+          <div class="instr-highlight">
+            <span style="color:var(--orange)">ORANGE pulse:</span> HP below 35%, in danger
+          </div>
+          <div class="instr-highlight warn">
+            <span>BLUE pulse:</span> personal crisis active - click them immediately to open a minigame
+          </div>
+          Minigame success gives <strong>+25 HP</strong> and score. Failure deals <strong>-30 HP</strong>.<br><br>
+          Crises keep ticking while a minigame is open.
+        </div>
+      </div>
+
+      <div id="instr-3" style="display:none">
+        <div class="instr-title">SYSTEMS</div>
+        <div class="instr-body">
+          Six systems keep the bunker alive. They all decay slowly and crises can accelerate the decline.<br><br>
+          Five systems must stay <strong>HIGH</strong>: Oxygen, Food, Power, Water, Morale.<br><br>
+          <strong class="r">Radiation must stay LOW.</strong> Its bar fills as danger rises - the opposite of all others.<br><br>
+          <div class="instr-highlight crit">
+            <span>Below 15%</span> on any vital system: residents take constant passive damage every second.
+          </div>
+          <div class="instr-highlight crit">
+            <span>Above 60%</span> radiation: all residents are irradiated each second until sealed.
+          </div>
+          Correct crisis answers repair the relevant system. Wrong answers damage it further.
+        </div>
+      </div>
+
+      <div id="instr-4" style="display:none">
+        <div class="instr-title">MINIGAMES</div>
+        <div class="instr-body">
+          Each resident has a unique personal crisis minigame that opens when you click them while they are <strong class="b">blue-glowing</strong>.<br><br>
+          All minigames are timed. Fail the minigame or run out of time: the resident loses 30 HP.<br><br>
+          <div class="instr-highlight">
+            <span>Success:</span> +25 HP to resident, bonus score<br>
+            <span style="color:var(--red)">Failure:</span> -30 HP, possible death
+          </div>
+          Abandoning via the button counts as failure. Crises keep their timers while the minigame is active - only the crisis answer buttons are locked.
+        </div>
+      </div>
+
+      <div id="instr-5" style="display:none">
+        <div class="instr-title">WAVES AND WIN</div>
+        <div class="instr-body">
+          Survive <strong>10 waves</strong> to complete the mission. Each wave lasts 40 seconds.<br><br>
+          Each new wave makes crises spawn faster, shrink timers, and increases the chance of simultaneous crises.<br><br>
+          Score multiplies with wave number - high-wave, fast resolutions earn the most points.<br><br>
+          <div class="instr-highlight crit">
+            <span>Lose when:</span> all residents die, or any vital system hits 0%
+          </div>
+          The tutorial is complete. Good luck operator.
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="nav-btn" id="prev-btn" onclick="goStep(currentStep-1)" style="display:none">PREV</button>
+        <button class="nav-btn" id="next-btn" onclick="goStep(currentStep+1)">NEXT MODULE</button>
+        <button class="nav-btn primary" id="play-btn" style="display:none" onclick="navTo('game.html')">PLAY NOW</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== BGM (continuous) =====
+const BGM = new Audio('./sound/bgm.mp3');
+BGM.loop = true;
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem('bunker7_settings');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function tryStartBGM() {
+  const s = loadSettings();
+  if (s.bgmEnabled === false) return;
+  BGM.volume = (s.bgmVol ?? 40) / 100;
+  const pos = parseFloat(sessionStorage.getItem('bgmPos') || '0');
+  BGM.currentTime = pos;
+  BGM.play().catch(() => {});
+}
+
+setInterval(() => {
+  if (!BGM.paused) sessionStorage.setItem('bgmPos', BGM.currentTime);
+}, 500);
+
+// ===== AUDIO =====
+const SFX = {
+  click: new Audio('./sound/click.mp3'),
+  success: new Audio('./sound/success.mp3'),
+  fail: new Audio('./sound/fail.mp3')
+};
+
+function playSound(name) {
+  try {
+    const s = loadSettings();
+    if (s.sfxEnabled === false && name !== 'bgm') return;
+    if (SFX[name]) {
+      SFX[name].volume = (s.sfxVol ?? 100) / 100;
+      SFX[name].currentTime = 0;
+      SFX[name].play().catch(e => {});
+    }
+  } catch (e) {}
+}
+
+function navTo(url) {
+  playSound('click');
+  sessionStorage.setItem('bgmPos', BGM.currentTime);
+  setTimeout(() => window.location.href = url, 200); 
+}
+
+// ---- STEP NAVIGATION ----
+let currentStep = 0;
+const STEPS = 5;
+
+function goStep(n) {
+  if (n < 0 || n >= STEPS) return;
+  playSound('click');
+  currentStep = n;
+
+  document.querySelectorAll('.step-section').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.step-pill').forEach((p, i) => {
+    p.classList.toggle('active', i === n);
+  });
+  document.getElementById('step-num').textContent = n + 1;
+
+  // instruction panels
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('instr-' + i).style.display = (i === n + 1) ? 'block' : 'none';
+  }
+
+  document.getElementById('prev-btn').style.display = n > 0 ? 'block' : 'none';
+  document.getElementById('next-btn').style.display = n < STEPS - 1 ? 'block' : 'none';
+  document.getElementById('play-btn').style.display = n === STEPS - 1 ? 'block' : 'none';
+
+  if (n === 1) initResDemo();
+  if (n === 2) initSysDemo();
+}
+
+// ---- CRISIS DEMO ----
+const demoState = { 1: false, 2: false, 3: false };
+
+function demoAnswer(id, opt, correct) {
+  playSound('click');
+  
+  if (demoState[id]) return;
+  demoState[id] = true;
+
+  const btns = ['a','b','c'];
+  btns.forEach(b => {
+    const el = document.getElementById('dc'+id+'-'+b);
+    if (el) el.disabled = true;
+  });
+
+  const clickedBtn = document.getElementById('dc'+id+'-'+opt);
+  const fb = document.getElementById('dc'+id+'-fb');
+
+  if (correct) {
+    playSound('success');
+    clickedBtn.classList.add('correct');
+    fb.style.color = '#39ff14';
+    fb.textContent = 'CORRECT - system repaired, points awarded';
+    fb.classList.add('show');
+  } else {
+    playSound('fail');
+    clickedBtn.classList.add('wrong');
+    fb.style.color = '#ff3232';
+    fb.textContent = 'WRONG - system damaged, resident hurt';
+    fb.classList.add('show');
+  }
+}
+// animate crisis 1 timer demo (just visual, counts from 20 to 10)
+let dc1t = 20;
+setInterval(() => {
+  if (demoState[1]) return;
+  dc1t = Math.max(0, dc1t - 1);
+  const pct = dc1t / 20;
+  const col = pct > 0.5 ? '#39ff14' : pct > 0.25 ? '#ffb300' : '#ff3232';
+  const el = document.getElementById('dc1-timer');
+  const bar = document.getElementById('dc1-bar');
+  if (el) el.textContent = dc1t + 's';
+  if (el) el.style.color = col;
+  if (bar) { bar.style.width = (pct * 100) + '%'; bar.style.background = col; }
+  if (dc1t === 0) { dc1t = 20; demoState[1] = false; resetDemoCrisis(1); }
+}, 1000);
+
+function resetDemoCrisis(id) {
+  ['a','b','c'].forEach(b => {
+    const el = document.getElementById('dc'+id+'-'+b);
+    if (el) { el.disabled = false; el.className = 'dcb'; }
+  });
+  const fb = document.getElementById('dc'+id+'-fb');
+  if (fb) { fb.classList.remove('show'); }
+  demoState[id] = false;
+}
+
+// ---- RESIDENT DEMO ----
+const DEMO_RES = [
+  { n:'DR. CHEN', r:'Medic',    hp:88, cls:'',      badge:'o', st:'Stable' },
+  { n:'MALIK',    r:'Engineer', hp:62, cls:'',      badge:'o', st:'On duty' },
+  { n:'SARA',     r:'Botanist', hp:31, cls:'alert', badge:'!', st:'Injured' },
+  { n:'BLAKE',    r:'Security', hp:75, cls:'mgon',  badge:'?', st:'NEEDS ATTN' },
+  { n:'YUKI',     r:'Analyst',  hp:0,  cls:'dead',  badge:'x', st:'Deceased' },
+];
+
+function colorFor(v) { return v > 55 ? '#39ff14' : v > 25 ? '#ffb300' : '#ff3232'; }
+
+function initResDemo() {
+  const grid = document.getElementById('demo-res-grid');
+  grid.innerHTML = DEMO_RES.map((r, i) => `
+    <div class="demo-res ${r.cls}" id="dres-${i}" onclick="clickDemoRes(${i})">
+      <div class="rn">${r.n.split(' ')[0]}<span style="color:${r.cls === 'mgon' ? '#00bfff' : r.cls === 'alert' ? '#ff6600' : r.cls === 'dead' ? '#333' : '#39ff14'}">${r.badge}</span></div>
+      <div class="rr">${r.r}</div>
+      <div class="rhb"><div class="rhf" style="width:${r.hp}%;background:${r.cls === 'dead' ? '#222' : colorFor(r.hp)}"></div></div>
+      <div class="rst">${r.st}</div>
+    </div>`).join('');
+}
+
+function clickDemoRes(i) {
+  if (DEMO_RES[i].cls !== 'mgon') return;
+  playSound('click');
+  playSound('success');
+  
+  const hint = document.getElementById('res-click-hint');
+  const result = document.getElementById('res-click-result');
+  hint.style.display = 'none';
+  result.style.display = 'block';
+  result.textContent = 'BLAKE: Personal crisis minigame would open here during actual gameplay.';
+
+  const card = document.getElementById('dres-3');
+  DEMO_RES[3].cls = '';
+  DEMO_RES[3].badge = 'o';
+  DEMO_RES[3].st = 'Stabilized';
+  DEMO_RES[3].hp = Math.min(100, DEMO_RES[3].hp + 25);
+  setTimeout(() => initResDemo(), 100);
+}
+
+// ---- SYSTEM DEMO ----
+const DEMO_SYS = [
+  { n:'OXYGEN',    v:82, d:0.3, rad: false },
+  { n:'FOOD',      v:55, d:0.2, rad: false },
+  { n:'POWER',     v:71, d:0.18, rad: false },
+  { n:'WATER',     v:40, d:0.25, rad: false },
+  { n:'RADIATION', v:38, d:-0.15, rad: true },
+  { n:'MORALE',    v:25, d:0.22, rad: false },
+];
+
+function initSysDemo() {
+  renderSysDemo();
+}
+
+function renderSysDemo() {
+  const grid = document.getElementById('demo-sys-grid');
+  if (!grid) return;
+  grid.innerHTML = DEMO_SYS.map(s => {
+    const isRad = s.rad;
+    const color = isRad ? (s.v < 30 ? '#39ff14' : s.v < 60 ? '#ffb300' : '#ff3232') : colorFor(s.v);
+    const width = isRad ? Math.min(100, s.v) : Math.max(0, s.v);
+    return `<div class="demo-sr">
+      <div class="demo-sn">${s.n}</div>
+      <div class="demo-sb"><div class="demo-sf" style="width:${width}%;background:${color}"></div></div>
+      <div class="demo-sv" style="color:${color}">${Math.round(s.v)}%</div>
+    </div>`;
+  }).join('');
+}
+
+setInterval(() => {
+  if (currentStep !== 2) return;
+  DEMO_SYS.forEach(s => {
+    if (s.rad) {
+      s.v = s.v + s.d;
+      if (s.v <= 0 || s.v >= 80) s.d *= -1;
+    } else {
+      s.v = s.v - s.d;
+      if (s.v <= 5 || s.v >= 95) s.d *= -1;
+    }
+  });
+  renderSysDemo();
+}, 800);
+
+// Start BGM on load / first interaction
+document.addEventListener('click', () => tryStartBGM(), { once: true });
+window.addEventListener('DOMContentLoaded', tryStartBGM);
+</script>
+</body>
+</html>

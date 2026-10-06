@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUNKER-7</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root {
+  --green: #39ff14;
+  --green-dim: #4a7a4a;
+  --green-dark: #1a3d1a;
+  --green-bg: #0b150b;
+  --bg: #050a05;
+  --orange: #ff6600;
+  --red: #ff3232;
+  --font: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #020402;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font);
+}
+#G {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--green);
+  width: 900px;
+  height: 640px;
+  border: 1px solid var(--green-dark);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 60px rgba(57,255,20,0.07), 0 0 120px rgba(57,255,20,0.03);
+}
+#G::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+  pointer-events: none;
+  z-index: 1;
+}
+.corner { position: absolute; width: 16px; height: 16px; border-color: var(--green-dim); border-style: solid; opacity: 0.4; }
+.corner.tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.corner.tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.logo { font-size: 38px; letter-spacing: 10px; color: var(--green); text-shadow: 0 0 30px rgba(57,255,20,0.4), 0 0 60px rgba(57,255,20,0.15); animation: glow 3s ease-in-out infinite; }
+@keyframes glow { 0%,100%{ text-shadow: 0 0 20px rgba(57,255,20,0.4), 0 0 40px rgba(57,255,20,0.1); } 50%{ text-shadow: 0 0 40px rgba(57,255,20,0.7), 0 0 80px rgba(57,255,20,0.25); } }
+
+.sub { font-size: 11px; letter-spacing: 5px; color: var(--green-dim); margin-top: 6px; }
+
+.divider {
+  width: 340px;
+  height: 1px;
+  margin: 28px 0;
+  background: linear-gradient(to right, transparent, var(--green-dark), var(--green-dim), var(--green-dark), transparent);
+}
+
+.status-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+.status-item { text-align: center; }
+.status-val { font-size: 10px; color: var(--green-dim); letter-spacing: 2px; }
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 5px; animation: blink 1.4s ease-in-out infinite; }
+.status-dot.d2 { animation-delay: 0.4s; }
+.status-dot.d3 { animation-delay: 0.8s; }
+@keyframes blink { 0%,100%{ opacity: 1; } 50%{ opacity: 0.2; } }
+
+.menu-btn {
+  display: block;
+  width: 300px;
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 14px 0;
+  cursor: pointer;
+  letter-spacing: 4px;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.menu-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(57,255,20,0.04) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.4s;
+}
+.menu-btn:hover { border-color: var(--green); background: rgba(57,255,20,0.05); box-shadow: 0 0 12px rgba(57,255,20,0.1); }
+.menu-btn:hover::after { transform: translateX(100%); }
+.menu-btn.primary { border-color: var(--green); }
+
+.footer {
+  position: absolute;
+  bottom: 14px;
+  font-size: 8px;
+  color: var(--green-dark);
+  letter-spacing: 3px;
+  z-index: 2;
+}
+
+.ticker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--green-bg);
+  border-top: 1px solid var(--green-dark);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+.ticker-inner {
+  display: flex;
+  white-space: nowrap;
+  animation: scroll 28s linear infinite;
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  gap: 60px;
+}
+@keyframes scroll { 0%{ transform: translateX(100%); } 100%{ transform: translateX(-100%); } }
+</style>
+</head>
+<body>
+<div id="G">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="content">
+    <div class="logo">BUNKER-7</div>
+    <div class="sub">CRISIS MANAGEMENT SYSTEM</div>
+    <div class="divider"></div>
+    <div class="status-row">
+      <div class="status-item"><div class="status-val"><span class="status-dot"></span>SYSTEMS ONLINE</div></div>
+      <div class="status-item"><div class="status-val"><span class="status-dot d2"></span>5 RESIDENTS READY</div></div>
+      <div class="status-item"><div class="status-val"><span class="status-dot d3"></span>AWAITING OPERATOR</div></div>
+    </div>
+    <button onclick="navTo('game.html')" class="menu-btn primary">INITIALIZE SYSTEM</button>
+    <button onclick="navTo('tutorial.html')" class="menu-btn">OPERATOR BRIEFING</button>
+    <button onclick="navTo('achievements.html')" class="menu-btn">COMMENDATION LOG</button>
+    <button onclick="navTo('settings.html')" class="menu-btn">SYSTEM CONFIGURATION</button>
+    <button onclick="navTo('about.html')" class="menu-btn">SYSTEM RECORDS</button>
+  </div>
+
+  <div class="footer">BUNKER-7 DEEP SHELTER SYSTEM v6.0</div>
+
+  <div class="ticker">
+    <div class="ticker-inner">
+      BUNKER-7 ONLINE &nbsp;|&nbsp; GEOTHERMAL STABLE &nbsp;|&nbsp; EXT TEMP: -14C &nbsp;|&nbsp; NO SURFACE SIGNALS &nbsp;|&nbsp; STRUCTURAL INTEGRITY OK &nbsp;|&nbsp; AIR SCRUBBERS NOMINAL &nbsp;|&nbsp; WATER RECYCLER ACTIVE &nbsp;|&nbsp; REACTOR OUTPUT STEADY &nbsp;|&nbsp; BUNKER-7 ONLINE &nbsp;|&nbsp; GEOTHERMAL STABLE &nbsp;|&nbsp; EXT TEMP: -14C &nbsp;|&nbsp; NO SURFACE SIGNALS
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== BGM (continuous across pages) =====
+const BGM = new Audio('./sound/bgm.mp3');
+BGM.loop = true;
+
+const SFX = {
+  click: new Audio('./sound/click.mp3')
+};
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem('bunker7_settings');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function tryStartBGM() {
+  const s = loadSettings();
+  if (s.bgmEnabled === false) return;
+  BGM.volume = (s.bgmVol ?? 40) / 100;
+  const pos = parseFloat(sessionStorage.getItem('bgmPos') || '0');
+  BGM.currentTime = pos;
+  BGM.play().catch(() => {});
+}
+
+setInterval(() => {
+  if (!BGM.paused) sessionStorage.setItem('bgmPos', BGM.currentTime);
+}, 500);
+
+function playSound(name) {
+  try {
+    const s = loadSettings();
+    if (s.sfxEnabled === false) return;
+    if (SFX[name]) {
+      SFX[name].volume = (s.sfxVol ?? 100) / 100;
+      SFX[name].currentTime = 0;
+      SFX[name].play().catch(e => {});
+    }
+  } catch (e) {}
+}
+
+function navTo(url) {
+  playSound('click');
+  sessionStorage.setItem('bgmPos', BGM.currentTime);
+  setTimeout(() => window.location.href = url, 200); 
+}
+
+// Start BGM on first user interaction
+document.addEventListener('click', () => tryStartBGM(), { once: true });
+window.addEventListener('DOMContentLoaded', tryStartBGM);
+</script>
+
+</body>
+</html>
