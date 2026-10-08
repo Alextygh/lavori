@@ -77,3 +77,26 @@ My greatest creation. Here I publish every written work I ever did, these are bo
 
 ### [π](https://alextygh.github.io/lavori/%CF%80.html)
 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998
+
+## Copyright
+
+### Code license
+Unless stated otherwise below, all the code in this repository (and in the external websites listed above) is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). You are free to share and adapt it, even commercially, as long as you give appropriate credit, provide a link to the license, and indicate if changes were made.
+
+### All rights reserved
+**[Bunker-7](https://alextygh.github.io/lavori/Bunker-7/index.html)** and the **[Whisperheaven Library](https://alextygh.github.io/lavori/Whisperheaven/index.html)** are **not** covered by CC BY 4.0. Everything inside them, including all code, text, stories, characters and other content, is © Ale.10. All rights reserved.
+
+### Third-party properties
+Some pages are fan-made and use names, characters or data that belong to other people. I do not own any of them, I am not affiliated with or endorsed by their owners, and these pages are made for fun and not for profit. The CC BY 4.0 license above covers only my own code, not these third-party materials.
+
+- **Character Compendium**: Marvel characters are © & ™ Marvel / Disney. DC characters are © & ™ DC / Warner Bros. Discovery. Star Wars characters are © & ™ Lucasfilm Ltd. / Disney. Biographies and information are taken from [Marvel Fandom](https://marvel.fandom.com/), [DC Fandom](https://dc.fandom.com/) and [Star Wars Fandom (Wookieepedia)](https://starwars.fandom.com/), whose text is generally available under [CC BY-SA](https://creativecommons.org/licenses/by-sa/3.0/) unless otherwise noted, and belongs to its respective contributors.
+- **CHEGG**: based on the video by [Gerg](https://www.youtube.com/watch?v=ciZCvS2PKNA); the original concept belongs to its creator. Elements such as Mobs and Spawn Eggs come from Minecraft, which is © Mojang AB / Microsoft.
+- **Chessverse**: uses [Stockfish](https://stockfishchess.org/), which is free software under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.html). Game styles are based on games played on [Lichess](https://lichess.org/). The names of the opponents belong to their respective owners.
+- **Duckapedia**: Hitman: World of Assassination and its rubber ducks are © & ™ IO Interactive A/S. Hitman is a trademark of IO Interactive.
+- **Emergency Map**: map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, available under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/).
+- **Google**: Google and the Google logo are trademarks of Google LLC. This page is only a non-functional imitation of the front page.
+- **Louie's Cookbook**: Pikmin, Louie and every Pikmin enemy are © & ™ Nintendo.
+- **Pokémon**: Pokémon and all related names, characters and stats are © & ™ Nintendo, Game Freak and Creatures Inc. / The Pokémon Company.
+- **Skylandex**: Skylanders and all related characters are © & ™ Activision Publishing, Inc.
+
+All other trademarks and copyrights are the property of their respective owners.
