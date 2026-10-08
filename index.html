@@ -226,6 +226,124 @@
 
       .list-item.wip a { opacity: 0.4; }
 
+      /* ── Guide collapsible ── */
+      .guide {
+        margin-bottom: 14px;
+      }
+
+      .guide-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        backdrop-filter: blur(6px);
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.15s, background 0.15s;
+      }
+
+      .guide-toggle:hover {
+        border-color: var(--border-hover);
+        background: rgba(255,255,255,0.6);
+      }
+
+      .guide-toggle .guide-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .guide-chevron {
+        font-size: 11px;
+        color: var(--text-secondary);
+        transition: transform 0.25s ease;
+      }
+
+      .guide.open .guide-chevron {
+        transform: rotate(180deg);
+      }
+
+      .guide-body {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s ease;
+      }
+
+      .guide.open .guide-body {
+        grid-template-rows: 1fr;
+      }
+
+      .guide-body-inner {
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .guide-content {
+        margin-top: 2px;
+        padding: 18px;
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        backdrop-filter: blur(6px);
+        font-size: 13px;
+        line-height: 1.65;
+        color: var(--text-primary);
+        max-height: 60vh;
+        overflow-y: auto;
+        overflow-wrap: anywhere;
+      }
+
+      .guide-content h1, .guide-content h2, .guide-content h3,
+      .guide-content h4, .guide-content h5, .guide-content h6 {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin: 1.2em 0 0.5em;
+        line-height: 1.3;
+      }
+      .guide-content > :first-child { margin-top: 0; }
+      .guide-content h1 { font-size: 18px; }
+      .guide-content h2 { font-size: 15px; }
+      .guide-content h3 { font-size: 14px; }
+      .guide-content p { margin: 0.6em 0; }
+      .guide-content ul, .guide-content ol { margin: 0.6em 0; padding-left: 1.4em; }
+      .guide-content li { margin: 0.2em 0; }
+      .guide-content a { color: var(--accent); }
+      .guide-content img { max-width: 100%; height: auto; border-radius: 6px; }
+      .guide-content hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+      .guide-content blockquote {
+        margin: 0.8em 0;
+        padding-left: 12px;
+        border-left: 2px solid var(--text-secondary);
+        color: var(--text-secondary);
+      }
+      .guide-content code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        background: rgba(255,255,255,0.5);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+      .guide-content pre {
+        margin: 0.8em 0;
+        padding: 12px;
+        background: rgba(255,255,255,0.5);
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      .guide-content pre code { background: none; padding: 0; }
+      .guide-content table { border-collapse: collapse; margin: 0.8em 0; display: block; overflow-x: auto; }
+      .guide-content th, .guide-content td { border: 0.5px solid var(--border-hover); padding: 6px 10px; }
+      .guide-status { color: var(--text-secondary); font-size: 12px; }
+
       footer {
         margin-top: 64px;
         font-size: 11px;
@@ -239,6 +357,8 @@
         .list-item a { padding: 13px 14px; }
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   </head>
   <body>
     <div class="flash" id="flash"></div>
@@ -263,6 +383,20 @@
       ══════════════════════════════════════════ -->
       <div class="section-panel active" id="tab-freetime">
         <div class="section-label">Free Time</div>
+
+        <!-- Guide: loads README.md from the same directory when opened -->
+        <div class="guide" id="guide">
+          <button class="guide-toggle" id="guide-toggle" aria-expanded="false" aria-controls="guide-body">
+            <span class="guide-title"><span class="item-dot"></span><span>Guide</span></span>
+            <span class="guide-chevron">▼</span>
+          </button>
+          <div class="guide-body" id="guide-body">
+            <div class="guide-body-inner">
+              <div class="guide-content" id="guide-content"><span class="guide-status">Loading…</span></div>
+            </div>
+          </div>
+        </div>
+
         <ul class="list">
           <li class="list-item"><a href="https://alextygh.github.io/lavori/EVERYTHING.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">EVERYTHING</span><span class="item-desc">EVERYTHING</span></div></div><span class="item-arrow">→</span></a></li>
           <li class="list-item"><a href="https://alextygh.github.io/lavori/Bunker-7/index.html"><div class="item-left"><span class="item-dot"></span><div class="item-text"><span class="item-name">Bunker-7</span><span class="item-desc">A little game about a Bunker</span></div></div><span class="item-arrow">→</span></a></li>
@@ -340,6 +474,42 @@
           document.getElementById('tab-' + target).classList.add('active');
         });
       });
+
+      // ── Guide collapsible (loads README.md) ────────────────────────
+      (function () {
+        const guide = document.getElementById('guide');
+        const toggle = document.getElementById('guide-toggle');
+        const content = document.getElementById('guide-content');
+        let loaded = false;
+
+        async function loadGuide() {
+          try {
+            const res = await fetch('README.md');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const md = await res.text();
+            if (window.marked) {
+              const html = window.marked.parse(md);
+              content.innerHTML = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+              content.querySelectorAll('a').forEach(a => {
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+              });
+            } else {
+              content.textContent = md;
+              content.style.whiteSpace = 'pre-wrap';
+            }
+            loaded = true;
+          } catch (err) {
+            content.innerHTML = '<span class="guide-status">Could not load the guide.</span>';
+          }
+        }
+
+        toggle.addEventListener('click', () => {
+          const open = guide.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', open);
+          if (open && !loaded) loadGuide();
+        });
+      })();
     </script>
   </body>
 </html>
