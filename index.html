@@ -356,6 +356,18 @@
         body { padding: 48px 16px 80px; }
         .list-item a { padding: 13px 14px; }
       }
+
+      /* ── Idle Pong overlay ── */
+      #idle-pong {
+        position: fixed; inset: 0;
+        width: 100vw; height: 100vh;
+        pointer-events: none;
+        z-index: 900;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        background: transparent;
+      }
+      #idle-pong.visible { opacity: 1; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
@@ -509,6 +521,178 @@
           toggle.setAttribute('aria-expanded', open);
           if (open && !loaded) loadGuide();
         });
+      })();
+    </script>
+
+    <canvas id="idle-pong" aria-hidden="true"></canvas>
+    <script>
+      // ── Idle Pong: starts after 10s without activity ───────────────
+      (function () {
+        const IDLE_MS = 10000;
+        const canvas = document.getElementById('idle-pong');
+        const ctx = canvas.getContext('2d');
+
+        let w = 0, h = 0, dpr = 1;
+        let idleTimer = null, rafId = null, hideTimer = null;
+        let running = false, last = 0, color = '#4b0082';
+
+        const L = { y: 0, target: 0, offset: 0 };
+        const R = { y: 0, target: 0, offset: 0 };
+        const ball = { x: 0, y: 0, vx: 0, vy: 0, speed: 0 };
+        const score = { l: 0, r: 0 };
+        let serveDelay = 0;
+
+        const radius   = () => Math.max(6, Math.min(w, h) * 0.015);
+        const padH     = () => Math.max(50, h * 0.18);
+        const padW     = () => Math.max(8, radius() * 1.6);
+        const margin   = () => Math.max(16, w * 0.03);
+        const baseSpd  = () => Math.max(320, w * 0.5);
+        const maxSpd   = () => baseSpd() * 2.2;
+
+        function resize() {
+          const nw = window.innerWidth, nh = window.innerHeight;
+          const rx = w ? nw / w : 1, ry = h ? nh / h : 1;
+          dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.round(nw * dpr);
+          canvas.height = Math.round(nh * dpr);
+          w = nw; h = nh;
+          // scale game state so the board stays proportional
+          ball.x *= rx; ball.y *= ry;
+          ball.vx *= rx; ball.vy *= ry;
+          L.y *= ry; R.y *= ry; L.target *= ry; R.target *= ry;
+          if (!ball.speed) { L.y = R.y = h / 2; resetBall(); }
+          else ball.speed = Math.hypot(ball.vx, ball.vy);
+        }
+
+        function resetBall() {
+          ball.x = w / 2; ball.y = h / 2;
+          const dir = Math.random() < 0.5 ? -1 : 1;
+          const ang = (Math.random() * 50 - 25) * Math.PI / 180;
+          ball.speed = baseSpd();
+          ball.vx = Math.cos(ang) * ball.speed * dir;
+          ball.vy = Math.sin(ang) * ball.speed;
+          serveDelay = 0.8;
+          L.offset = R.offset = 0;
+        }
+
+        function pickOffset(p) { p.offset = (Math.random() * 2 - 1) * padH() * 0.45; }
+
+        function movePaddle(p, towardBall, dt) {
+          p.target = towardBall ? ball.y + p.offset : h / 2;
+          const maxMove = h * 0.75 * dt;
+          const diff = p.target - p.y;
+          p.y += Math.max(-maxMove, Math.min(maxMove, diff));
+          const half = padH() / 2;
+          p.y = Math.max(half, Math.min(h - half, p.y));
+        }
+
+        function bounce(p, dir) {
+          const rel = Math.max(-1, Math.min(1, (ball.y - p.y) / (padH() / 2)));
+          const ang = rel * 55 * Math.PI / 180;
+          ball.speed = Math.min(ball.speed * 1.06, maxSpd());
+          ball.vx = Math.cos(ang) * ball.speed * dir;
+          ball.vy = Math.sin(ang) * ball.speed;
+          pickOffset(dir === 1 ? R : L);
+        }
+
+        function update(dt) {
+          const r = radius(), m = margin(), pw = padW();
+          const lx = m + pw, rx = w - m - pw;
+
+          movePaddle(L, ball.vx < 0, dt);
+          movePaddle(R, ball.vx > 0, dt);
+
+          if (serveDelay > 0) { serveDelay -= dt; return; }
+
+          ball.x += ball.vx * dt;
+          ball.y += ball.vy * dt;
+
+          if (ball.y < r)     { ball.y = r;     ball.vy =  Math.abs(ball.vy); }
+          if (ball.y > h - r) { ball.y = h - r; ball.vy = -Math.abs(ball.vy); }
+
+          const half = padH() / 2 + r * 0.5;
+          if (ball.vx < 0 && ball.x - r <= lx && ball.x > m && Math.abs(ball.y - L.y) <= half) {
+            ball.x = lx + r; bounce(L, 1);
+          } else if (ball.vx > 0 && ball.x + r >= rx && ball.x < w - m && Math.abs(ball.y - R.y) <= half) {
+            ball.x = rx - r; bounce(R, -1);
+          }
+
+          if (ball.x < -r)     { score.r++; resetBall(); }
+          else if (ball.x > w + r) { score.l++; resetBall(); }
+        }
+
+        function draw() {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, w, h);
+          ctx.fillStyle = color;
+          ctx.strokeStyle = color;
+
+          // center line
+          ctx.globalAlpha = 0.35;
+          ctx.lineWidth = Math.max(2, w * 0.003);
+          ctx.setLineDash([h * 0.025, h * 0.025]);
+          ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
+          ctx.setLineDash([]);
+
+          // score
+          const fs = Math.max(28, Math.min(w, h) * 0.09);
+          ctx.globalAlpha = 0.8;
+          ctx.font = '500 ' + fs + 'px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(score.l, w / 2 - fs * 1.2, Math.max(16, h * 0.03));
+          ctx.fillText(score.r, w / 2 + fs * 1.2, Math.max(16, h * 0.03));
+
+          // paddles + ball
+          ctx.globalAlpha = 0.9;
+          const pw = padW(), ph = padH(), m = margin(), r = radius();
+          ctx.fillRect(m, L.y - ph / 2, pw, ph);
+          ctx.fillRect(w - m - pw, R.y - ph / 2, pw, ph);
+          ctx.beginPath(); ctx.arc(ball.x, ball.y, r, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        function frame(t) {
+          if (!running) return;
+          const dt = Math.min(0.05, (t - last) / 1000);
+          last = t;
+          update(dt);
+          draw();
+          rafId = requestAnimationFrame(frame);
+        }
+
+        function start() {
+          if (running) return;
+          clearTimeout(hideTimer);
+          running = true;
+          color = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#4b0082';
+          resize();
+          canvas.classList.add('visible');
+          last = performance.now();
+          rafId = requestAnimationFrame(frame);
+        }
+
+        function stop() {
+          if (!running) return;
+          running = false;
+          cancelAnimationFrame(rafId);
+          canvas.classList.remove('visible');
+          hideTimer = setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 400);
+        }
+
+        function resetIdle() {
+          stop();
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(start, IDLE_MS);
+        }
+
+        ['mousemove', 'mousedown', 'keydown', 'wheel', 'scroll', 'touchstart', 'touchmove', 'click', 'pointerdown']
+          .forEach(evt => window.addEventListener(evt, resetIdle, { passive: true }));
+
+        window.addEventListener('resize', () => { if (running) { resize(); draw(); } });
+        document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); clearTimeout(idleTimer); } else resetIdle(); });
+
+        resetIdle();
       })();
     </script>
   </body>
