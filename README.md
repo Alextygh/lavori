@@ -65,6 +65,9 @@ You know, huh, Google? The search engine? The one you used to get here (probably
 ### [Louie's Cookbook](https://alextygh.github.io/lavori/Louie's%20Recipes/index.html)
 The cookbook by Louie from the Pikmin saga. Here Louie gives you a recipe for every Pikmin enemy, from Pikim 1 to 4 and "Hey! Pikmin". Funny thing.
 
+### [Lucky Sim](https://alextygh.github.io/lavori/gambling/index.html)
+A simulator made only for entrainment that simulates real-life gambling games. There are games such as Poker, Blackjack, Roulette, Horse-racing and much more! This is only a simulation and does not use any real money, it does show how gambling can make you lose so much. Please do not gamble. 
+
 ### [Pokémon](https://pkm-stats-game.netlify.app/)
 **--External Website--**
 Here you can play "Higher or Lower" with Pokémon stats. There are two modes, various languages you can pick from. It also supports local web saving, and you can optionally create an account. It gets updated every time a new Pokemon is released.
