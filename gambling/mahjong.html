@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mahjong | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d; --tile:#fbf6e6; --tile-edge:#3f8f63;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b; --tile:#f1ead3; --tile-edge:#2f7a52;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:16px 12px;color:#fff}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;font-size:14px;margin:0 4px 12px}
+.hand{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;min-height:70px;align-items:flex-end}
+.gap{width:14px}
+.grp{display:flex;gap:2px;margin:0 6px}
+.tile{position:relative;width:clamp(36px,9.5vw,54px);aspect-ratio:3/4;border-radius:7px;border:1px solid #bdb48f;border-bottom:5px solid var(--tile-edge);background:var(--tile);color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:800;padding:0;cursor:default;line-height:1}
+.tile .n{font-size:clamp(18px,5vw,28px)}
+.tile .n.w3{font-size:clamp(11px,3vw,16px)}
+.tile .l{font-family:system-ui,sans-serif;font-size:clamp(7px,1.8vw,9px);font-weight:700;letter-spacing:.5px;margin-top:3px}
+.tile.s0{color:#b3262e}
+.tile.s1{color:#1f5fbf}
+.tile.s2{color:#1b7a3a}
+.tile.wind{color:#222}
+.tile.dr0{color:#b3262e}
+.tile.dr1{color:#1b7a3a}
+.tile.dr2{color:#555}
+.tile.can{cursor:pointer}
+.tile.can:hover{transform:translateY(-4px)}
+.tile.sel{transform:translateY(-14px);box-shadow:0 0 0 3px var(--gold),0 6px 14px rgba(0,0,0,.4)}
+.tile.drawn{box-shadow:0 0 0 2px #7dffb5}
+.tile.sm{width:30px;border-bottom-width:3px;border-radius:5px}
+.tile.sm .n{font-size:14px}
+.tile.sm .n.w3{font-size:8px}
+.tile.sm .l{font-size:6px;margin-top:1px}
+.info{background:rgba(0,0,0,.28);border-radius:12px;padding:10px 12px;margin:16px 4px 6px;font-size:14px;min-height:3.2em}
+#msg{min-height:3em;margin:10px 0 8px;text-align:center;font-weight:600;font-size:16px}
+.fanlist{text-align:center;font-size:14px;margin-bottom:8px;color:#f5d76e;font-weight:700}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:13px 28px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.disc{display:flex;flex-wrap:wrap;gap:3px;min-height:36px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td:last-child,th:last-child{text-align:right}
+tr.hit td{background:var(--gold);color:#fff;font-weight:800}
+.rules ul{margin:0;padding-left:20px;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:5}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Mahjong</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div class="status"><span id="stDraw">Not started</span><span id="stLeft"></span><span id="stAnte"></span></div>
+    <div class="hand" id="hand" aria-label="Your tiles"></div>
+    <div class="info" id="info">Start a hand to get 13 tiles. Each turn you draw a tile and discard one, and you win by completing four sets and a pair.</div>
+    <div id="msg" aria-live="polite"></div>
+    <div class="fanlist" id="fanlist"></div>
+    <div class="controls">
+      <div class="bets" id="betsRow"><span>Bet:</span><span id="bets"></span></div>
+      <button class="btn" id="start">DEAL</button>
+      <button class="btn" id="disc" hidden>DISCARD</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your discards</h2>
+    <div class="disc" id="discards"><span class="sub">Nothing discarded yet.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Payouts (multiplies your bet, stake included)</h2>
+    <table id="ptable"><thead><tr><th>Winning hand value</th><th>Pays</th></tr></thead><tbody></tbody></table>
+    <p class="sub" style="margin:10px 0 0">If you do not complete a hand before the tiles run out, you lose your bet.</p>
+  </div>
+
+  <div class="card rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>136 tiles: three suits (Characters, Dots, Bamboo) numbered 1 to 9, four winds (E, S, W, N) and three dragons (Red, Green, White), four copies of each.</li>
+      <li>You start with 13 tiles. Each turn you draw one tile, then tap a tile to select it and press Discard (or tap it again). You get <strong>24 draws</strong> in total.</li>
+      <li>You win the moment your 14 tiles make <strong>four sets plus a pair</strong>. A set is three of the same tile, or three in a row in the same suit (no runs of honors). Seven Pairs and Thirteen Orphans also win.</li>
+      <li>Hand value (fan): All Chows 1, All Pungs 3, Mixed One Suit 3, Pure One Suit 6, each Dragon Pung 1, each Wind Pung 1, Big Three Dragons 8, Seven Pairs 4, All Honors 10, Thirteen Orphans 13. The values add up to a maximum of 13, and the best reading of your hand is used.</li>
+      <li>There are no opponents and no calling of discards, so use the hint line: it tells you how many tiles away you are and, once you are one tile from winning, which tiles you are waiting for.</li>
+      <li>The tile order is fixed when you deal. If you leave in the middle of a hand, it waits for you here.</li>
+      <li>While you owe money, the profit from a win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Mahjong core: tiles 0-8 characters, 9-17 dots, 18-26 bamboo, 27-30 winds, 31-33 dragons ---------- */
+function mjSuit(t){return t<9?0:(t<18?1:(t<27?2:3))}
+function mjMelds(c,out,cur){
+  var i=0;
+  while(i<34&&c[i]===0){i++}
+  if(i===34){out.push(cur.slice());return}
+  if(c[i]>=3){c[i]-=3;cur.push([i,i,i]);mjMelds(c,out,cur);cur.pop();c[i]+=3}
+  if(i<27&&i%9<=6&&c[i+1]>0&&c[i+2]>0){
+    c[i]--;c[i+1]--;c[i+2]--;cur.push([i,i+1,i+2]);mjMelds(c,out,cur);cur.pop();c[i]++;c[i+1]++;c[i+2]++;
+  }
+}
+function mjDecomps(c){
+  var res=[];
+  for(var p=0;p<34;p++){
+    if(c[p]>=2){
+      c[p]-=2;
+      var out=[];mjMelds(c,out,[]);
+      c[p]+=2;
+      for(var k=0;k<out.length;k++){res.push({pair:p,melds:out[k]})}
+    }
+  }
+  return res;
+}
+var MJ_ORPHANS=[0,8,9,17,18,26,27,28,29,30,31,32,33];
+function mjSevenPairs(c){
+  var n=0;
+  for(var i=0;i<34;i++){if(c[i]===2){n++}else if(c[i]!==0){return false}}
+  return n===7;
+}
+function mjOrphans(c){
+  var kinds=0,pair=false,i;
+  for(i=0;i<34;i++){
+    if(MJ_ORPHANS.indexOf(i)===-1){if(c[i]>0){return false}}
+  }
+  for(i=0;i<MJ_ORPHANS.length;i++){
+    var n=c[MJ_ORPHANS[i]];
+    if(n>=1){kinds++}
+    if(n===2){pair=true}
+    if(n>2){return false}
+  }
+  return kinds===13&&pair;
+}
+function mjIsWin(c){
+  return mjSevenPairs(c)||mjOrphans(c)||mjDecomps(c).length>0;
+}
+/* Fan value of a winning hand. Returns {fan, names, melds, pair, kind} for the best reading */
+function mjScore(c){
+  var best=null;
+  var suits=[0,0,0],honors=0,i;
+  for(i=0;i<27;i++){if(c[i]>0){suits[mjSuit(i)]++}}
+  for(i=27;i<34;i++){honors+=c[i]}
+  var suitKinds=(suits[0]>0?1:0)+(suits[1]>0?1:0)+(suits[2]>0?1:0);
+  var allHonors=(suitKinds===0);
+  function flushPart(names){
+    var f=0;
+    if(suitKinds===1&&honors===0){f+=6;names.push(['Pure One Suit',6])}
+    else if(suitKinds===1&&honors>0){f+=3;names.push(['Mixed One Suit',3])}
+    return f;
+  }
+  function consider(r){if(!best||r.fan>best.fan){best=r}}
+  if(mjOrphans(c)){consider({fan:13,names:[['Thirteen Orphans',13]],kind:'orphans'})}
+  if(mjSevenPairs(c)){
+    var nm=[['Seven Pairs',4]],f=4;
+    if(allHonors){nm=[['All Honors',10]];f=10}
+    else{f+=flushPart(nm)}
+    consider({fan:Math.min(13,f),names:nm,kind:'pairs'});
+  }
+  var ds=mjDecomps(c);
+  for(var d=0;d<ds.length;d++){
+    var dec=ds[d],names=[],fan=0,pungs=0,chows=0,dragons=0,winds=0;
+    for(var m=0;m<dec.melds.length;m++){
+      var me=dec.melds[m];
+      if(me[0]===me[1]){
+        pungs++;
+        if(me[0]>=31){dragons++}else if(me[0]>=27){winds++}
+      }else{chows++}
+    }
+    if(allHonors){names.push(['All Honors',10]);fan=10}
+    else{
+      fan+=flushPart(names);
+      if(pungs===4){fan+=3;names.push(['All Pungs',3])}
+      if(chows===4&&dec.pair<27){fan+=1;names.push(['All Chows',1])}
+      if(dragons===3){fan+=8;names.push(['Big Three Dragons',8])}
+      else if(dragons>0){fan+=dragons;names.push(['Dragon Pung x'+dragons,dragons])}
+      if(winds>0){fan+=winds;names.push(['Wind Pung x'+winds,winds])}
+    }
+    consider({fan:Math.min(13,fan),names:names,kind:'std',melds:dec.melds,pair:dec.pair});
+  }
+  return best;
+}
+/* Shanten: 0 = ready to win (tenpai), -1 = complete. Each suit is solved on its own and cached. */
+var MJ_SUIT_MEMO={};
+function mjSuitBest(cnt,n,honor){
+  var key=cnt.join('')+(honor?'h':'');
+  var hit=MJ_SUIT_MEMO[key];
+  if(hit){return hit}
+  var res=[];
+  for(var q=0;q<10;q++){res.push(-1)}
+  var c=cnt.slice();
+  function dfs(i,m,t,p){
+    while(i<n&&c[i]===0){i++}
+    if(i>=n){
+      var idx=m*2+p;
+      if(t>res[idx]){res[idx]=t}
+      return;
+    }
+    if(c[i]>=3&&m<4){c[i]-=3;dfs(i,m+1,t,p);c[i]+=3}
+    if(!honor&&i<=6&&c[i+1]>0&&c[i+2]>0&&m<4){c[i]--;c[i+1]--;c[i+2]--;dfs(i,m+1,t,p);c[i]++;c[i+1]++;c[i+2]++}
+    if(!p&&c[i]>=2){c[i]-=2;dfs(i,m,t,1);c[i]+=2}
+    if(c[i]>=2){c[i]-=2;dfs(i,m,t+1,p);c[i]+=2}
+    if(!honor&&i<=7&&c[i+1]>0){c[i]--;c[i+1]--;dfs(i,m,t+1,p);c[i]++;c[i+1]++}
+    if(!honor&&i<=6&&c[i+2]>0){c[i]--;c[i+2]--;dfs(i,m,t+1,p);c[i]++;c[i+2]++}
+    c[i]--;dfs(i,m,t,p);c[i]++;
+  }
+  dfs(0,0,0,0);
+  MJ_SUIT_MEMO[key]=res;
+  return res;
+}
+function mjShantenStd(c){
+  var dp=[];
+  for(var q=0;q<10;q++){dp.push(-1)}
+  dp[0]=0;
+  var groups=[[0,9,false],[9,9,false],[18,9,false],[27,7,true]];
+  for(var g=0;g<4;g++){
+    var start=groups[g][0],n=groups[g][1],honor=groups[g][2];
+    var cnt=[];
+    for(var i=0;i<n;i++){cnt.push(c[start+i])}
+    var r=mjSuitBest(cnt,n,honor);
+    var nd=[];
+    for(var z=0;z<10;z++){nd.push(-1)}
+    for(var a=0;a<10;a++){
+      if(dp[a]<0){continue}
+      var am=a>>1,ap=a&1;
+      for(var b=0;b<10;b++){
+        if(r[b]<0){continue}
+        var bm=b>>1,bp=b&1;
+        var m=am+bm,p=ap+bp;
+        if(m>4||p>1){continue}
+        var idx=m*2+p,t=dp[a]+r[b];
+        if(t>nd[idx]){nd[idx]=t}
+      }
+    }
+    dp=nd;
+  }
+  var best=8;
+  for(var k=0;k<10;k++){
+    if(dp[k]<0){continue}
+    var mm=k>>1,pp=k&1;
+    var tt=Math.min(dp[k],4-mm);
+    var s2=8-2*mm-tt-pp;
+    if(s2<best){best=s2}
+  }
+  return best;
+}
+function mjShanten(c){
+  var s=mjShantenStd(c);
+  var pairs=0,kinds=0,i;
+  for(i=0;i<34;i++){if(c[i]>=2){pairs++}if(c[i]>0){kinds++}}
+  var chi=6-pairs+Math.max(0,7-kinds);
+  if(chi<s){s=chi}
+  var ok=0,hasPair=false;
+  for(i=0;i<MJ_ORPHANS.length;i++){
+    var n=c[MJ_ORPHANS[i]];
+    if(n>0){ok++}
+    if(n>=2){hasPair=true}
+  }
+  var kok=13-ok-(hasPair?1:0);
+  if(kok<s){s=kok}
+  return s;
+}
+
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',GAME_KEY='luckysim_mahjong';
+  var START=50,BROKE=5,DRAWS=24;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_jackpot','luckysim_yahtzee','luckysim_mahjong'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var WINDS=['E','S','W','N'],DRAG=['RED','GRN','WHT'],SUITN=['CHAR','DOT','BAM'];
+  var TILE_NAMES=[];
+  (function(){
+    var sn=['Character','Dot','Bamboo'],i;
+    for(i=0;i<27;i++){TILE_NAMES.push((i%9+1)+' '+sn[Math.floor(i/9)])}
+    var w=['East','South','West','North'],d=['Red Dragon','Green Dragon','White Dragon'];
+    for(i=0;i<4;i++){TILE_NAMES.push(w[i])}
+    for(i=0;i<3;i++){TILE_NAMES.push(d[i])}
+  })();
+
+  function multFor(fan){
+    if(fan<=0){return 1.8}
+    if(fan===1){return 2.2}
+    if(fan===2){return 3}
+    if(fan===3){return 4}
+    if(fan===4){return 6}
+    if(fan===5){return 8}
+    if(fan===6){return 12}
+    if(fan<=9){return 16}
+    if(fan<=12){return 40}
+    return 100;
+  }
+  var PAYROWS=[
+    {label:'Plain win (no extra value)',f:0},{label:'1 fan',f:1},{label:'2 fan',f:2},{label:'3 fan',f:3},
+    {label:'4 fan',f:4},{label:'5 fan',f:5},{label:'6 fan',f:6},{label:'7 to 9 fan',f:7},
+    {label:'10 to 12 fan',f:10},{label:'13 fan (limit hand)',f:13}
+  ];
+
+  var $=function(id){return document.getElementById(id)};
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,phase='idle'; /* idle | playing | ended */
+  var S=null,sel=null,result=null;
+
+  var balEl=$('bal'),debtEl=$('debt'),msgEl=$('msg'),handEl=$('hand'),toastEl=$('toast'),infoEl=$('info');
+  var startBtn=$('start'),discBtn=$('disc'),betsEl=$('bets'),betsRow=$('betsRow'),discEl=$('discards'),fanEl=$('fanlist');
+  var picks=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function newWall(){
+    var w=[];
+    for(var t=0;t<34;t++){for(var k=0;k<4;k++){w.push(t)}}
+    for(var j=w.length-1;j>0;j--){
+      var r=randInt(j+1),x=w[j];w[j]=w[r];w[r]=x;
+    }
+    return w;
+  }
+  function cnt(arr){var c=[];for(var i=0;i<34;i++){c.push(0)}arr.forEach(function(t){c[t]++});return c}
+  function sortTiles(a){a.sort(function(x,y){return x-y});return a}
+
+  /* ---------- Tiles ---------- */
+  function tileEl(t,opts){
+    opts=opts||{};
+    var b=document.createElement('button');
+    var n,l,cls;
+    if(t<27){n=String(t%9+1);l=SUITN[Math.floor(t/9)];cls='s'+Math.floor(t/9)}
+    else if(t<31){n=WINDS[t-27];l='WIND';cls='wind'}
+    else{n=DRAG[t-31];l='DRAGON';cls='dr'+(t-31)}
+    b.className='tile '+cls+(opts.sm?' sm':'');
+    b.innerHTML='<span class="n'+(t>=31?' w3':'')+'">'+n+'</span><span class="l">'+l+'</span>';
+    b.setAttribute('aria-label',TILE_NAMES[t]);
+    return b;
+  }
+
+  /* ---------- Bet buttons and pay table ---------- */
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Bet '+v+' chips');
+    b.addEventListener('click',function(){
+      if(phase==='playing'){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      render();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+  (function(){
+    var tb=document.querySelector('#ptable tbody');
+    PAYROWS.forEach(function(r,i){
+      var tr=document.createElement('tr');tr.setAttribute('data-i',i);
+      tr.innerHTML='<td>'+r.label+'</td><td>x'+multFor(r.f)+'</td>';
+      tb.appendChild(tr);
+    });
+  })();
+
+  /* ---------- Saved hand ---------- */
+  function saveGame(){try{localStorage.setItem(GAME_KEY,JSON.stringify(S))}catch(e){}}
+  function clearGame(){try{localStorage.removeItem(GAME_KEY)}catch(e){}}
+  function loadGame(){
+    try{
+      var raw=localStorage.getItem(GAME_KEY);
+      if(!raw){return false}
+      var g=JSON.parse(raw);
+      if(!g||[5,10,25,50].indexOf(g.bet)===-1||!g.wall||g.wall.length!==136||!g.hand||g.hand.length!==13||typeof g.drawn!=='number'||!g.discards||!(g.drawsLeft>=0&&g.drawsLeft<=DRAWS)||!(g.pos>=14&&g.pos<=136)){clearGame();return false}
+      S=g;bet=g.bet;
+      return true;
+    }catch(e){return false}
+  }
+
+  /* ---------- Hints ---------- */
+  function afterDiscardCounts(kind,i){
+    var all=S.hand.slice();all.push(S.drawn);
+    var tile=(kind==='drawn')?S.drawn:S.hand[i];
+    var c=cnt(all);c[tile]--;
+    return {c:c,tile:tile};
+  }
+  function bestShanten(){
+    var all=S.hand.slice();all.push(S.drawn);
+    var c=cnt(all),best=99;
+    for(var t=0;t<34;t++){
+      if(c[t]===0){continue}
+      c[t]--;
+      var s=mjShanten(c);
+      if(s<best){best=s}
+      c[t]++;
+    }
+    return best;
+  }
+  function describe(s){
+    if(s<=0){return 'ready to win with one more tile'}
+    return s+' tile'+(s===1?'':'s')+' away from being ready to win';
+  }
+  function updateInfo(){
+    if(phase!=='playing'){return}
+    if(sel===null){
+      var b=bestShanten();
+      infoEl.textContent='Your best discard leaves you '+describe(b)+'. Tap a tile to see what discarding it does.';
+      return;
+    }
+    var r=afterDiscardCounts(sel.kind,sel.i);
+    var s=mjShanten(r.c);
+    var txt='Discard '+TILE_NAMES[r.tile]+': you would be '+describe(s)+'.';
+    if(s===0){
+      var waits=[];
+      for(var t=0;t<34;t++){
+        if(r.c[t]>=4){continue}
+        var unseen=4-r.c[t]-(r.tile===t?1:0);
+        S.discards.forEach(function(d){if(d===t){unseen--}});
+        r.c[t]++;
+        if(mjIsWin(r.c)){waits.push(TILE_NAMES[t]+' ('+Math.max(0,unseen)+' left)')}
+        r.c[t]--;
+      }
+      txt+=' Waiting for: '+waits.join(', ')+'.';
+    }
+    infoEl.textContent=txt;
+  }
+
+  /* ---------- Render ---------- */
+  function render(){
+    setBal();
+    var playing=(phase==='playing');
+    startBtn.hidden=playing;
+    startBtn.textContent=(phase==='ended')?'NEW HAND':'DEAL';
+    startBtn.disabled=(chips<bet);
+    discBtn.hidden=!playing;
+    discBtn.disabled=(sel===null);
+    betsRow.hidden=playing;
+    picks.forEach(function(p){p.disabled=playing});
+
+    handEl.innerHTML='';
+    if(S&&(playing||phase==='ended')){
+      var hand=S.hand;
+      if(phase==='ended'&&result&&result.win&&result.sc&&result.sc.kind==='std'){
+        result.sc.melds.forEach(function(m){
+          var g=document.createElement('div');g.className='grp';
+          m.forEach(function(t){g.appendChild(tileEl(t))});
+          handEl.appendChild(g);
+        });
+        var pg=document.createElement('div');pg.className='grp';
+        pg.appendChild(tileEl(result.sc.pair));pg.appendChild(tileEl(result.sc.pair));
+        handEl.appendChild(pg);
+      }else{
+        hand.forEach(function(t,i){
+          var el=tileEl(t);
+          if(playing){
+            el.classList.add('can');
+            if(sel&&sel.kind==='hand'&&sel.i===i){el.classList.add('sel')}
+            el.addEventListener('click',function(){pick('hand',i)});
+          }
+          handEl.appendChild(el);
+        });
+        if(S.drawn>=0&&phase!=='idle'){
+          var gp=document.createElement('div');gp.className='gap';handEl.appendChild(gp);
+          var d=tileEl(S.drawn);
+          d.classList.add('drawn');
+          if(playing){
+            d.classList.add('can');
+            if(sel&&sel.kind==='drawn'){d.classList.add('sel')}
+            d.addEventListener('click',function(){pick('drawn',0)});
+          }
+          handEl.appendChild(d);
+        }
+      }
+      var drawsMade=DRAWS-S.drawsLeft;
+      $('stDraw').textContent='Draw '+drawsMade+' of '+DRAWS;
+      $('stLeft').textContent=(playing?S.drawsLeft+' draw'+(S.drawsLeft===1?'':'s')+' left':'');
+      $('stAnte').textContent='Bet: '+S.bet;
+    }else{
+      $('stDraw').textContent='Not started';$('stLeft').textContent='';$('stAnte').textContent='Bet: '+bet;
+    }
+
+    discEl.innerHTML='';
+    if(S&&S.discards.length){
+      S.discards.forEach(function(t){discEl.appendChild(tileEl(t,{sm:true}))});
+    }else{
+      discEl.innerHTML='<span class="sub">Nothing discarded yet.</span>';
+    }
+
+    var rows=document.querySelectorAll('#ptable tbody tr');
+    var hitIdx=-1;
+    if(phase==='ended'&&result&&result.win){
+      var f=result.sc.fan;
+      hitIdx=(f<=6)?f:(f<=9?7:(f<=12?8:9));
+    }
+    for(var r=0;r<rows.length;r++){rows[r].classList.toggle('hit',r===hitIdx)}
+    updateInfo();
+  }
+
+  function pick(kind,i){
+    if(phase!=='playing'){return}
+    if(sel&&sel.kind===kind&&sel.i===i){discardSelected();return}
+    sel={kind:kind,i:i};
+    render();
+  }
+
+  /* ---------- Game flow ---------- */
+  function drawNext(){
+    S.drawn=S.wall[S.pos];S.pos++;S.drawsLeft--;
+    sel=null;
+    var all=S.hand.slice();all.push(S.drawn);
+    var c=cnt(all);
+    if(mjIsWin(c)){finish(true);return}
+    if(S.drawsLeft===0){finish(false);return}
+    saveGame();
+    msgEl.textContent='You drew '+TILE_NAMES[S.drawn]+'. Select a tile to discard.';
+    render();
+  }
+
+  startBtn.addEventListener('click',function(){
+    if(phase==='playing'){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller one.';
+      return;
+    }
+    chips-=bet;setNum(CHIPS_KEY,chips);
+    var wall=newWall();
+    S={bet:bet,wall:wall,pos:13,hand:sortTiles(wall.slice(0,13)),drawn:-1,discards:[],drawsLeft:DRAWS};
+    result=null;fanEl.textContent='';
+    phase='playing';
+    drawNext();
+  });
+
+  function discardSelected(){
+    if(phase!=='playing'||sel===null){return}
+    var tile;
+    if(sel.kind==='drawn'){
+      tile=S.drawn;
+    }else{
+      tile=S.hand[sel.i];
+      var all=S.hand.slice();
+      all.splice(sel.i,1);
+      all.push(S.drawn);
+      S.hand=sortTiles(all);
+    }
+    S.discards.push(tile);
+    S.drawn=-1;
+    drawNext();
+  }
+  discBtn.addEventListener('click',discardSelected);
+
+  function finish(win){
+    var all=S.hand.slice();
+    if(S.drawn>=0){all.push(S.drawn)}
+    var sc=null,ret=0;
+    if(win){
+      sc=mjScore(cnt(all));
+      ret=Math.floor(S.bet*multFor(sc.fan)+1e-9);
+    }
+    var profit=ret-S.bet,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    chips=chips+ret-toBank;
+    setNum(CHIPS_KEY,chips);
+    clearGame();
+    result={win:win,sc:sc,ret:ret};
+    sortTiles(all);
+    phase='ended';
+    sel=null;
+    var line;
+    if(win){
+      line='MAHJONG! '+sc.fan+' fan, pays x'+multFor(sc.fan)+'. Profit: +'+profit+' chips.';
+      if(toBank>0){line+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+      var parts=sc.names.map(function(n){return n[0]+' ('+n[1]+')'});
+      fanEl.textContent=parts.length?parts.join('  |  '):'Plain hand, no extra value';
+      infoEl.textContent='You completed your hand.';
+    }else{
+      line='The tiles ran out and your hand was never completed. You lost '+S.bet+' chips.';
+      fanEl.textContent='';
+      infoEl.textContent='Better luck next hand.';
+    }
+    if(chips<BROKE){line+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+    msgEl.textContent=line;
+    if(!win||sc.kind!=='std'){S.hand=all;S.drawn=-1}
+    render();
+  }
+
+  function refresh(){chips=getNum(CHIPS_KEY,START);render()}
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase!=='playing'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase!=='playing'){refresh()}});
+
+  /* Resume an unfinished hand */
+  if(loadGame()){
+    phase='playing';
+    msgEl.textContent='Welcome back. Your hand was waiting. Select a tile to discard.';
+  }else{
+    msgEl.textContent='Pick your bet and press Deal.';
+  }
+  render();
+})();
+</script>
+</body>
+</html>
