@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bingo | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --navy:#1b2a5c; --ball:#fffdf6; --hit:#f5d76e; --hit-t:#2a2208; --win:#1f8a5c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --navy:#141f45; --ball:#f4efe2; --hit:#e6b422; --hit-t:#1a1404; --win:#2fbf8a;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.stage{background:var(--navy);color:#fff;border:4px solid var(--gold);border-radius:18px;text-align:center;padding:14px 10px}
+.stage small{display:block;letter-spacing:2px;font-size:12px;opacity:.85}
+.current{width:96px;height:96px;margin:10px auto;border-radius:50%;background:var(--ball);color:#1a1a1a;border:5px solid var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900}
+.current .l{font-size:16px;color:var(--red);line-height:1}
+.current .n{font-size:38px;line-height:1.05;font-family:Georgia,serif}
+.current.empty{opacity:.4;background:transparent;color:#fff;border-style:dashed;border-color:#fff}
+.current.empty .n{font-size:34px}
+.current.pop{animation:pop .3s ease both}
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+.counter{font-size:14px;opacity:.9}
+.history{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:10px;min-height:26px}
+.history span{min-width:26px;height:26px;padding:0 4px;border-radius:13px;background:var(--ball);color:#1a1a1a;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.history span.last{background:var(--hit);color:var(--hit-t)}
+#msg{min-height:3.4em;margin:12px 0 4px;text-align:center;font-weight:600;font-size:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.sub{font-size:13px;color:var(--muted);margin:0 0 8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.btn{padding:10px 16px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.alt{background:var(--panel);color:var(--text);border:2px solid var(--gold)}
+.btn.big{padding:14px 26px;font-size:18px;font-weight:800}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.stepper{display:flex;align-items:center;gap:8px;font-weight:700}
+.stepper button{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);background:var(--panel);color:var(--text);font-size:20px;font-weight:800;cursor:pointer;line-height:1;padding:0}
+.stepper button:disabled{opacity:.4;cursor:not-allowed}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px}
+.bcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px}
+.bcard.won{border-color:var(--win);box-shadow:0 0 0 2px var(--win)}
+.bgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.bh{background:var(--navy);color:#fff;font-weight:900;text-align:center;border-radius:6px;padding:5px 0;font-family:Georgia,serif}
+.cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--line);background:var(--ball);color:#1a1a1a;font-weight:800;font-size:16px;transition:background .15s}
+.cell.free{font-size:11px;background:var(--gold);color:#fff;border-color:var(--gold)}
+.cell.hit{background:var(--hit);color:var(--hit-t);border-color:var(--gold)}
+.cell.line{background:var(--win);color:#fff;border-color:#7dffb5}
+.cinfo{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:var(--muted);font-weight:600;min-height:20px}
+.cinfo .prize{color:var(--accent);font-weight:800;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td:last-child,th:last-child{text-align:right}
+.rules ul{margin:0;padding-left:20px;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Bingo</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="stage">
+    <small>BALL CALLER</small>
+    <div class="current empty" id="current"><span class="n">?</span></div>
+    <div class="counter" id="counter">35 balls will be called</div>
+    <div class="history" id="history" aria-live="polite"></div>
+  </div>
+
+  <div id="msg">Choose how many cards to play. Each card costs 5 chips and 35 balls are called.</div>
+
+  <div class="card">
+    <h2>Your cards</h2>
+    <div class="row" style="margin-top:0;justify-content:space-between">
+      <div class="stepper">
+        <span>Cards:</span>
+        <button id="minus" aria-label="Fewer cards">−</button>
+        <span id="nCards">2</span>
+        <button id="plus" aria-label="More cards">+</button>
+      </div>
+      <button class="btn alt" id="shuffle">New cards</button>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn alt" id="skip" hidden>Skip to the end</button>
+      <button class="btn big" id="play">PLAY</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Prizes and odds</h2>
+    <p class="sub">Prizes are paid per card, for the number of lines it completes after all 35 balls. A line is a row, a column or either diagonal (12 in total).</p>
+    <table id="ptable"><thead><tr><th>Completed lines</th><th>Odds per card</th><th>Prize</th></tr></thead><tbody></tbody></table>
+    <p class="sub" style="margin-top:10px" id="rtp"></p>
+  </div>
+
+  <div class="card rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>This is 75-ball bingo. Each card is a 5×5 grid with columns B (1-15), I (16-30), N (31-45), G (46-60) and O (61-75). The centre square is free.</li>
+      <li>All 35 balls are drawn the moment you press Play, then called one at a time. Matching numbers on your cards light up.</li>
+      <li>One card can complete several lines at once, and you are paid for the total. A card with a single line gets 10 chips, so it just doubles your stake.</li>
+      <li>Odds and prizes come from a simulation of millions of cards, so they are close but not exact. Over time you get back about 89% of what you spend, which is how real games stay profitable for the house.</li>
+      <li>While you owe money, the profit from any win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5,PRICE=5,MAXC=4,CALLS=35,STEP_MS=380;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_jackpot'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  function fmt(n){return n.toLocaleString('en-US')}
+
+  /* Prize table. Odds come from a simulation of 400,000 cards with 35 balls called. */
+  var TIERS=[
+    {lines:1,prize:10,odds:4.4,label:'1 line'},
+    {lines:2,prize:25,odds:26,label:'2 lines'},
+    {lines:3,prize:100,odds:200,label:'3 lines'},
+    {lines:4,prize:500,odds:1860,label:'4 lines'},
+    {lines:5,prize:5000,odds:19000,label:'5 lines'},
+    {lines:6,prize:25000,odds:133000,label:'6 or more lines'}
+  ];
+  var RTP=0.89;
+  function prizeFor(k){
+    if(k<1){return 0}
+    return TIERS[Math.min(k,6)-1].prize;
+  }
+
+  var LINES=[];
+  (function(){
+    var r,c,l;
+    for(r=0;r<5;r++){l=[];for(c=0;c<5;c++){l.push(r*5+c)}LINES.push(l)}
+    for(c=0;c<5;c++){l=[];for(r=0;r<5;r++){l.push(r*5+c)}LINES.push(l)}
+    l=[];for(r=0;r<5;r++){l.push(r*5+r)}LINES.push(l);
+    l=[];for(r=0;r<5;r++){l.push(r*5+4-r)}LINES.push(l);
+  })();
+  var LETTERS=['B','I','N','G','O'];
+
+  var chips=getNum(CHIPS_KEY,START);
+  var phase='ready'; /* ready | playing */
+  var nCards=2,cards=[],called=[],timerId=null,pending=null,toastT,needFresh=false;
+
+  var $=function(id){return document.getElementById(id)};
+  var balEl=$('bal'),debtEl=$('debt'),msgEl=$('msg'),cardsEl=$('cards'),curEl=$('current'),histEl=$('history'),counterEl=$('counter');
+  var playBtn=$('play'),skipBtn=$('skip'),plusBtn=$('plus'),minusBtn=$('minus'),shuffleBtn=$('shuffle');
+
+  function toast(m){
+    var t=$('toast');t.textContent=m;t.classList.add('show');
+    clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=fmt(chips);
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+fmt(d)):'';
+  }
+
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function pickFrom(lo,hi,count){
+    var pool=[];for(var i=lo;i<=hi;i++){pool.push(i)}
+    var out=[];
+    for(var k=0;k<count;k++){out.push(pool.splice(randInt(pool.length),1)[0])}
+    return out;
+  }
+  function newCard(){
+    var cells=new Array(25),c,r,col;
+    for(c=0;c<5;c++){
+      col=pickFrom(c*15+1,c*15+15,5);
+      for(r=0;r<5;r++){cells[r*5+c]=col[r]}
+    }
+    cells[12]=0; /* free space */
+    return cells;
+  }
+  function dealCards(){
+    cards=[];
+    for(var i=0;i<nCards;i++){cards.push(newCard())}
+  }
+
+  function completedLines(card,set){
+    var out=[];
+    LINES.forEach(function(l,idx){
+      var ok=l.every(function(i){return card[i]===0||set[card[i]]});
+      if(ok){out.push(idx)}
+    });
+    return out;
+  }
+  function callSet(upTo){
+    var s={};
+    for(var i=0;i<upTo;i++){s[called[i]]=true}
+    return s;
+  }
+
+  /* ---------- Rendering ---------- */
+  function renderCards(upTo,final,results){
+    var set=callSet(upTo);
+    cardsEl.innerHTML='';
+    cards.forEach(function(card,ci){
+      var lineCells={};
+      var done=completedLines(card,set);
+      if(final){done.forEach(function(li){LINES[li].forEach(function(i){lineCells[i]=true})})}
+      var wrap=document.createElement('div');
+      wrap.className='bcard'+((final&&results&&results.prizes[ci]>0)?' won':'');
+      var grid=document.createElement('div');grid.className='bgrid';
+      LETTERS.forEach(function(L){
+        var h=document.createElement('div');h.className='bh';h.textContent=L;grid.appendChild(h);
+      });
+      card.forEach(function(v,i){
+        var d=document.createElement('div');
+        if(v===0){d.className='cell free';d.textContent='FREE'}
+        else{
+          d.className='cell'+(set[v]?(lineCells[i]?' line':' hit'):'');
+          d.textContent=v;
+        }
+        grid.appendChild(d);
+      });
+      wrap.appendChild(grid);
+      var info=document.createElement('div');info.className='cinfo';
+      var left=document.createElement('span');
+      var right=document.createElement('span');right.className='prize';
+      if(final&&results){
+        var k=results.lineCounts[ci];
+        left.textContent=k+(k===1?' line':' lines');
+        right.textContent=results.prizes[ci]>0?('+'+fmt(results.prizes[ci])):'0';
+      }else{
+        left.textContent='Card '+(ci+1);
+      }
+      info.appendChild(left);info.appendChild(right);
+      wrap.appendChild(info);
+      cardsEl.appendChild(wrap);
+    });
+  }
+  function letterFor(n){return LETTERS[Math.floor((n-1)/15)]}
+  function renderCaller(upTo){
+    histEl.innerHTML='';
+    for(var i=0;i<upTo;i++){
+      var s=document.createElement('span');
+      s.textContent=called[i];
+      if(i===upTo-1){s.className='last'}
+      histEl.appendChild(s);
+    }
+    if(upTo===0){
+      curEl.className='current empty';
+      curEl.innerHTML='<span class="n">?</span>';
+      counterEl.textContent=CALLS+' balls will be called';
+    }else{
+      var n=called[upTo-1];
+      curEl.className='current pop';
+      curEl.innerHTML='<span class="l">'+letterFor(n)+'</span><span class="n">'+n+'</span>';
+      counterEl.textContent='Ball '+upTo+' of '+CALLS;
+    }
+  }
+  function renderControls(){
+    var cost=nCards*PRICE;
+    $('nCards').textContent=nCards;
+    playBtn.textContent='PLAY ('+cost+')';
+    playBtn.disabled=(phase!=='ready')||chips<cost;
+    plusBtn.disabled=(phase!=='ready')||nCards>=MAXC;
+    minusBtn.disabled=(phase!=='ready')||nCards<=1;
+    shuffleBtn.disabled=(phase!=='ready');
+    skipBtn.hidden=(phase!=='playing');
+  }
+
+  /* ---------- Controls ---------- */
+  function resetBoard(){
+    called=[];dealCards();needFresh=false;
+    renderCaller(0);renderCards(0,false,null);renderControls();
+  }
+  plusBtn.addEventListener('click',function(){
+    if(phase!=='ready'||nCards>=MAXC){return}
+    nCards++;resetBoard();
+    msgEl.textContent='Choose how many cards to play. Each card costs 5 chips and 35 balls are called.';
+  });
+  minusBtn.addEventListener('click',function(){
+    if(phase!=='ready'||nCards<=1){return}
+    nCards--;resetBoard();
+    msgEl.textContent='Choose how many cards to play. Each card costs 5 chips and 35 balls are called.';
+  });
+  shuffleBtn.addEventListener('click',function(){
+    if(phase!=='ready'){return}
+    resetBoard();
+  });
+
+  /* ---------- Play ---------- */
+  playBtn.addEventListener('click',function(){
+    if(phase!=='ready'){return}
+    var cost=nCards*PRICE;
+    if(chips<cost){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for '+nCards+' cards. Play fewer cards.';
+      return;
+    }
+    if(needFresh){dealCards();needFresh=false}
+    /* decide everything now */
+    called=pickFrom(1,75,CALLS);
+    var set=callSet(CALLS);
+    var prizes=[],lineCounts=[],total=0;
+    cards.forEach(function(card){
+      var k=completedLines(card,set).length;
+      var p=prizeFor(k);
+      lineCounts.push(k);prizes.push(p);total+=p;
+    });
+    var profit=total-cost,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var finalChips=chips-cost+total-toBank;
+    setNum(CHIPS_KEY,finalChips); /* saved now, so leaving mid-game cannot undo the result */
+
+    pending={prizes:prizes,lineCounts:lineCounts,total:total,cost:cost,profit:profit,toBank:toBank,finalChips:finalChips};
+    phase='playing';
+    chips-=cost;setBal();
+    msgEl.textContent='Calling the balls...';
+    var shown=0;
+    renderCaller(0);renderCards(0,false,null);renderControls();
+    timerId=setInterval(function(){
+      shown++;
+      renderCaller(shown);
+      renderCards(shown,false,null);
+      if(shown>=CALLS){finish()}
+    },STEP_MS);
+  });
+
+  skipBtn.addEventListener('click',function(){
+    if(phase!=='playing'){return}
+    renderCaller(CALLS);
+    finish();
+  });
+
+  function finish(){
+    if(timerId){clearInterval(timerId);timerId=null}
+    if(!pending){return}
+    var r=pending;pending=null;
+    chips=r.finalChips;
+    phase='ready';
+    renderCaller(CALLS);
+    renderCards(CALLS,true,r);
+    var winners=r.prizes.filter(function(p){return p>0}).length;
+    var line;
+    if(winners>0){
+      line=winners+' of '+nCards+(nCards===1?' card':' cards')+' won, prizes total '+fmt(r.total)+' chips. ';
+      line+=r.profit>0?('Profit: +'+fmt(r.profit)+' chips.'):(r.profit===0?'You broke even.':('You still lost '+fmt(-r.profit)+' chips overall.'));
+    }else{
+      line='No complete lines. You lost '+fmt(r.cost)+' chips.';
+    }
+    if(r.toBank>0){line+=' '+fmt(r.toBank)+' went straight to the bank to pay your debt, you keep '+fmt(r.profit-r.toBank)+'.'}
+    if(chips<BROKE){line+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+    msgEl.textContent=line;
+    setBal();renderControls();
+    needFresh=true;
+  }
+
+  /* ---------- Prize table ---------- */
+  (function(){
+    var tb=document.querySelector('#ptable tbody');
+    TIERS.forEach(function(t){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+t.label+'</td><td>about 1 in '+fmt(t.odds)+'</td><td>'+fmt(t.prize)+'</td>';
+      tb.appendChild(tr);
+    });
+    $('rtp').textContent='Over time a 5 chip card gives back about '+Math.round(RTP*100)+'% of its price.';
+  })();
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();renderControls();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase!=='playing'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase!=='playing'){refresh()}});
+
+  dealCards();
+  renderCaller(0);renderCards(0,false,null);setBal();renderControls();
+})();
+</script>
+</body>
+</html>

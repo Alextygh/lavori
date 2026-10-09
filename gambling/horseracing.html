@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Horse Racing | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --turf:#2f7d3c; --turf2:#2a7035; --dirt:#8b5e34;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --turf:#245c2d; --turf2:#1f5128;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.trackbox{border:5px solid var(--gold);border-radius:16px;overflow:hidden;background:var(--dirt)}
+.lane{display:flex;align-items:center;height:48px;border-bottom:2px dashed rgba(255,255,255,.35);background:repeating-linear-gradient(90deg,var(--turf),var(--turf) 40px,var(--turf2) 40px,var(--turf2) 80px)}
+.lane:last-child{border-bottom:0}
+.lane.mine{outline:3px solid #fff;outline-offset:-3px}
+.lane.winner{box-shadow:inset 0 0 0 3px var(--gold)}
+.badge{width:38px;height:100%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:16px;flex:none}
+.run{position:relative;flex:1;height:100%;border-right:6px solid;border-image:repeating-linear-gradient(#fff 0 8px,#111 8px 16px) 1}
+.horse{position:absolute;top:6px;left:0;font-size:30px;line-height:1;transform:scaleX(-1);width:34px}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:14px}
+.pickhorse{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--text);font-family:inherit;font-size:15px;cursor:pointer;text-align:left}
+.pickhorse .n{width:28px;height:28px;border-radius:50%;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.pickhorse .nm{flex:1;font-weight:700}
+.pickhorse .od{font-weight:800;color:var(--accent)}
+.pickhorse .fav{font-size:11px;color:var(--gold);font-weight:800;display:block}
+.pickhorse.sel{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold) inset}
+.pickhorse:disabled{cursor:not-allowed;opacity:.8}
+#msg{min-height:3.4em;margin:14px 0 8px;text-align:center;font-weight:600;font-size:16px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:14px 34px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rules{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
+.rules h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.rules ul{margin:0;padding-left:20px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Horse Racing</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="trackbox" id="track" aria-label="Race track"></div>
+
+  <div class="board" id="board"></div>
+
+  <div id="msg" aria-live="polite">Pick a horse to win, choose your bet and start the race.</div>
+
+  <div class="controls">
+    <div class="bets"><span>Bet:</span><span id="bets"></span></div>
+    <button class="btn" id="go">START RACE</button>
+  </div>
+
+  <div class="rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>Six horses run each race. Back one horse to <strong>win</strong>: it has to finish first.</li>
+      <li>Every horse has a hidden strength. Stronger horses win more often and pay less. Longshots pay a lot but rarely win.</li>
+      <li>The multiplier is roughly 90 divided by the horse's win chance, rounded down. That leaves the house about 10%, and payouts are rounded down to whole chips.</li>
+      <li>Payouts include your stake. While you owe money, the profit from a win goes to the bank first.</li>
+      <li>Each race is a fresh field with new odds. The race result is fixed at the start gate, and the run is just the show.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var NAMES=['Thunder Bolt','Lucky Charm','Midnight Run','Golden Ticket','Dusty Boots','Silver Arrow','Red Comet','Night Owl','Pasta Power','Milan Express','Wild Clover','Sir Gallop','Spritz Runner','Blue Lagoon','Storm Chaser','Moon Dancer'];
+  var COLORS=['#c0392b','#2c6fbb','#e0a800','#7d3c98','#17897a','#d35400'];
+  var EDGE=0.90;
+
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,phase='betting',selected=null,field=[];
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var trackEl=document.getElementById('track');
+  var boardEl=document.getElementById('board');
+  var betsEl=document.getElementById('bets');
+  var goBtn=document.getElementById('go');
+  var toastEl=document.getElementById('toast');
+  var picks=[],laneEls=[],horseEls=[],boardBtns=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function setButtons(){
+    var racing=(phase==='racing');
+    goBtn.textContent=(phase==='done')?'NEXT RACE':'START RACE';
+    goBtn.disabled=racing||(phase==='betting'&&chips<bet);
+    picks.forEach(function(p){p.disabled=(phase!=='betting')});
+    boardBtns.forEach(function(b){b.disabled=(phase!=='betting')});
+  }
+
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function payoutFor(h,b){return Math.floor(b*h.m)}
+
+  /* ---------- Bet buttons ---------- */
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Bet '+v+' chips');
+    b.addEventListener('click',function(){
+      if(phase!=='betting'){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      setButtons();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+
+  /* ---------- New field ---------- */
+  function newField(){
+    var pool=NAMES.slice(),names=[];
+    for(var i=0;i<6;i++){names.push(pool.splice(randInt(pool.length),1)[0])}
+    var strengths=[],sum=0;
+    for(var j=0;j<6;j++){var s=1+randInt(10);strengths.push(s);sum+=s}
+    field=[];
+    var best=0;
+    for(var k=0;k<6;k++){
+      var p=strengths[k]/sum;
+      var m=Math.max(1.2,Math.floor((EDGE/p)*10)/10);
+      field.push({n:k+1,name:names[k],s:strengths[k],p:p,m:m});
+      if(m<field[best].m){best=k}
+    }
+    field[best].fav=true;
+    selected=null;
+    phase='betting';
+    renderField();
+    setButtons();
+    msgEl.textContent='Pick a horse to win, choose your bet and start the race.';
+  }
+
+  function renderField(){
+    trackEl.innerHTML='';boardEl.innerHTML='';
+    laneEls=[];horseEls=[];boardBtns=[];
+    field.forEach(function(h,i){
+      var lane=document.createElement('div');lane.className='lane';
+      var badge=document.createElement('div');badge.className='badge';badge.style.background=COLORS[i];badge.textContent=h.n;
+      var run=document.createElement('div');run.className='run';
+      var horse=document.createElement('div');horse.className='horse';horse.textContent='🐎';
+      run.appendChild(horse);lane.appendChild(badge);lane.appendChild(run);
+      trackEl.appendChild(lane);
+      laneEls.push(lane);horseEls.push(horse);
+
+      var b=document.createElement('button');
+      b.className='pickhorse';
+      b.innerHTML='<span class="n" style="background:'+COLORS[i]+'">'+h.n+'</span><span class="nm">'+h.name+(h.fav?'<span class="fav">FAVORITE</span>':'')+'</span><span class="od">x'+h.m.toFixed(1)+'</span>';
+      b.addEventListener('click',function(){selectHorse(i)});
+      boardEl.appendChild(b);
+      boardBtns.push(b);
+    });
+  }
+  function selectHorse(i){
+    if(phase!=='betting'){return}
+    selected=i;
+    boardBtns.forEach(function(b,k){b.classList.toggle('sel',k===i)});
+    laneEls.forEach(function(l,k){l.classList.toggle('mine',k===i)});
+    var h=field[i];
+    msgEl.textContent='You back #'+h.n+' '+h.name+'. A '+bet+' chip bet pays '+payoutFor(h,bet)+' if it wins.';
+  }
+  function placeHorses(positions){
+    horseEls.forEach(function(el,i){
+      var p=positions[i];
+      el.style.left='calc('+(p*100)+'% - '+(p*34)+'px)';
+    });
+  }
+
+  /* ---------- Race ---------- */
+  function drawOrder(){
+    var rest=field.map(function(h,i){return i}),order=[];
+    while(rest.length){
+      var total=0;
+      rest.forEach(function(i){total+=field[i].s});
+      var r=randInt(total*1000)/1000,acc=0,pick=rest[rest.length-1];
+      for(var k=0;k<rest.length;k++){
+        acc+=field[rest[k]].s;
+        if(r<acc){pick=rest[k];break}
+      }
+      order.push(pick);
+      rest.splice(rest.indexOf(pick),1);
+    }
+    return order;
+  }
+  function ordinal(n){return n===1?'1st':(n===2?'2nd':(n===3?'3rd':n+'th'))}
+
+  function startRace(){
+    if(selected===null){msgEl.textContent='Pick a horse first.';return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller one.';
+      return;
+    }
+    var order=drawOrder(); /* order[0] is the winner */
+    var rank=order.indexOf(selected);
+    var won=(rank===0);
+    var ret=won?payoutFor(field[selected],bet):0;
+    var profit=ret-bet,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var finalChips=chips-bet+ret-toBank;
+    setNum(CHIPS_KEY,finalChips); /* saved at the gate, so leaving mid-race cannot undo the result */
+
+    phase='racing';
+    chips-=bet;
+    setBal();setButtons();
+    msgEl.textContent='And they are off!';
+
+    var times=[],wob=[];
+    order.forEach(function(horseIdx,r){
+      times[horseIdx]=6200+r*380+randInt(120);
+      wob[horseIdx]={a:0.05+Math.random()*0.05,f:0.003+Math.random()*0.004,ph:Math.random()*6.28};
+    });
+    var last=[0,0,0,0,0,0],endT=Math.max.apply(null,times);
+    var t0=null;
+    function frame(ts){
+      if(t0===null){t0=ts}
+      var t=ts-t0,pos=[];
+      for(var i=0;i<6;i++){
+        var T=times[i],p;
+        if(t>=T){p=1}
+        else{
+          var x=t/T;
+          p=x+wob[i].a*Math.sin(wob[i].f*t+wob[i].ph)*(1-x);
+          if(p<last[i]){p=last[i]}
+          if(p>1){p=1}
+        }
+        last[i]=p;pos.push(p);
+      }
+      placeHorses(pos);
+      if(t<endT+200){requestAnimationFrame(frame)}
+      else{
+        placeHorses([1,1,1,1,1,1]);
+        done();
+      }
+    }
+    requestAnimationFrame(frame);
+
+    function done(){
+      chips=finalChips;
+      phase='done';
+      laneEls.forEach(function(l,k){l.classList.toggle('winner',k===order[0])});
+      var w=field[order[0]],mine=field[selected];
+      var podium='Winner: #'+w.n+' '+w.name+'. ';
+      if(won){
+        msgEl.textContent=podium+'Your horse won! Profit: +'+profit+' chips.';
+        if(toBank>0){msgEl.textContent+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+      }else{
+        msgEl.textContent=podium+'Your #'+mine.n+' '+mine.name+' finished '+ordinal(rank+1)+'. You lost '+bet+' chips.';
+      }
+      if(chips<BROKE){msgEl.textContent+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      setBal();setButtons();
+    }
+  }
+
+  goBtn.addEventListener('click',function(){
+    if(phase==='betting'){startRace()}
+    else if(phase==='done'){newField()}
+  });
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();setButtons();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase!=='racing'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase!=='racing'){refresh()}});
+
+  newField();
+  placeHorses([0,0,0,0,0,0]);
+  setBal();setButtons();
+})();
+</script>
+</body>
+</html>

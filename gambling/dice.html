@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dice | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d; --zone:#2fbf8a; --lose:#b3262e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b; --zone:#2fbf8a; --lose:#ff6b6b;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:18px 14px;color:#fff}
+.roll{display:flex;align-items:center;justify-content:center;gap:14px}
+.die{font-size:56px;line-height:1}
+#num{font-size:clamp(64px,20vw,110px);font-weight:900;font-family:Georgia,serif;min-width:2.2ch;text-align:center;line-height:1}
+#num.win{color:#7dffb5}
+#num.lose{color:#ff9a9a}
+.bar{position:relative;height:26px;background:var(--lose);border-radius:13px;margin:16px 6px 4px;overflow:hidden;opacity:.95}
+.zone{position:absolute;top:0;bottom:0;background:var(--zone)}
+.marker{position:absolute;top:-2px;bottom:-2px;width:4px;background:#fff;box-shadow:0 0 6px #000;transform:translateX(-2px);display:none}
+.scale{display:flex;justify-content:space-between;font-size:12px;margin:0 6px;opacity:.85}
+.mode{display:flex;gap:10px;justify-content:center;margin:16px 0 6px}
+.mode button{padding:10px 20px;border-radius:10px;border:2px solid var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit;font-size:15px}
+.mode button.sel{background:var(--gold);color:#fff}
+.mode button:disabled,#chance:disabled{opacity:.55;cursor:not-allowed}
+.slider{margin:10px 6px}
+.slider label{display:block;font-weight:700;margin-bottom:6px;text-align:center}
+#chance{width:100%;accent-color:#f5d76e}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}
+.info div{background:rgba(0,0,0,.28);border-radius:10px;padding:8px;text-align:center;font-size:13px}
+.info strong{display:block;font-size:19px}
+#msg{min-height:3.4em;margin:10px 0 8px;text-align:center;font-weight:600;font-size:16px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:14px 40px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hist{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;min-height:30px}
+.hist span{min-width:34px;height:30px;padding:0 6px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.hist .w{background:#1f8a5c}
+.hist .l{background:#a52a33}
+.rules{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
+.rules h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.rules ul{margin:0;padding-left:20px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Dice</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div class="roll"><span class="die" aria-hidden="true">🎲</span><span id="num" aria-live="polite">--</span></div>
+
+    <div class="bar" id="bar"><div class="zone" id="zone"></div><div class="marker" id="marker"></div></div>
+    <div class="scale"><span>1</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+
+    <div class="mode">
+      <button id="under" class="sel">Roll Under</button>
+      <button id="over">Roll Over</button>
+    </div>
+
+    <div class="slider">
+      <label for="chance">Win chance: <span id="chanceTxt">50</span>%</label>
+      <input type="range" id="chance" min="5" max="75" step="1" value="50">
+    </div>
+
+    <div class="info">
+      <div>You win if<strong id="cond">1 to 50</strong></div>
+      <div>Multiplier<strong id="mult">x1.90</strong></div>
+      <div>Payout on a win<strong id="pay">9</strong></div>
+    </div>
+
+    <div id="msg">Choose your bet, your side and your win chance. A lower chance pays more.</div>
+
+    <div class="controls">
+      <div class="bets"><span>Bet:</span><span id="bets"></span></div>
+      <button class="btn" id="go">ROLL</button>
+    </div>
+    <div class="hist" id="hist" aria-label="Previous rolls"></div>
+  </div>
+
+  <div class="rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>The dice roll a whole number from 1 to 100. Every number is equally likely.</li>
+      <li>You pick Under or Over and a win chance from 5% to 75%. The multiplier is 95 divided by your win chance, so the house keeps about 5%, plus payouts are rounded down to whole chips.</li>
+      <li>Payouts include your stake. A win returns your bet and the profit on top.</li>
+      <li>While you owe money, the profit from a win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5,EDGE_BASE=95;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,mode='under',chance=50,rolling=false;
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var numEl=document.getElementById('num');
+  var zoneEl=document.getElementById('zone');
+  var markerEl=document.getElementById('marker');
+  var goBtn=document.getElementById('go');
+  var underBtn=document.getElementById('under');
+  var overBtn=document.getElementById('over');
+  var slider=document.getElementById('chance');
+  var chanceTxt=document.getElementById('chanceTxt');
+  var condEl=document.getElementById('cond');
+  var multEl=document.getElementById('mult');
+  var payEl=document.getElementById('pay');
+  var histEl=document.getElementById('hist');
+  var betsEl=document.getElementById('bets');
+  var picks=[];
+
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function payoutFor(b){return Math.floor(b*EDGE_BASE/chance)}
+  function updateInfo(){
+    chanceTxt.textContent=chance;
+    var lo,hi;
+    if(mode==='under'){lo=1;hi=chance}else{lo=101-chance;hi=100}
+    condEl.textContent=(lo===hi)?String(lo):(lo+' to '+hi);
+    multEl.textContent='x'+(EDGE_BASE/chance).toFixed(2);
+    payEl.textContent=payoutFor(bet)+' (profit +'+(payoutFor(bet)-bet)+')';
+    zoneEl.style.left=((lo-1))+'%';
+    zoneEl.style.width=(hi-lo+1)+'%';
+  }
+  function setButtons(){
+    goBtn.disabled=rolling||chips<bet;
+    picks.forEach(function(p){p.disabled=rolling});
+    underBtn.disabled=rolling;overBtn.disabled=rolling;slider.disabled=rolling;
+  }
+
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Bet '+v+' chips');
+    b.addEventListener('click',function(){
+      if(rolling){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      updateInfo();setButtons();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+  underBtn.addEventListener('click',function(){
+    if(rolling){return}
+    mode='under';underBtn.classList.add('sel');overBtn.classList.remove('sel');updateInfo();
+  });
+  overBtn.addEventListener('click',function(){
+    if(rolling){return}
+    mode='over';overBtn.classList.add('sel');underBtn.classList.remove('sel');updateInfo();
+  });
+  slider.addEventListener('input',function(){
+    chance=parseInt(slider.value,10);updateInfo();
+  });
+
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function pushHist(roll,won){
+    var s=document.createElement('span');
+    s.className=won?'w':'l';
+    s.textContent=roll;
+    histEl.insertBefore(s,histEl.firstChild);
+    while(histEl.children.length>12){histEl.removeChild(histEl.lastChild)}
+  }
+
+  goBtn.addEventListener('click',function(){
+    if(rolling){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller one.';
+      return;
+    }
+    var roll=randInt(100)+1;
+    var won=(mode==='under')?(roll<=chance):(roll>100-chance);
+    var ret=won?payoutFor(bet):0;
+    var profit=ret-bet;
+    var toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var finalChips=chips-bet+ret-toBank;
+    setNum(CHIPS_KEY,finalChips); /* saved now, so leaving mid-roll cannot undo the result */
+
+    rolling=true;
+    chips-=bet;
+    setBal();setButtons();
+    numEl.className='';
+    markerEl.style.display='block';
+    msgEl.textContent='Rolling...';
+
+    var t0=performance.now();
+    var iv=setInterval(function(){
+      var el=performance.now()-t0;
+      if(el>=1200){
+        clearInterval(iv);
+        numEl.textContent=roll;
+        markerEl.style.left=(roll-0.5)+'%';
+        finish();
+      }else{
+        var r=randInt(100)+1;
+        numEl.textContent=r;
+        markerEl.style.left=(r-0.5)+'%';
+      }
+    },60);
+
+    function finish(){
+      chips=finalChips;
+      rolling=false;
+      numEl.className=won?'win':'lose';
+      pushHist(roll,won);
+      if(won){
+        msgEl.textContent='Rolled '+roll+'. You win! Profit: +'+profit+' chips.';
+        if(toBank>0){msgEl.textContent+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+      }else{
+        msgEl.textContent='Rolled '+roll+'. You lost '+bet+' chips.';
+      }
+      if(chips<BROKE){msgEl.textContent+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      setBal();setButtons();
+    }
+  });
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();setButtons();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&!rolling){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&!rolling){refresh()}});
+
+  updateInfo();setBal();setButtons();
+})();
+</script>
+</body>
+</html>

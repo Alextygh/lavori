@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roulette | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --black:#1a1a1a; --green:#0f6b4a; --felt:#14573d;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --felt:#0f3d2b;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:980px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.stage{display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+canvas{max-width:100%;height:auto}
+.side{flex:1;min-width:240px}
+#msg{min-height:3.2em;font-size:16px;font-weight:600}
+.hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.hist span{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.tablewrap{margin-top:16px;overflow-x:auto;background:var(--felt);border-radius:14px;padding:12px;border:4px solid var(--gold)}
+.table{display:grid;grid-template-columns:48px repeat(12,1fr) 48px;gap:3px;min-width:640px}
+.cell{position:relative;border:1px solid rgba(255,255,255,.55);background:transparent;color:#fff;font-weight:700;font-size:15px;min-height:42px;border-radius:5px;cursor:pointer;font-family:inherit;padding:0}
+.cell:hover:not(:disabled),.cell:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.cell:disabled{cursor:not-allowed}
+.cell.r{background:var(--red)}
+.cell.b{background:var(--black)}
+.cell.g{background:var(--green);font-size:18px}
+.cell.o{font-size:13px}
+.chip{position:absolute;right:2px;bottom:2px;min-width:22px;height:22px;padding:0 4px;border-radius:11px;background:#f5d76e;color:#2b2200;border:2px dashed #8a6d00;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.btn{padding:11px 18px;border-radius:10px;border:0;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;background:var(--line);color:var(--text)}
+.btn.spin{background:var(--accent);color:#fff;font-size:17px;padding:12px 28px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.spacer{flex:1}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.note a{color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Roulette</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="stage">
+    <canvas id="wheel" width="320" height="320" aria-label="Roulette wheel"></canvas>
+    <div class="side">
+      <div id="msg" aria-live="polite">You start with 50 chips. Pick a chip, click the table to place bets, then press Spin.</div>
+      <div class="hist" id="hist" aria-label="Previous results"></div>
+      <p class="note" style="text-align:left">European wheel: 37 pockets, one zero. Straight number pays 35 to 1, dozens and columns 2 to 1, other outside bets 1 to 1. Zero loses all outside bets.</p>
+    </div>
+  </div>
+
+  <div class="tablewrap"><div class="table" id="table"></div></div>
+
+  <div class="controls">
+    <div class="chips" id="chips"></div>
+    <div class="spacer"></div>
+    <button class="btn" id="undo">Undo</button>
+    <button class="btn" id="clear">Clear bets</button>
+    <button class="btn" id="rebet">Repeat last</button>
+    <button class="btn spin" id="spin">SPIN</button>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. If you go broke, the only way back is a loan on the main menu, and it comes with debt. While you owe money, any profit from a win goes to the bank first (you always get your stake back).</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips';
+  var DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5;
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function addNum(key,amt){
+    try{localStorage.setItem(key,String(getNum(key,0)+amt))}catch(e){}
+  }
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+  function loadChips(){return getNum(CHIPS_KEY,START)}
+  function saveChips(n){
+    try{localStorage.setItem(CHIPS_KEY,String(n))}catch(e){}
+  }
+
+  var WHEEL=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+  var REDS=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  var TAU=Math.PI*2;
+  var SEG=TAU/WHEEL.length;
+
+  function isRed(n){return REDS.indexOf(n)!==-1}
+  function colorName(n){return n===0?'green':(isRed(n)?'red':'black')}
+  function colorVar(n){return n===0?'#0f6b4a':(isRed(n)?'#b3262e':'#1a1a1a')}
+
+  var chips=loadChips();
+  var bets={};
+  var stack=[];
+  var lastBets=[];
+  var selected=10;
+  var spinning=false;
+  var rot=0;
+  var cells={};
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var histEl=document.getElementById('hist');
+  var toastEl=document.getElementById('toast');
+  var tableEl=document.getElementById('table');
+  var spinBtn=document.getElementById('spin');
+  var undoBtn=document.getElementById('undo');
+  var clearBtn=document.getElementById('clear');
+  var rebetBtn=document.getElementById('rebet');
+  var timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function totalBet(){var s=0;for(var k in bets){s+=bets[k]}return s}
+
+  /* ---------- Table ---------- */
+  function makeCell(key,label,cls,col,row,span){
+    var b=document.createElement('button');
+    b.className='cell '+cls;
+    b.setAttribute('data-key',key);
+    b.style.gridColumn=span?(col+' / span '+span):String(col);
+    b.style.gridRow=String(row);
+    var t=document.createElement('span');t.textContent=label;b.appendChild(t);
+    var c=document.createElement('span');c.className='chip';b.appendChild(c);
+    b.addEventListener('click',function(){place(key)});
+    tableEl.appendChild(b);
+    cells[key]=b;
+  }
+  makeCell('n0','0','g',1,1);
+  tableEl.lastChild.style.gridRow='1 / span 3';
+  for(var r=0;r<3;r++){
+    for(var c=0;c<12;c++){
+      var n=c*3+3-r;
+      makeCell('n'+n,String(n),isRed(n)?'r':'b',c+2,r+1);
+    }
+  }
+  makeCell('c3','2:1','o',14,1);
+  makeCell('c2','2:1','o',14,2);
+  makeCell('c1','2:1','o',14,3);
+  makeCell('d1','1st 12','o',2,4,4);
+  makeCell('d2','2nd 12','o',6,4,4);
+  makeCell('d3','3rd 12','o',10,4,4);
+  makeCell('low','1-18','o',2,5,2);
+  makeCell('even','EVEN','o',4,5,2);
+  makeCell('red','RED','r o',6,5,2);
+  makeCell('black','BLACK','b o',8,5,2);
+  makeCell('odd','ODD','o',10,5,2);
+  makeCell('high','19-36','o',12,5,2);
+
+  function renderBets(){
+    for(var k in cells){
+      var chip=cells[k].querySelector('.chip');
+      if(bets[k]){chip.textContent=bets[k];chip.style.display='flex'}
+      else{chip.style.display='none'}
+    }
+    setButtons();
+  }
+  function setButtons(){
+    var has=stack.length>0;
+    spinBtn.disabled=spinning||!has;
+    undoBtn.disabled=spinning||!has;
+    clearBtn.disabled=spinning||!has;
+    rebetBtn.disabled=spinning||has||lastBets.length===0;
+    for(var k in cells){cells[k].disabled=spinning}
+  }
+
+  /* ---------- Chip picker ---------- */
+  var denoms=[5,10,25,50,100];
+  var chipsEl=document.getElementById('chips');
+  denoms.forEach(function(d){
+    var b=document.createElement('button');
+    b.className='pick'+(d===selected?' sel':'');
+    b.textContent=d;
+    b.setAttribute('aria-label','Chip value '+d);
+    b.addEventListener('click',function(){
+      selected=d;
+      var all=chipsEl.querySelectorAll('.pick');
+      for(var i=0;i<all.length;i++){all[i].classList.remove('sel')}
+      b.classList.add('sel');
+    });
+    chipsEl.appendChild(b);
+  });
+
+  /* ---------- Betting ---------- */
+  function place(key){
+    if(spinning){return}
+    if(chips<selected){
+      toast(chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller chip.');
+      return;
+    }
+    chips-=selected;saveChips(chips);
+    bets[key]=(bets[key]||0)+selected;
+    stack.push({key:key,amt:selected});
+    setBal();renderBets();
+  }
+  undoBtn.addEventListener('click',function(){
+    if(spinning||!stack.length){return}
+    var last=stack.pop();
+    chips+=last.amt;saveChips(chips);
+    bets[last.key]-=last.amt;
+    if(bets[last.key]<=0){delete bets[last.key]}
+    setBal();renderBets();
+  });
+  clearBtn.addEventListener('click',function(){
+    if(spinning||!stack.length){return}
+    chips+=totalBet();saveChips(chips);
+    bets={};stack=[];
+    setBal();renderBets();
+  });
+  rebetBtn.addEventListener('click',function(){
+    if(spinning||!lastBets.length){return}
+    var need=0;lastBets.forEach(function(b){need+=b.amt});
+    if(need>chips){toast('Not enough chips to repeat the last bets.');return}
+    lastBets.forEach(function(b){
+      chips-=b.amt;
+      bets[b.key]=(bets[b.key]||0)+b.amt;
+      stack.push({key:b.key,amt:b.amt});
+    });
+    saveChips(chips);setBal();renderBets();
+  });
+
+  function multiplier(key,n){
+    if(key.charAt(0)==='n'){return parseInt(key.slice(1),10)===n?36:0}
+    if(n===0){return 0}
+    switch(key){
+      case 'red':return isRed(n)?2:0;
+      case 'black':return !isRed(n)?2:0;
+      case 'odd':return n%2===1?2:0;
+      case 'even':return n%2===0?2:0;
+      case 'low':return n<=18?2:0;
+      case 'high':return n>=19?2:0;
+      case 'd1':return n<=12?3:0;
+      case 'd2':return (n>=13&&n<=24)?3:0;
+      case 'd3':return n>=25?3:0;
+      case 'c1':return n%3===1?3:0;
+      case 'c2':return n%3===2?3:0;
+      case 'c3':return n%3===0?3:0;
+    }
+    return 0;
+  }
+
+  function randomPocket(){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%37;
+    }catch(e){return Math.floor(Math.random()*37)}
+  }
+
+  /* ---------- Wheel drawing ---------- */
+  var canvas=document.getElementById('wheel');
+  var ctx=canvas.getContext('2d');
+  var dpr=window.devicePixelRatio||1;
+  canvas.width=320*dpr;canvas.height=320*dpr;
+  canvas.style.width='320px';
+
+  function draw(){
+    var s=320,c=s/2,R=150;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,s,s);
+    ctx.save();
+    ctx.translate(c,c);
+    ctx.fillStyle='#5a3a1a';
+    ctx.beginPath();ctx.arc(0,0,R+8,0,TAU);ctx.fill();
+    ctx.rotate(rot);
+    for(var i=0;i<WHEEL.length;i++){
+      var a0=-Math.PI/2+i*SEG,a1=a0+SEG;
+      ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,a0,a1);ctx.closePath();
+      ctx.fillStyle=colorVar(WHEEL[i]);ctx.fill();
+      ctx.strokeStyle='#d4af37';ctx.lineWidth=1;ctx.stroke();
+      ctx.save();
+      ctx.rotate((i+0.5)*SEG);
+      ctx.translate(0,-R+15);
+      ctx.fillStyle='#fff';ctx.font='bold 11px system-ui,sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(String(WHEEL[i]),0,0);
+      ctx.restore();
+    }
+    ctx.beginPath();ctx.arc(0,0,64,0,TAU);
+    ctx.fillStyle='#2b1d0e';ctx.fill();
+    ctx.strokeStyle='#d4af37';ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();ctx.arc(0,0,10,0,TAU);ctx.fillStyle='#d4af37';ctx.fill();
+    ctx.restore();
+    /* ball and pointer stay fixed at the top */
+    ctx.beginPath();ctx.arc(c,c-R+36,6,0,TAU);
+    ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#888';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(c-9,2);ctx.lineTo(c+9,2);ctx.lineTo(c,20);ctx.closePath();
+    ctx.fillStyle='#d4af37';ctx.fill();
+  }
+  draw();
+
+  /* ---------- Spin ---------- */
+  function pushHistory(n){
+    var s=document.createElement('span');
+    s.textContent=n;s.style.background=colorVar(n);
+    histEl.insertBefore(s,histEl.firstChild);
+    while(histEl.children.length>12){histEl.removeChild(histEl.lastChild)}
+  }
+
+  spinBtn.addEventListener('click',function(){
+    if(spinning){return}
+    var stake=totalBet();
+    if(!stake){msgEl.textContent='Place at least one bet first.';return}
+    lastBets=stack.slice();
+    var n=randomPocket();
+    var win=0;
+    for(var k in bets){win+=bets[k]*multiplier(k,n)}
+    var profit=win-stake;
+    var toBank=0;
+    if(profit>0){
+      /* winnings above the stake go straight to the bank to pay off debt */
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){try{localStorage.setItem(DEBT_KEY,String(debtNow-toBank))}catch(e){}}
+    }
+    var finalChips=chips+win-toBank;
+    if(win-stake>0){addNum(WON_KEY,win-stake)}else if(win-stake<0){addNum(LOST_KEY,stake-win)}
+    saveChips(finalChips); /* result is saved right away, so leaving mid-spin cannot undo it */
+    spinning=true;setButtons();
+    msgEl.textContent='No more bets. The wheel is spinning...';
+
+    var idx=WHEEL.indexOf(n);
+    var desired=-(idx+0.5)*SEG;
+    var delta=((((desired-rot)%TAU)+TAU)%TAU)+TAU*6;
+    var start=rot,dur=5000,t0=null;
+
+    function step(ts){
+      if(t0===null){t0=ts}
+      var p=Math.min(1,(ts-t0)/dur);
+      var e=1-Math.pow(1-p,3);
+      rot=start+delta*e;
+      draw();
+      if(p<1){requestAnimationFrame(step)}
+      else{
+        rot=rot%TAU;draw();
+        spinning=false;
+        chips=finalChips;
+        bets={};stack=[];
+        pushHistory(n);
+        var net=win-stake;
+        var base='The ball landed on '+n+' ('+colorName(n)+'). ';
+        if(win===0){msgEl.textContent=base+'No luck, you lost '+stake+' chips.'}
+        else if(net>0){
+          msgEl.textContent=base+'You win! Profit: +'+net+' chips.';
+          if(toBank>0){msgEl.textContent+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(net-toBank)+'.'}
+        }
+        else if(net===0){msgEl.textContent=base+'You got your stake back, no gain.'}
+        else{msgEl.textContent=base+'You got back '+win+' chips, net '+net+'.'}
+        if(chips<BROKE){msgEl.textContent+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+        setBal();renderBets();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+
+  /* ---------- Misc ---------- */
+  /* Refund unplaced bets if the player leaves the page before spinning */
+  window.addEventListener('pagehide',function(){
+    if(!spinning&&stack.length){saveChips(chips+totalBet())}
+  });
+  window.addEventListener('pageshow',function(e){
+    if(e.persisted){chips=loadChips();bets={};stack=[];setBal();renderBets()}
+  });
+  window.addEventListener('storage',function(e){
+    if(e.key===CHIPS_KEY&&!spinning&&!stack.length){chips=loadChips();setBal()}
+  });
+
+  setBal();renderBets();
+})();
+</script>
+</body>
+</html>

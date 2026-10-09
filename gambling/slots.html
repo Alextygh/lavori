@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slots | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --reel:#fffdf6; --machine:#7a1f2b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --reel:#1d2f26; --machine:#5a1620;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.machine{background:var(--machine);border:5px solid var(--gold);border-radius:22px;padding:20px 16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.reels{display:flex;gap:10px;justify-content:center;background:#000;padding:12px;border-radius:14px;border:3px solid var(--gold)}
+.reel{flex:1;max-width:150px;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:var(--reel);border-radius:10px;font-size:clamp(44px,13vw,80px);border:3px solid transparent;transition:transform .15s}
+.reel.spinning{filter:blur(1.5px);transform:translateY(2px)}
+.reel.win{border-color:var(--gold);box-shadow:0 0 18px var(--gold);animation:pulse .6s ease-in-out 3}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.payline{height:3px;background:var(--red);margin:-5px 10px 0;opacity:.0}
+#msg{min-height:3.4em;margin:14px 0 4px;text-align:center;color:#fff;font-weight:600;font-size:16px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:8px}
+.bets{display:flex;gap:8px;align-items:center;color:#fff;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn.spin{padding:14px 40px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn.spin:disabled{opacity:.45;cursor:not-allowed}
+.paytable{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.paytable h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.pt{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;font-size:14px}
+.pt div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:3px 0}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Slots</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="machine">
+    <div class="reels" aria-label="Slot reels">
+      <div class="reel" id="r0">🍒</div>
+      <div class="reel" id="r1">🍋</div>
+      <div class="reel" id="r2">🔔</div>
+    </div>
+    <div id="msg" aria-live="polite">Pick your bet and pull the lever. Three matching symbols win, and so do two cherries.</div>
+    <div class="controls">
+      <div class="bets"><span>Bet:</span><span id="bets"></span></div>
+      <button class="btn spin" id="spin">SPIN</button>
+    </div>
+  </div>
+
+  <div class="paytable">
+    <h2>Pay table (multiplies your bet, stake included)</h2>
+    <div class="pt" id="pt"></div>
+    <p class="note" style="text-align:left;margin-bottom:0">Every spin is random and independent. The machine is built so that, over many spins, players lose more than they win, just like the real thing. While you owe money, the profit from a win goes to the bank first.</p>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  /* Symbols: w = weight, three = payout multiplier for three of a kind */
+  var SYMS=[
+    {s:'🍒',w:30,three:5},
+    {s:'🍋',w:25,three:8},
+    {s:'🔔',w:18,three:15},
+    {s:'⭐',w:12,three:30},
+    {s:'💎',w:8,three:60},
+    {s:'7️⃣',w:4,three:200}
+  ];
+  var TWO_CHERRY=2;
+  var TOTAL_W=SYMS.reduce(function(a,b){return a+b.w},0);
+
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,spinning=false;
+  var reels=[document.getElementById('r0'),document.getElementById('r1'),document.getElementById('r2')];
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var spinBtn=document.getElementById('spin');
+  var toastEl=document.getElementById('toast');
+  var betsEl=document.getElementById('bets');
+  var picks=[];
+  var timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function showBal(n){
+    balEl.textContent=n.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function setButtons(){
+    spinBtn.disabled=spinning||chips<bet;
+    picks.forEach(function(p){p.disabled=spinning});
+  }
+
+  /* Pay table */
+  var pt=document.getElementById('pt');
+  SYMS.forEach(function(x){
+    var d=document.createElement('div');
+    d.innerHTML='<span>'+x.s+x.s+x.s+'</span><strong>x'+x.three+'</strong>';
+    pt.appendChild(d);
+  });
+  var d2=document.createElement('div');
+  d2.innerHTML='<span>Any 2 🍒</span><strong>x'+TWO_CHERRY+'</strong>';
+  pt.appendChild(d2);
+
+  /* Bet buttons */
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Bet '+v+' chips');
+    b.addEventListener('click',function(){
+      if(spinning){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      setButtons();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function pickIdx(){
+    var r=randInt(TOTAL_W),acc=0;
+    for(var i=0;i<SYMS.length;i++){
+      acc+=SYMS[i].w;
+      if(r<acc){return i}
+    }
+    return 0;
+  }
+  function multiplier(res){
+    if(res[0]===res[1]&&res[1]===res[2]){return SYMS[res[0]].three}
+    var cherries=res.filter(function(x){return x===0}).length;
+    return cherries===2?TWO_CHERRY:0;
+  }
+
+  spinBtn.addEventListener('click',function(){
+    if(spinning){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller one.';
+      return;
+    }
+    var res=[pickIdx(),pickIdx(),pickIdx()];
+    var m=multiplier(res);
+    var win=bet*m;
+    var profit=win-bet;
+    var toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+    }
+    var finalChips=chips-bet+win-toBank;
+    if(profit>0){addNum(WON_KEY,profit)}else{addNum(LOST_KEY,bet)}
+    setNum(CHIPS_KEY,finalChips); /* saved now, so leaving mid-spin cannot undo the result */
+
+    spinning=true;
+    chips-=bet;
+    showBal(chips);
+    setButtons();
+    msgEl.textContent='Spinning...';
+    reels.forEach(function(r){r.classList.remove('win');r.classList.add('spinning')});
+
+    var stopAt=[900,1500,2100];
+    var t0=performance.now();
+    var stopped=[false,false,false];
+    var iv=setInterval(function(){
+      var el=performance.now()-t0;
+      for(var i=0;i<3;i++){
+        if(stopped[i]){continue}
+        if(el>=stopAt[i]){
+          stopped[i]=true;
+          reels[i].textContent=SYMS[res[i]].s;
+          reels[i].classList.remove('spinning');
+        }else{
+          reels[i].textContent=SYMS[randInt(SYMS.length)].s;
+        }
+      }
+      if(stopped[0]&&stopped[1]&&stopped[2]){
+        clearInterval(iv);
+        finish();
+      }
+    },80);
+
+    function finish(){
+      chips=finalChips;
+      spinning=false;
+      if(m>0){
+        var three=(res[0]===res[1]&&res[1]===res[2]);
+        for(var i=0;i<3;i++){
+          if(three||res[i]===0){reels[i].classList.add('win')}
+        }
+        msgEl.textContent='You win! Profit: +'+profit+' chips.';
+        if(toBank>0){msgEl.textContent+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+      }else{
+        msgEl.textContent='No luck, you lost '+bet+' chips.';
+      }
+      if(chips<BROKE){msgEl.textContent+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      showBal(chips);
+      setButtons();
+    }
+  });
+
+  window.addEventListener('pageshow',function(e){
+    if(e.persisted&&!spinning){chips=getNum(CHIPS_KEY,START);showBal(chips);setButtons()}
+  });
+  window.addEventListener('storage',function(e){
+    if(e.key===CHIPS_KEY&&!spinning){chips=getNum(CHIPS_KEY,START);showBal(chips);setButtons()}
+  });
+
+  showBal(chips);setButtons();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lottery | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --navy:#1b2a5c; --ball:#fffdf6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --navy:#141f45; --ball:#f4efe2;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.jackpot{background:var(--navy);color:#fff;border:4px solid var(--gold);border-radius:18px;text-align:center;padding:14px 10px}
+.jackpot small{display:block;letter-spacing:2px;font-size:12px;opacity:.85}
+.jackpot strong{display:block;font-size:clamp(28px,8vw,46px);color:#f5d76e;font-family:Georgia,serif}
+.drawn{display:flex;gap:8px;justify-content:center;margin-top:10px;min-height:52px}
+.ball{width:46px;height:46px;border-radius:50%;background:var(--ball);color:#1a1a1a;border:2px solid #aaa;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;flex:none}
+.ball.pb{background:var(--red);color:#fff;border-color:#fff}
+.ball.empty{opacity:.35;background:transparent;color:#fff;border-style:dashed}
+.ball.pop{animation:pop .4s ease both}
+@keyframes pop{from{transform:scale(.2)}to{transform:scale(1)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.sub{font-size:13px;color:var(--muted);margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:5px}
+.num{height:36px;border-radius:50%;border:2px solid var(--line);background:var(--ball);color:#1a1a1a;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;padding:0}
+.num.sel{background:var(--navy);color:#fff;border-color:var(--gold)}
+.num.pbn{border-color:#d9a0a0}
+.num.pbn.sel{background:var(--red);color:#fff;border-color:#fff}
+.num:disabled{cursor:not-allowed;opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{padding:10px 16px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.alt{background:var(--panel);color:var(--text);border:2px solid var(--gold)}
+.btn.big{padding:14px 26px;font-size:18px;font-weight:800}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.ticket{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0;border-bottom:1px dashed var(--line)}
+.ticket:last-child{border-bottom:0}
+.ticket .tb{width:30px;height:30px;font-size:12px;border-width:2px}
+.ticket .tb.hit{background:#1f8a5c;color:#fff;border-color:#7dffb5}
+.ticket .tb.pb.hit{background:var(--red);border-color:#fff}
+.ticket .tb.pb:not(.hit){background:transparent;color:var(--red);border-color:var(--red)}
+.ticket .sp{flex:1}
+.ticket .prize{font-weight:800;color:var(--accent)}
+.ticket .rm{border:0;background:transparent;color:var(--red);font-size:18px;cursor:pointer;font-weight:900}
+#msg{min-height:3.4em;margin:12px 0 4px;text-align:center;font-weight:600;font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td:last-child,th:last-child{text-align:right}
+.rules ul{margin:0;padding-left:20px;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Lottery</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="jackpot">
+    <small>JACKPOT</small>
+    <strong id="jp">50,000,000</strong>
+    <div class="drawn" id="drawn" aria-live="polite"></div>
+  </div>
+
+  <div id="msg">Pick 5 numbers from 1 to 69 and one Powerball from 1 to 26. Each ticket costs 5 chips.</div>
+
+  <div class="card">
+    <h2>Build a ticket</h2>
+    <p class="sub">White numbers: <span id="wCount">0</span> of 5 chosen</p>
+    <div class="grid" id="wGrid"></div>
+    <p class="sub" style="margin-top:12px">Powerball: <span id="pCount">0</span> of 1 chosen</p>
+    <div class="grid" id="pGrid"></div>
+    <div class="row">
+      <button class="btn" id="addT" disabled>Add ticket</button>
+      <button class="btn alt" id="fillR">Random numbers</button>
+      <button class="btn alt" id="clearB">Clear</button>
+      <button class="btn alt" id="quick5">Quick pick x5</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your tickets (<span id="tCount">0</span> of 10)</h2>
+    <div id="cart"><p class="sub">No tickets yet.</p></div>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <button class="btn alt" id="clearC">Clear tickets</button>
+      <button class="btn alt" id="reuse" hidden>Reuse these tickets</button>
+      <button class="btn big" id="draw" disabled>BUY AND DRAW</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Prizes and odds</h2>
+    <table id="ptable"><thead><tr><th>Match</th><th>Odds per ticket</th><th>Prize</th></tr></thead><tbody></tbody></table>
+    <p class="sub" style="margin-top:10px" id="rtp"></p>
+  </div>
+
+  <div class="card rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>This copies the structure of the real Powerball: 5 white balls from 69 and 1 red Powerball from 26. The odds are the real ones, so the jackpot is almost impossible to win.</li>
+      <li>Prizes are scaled to chips. Your ticket costs 5 chips.</li>
+      <li>Everything is drawn the moment you press Buy and Draw. Each draw, the jackpot grows as if other players were buying tickets. If someone (you) wins it, it resets.</li>
+      <li>Lottery tickets lose money over time, and this one is built to show that. While you owe money, the profit from any win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',JP_KEY='luckysim_jackpot';
+  var START=50,BROKE=5,PRICE=5,MAXT=10,JP_START=50000000;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_jackpot'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  function fmt(n){return n.toLocaleString('en-US')}
+  function pad(n){return n<10?'0'+n:String(n)}
+  function C(n,k){
+    if(k<0||k>n){return 0}
+    var r=1;
+    for(var i=1;i<=k;i++){r=r*(n-k+i)/i}
+    return Math.round(r);
+  }
+
+  /* Prize table: w = white matches, pb = Powerball matched */
+  var TIERS=[
+    {w:5,pb:true,prize:-1,label:'5 + Powerball'},
+    {w:5,pb:false,prize:2500000,label:'5 white'},
+    {w:4,pb:true,prize:125000,label:'4 + Powerball'},
+    {w:4,pb:false,prize:250,label:'4 white'},
+    {w:3,pb:true,prize:250,label:'3 + Powerball'},
+    {w:3,pb:false,prize:17,label:'3 white'},
+    {w:2,pb:true,prize:17,label:'2 + Powerball'},
+    {w:1,pb:true,prize:10,label:'1 + Powerball'},
+    {w:0,pb:true,prize:10,label:'Powerball only'}
+  ];
+  var WHITE_COMBOS=C(69,5);
+  function tierProb(t){
+    var pw=C(5,t.w)*C(64,5-t.w)/WHITE_COMBOS;
+    return pw*(t.pb?(1/26):(25/26));
+  }
+  function prizeFor(w,pb,jackpot){
+    for(var i=0;i<TIERS.length;i++){
+      var t=TIERS[i];
+      if(t.w===w&&t.pb===pb){return t.prize===-1?jackpot:t.prize}
+    }
+    return 0;
+  }
+
+  var chips=getNum(CHIPS_KEY,START);
+  var phase='build'; /* build | drawing | done */
+  var bW=[],bP=null,cart=[],results=null;
+
+  var $=function(id){return document.getElementById(id)};
+  var balEl=$('bal'),debtEl=$('debt'),jpEl=$('jp'),drawnEl=$('drawn'),msgEl=$('msg');
+  var wGrid=$('wGrid'),pGrid=$('pGrid'),cartEl=$('cart'),toastEl=$('toast');
+  var addBtn=$('addT'),drawBtn=$('draw'),reuseBtn=$('reuse');
+  var wBtns=[],pBtns=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=fmt(chips);
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+fmt(d)):'';
+  }
+  function showJackpot(){jpEl.textContent=fmt(getNum(JP_KEY,JP_START))}
+
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function randomTicket(){
+    var pool=[];for(var i=1;i<=69;i++){pool.push(i)}
+    var w=[];
+    for(var k=0;k<5;k++){w.push(pool.splice(randInt(pool.length),1)[0])}
+    w.sort(function(a,b){return a-b});
+    return {w:w,pb:randInt(26)+1};
+  }
+
+  /* ---------- Number grids ---------- */
+  function resetIfDone(){
+    if(phase==='done'){
+      cart=[];results=null;phase='build';
+      renderCart();renderDrawn(null,0);
+      msgEl.textContent='Pick 5 numbers from 1 to 69 and one Powerball from 1 to 26. Each ticket costs 5 chips.';
+    }
+  }
+  for(var n=1;n<=69;n++){
+    (function(v){
+      var b=document.createElement('button');
+      b.className='num';b.textContent=v;
+      b.setAttribute('aria-label','White number '+v);
+      b.addEventListener('click',function(){
+        if(phase==='drawing'){return}
+        resetIfDone();
+        var i=bW.indexOf(v);
+        if(i!==-1){bW.splice(i,1)}
+        else if(bW.length<5){bW.push(v)}
+        else{toast('You already picked 5 numbers.')}
+        renderBuilder();
+      });
+      wGrid.appendChild(b);wBtns[v]=b;
+    })(n);
+  }
+  for(var q=1;q<=26;q++){
+    (function(v){
+      var b=document.createElement('button');
+      b.className='num pbn';b.textContent=v;
+      b.setAttribute('aria-label','Powerball '+v);
+      b.addEventListener('click',function(){
+        if(phase==='drawing'){return}
+        resetIfDone();
+        bP=(bP===v)?null:v;
+        renderBuilder();
+      });
+      pGrid.appendChild(b);pBtns[v]=b;
+    })(q);
+  }
+  function renderBuilder(){
+    for(var v=1;v<=69;v++){wBtns[v].classList.toggle('sel',bW.indexOf(v)!==-1)}
+    for(var p=1;p<=26;p++){pBtns[p].classList.toggle('sel',bP===p)}
+    $('wCount').textContent=bW.length;
+    $('pCount').textContent=bP===null?0:1;
+    addBtn.disabled=!(bW.length===5&&bP!==null)||phase==='drawing';
+  }
+
+  /* ---------- Cart ---------- */
+  function ballEl(v,cls){
+    var s=document.createElement('span');
+    s.className='ball tb '+(cls||'');
+    s.textContent=pad(v);
+    return s;
+  }
+  function renderCart(){
+    $('tCount').textContent=cart.length;
+    cartEl.innerHTML='';
+    if(!cart.length){
+      cartEl.innerHTML='<p class="sub">No tickets yet.</p>';
+    }
+    cart.forEach(function(t,i){
+      var row=document.createElement('div');row.className='ticket';
+      t.w.forEach(function(v){
+        var hit=results&&results.whites.indexOf(v)!==-1;
+        row.appendChild(ballEl(v,hit?'hit':''));
+      });
+      var hitP=results&&results.pb===t.pb;
+      row.appendChild(ballEl(t.pb,'pb'+(hitP?' hit':'')));
+      var sp=document.createElement('span');sp.className='sp';row.appendChild(sp);
+      if(results){
+        var pz=document.createElement('span');pz.className='prize';
+        var amt=results.prizes[i];
+        pz.textContent=amt>0?('+'+fmt(amt)):'0';
+        row.appendChild(pz);
+      }else if(phase==='build'){
+        var rm=document.createElement('button');rm.className='rm';rm.textContent='×';
+        rm.setAttribute('aria-label','Remove ticket');
+        rm.addEventListener('click',function(){cart.splice(i,1);renderCart()});
+        row.appendChild(rm);
+      }
+      cartEl.appendChild(row);
+    });
+    var cost=cart.length*PRICE;
+    drawBtn.textContent=cart.length?('BUY '+cart.length+' AND DRAW ('+cost+')'):'BUY AND DRAW';
+    drawBtn.disabled=(phase!=='build')||cart.length===0||chips<cost;
+    reuseBtn.hidden=!(phase==='done'&&cart.length>0);
+    $('clearC').disabled=(phase==='drawing');
+  }
+
+  function addTicket(t){
+    if(cart.length>=MAXT){toast('Maximum '+MAXT+' tickets per draw.');return false}
+    cart.push(t);return true;
+  }
+  addBtn.addEventListener('click',function(){
+    if(phase==='drawing'){return}
+    resetIfDone();
+    if(bW.length!==5||bP===null){return}
+    var w=bW.slice().sort(function(a,b){return a-b});
+    if(addTicket({w:w,pb:bP})){bW=[];bP=null;renderBuilder();renderCart()}
+  });
+  $('fillR').addEventListener('click',function(){
+    if(phase==='drawing'){return}
+    resetIfDone();
+    var t=randomTicket();bW=t.w.slice();bP=t.pb;renderBuilder();
+  });
+  $('clearB').addEventListener('click',function(){
+    if(phase==='drawing'){return}
+    bW=[];bP=null;renderBuilder();
+  });
+  $('quick5').addEventListener('click',function(){
+    if(phase==='drawing'){return}
+    resetIfDone();
+    for(var i=0;i<5;i++){if(!addTicket(randomTicket())){break}}
+    renderCart();
+  });
+  $('clearC').addEventListener('click',function(){
+    if(phase==='drawing'){return}
+    cart=[];results=null;phase='build';
+    renderCart();renderDrawn(null,0);renderBuilder();
+  });
+  reuseBtn.addEventListener('click',function(){
+    if(phase!=='done'){return}
+    results=null;phase='build';
+    renderCart();renderDrawn(null,0);
+    msgEl.textContent='Same numbers, new draw. Press Buy and Draw.';
+  });
+
+  /* ---------- Drawn balls ---------- */
+  function renderDrawn(draw,count){
+    drawnEl.innerHTML='';
+    for(var i=0;i<6;i++){
+      var s=document.createElement('span');
+      var isPB=(i===5);
+      if(draw&&i<count){
+        s.className='ball'+(isPB?' pb':'')+' pop';
+        s.textContent=pad(isPB?draw.pb:draw.whites[i]);
+      }else{
+        s.className='ball empty'+(isPB?' pb':'');
+        s.textContent='?';
+      }
+      drawnEl.appendChild(s);
+    }
+  }
+
+  /* ---------- Draw ---------- */
+  drawBtn.addEventListener('click',function(){
+    if(phase!=='build'||!cart.length){return}
+    var cost=cart.length*PRICE;
+    if(chips<cost){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for '+cart.length+' tickets. Remove some tickets.';
+      return;
+    }
+    /* the draw */
+    var pool=[];for(var i=1;i<=69;i++){pool.push(i)}
+    var whites=[];
+    for(var k=0;k<5;k++){whites.push(pool.splice(randInt(pool.length),1)[0])}
+    whites.sort(function(a,b){return a-b});
+    var pb=randInt(26)+1;
+    var jackpot=getNum(JP_KEY,JP_START);
+    var prizes=[],total=0,jackpotHit=false,winners=0;
+    cart.forEach(function(t){
+      var mw=t.w.filter(function(v){return whites.indexOf(v)!==-1}).length;
+      var mp=(t.pb===pb);
+      var amt=prizeFor(mw,mp,jackpot);
+      if(mw===5&&mp){jackpotHit=true}
+      if(amt>0){winners++}
+      prizes.push(amt);total+=amt;
+    });
+    var profit=total-cost,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var finalChips=chips-cost+total-toBank;
+    setNum(CHIPS_KEY,finalChips); /* saved now, so leaving mid-draw cannot undo the result */
+    if(jackpotHit){setNum(JP_KEY,JP_START)}
+    else{setNum(JP_KEY,jackpot+250000+randInt(750000))}
+
+    var draw={whites:whites,pb:pb};
+    phase='drawing';
+    chips-=cost;setBal();
+    drawBtn.disabled=true;addBtn.disabled=true;
+    msgEl.textContent='Drawing the balls...';
+    renderDrawn(draw,0);
+    var shown=0;
+    var iv=setInterval(function(){
+      shown++;
+      renderDrawn(draw,shown);
+      if(shown>=6){clearInterval(iv);setTimeout(finish,600)}
+    },800);
+
+    function finish(){
+      results={whites:whites,pb:pb,prizes:prizes};
+      chips=finalChips;
+      phase='done';
+      var line='Drawn: '+whites.map(pad).join(' ')+' and Powerball '+pad(pb)+'. ';
+      if(jackpotHit){
+        line+='JACKPOT! You won '+fmt(jackpot)+' chips. This is a one in 292 million event.';
+      }else if(winners>0){
+        line+=winners+' of '+cart.length+' tickets won, prizes total '+fmt(total)+' chips. ';
+        line+=profit>0?('Profit: +'+fmt(profit)+' chips.'):('You still lost '+fmt(-profit)+' chips overall.');
+      }else{
+        line+='No winning tickets. You lost '+fmt(cost)+' chips.';
+      }
+      if(toBank>0){line+=' '+fmt(toBank)+' went straight to the bank to pay your debt, you keep '+fmt(profit-toBank)+'.'}
+      if(chips<BROKE){line+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      msgEl.textContent=line;
+      setBal();showJackpot();renderCart();renderBuilder();
+    }
+  });
+
+  /* ---------- Prize table ---------- */
+  (function(){
+    var tb=document.querySelector('#ptable tbody');
+    var ev=0;
+    TIERS.forEach(function(t){
+      var p=tierProb(t);
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+t.label+'</td><td>1 in '+fmt(Math.round(1/p))+'</td><td>'+(t.prize===-1?'JACKPOT':fmt(t.prize))+'</td>';
+      tb.appendChild(tr);
+      if(t.prize!==-1){ev+=p*t.prize}
+    });
+    $('rtp').textContent='Not counting the jackpot, a 5 chip ticket gives back about '+(ev/PRICE*100).toFixed(0)+'% of its price over time. The jackpot adds only a few percent more.';
+  })();
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();showJackpot();renderCart();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase!=='drawing'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase!=='drawing'){refresh()}});
+
+  renderDrawn(null,0);renderBuilder();renderCart();setBal();showJackpot();
+})();
+</script>
+</body>
+</html>
