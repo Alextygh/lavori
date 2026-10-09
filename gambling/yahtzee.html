@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yahtzee | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d; --die:#fffdf6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b; --die:#f4efe2;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:16px 12px;color:#fff}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;font-size:14px;margin:0 4px 10px}
+.dice{display:flex;gap:8px;justify-content:center}
+.die{position:relative;flex:1;max-width:96px;aspect-ratio:1;border-radius:14px;border:3px solid #999;background:var(--die);color:#1a1a1a;font-size:clamp(46px,13vw,76px);line-height:1;display:flex;align-items:center;justify-content:center;cursor:default;padding:0;font-family:inherit}
+.die.can{cursor:pointer}
+.die.can:hover{transform:translateY(-3px)}
+.die.held{border-color:var(--gold);box-shadow:0 0 14px var(--gold);transform:translateY(-10px)}
+.die .tag{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-family:system-ui,sans-serif;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1px;visibility:hidden}
+.die.held .tag{visibility:visible}
+.die.rolling{animation:shake .12s linear infinite}
+@keyframes shake{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+#msg{min-height:3.4em;margin:30px 0 8px;text-align:center;font-weight:600;font-size:16px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:14px 30px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:19px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.sheet{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+@media (max-width:620px){.sheet{grid-template-columns:1fr}}
+.sec h3{margin:6px 0;font-size:13px;color:var(--muted);letter-spacing:1px}
+.rowc{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);margin-bottom:5px;background:transparent;color:var(--text);font-family:inherit;font-size:15px;width:100%;text-align:left}
+.rowc .nm{font-weight:600}
+.rowc .sc{font-weight:800;min-width:2.4em;text-align:right}
+.rowc.filled{background:rgba(127,127,127,.12)}
+.rowc.filled .sc{color:var(--accent)}
+.rowc.opt{cursor:pointer}
+.rowc.opt .sc{color:var(--muted)}
+.rowc.opt:hover{border-color:var(--gold)}
+.rowc.pickable{border-color:var(--gold)}
+.rowc.pickable .sc{color:var(--text)}
+.rowc.locked{opacity:.4;cursor:not-allowed}
+.tot{display:flex;justify-content:space-between;padding:4px 10px;font-size:14px;color:var(--muted)}
+.tot strong{color:var(--text)}
+.tot.big{font-size:18px;color:var(--text);border-top:2px solid var(--line);margin-top:6px;padding-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td:last-child,th:last-child{text-align:right}
+tr.hit td{background:var(--gold);color:#fff;font-weight:800}
+.rules ul{margin:0;padding-left:20px;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:5}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Yahtzee</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div class="status"><span id="stTurn">Not started</span><span id="stRolls"></span><span id="stAnte"></span></div>
+    <div class="dice" id="dice" aria-label="Your dice"></div>
+    <div id="msg" aria-live="polite">Pick your entry fee and start a game. You play all 13 rounds, and your final score decides the payout.</div>
+    <div class="controls">
+      <div class="bets" id="betsRow"><span>Entry:</span><span id="bets"></span></div>
+      <button class="btn" id="start">START GAME</button>
+      <button class="btn" id="roll" hidden>ROLL</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Score sheet</h2>
+    <div class="sheet">
+      <div class="sec">
+        <h3>UPPER SECTION</h3>
+        <div id="upper"></div>
+        <div class="tot"><span>Upper subtotal</span><strong id="upSub">0 / 63</strong></div>
+        <div class="tot"><span>Bonus (63 or more: +35)</span><strong id="upBonus">0</strong></div>
+      </div>
+      <div class="sec">
+        <h3>LOWER SECTION</h3>
+        <div id="lower"></div>
+        <div class="tot"><span>Extra Yahtzee bonus (+100 each)</span><strong id="yBonus">0</strong></div>
+        <div class="tot big"><span>Total</span><strong id="total">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Payouts (multiplies your entry fee)</h2>
+    <table id="ptable"><thead><tr><th>Final score</th><th>Pays</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>Standard solo Yahtzee. Each round you roll five dice up to three times, tap dice to hold them, then score the roll in one empty box.</li>
+      <li>Upper section: boxes for ones to sixes score the sum of that number. Reach 63 points there for a 35 point bonus.</li>
+      <li>Lower section: 3 of a kind and 4 of a kind score all five dice, Full House 25, Small Straight 30, Large Straight 40, Yahtzee 50, Chance scores all five dice.</li>
+      <li>A second Yahtzee after scoring 50 in the Yahtzee box adds 100, and then follows the usual joker rule: use the matching upper box if it is empty, otherwise the roll counts as a Full House, Small Straight or Large Straight in full.</li>
+      <li>The entry fee is taken when you start. If you leave in the middle of a game, it waits for you here, dice and score sheet included.</li>
+      <li>While you owe money, the profit from a win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',GAME_KEY='luckysim_yahtzee';
+  var START=50,BROKE=5;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_jackpot','luckysim_yahtzee'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var CATS=[
+    {id:'ones',name:'Ones',face:1},{id:'twos',name:'Twos',face:2},{id:'threes',name:'Threes',face:3},
+    {id:'fours',name:'Fours',face:4},{id:'fives',name:'Fives',face:5},{id:'sixes',name:'Sixes',face:6},
+    {id:'k3',name:'3 of a Kind'},{id:'k4',name:'4 of a Kind'},{id:'fh',name:'Full House (25)'},
+    {id:'ss',name:'Small Straight (30)'},{id:'ls',name:'Large Straight (40)'},{id:'yz',name:'YAHTZEE (50)'},{id:'chance',name:'Chance'}
+  ];
+  var FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  /* Payout tiers: score at or above min pays m times the entry fee (stake included) */
+  var TIERS=[
+    {min:0,m:0,label:'Under 200'},
+    {min:200,m:0.5,label:'200 to 259'},
+    {min:260,m:1,label:'260 to 299'},
+    {min:300,m:2,label:'300 to 349'},
+    {min:350,m:4,label:'350 to 399'},
+    {min:400,m:12,label:'400 or more'}
+  ];
+  function tierFor(score){
+    var t=TIERS[0];
+    for(var i=0;i<TIERS.length;i++){if(score>=TIERS[i].min){t=TIERS[i]}}
+    return t;
+  }
+
+  var $=function(id){return document.getElementById(id)};
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,phase='idle'; /* idle | playing | ended */
+  var S=null,busy=false;
+
+  var balEl=$('bal'),debtEl=$('debt'),msgEl=$('msg'),diceEl=$('dice'),toastEl=$('toast');
+  var startBtn=$('start'),rollBtn=$('roll'),betsEl=$('bets'),betsRow=$('betsRow');
+  var picks=[],dieBtns=[],rowEls={},timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function randDie(){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return (a[0]%6)+1;
+    }catch(e){return Math.floor(Math.random()*6)+1}
+  }
+
+  /* ---------- Scoring ---------- */
+  function counts(d){var c=[0,0,0,0,0,0,0];d.forEach(function(x){c[x]++});return c}
+  function sumOf(d){return d.reduce(function(a,b){return a+b},0)}
+  function isYahtzee(d){return d.length===5&&d.every(function(x){return x===d[0]})}
+  function scoreCat(cat,d,joker){
+    var c=counts(d),s=sumOf(d),mx=Math.max.apply(null,c.slice(1));
+    if(cat.face){return c[cat.face]*cat.face}
+    var h=function(n){return c[n]>0};
+    switch(cat.id){
+      case 'k3':return mx>=3?s:0;
+      case 'k4':return mx>=4?s:0;
+      case 'fh':return (joker||(c.indexOf(3)!==-1&&c.indexOf(2)!==-1))?25:0;
+      case 'ss':
+        if(joker){return 30}
+        return ((h(1)&&h(2)&&h(3)&&h(4))||(h(2)&&h(3)&&h(4)&&h(5))||(h(3)&&h(4)&&h(5)&&h(6)))?30:0;
+      case 'ls':
+        if(joker){return 40}
+        return ((h(1)&&h(2)&&h(3)&&h(4)&&h(5))||(h(2)&&h(3)&&h(4)&&h(5)&&h(6)))?40:0;
+      case 'yz':return mx===5?50:0;
+      case 'chance':return s;
+    }
+    return 0;
+  }
+  /* Which boxes may be used for the current dice, and is the joker rule in force */
+  function options(){
+    var joker=isYahtzee(S.dice)&&S.card.yz!==null;
+    var allowed={};
+    CATS.forEach(function(c){if(S.card[c.id]===null){allowed[c.id]=true}});
+    if(joker){
+      var upper=CATS[S.dice[0]-1];
+      if(S.card[upper.id]===null){
+        allowed={};allowed[upper.id]=true;
+      }
+    }
+    return {allowed:allowed,joker:joker};
+  }
+  function totals(){
+    var up=0,low=0;
+    CATS.forEach(function(c,i){
+      var v=S.card[c.id];
+      if(v===null){return}
+      if(i<6){up+=v}else{low+=v}
+    });
+    var bonus=up>=63?35:0;
+    return {up:up,bonus:bonus,low:low,yb:S.bonus,total:up+bonus+low+S.bonus};
+  }
+
+  /* ---------- Saved game ---------- */
+  function saveGame(){
+    try{localStorage.setItem(GAME_KEY,JSON.stringify(S))}catch(e){}
+  }
+  function clearGame(){try{localStorage.removeItem(GAME_KEY)}catch(e){}}
+  function loadGame(){
+    try{
+      var raw=localStorage.getItem(GAME_KEY);
+      if(!raw){return false}
+      var g=JSON.parse(raw);
+      if(!g||[5,10,25,50].indexOf(g.bet)===-1||!(g.turn>=1&&g.turn<=13)||!g.card||!g.dice||!g.held||g.held.length!==5||!(g.rollsLeft>=0&&g.rollsLeft<=3)||!(g.dice.length===0||g.dice.length===5)){clearGame();return false}
+      for(var i=0;i<CATS.length;i++){if(g.card[CATS[i].id]===undefined){clearGame();return false}}
+      S=g;bet=g.bet;
+      return true;
+    }catch(e){return false}
+  }
+  function newGame(){
+    var card={};CATS.forEach(function(c){card[c.id]=null});
+    S={bet:bet,turn:1,rollsLeft:3,dice:[],held:[false,false,false,false,false],card:card,bonus:0};
+  }
+
+  /* ---------- Build UI ---------- */
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Entry fee '+v+' chips');
+    b.addEventListener('click',function(){
+      if(phase==='playing'){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      render();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+  for(var i=0;i<5;i++){
+    (function(idx){
+      var d=document.createElement('button');
+      d.className='die';
+      d.innerHTML='<span class="f">?</span><span class="tag">HELD</span>';
+      d.setAttribute('aria-label','Die '+(idx+1));
+      d.addEventListener('click',function(){
+        if(phase!=='playing'||busy||!S.dice.length||S.rollsLeft===0){return}
+        S.held[idx]=!S.held[idx];
+        saveGame();render();
+      });
+      diceEl.appendChild(d);dieBtns.push(d);
+    })(i);
+  }
+  CATS.forEach(function(c,i){
+    var b=document.createElement('button');
+    b.className='rowc';
+    b.innerHTML='<span class="nm">'+c.name+'</span><span class="sc">-</span>';
+    b.addEventListener('click',function(){chooseCat(c)});
+    $(i<6?'upper':'lower').appendChild(b);
+    rowEls[c.id]=b;
+  });
+  (function(){
+    var tb=document.querySelector('#ptable tbody');
+    TIERS.forEach(function(t,i){
+      var tr=document.createElement('tr');tr.setAttribute('data-i',i);
+      tr.innerHTML='<td>'+t.label+'</td><td>'+(t.m===0?'Nothing':'x'+t.m)+'</td>';
+      tb.appendChild(tr);
+    });
+  })();
+
+  /* ---------- Render ---------- */
+  function render(){
+    setBal();
+    var playing=(phase==='playing');
+    startBtn.hidden=playing;
+    startBtn.textContent=(phase==='ended')?'NEW GAME':'START GAME';
+    startBtn.disabled=(chips<bet);
+    rollBtn.hidden=!playing;
+    betsRow.hidden=playing;
+    picks.forEach(function(p){p.disabled=playing});
+
+    if(playing){
+      $('stTurn').textContent='Round '+S.turn+' of 13';
+      $('stRolls').textContent=S.rollsLeft+' roll'+(S.rollsLeft===1?'':'s')+' left';
+      $('stAnte').textContent='Entry: '+S.bet;
+      rollBtn.disabled=busy||S.rollsLeft===0;
+      rollBtn.textContent=S.rollsLeft===0?'PICK A BOX':(S.dice.length?'ROLL AGAIN':'ROLL')+' ('+S.rollsLeft+')';
+    }else if(phase==='ended'){
+      $('stRolls').textContent='';
+    }else{
+      $('stTurn').textContent='Not started';$('stRolls').textContent='';$('stAnte').textContent='Entry: '+bet;
+    }
+
+    for(var i=0;i<5;i++){
+      var d=dieBtns[i];
+      var has=playing&&S&&S.dice.length===5;
+      d.querySelector('.f').textContent=has?FACES[S.dice[i]-1]:'?';
+      d.classList.toggle('held',!!(has&&S.held[i]));
+      d.classList.toggle('can',!!(has&&!busy&&S.rollsLeft>0));
+    }
+
+    var opts=(playing&&S.dice.length===5)?options():null;
+    CATS.forEach(function(c){
+      var el=rowEls[c.id],sc=el.querySelector('.sc');
+      var v=S?S.card[c.id]:null;
+      el.className='rowc';
+      if(v!==null&&S){
+        el.classList.add('filled');sc.textContent=v;
+      }else if(opts){
+        var ok=!!opts.allowed[c.id];
+        sc.textContent=scoreCat(c,S.dice,opts.joker&&!c.face);
+        el.classList.add(ok?'opt':'locked');
+        if(ok){el.classList.add('pickable')}
+      }else{
+        sc.textContent='-';
+      }
+    });
+
+    var t=S?totals():{up:0,bonus:0,low:0,yb:0,total:0};
+    $('upSub').textContent=t.up+' / 63';
+    $('upBonus').textContent=t.bonus;
+    $('yBonus').textContent=t.yb;
+    $('total').textContent=t.total;
+
+    var rows=document.querySelectorAll('#ptable tbody tr');
+    var cur=(S&&(phase==='playing'||phase==='ended'))?tierFor(t.total):null;
+    for(var r=0;r<rows.length;r++){
+      rows[r].classList.toggle('hit',!!cur&&TIERS[r]===cur);
+    }
+  }
+
+  /* ---------- Actions ---------- */
+  startBtn.addEventListener('click',function(){
+    if(phase==='playing'){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that entry fee. Try a smaller one.';
+      return;
+    }
+    chips-=bet;setNum(CHIPS_KEY,chips);
+    newGame();
+    phase='playing';
+    saveGame();
+    msgEl.textContent='Round 1. Press Roll.';
+    render();
+  });
+
+  rollBtn.addEventListener('click',function(){
+    if(phase!=='playing'||busy||S.rollsLeft===0){return}
+    var fresh=!S.dice.length;
+    var nd=[];
+    for(var i=0;i<5;i++){nd.push((fresh||!S.held[i])?randDie():S.dice[i])}
+    var old=S.dice.slice();
+    S.dice=nd;S.rollsLeft--;
+    saveGame(); /* saved before the animation, so refreshing cannot reroll */
+    busy=true;
+    var t0=performance.now();
+    var iv=setInterval(function(){
+      var el=performance.now()-t0;
+      if(el>=550){
+        clearInterval(iv);
+        busy=false;
+        dieBtns.forEach(function(d){d.classList.remove('rolling')});
+        msgEl.textContent=S.rollsLeft>0?'Tap dice to hold them and roll again, or choose a box.':'No rolls left. Choose a box to score.';
+        render();
+      }else{
+        for(var k=0;k<5;k++){
+          if(fresh||!S.held[k]){
+            dieBtns[k].classList.add('rolling');
+            dieBtns[k].querySelector('.f').textContent=FACES[randDie()-1];
+          }
+        }
+      }
+    },70);
+    rollBtn.disabled=true;
+    msgEl.textContent='Rolling...';
+  });
+
+  function chooseCat(c){
+    if(phase!=='playing'||busy||!S||S.dice.length!==5){return}
+    if(S.card[c.id]!==null){return}
+    var o=options();
+    if(!o.allowed[c.id]){
+      toast('Joker rule: you must use the matching upper box first.');
+      return;
+    }
+    if(isYahtzee(S.dice)&&S.card.yz===50){S.bonus+=100}
+    S.card[c.id]=scoreCat(c,S.dice,o.joker&&!c.face);
+    S.turn++;S.rollsLeft=3;S.dice=[];S.held=[false,false,false,false,false];
+    if(S.turn>13){finishGame();return}
+    saveGame();
+    msgEl.textContent='Round '+S.turn+'. Press Roll.';
+    render();
+  }
+
+  function finishGame(){
+    var t=totals();
+    var tier=tierFor(t.total);
+    var ret=Math.floor(S.bet*tier.m);
+    var profit=ret-S.bet,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    chips=chips+ret-toBank;
+    setNum(CHIPS_KEY,chips);
+    clearGame();
+    phase='ended';
+    $('stTurn').textContent='Game over';
+    var line='Final score: '+t.total+'. ';
+    if(profit>0){
+      line+='You win! Profit: +'+profit+' chips.';
+      if(toBank>0){line+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+    }else if(profit===0){
+      line+='You get your entry fee back, no gain.';
+    }else if(ret>0){
+      line+='You get '+ret+' chips back, net '+profit+'.';
+    }else{
+      line+='Not enough points. You lost '+S.bet+' chips.';
+    }
+    if(chips<BROKE){line+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+    msgEl.textContent=line;
+    render();
+  }
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    render();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase!=='playing'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase!=='playing'){refresh()}});
+
+  /* Resume an unfinished game */
+  if(loadGame()){
+    phase='playing';
+    msgEl.textContent='Welcome back. Your game was waiting. '+(S.dice.length?'Hold dice, roll again, or choose a box.':'Press Roll.');
+  }
+  render();
+})();
+</script>
+</body>
+</html>
