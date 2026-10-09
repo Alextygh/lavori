@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scratch Cards | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --cell:#fffdf6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --cell:#f4efe2;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tier{border:3px solid var(--line);border-radius:14px;padding:12px 10px;background:var(--panel);color:var(--text);font-family:inherit;cursor:pointer;text-align:center}
+.tier .e{font-size:30px;display:block}
+.tier .nm{font-weight:800;display:block;margin-top:2px}
+.tier .pr{font-size:13px;color:var(--muted)}
+.tier.sel{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold) inset}
+.tier:disabled{cursor:not-allowed;opacity:.6}
+.ticket{margin-top:16px;border-radius:18px;border:5px solid var(--gold);padding:14px;color:#fff;background:linear-gradient(135deg,#7a1f2b,#3d0f17)}
+.ticket.t0{background:linear-gradient(135deg,#8a5a2b,#4a2e12)}
+.ticket.t1{background:linear-gradient(135deg,#5c6b73,#2b363b)}
+.ticket.t2{background:linear-gradient(135deg,#7a5c00,#3d2e00)}
+.ticket.t3{background:linear-gradient(135deg,#4b2a7a,#241240)}
+.ticket h2{margin:0;text-align:center;font-family:Georgia,serif;font-size:22px;letter-spacing:1px}
+.ticket .sub{text-align:center;font-size:13px;opacity:.9;margin:2px 0 12px}
+.cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px;margin:0 auto}
+.cell{position:relative;aspect-ratio:1;border-radius:10px;background:var(--cell);color:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:900;font-size:clamp(16px,5vw,24px);font-family:Georgia,serif}
+.cell .coin{font-size:.6em;margin-right:3px}
+.cell canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.cell.win{background:#ffe38a;box-shadow:0 0 0 3px var(--gold) inset;animation:pulse .6s ease-in-out 3}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.empty{text-align:center;padding:30px 10px;opacity:.85}
+#msg{min-height:3.4em;margin:12px 0 4px;text-align:center;font-weight:600;font-size:16px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:8px}
+.btn{padding:13px 28px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn.alt{background:var(--panel);color:var(--text);border:2px solid var(--gold)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td:last-child,th:last-child{text-align:right}
+.sub2{font-size:13px;color:var(--muted);margin:10px 0 0}
+.rules ul{margin:0;padding-left:20px;font-size:14px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:5}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Scratch Cards</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="tiers" id="tiers"></div>
+
+  <div class="ticket t0" id="ticket">
+    <h2 id="tName">Lucky Clover</h2>
+    <div class="sub">Find three matching amounts to win that amount</div>
+    <div class="cells" id="cells"></div>
+    <div class="empty" id="empty">Pick a card and press Buy to get a fresh one.</div>
+  </div>
+
+  <div id="msg" aria-live="polite"></div>
+
+  <div class="controls">
+    <button class="btn" id="buy">BUY CARD</button>
+    <button class="btn alt" id="revealAll" hidden>REVEAL ALL</button>
+  </div>
+
+  <div class="card">
+    <h2>Prizes and odds for this card</h2>
+    <table id="ptable"><thead><tr><th>Three matching</th><th>Odds per card</th><th>Prize</th></tr></thead><tbody></tbody></table>
+    <p class="sub2" id="rtp"></p>
+  </div>
+
+  <div class="card rules">
+    <h2>How it works</h2>
+    <ul>
+      <li>Each card has nine hidden amounts. Scratch the cells with your finger or mouse. If three of them match, you win that amount.</li>
+      <li>Four cards to choose from. The prizes scale with the price, so a 50 chip card can pay up to 200 times 50.</li>
+      <li>The card is printed the moment you buy it, so scratching more slowly or faster changes nothing. You can also press Reveal All.</li>
+      <li>Your prize is paid when the card is fully revealed. If you leave with a card half scratched, it waits for you here and you cannot buy another until you reveal it.</li>
+      <li>While you owe money, the profit from a win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',CARD_KEY='luckysim_scratch';
+  var START=50,BROKE=5;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_jackpot','luckysim_yahtzee','luckysim_mahjong','luckysim_scratch'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var TIERS=[
+    {name:'Lucky Clover',emoji:'🍀',price:5},
+    {name:'Golden Fruits',emoji:'🍒',price:10},
+    {name:'Diamond Rush',emoji:'💎',price:25},
+    {name:'Royal Fortune',emoji:'👑',price:50}
+  ];
+  /* Outcome multipliers (times the card price) and their chances. The rest of the probability is a loser. */
+  var OUTCOMES=[
+    {m:1,p:0.12},{m:2,p:0.07},{m:5,p:0.025},{m:10,p:0.01},{m:50,p:0.002},{m:200,p:0.0004}
+  ];
+  var DECOYS=[1,2,5,10,20,50,100,200,500];
+
+  var $=function(id){return document.getElementById(id)};
+  function fmt(n){return n.toLocaleString('en-US')}
+  var chips=getNum(CHIPS_KEY,START);
+  var tier=0,card=null,revealed=[],settled=false;
+
+  var balEl=$('bal'),debtEl=$('debt'),msgEl=$('msg'),cellsEl=$('cells'),toastEl=$('toast'),tiersEl=$('tiers');
+  var buyBtn=$('buy'),revealBtn=$('revealAll'),emptyEl=$('empty'),ticketEl=$('ticket');
+  var tierBtns=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=fmt(chips);
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+fmt(d)):'';
+  }
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function shuffle(a){
+    for(var i=a.length-1;i>0;i--){var j=randInt(i+1),t=a[i];a[i]=a[j];a[j]=t}
+    return a;
+  }
+
+  /* ---------- Outcome and card ---------- */
+  function drawMultiplier(){
+    var r=randInt(1000000)/1000000,acc=0;
+    for(var i=0;i<OUTCOMES.length;i++){
+      acc+=OUTCOMES[i].p;
+      if(r<acc){return OUTCOMES[i].m}
+    }
+    return 0;
+  }
+  function makeCells(price,m){
+    var win=m>0?price*m:null,cells=[],count={};
+    if(win!==null){for(var k=0;k<3;k++){cells.push(win)}count[win]=3}
+    var pool=DECOYS.map(function(x){return x*price}).filter(function(v){return v!==win});
+    while(cells.length<9){
+      var v=pool[randInt(pool.length)];
+      if((count[v]||0)<2){cells.push(v);count[v]=(count[v]||0)+1}
+    }
+    return shuffle(cells);
+  }
+
+  /* ---------- Saved card ---------- */
+  function saveCard(){try{localStorage.setItem(CARD_KEY,JSON.stringify(card))}catch(e){}}
+  function clearCard(){try{localStorage.removeItem(CARD_KEY)}catch(e){}}
+  function loadCard(){
+    try{
+      var raw=localStorage.getItem(CARD_KEY);
+      if(!raw){return false}
+      var c=JSON.parse(raw);
+      if(!c||!(c.tier>=0&&c.tier<TIERS.length)||!c.cells||c.cells.length!==9||typeof c.prize!=='number'||c.price!==TIERS[c.tier].price){clearCard();return false}
+      card=c;tier=c.tier;
+      return true;
+    }catch(e){return false}
+  }
+
+  /* ---------- UI ---------- */
+  TIERS.forEach(function(t,i){
+    var b=document.createElement('button');
+    b.className='tier'+(i===tier?' sel':'');
+    b.innerHTML='<span class="e">'+t.emoji+'</span><span class="nm">'+t.name+'</span><span class="pr">'+t.price+' chips</span>';
+    b.addEventListener('click',function(){
+      if(card&&!settled){return}
+      tier=i;
+      renderTiers();renderTable();renderTicket();setButtons();
+    });
+    tiersEl.appendChild(b);tierBtns.push(b);
+  });
+  function renderTiers(){
+    tierBtns.forEach(function(b,i){
+      b.classList.toggle('sel',i===tier);
+      b.disabled=!!(card&&!settled);
+    });
+  }
+  function renderTable(){
+    var t=TIERS[tier],tb=document.querySelector('#ptable tbody');
+    tb.innerHTML='';
+    var any=0,ev=0;
+    OUTCOMES.forEach(function(o){
+      any+=o.p;ev+=o.p*o.m;
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>3 x '+fmt(t.price*o.m)+'</td><td>1 in '+fmt(Math.round(1/o.p))+'</td><td>'+fmt(t.price*o.m)+'</td>';
+      tb.appendChild(tr);
+    });
+    $('rtp').textContent='About 1 card in '+(1/any).toFixed(1)+' wins something, but over time a card returns only about '+(ev*100).toFixed(0)+'% of its price.';
+  }
+  function renderTicket(){
+    var t=TIERS[tier];
+    ticketEl.className='ticket t'+tier;
+    $('tName').textContent=t.emoji+' '+t.name+' '+t.emoji;
+  }
+  function setButtons(){
+    var active=!!(card&&!settled);
+    buyBtn.disabled=active||chips<TIERS[tier].price;
+    buyBtn.textContent=settled?('BUY ANOTHER ('+TIERS[tier].price+')'):('BUY CARD ('+TIERS[tier].price+')');
+    revealBtn.hidden=!active;
+  }
+
+  /* ---------- Scratching ---------- */
+  function makeCell(i){
+    var el=document.createElement('div');
+    el.className='cell';
+    el.innerHTML='<span><span class="coin">🪙</span>'+fmt(card.cells[i])+'</span>';
+    var cv=document.createElement('canvas');
+    cv.width=96;cv.height=96;
+    var ctx=cv.getContext&&cv.getContext('2d');
+    el.appendChild(cv);
+    if(!ctx){
+      /* no canvas support: tap to reveal */
+      cv.style.background='#b9bec2';
+      cv.addEventListener('click',function(){revealCell(i)});
+      return {el:el,cv:cv};
+    }
+    var g=ctx.createLinearGradient(0,0,96,96);
+    g.addColorStop(0,'#cfd4d8');g.addColorStop(.5,'#9aa1a6');g.addColorStop(1,'#c4c9cd');
+    ctx.fillStyle=g;ctx.fillRect(0,0,96,96);
+    ctx.fillStyle='rgba(255,255,255,.35)';
+    for(var k=0;k<14;k++){ctx.fillRect((k*23)%96,(k*37)%96,18,2)}
+    ctx.fillStyle='#666';ctx.font='bold 13px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('SCRATCH',48,48);
+    var drawing=false,moves=0;
+    function pos(e){
+      var r=cv.getBoundingClientRect();
+      return {x:(e.clientX-r.left)*(96/r.width),y:(e.clientY-r.top)*(96/r.height)};
+    }
+    function scratch(e){
+      var p=pos(e);
+      ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.fill();
+      moves++;
+      if(moves%5===0){checkClear()}
+    }
+    function checkClear(){
+      var d=ctx.getImageData(0,0,96,96).data,clear=0,total=0;
+      for(var q=3;q<d.length;q+=16){total++;if(d[q]<40){clear++}}
+      if(clear/total>0.5){revealCell(i)}
+    }
+    cv.addEventListener('pointerdown',function(e){
+      if(revealed[i]){return}
+      drawing=true;
+      try{cv.setPointerCapture(e.pointerId)}catch(x){}
+      scratch(e);e.preventDefault();
+    });
+    cv.addEventListener('pointermove',function(e){if(drawing&&!revealed[i]){scratch(e);e.preventDefault()}});
+    function stop(){drawing=false;if(!revealed[i]){checkClear()}}
+    cv.addEventListener('pointerup',stop);
+    cv.addEventListener('pointercancel',stop);
+    return {el:el,cv:cv};
+  }
+  var cellObjs=[];
+  function renderCard(){
+    cellsEl.innerHTML='';cellObjs=[];revealed=[];
+    if(!card){emptyEl.hidden=false;cellsEl.hidden=true;return}
+    emptyEl.hidden=true;cellsEl.hidden=false;
+    for(var i=0;i<9;i++){
+      var c=makeCell(i);
+      cellsEl.appendChild(c.el);cellObjs.push(c);revealed.push(false);
+    }
+  }
+  function revealCell(i){
+    if(revealed[i]){return}
+    revealed[i]=true;
+    cellObjs[i].cv.style.display='none';
+    if(revealed.every(function(x){return x})){settle()}
+  }
+  revealBtn.addEventListener('click',function(){
+    if(!card||settled){return}
+    for(var i=0;i<9;i++){revealed[i]=true;cellObjs[i].cv.style.display='none'}
+    settle();
+  });
+
+  /* ---------- Buying and settling ---------- */
+  buyBtn.addEventListener('click',function(){
+    var t=TIERS[tier];
+    if(card&&!settled){return}
+    if(chips<t.price){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for this card. Try a cheaper one.';
+      return;
+    }
+    var m=drawMultiplier();
+    card={tier:tier,price:t.price,cells:makeCells(t.price,m),prize:t.price*m};
+    settled=false;
+    chips-=t.price;setNum(CHIPS_KEY,chips);
+    saveCard(); /* the card is fixed and saved at purchase; the prize is paid when it is revealed */
+    msgEl.textContent='Scratch the cells. Three matching amounts win.';
+    setBal();renderTiers();renderCard();setButtons();
+  });
+
+  function settle(){
+    if(settled||!card){return}
+    settled=true;
+    var ret=card.prize,profit=ret-card.price,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    chips=chips+ret-toBank;
+    setNum(CHIPS_KEY,chips);
+    clearCard();
+    if(ret>0){
+      cellObjs.forEach(function(c,i){if(card.cells[i]===ret){c.el.classList.add('win')}});
+    }
+    var line;
+    if(ret===0){line='No match. You lost '+card.price+' chips.'}
+    else if(profit>0){
+      line='Three matching '+fmt(ret)+'! Profit: +'+fmt(profit)+' chips.';
+      if(toBank>0){line+=' '+fmt(toBank)+' went straight to the bank to pay your debt, you keep '+fmt(profit-toBank)+'.'}
+    }else{
+      line='Three matching '+fmt(ret)+'. You get your card price back, no gain.';
+    }
+    if(chips<BROKE){line+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+    msgEl.textContent=line;
+    setBal();renderTiers();setButtons();
+  }
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();setButtons();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&(!card||settled)){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&(!card||settled)){refresh()}});
+
+  /* Resume an unfinished card */
+  if(loadCard()){
+    settled=false;
+    msgEl.textContent='Welcome back. Your card was waiting. Scratch it or press Reveal All.';
+  }else{
+    msgEl.textContent='Pick a card and press Buy.';
+  }
+  renderTiers();renderTable();renderTicket();renderCard();setBal();setButtons();
+})();
+</script>
+</body>
+</html>
