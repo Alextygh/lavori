@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Baccarat | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d; --card:#fffdf6; --back:#7a1f2b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b; --card:#f4efe2; --back:#5a1620;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:16px 12px}
+.sides2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{border:2px solid transparent;border-radius:14px;padding:6px 4px;transition:border-color .2s,background .2s}
+.col.win{border-color:var(--gold);background:rgba(255,255,255,.1)}
+.who{color:#fff;font-weight:700;font-size:14px;margin:6px 4px;display:flex;justify-content:space-between}
+.hand{display:flex;gap:6px;min-height:110px;flex-wrap:wrap;justify-content:center}
+.card{width:clamp(48px,13vw,76px);aspect-ratio:5/7;border-radius:9px;border:2px solid #999;background:var(--card);color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:700;font-size:clamp(20px,5.5vw,30px)}
+.card.red{color:#b3262e}
+.card .st{font-size:.8em;line-height:1}
+.card.flip{animation:flip .35s ease both}
+@keyframes flip{from{transform:rotateY(90deg)}to{transform:rotateY(0)}}
+.divider{height:1px;background:rgba(255,255,255,.25);margin:12px 0}
+#msg{min-height:3.4em;margin:12px 0 8px;text-align:center;color:#fff;font-weight:600;font-size:16px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:6px}
+.bets{display:flex;gap:8px;align-items:center;color:#fff;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.sidepick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.side{flex:1;min-width:96px;max-width:200px;padding:10px 8px;border-radius:12px;border:3px dashed var(--gold);background:var(--panel);color:var(--text);cursor:pointer;font-family:inherit;font-weight:800;font-size:16px;line-height:1.2}
+.side small{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:2px}
+.side.sel{background:var(--gold);color:#fff;border-style:solid}
+.side.sel small{color:#fff}
+.side:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:13px 26px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rules{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
+.rules h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.rules ul{margin:0;padding-left:20px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Baccarat</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div class="sides2">
+      <div class="col" id="colP">
+        <div class="who"><span>Player</span><span id="pTotal"></span></div>
+        <div class="hand" id="player" aria-label="Player hand"></div>
+      </div>
+      <div class="col" id="colB">
+        <div class="who"><span>Banker</span><span id="bTotal"></span></div>
+        <div class="hand" id="banker" aria-label="Banker hand"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div id="msg" aria-live="polite">Pick Player, Banker or Tie, choose your bet and press Deal. Closest to 9 wins.</div>
+
+    <div class="sidepick" id="sidepick"></div>
+
+    <div class="controls">
+      <div class="bets"><span>Bet:</span><span id="bets"></span></div>
+      <button class="btn" id="deal">DEAL</button>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h2>House rules</h2>
+    <ul>
+      <li>Aces count 1, cards 2 to 9 count face value, and 10, J, Q, K count 0. A hand's total is the last digit of the sum.</li>
+      <li>Each side gets two cards. A total of 8 or 9 is a "natural" and ends the round. The nearest total to 9 wins.</li>
+      <li>Third cards are drawn automatically by the standard baccarat rules.</li>
+      <li><strong>Player</strong> pays 1 to 1. <strong>Banker</strong> pays 0.95 to 1 (the casino takes a 5% commission, rounded down). <strong>Tie</strong> pays 8 to 1.</li>
+      <li>If you bet Player or Banker and the round ties, your bet is returned.</li>
+      <li>Cards are drawn from a shoe that is treated as endless, so every card always has the same chance.</li>
+      <li>While you owe money, the profit from a win goes to the bank first. If you leave mid-round, the result is already saved.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost';
+  var START=50,BROKE=5;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var SUITS=['♠','♥','♦','♣'];
+  var RANKS={1:'A',11:'J',12:'Q',13:'K'};
+
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,side='P',phase='idle';
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var toastEl=document.getElementById('toast');
+  var betsEl=document.getElementById('bets');
+  var sideEl=document.getElementById('sidepick');
+  var playerEl=document.getElementById('player');
+  var bankerEl=document.getElementById('banker');
+  var pTotalEl=document.getElementById('pTotal');
+  var bTotalEl=document.getElementById('bTotal');
+  var colP=document.getElementById('colP');
+  var colB=document.getElementById('colB');
+  var dealBtn=document.getElementById('deal');
+  var picks=[],sides=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(shown){
+    balEl.textContent=(shown===undefined?chips:shown).toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function setButtons(){
+    var idle=(phase==='idle');
+    dealBtn.disabled=!idle||(chips<bet);
+    picks.forEach(function(p){p.disabled=!idle});
+    sides.forEach(function(s){s.btn.disabled=!idle});
+  }
+
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Bet '+v+' chips');
+    b.addEventListener('click',function(){
+      if(phase!=='idle'){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      setButtons();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+
+  [{k:'P',name:'Player',sub:'pays 1 to 1'},{k:'B',name:'Banker',sub:'pays 0.95 to 1'},{k:'T',name:'Tie',sub:'pays 8 to 1'}].forEach(function(o){
+    var b=document.createElement('button');
+    b.className='side'+(o.k===side?' sel':'');
+    b.innerHTML=o.name+'<small>'+o.sub+'</small>';
+    b.setAttribute('aria-label','Bet on '+o.name+', '+o.sub);
+    b.addEventListener('click',function(){
+      if(phase!=='idle'){return}
+      side=o.k;
+      sides.forEach(function(s){s.btn.classList.remove('sel')});
+      b.classList.add('sel');
+    });
+    sideEl.appendChild(b);
+    sides.push({k:o.k,btn:b});
+  });
+
+  /* ---------- Randomness and cards ---------- */
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function drawCard(){return randInt(52)}   /* endless shoe */
+  function rankOf(i){return 1+(i%13)}       /* 1 = ace ... 13 = king */
+  function suitOf(i){return Math.floor(i/13)}
+  function pts(i){var r=rankOf(i);return r>=10?0:r}
+  function total(cards){
+    var t=0;cards.forEach(function(c){t+=pts(c)});
+    return t%10;
+  }
+  function cardEl(idx){
+    var s=suitOf(idx),r=rankOf(idx);
+    var d=document.createElement('div');
+    d.className='card flip'+((s===1||s===2)?' red':'');
+    d.innerHTML='<span class="rk">'+(RANKS[r]||r)+'</span><span class="st">'+SUITS[s]+'</span>';
+    return d;
+  }
+
+  /* ---------- Play one round (all decided up front, then revealed) ---------- */
+  function playRound(){
+    var p=[drawCard(),drawCard()];
+    var b=[drawCard(),drawCard()];
+    var order=[['p',0],['b',0],['p',1],['b',1]];
+    var pt=total(p),bt=total(b);
+    if(pt<8&&bt<8){
+      var p3=null;
+      if(pt<=5){p3=drawCard();p.push(p3);order.push(['p',2])}
+      var drawB;
+      if(p3===null){drawB=(bt<=5)}
+      else{
+        var v=pts(p3);
+        if(bt<=2){drawB=true}
+        else if(bt===3){drawB=(v!==8)}
+        else if(bt===4){drawB=(v>=2&&v<=7)}
+        else if(bt===5){drawB=(v>=4&&v<=7)}
+        else if(bt===6){drawB=(v===6||v===7)}
+        else{drawB=false}
+      }
+      if(drawB){b.push(drawCard());order.push(['b',2])}
+    }
+    return {p:p,b:b,order:order};
+  }
+
+  function deal(){
+    if(phase!=='idle'){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that bet. Try a smaller one.';
+      return;
+    }
+    phase='busy';
+    var wager=bet,pick=side;
+    var round=playRound();
+    var pt=total(round.p),bt=total(round.b);
+    var winner=pt>bt?'P':(bt>pt?'B':'T');
+
+    /* settle now, so leaving mid-animation cannot undo the result */
+    var ret=0,label;
+    if(winner==='T'){
+      if(pick==='T'){ret=wager*9;label='Tie! Your Tie bet wins'}
+      else{ret=wager;label='Tie. Your bet is returned'}
+    }else if(winner===pick){
+      if(pick==='P'){ret=wager*2;label='Player wins'}
+      else{ret=wager+Math.floor(wager*0.95);label='Banker wins (5% commission taken)'}
+    }else{
+      ret=0;label=(winner==='P'?'Player':'Banker')+' wins, your bet loses';
+    }
+    var profit=ret-wager,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var afterBet=chips-wager;
+    var finalChips=afterBet+ret-toBank;
+    setNum(CHIPS_KEY,finalChips);
+
+    /* reveal */
+    setBal(afterBet);setButtons();
+    playerEl.innerHTML='';bankerEl.innerHTML='';
+    pTotalEl.textContent='';bTotalEl.textContent='';
+    colP.classList.remove('win');colB.classList.remove('win');
+    msgEl.textContent='Dealing...';
+    var shownP=[],shownB=[],i=0;
+    function step(){
+      if(i<round.order.length){
+        var o=round.order[i];i++;
+        if(o[0]==='p'){
+          var cp=round.p[o[1]];shownP.push(cp);
+          playerEl.appendChild(cardEl(cp));
+          pTotalEl.textContent=(o[1]>=1)?('Total: '+total(shownP)):'';
+        }else{
+          var cb=round.b[o[1]];shownB.push(cb);
+          bankerEl.appendChild(cardEl(cb));
+          bTotalEl.textContent=(o[1]>=1)?('Total: '+total(shownB)):'';
+        }
+        setTimeout(step,i<=4?550:800);
+      }else{
+        setTimeout(done,400);
+      }
+    }
+    function done(){
+      chips=finalChips;
+      phase='idle';
+      if(winner==='P'){colP.classList.add('win')}
+      else if(winner==='B'){colB.classList.add('win')}
+      else{colP.classList.add('win');colB.classList.add('win')}
+      var nat=(pt>=8||bt>=8)&&round.p.length===2&&round.b.length===2;
+      var text=label+' ('+pt+' to '+bt+(nat?', natural':'')+').';
+      if(profit>0){
+        text+=' Profit: +'+profit+' chips.';
+        if(toBank>0){text+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+      }else if(profit<0){
+        text+=' You lost '+(-profit)+' chips.';
+      }
+      if(chips<BROKE){text+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      msgEl.textContent=text;
+      setBal();setButtons();
+    }
+    setTimeout(step,300);
+  }
+
+  dealBtn.addEventListener('click',deal);
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();setButtons();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase==='idle'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase==='idle'){refresh()}});
+
+  setBal();setButtons();
+})();
+</script>
+</body>
+</html>
