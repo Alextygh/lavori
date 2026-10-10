@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solitaire | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d; --card:#fffdf6; --back:#7a1f2b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b; --card:#f4efe2; --back:#5a1620;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);touch-action:manipulation}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:12px 8px 16px}
+.row{display:grid;grid-template-columns:repeat(7,1fr);gap:clamp(3px,1.2vw,8px);align-items:start}
+.row.upper{margin-bottom:clamp(10px,3vw,18px)}
+.slot{width:100%;aspect-ratio:5/7;border-radius:8px;border:2px dashed rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);font-size:clamp(16px,4.5vw,28px);font-family:Georgia,serif}
+.cell{position:relative;min-width:0}
+.card{width:100%;aspect-ratio:5/7;border-radius:8px;border:2px solid #999;background:var(--card);color:#1a1a1a;font-family:Georgia,serif;font-weight:700;font-size:clamp(11px,3.3vw,19px);line-height:1.05;padding:2px 0 0 3px;position:relative;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none}
+.card.red{color:#b3262e}
+.card .big{position:absolute;left:0;right:0;bottom:8%;text-align:center;font-size:2.1em;line-height:1}
+.card.back{background:repeating-linear-gradient(45deg,var(--back),var(--back) 6px,#a02c3c 6px,#a02c3c 12px);border-color:#fff;cursor:default;padding:0}
+.card.stockcard{cursor:pointer}
+.card.sel{outline:3px solid var(--gold);outline-offset:-1px;box-shadow:0 0 10px var(--gold);z-index:2}
+.col .card{display:block}
+.found .card{padding-top:2px}
+.hint{color:rgba(255,255,255,.6)}
+#info{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;color:#fff;font-weight:700;font-size:13.5px;margin:0 4px 10px}
+#msg{min-height:3.2em;margin:14px 0 8px;text-align:center;color:#fff;font-weight:600;font-size:15.5px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;color:#fff;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:13px 26px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn.alt{background:var(--panel);color:var(--text);border:2px solid var(--gold)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rules{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
+.rules h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.rules ul{margin:0;padding-left:20px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Solitaire</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div id="info"><span id="iCards">Cards home: 0</span><span id="iRet">Return: 0</span><span id="iPass">Pass 1 of 3</span></div>
+
+    <div class="row upper">
+      <div class="cell" id="stock"></div>
+      <div class="cell waste" id="waste"></div>
+      <div class="cell"></div>
+      <div class="cell found" data-f="0"></div>
+      <div class="cell found" data-f="1"></div>
+      <div class="cell found" data-f="2"></div>
+      <div class="cell found" data-f="3"></div>
+    </div>
+
+    <div class="row" id="tableau"></div>
+
+    <div id="msg" aria-live="polite">Pick your buy-in and press Deal. Every card you get to the foundations earns chips back.</div>
+
+    <div class="controls">
+      <div class="bets"><span>Buy-in:</span><span id="bets"></span></div>
+      <button class="btn" id="deal">DEAL</button>
+      <button class="btn alt" id="cash" hidden>CASH OUT</button>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h2>House rules</h2>
+    <ul>
+      <li>This is Vegas-style Klondike. Your buy-in is taken when you deal.</li>
+      <li>Each card you send to the foundations pays <strong>5% of your buy-in</strong>, so you need <strong>20 cards home to break even</strong>. Clearing all 52 pays 2.6 times your buy-in. Payouts are rounded down when you cash out.</li>
+      <li>Turn up <strong>1 card at a time</strong> from the stock. The cards always come in the same order, and you may go through the stock <strong>5 times</strong>.</li>
+      <li>Build tableau columns down in alternating colors. Only a King (with any cards on it) can fill an empty column.</li>
+      <li>Foundations build up from Ace to King in a single suit. Cards on a foundation cannot be moved back, so the money is locked in.</li>
+      <li><strong>Double-click (or double-tap) a card</strong> to send it automatically to a place where it fits: its foundation first, otherwise a tableau column.</li>
+      <li>You can also tap a card to select it (this takes the cards on top of it too), then tap where it should go.</li>
+      <li>Press Cash Out whenever you are stuck. Your hand is saved if you leave, and the result is only paid when you cash out or clear the board.</li>
+      <li>While you owe money, the profit from a win goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',STATE_KEY='luckysim_solitaire';
+  var START=50,BROKE=5,PER_CARD=0.05,MAX_PASSES=5,DRAW=1;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_solitaire'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var SUITS=['♠','♥','♦','♣'];
+  var RANKS={1:'A',11:'J',12:'Q',13:'K'};
+  function rankOf(i){return 1+(i%13)}
+  function suitOf(i){return Math.floor(i/13)}
+  function isRed(i){var s=suitOf(i);return s===1||s===2}
+  function label(i){return (RANKS[rankOf(i)]||rankOf(i))+SUITS[suitOf(i)]}
+
+  var chips=getNum(CHIPS_KEY,START);
+  var bet=5,wager=0,phase='idle';
+  var stock=[],waste=[],found=[[],[],[],[]],tab=[];   /* tab[c] = [{id,up}] */
+  var pass=1,sel=null,cashArmed=false,cashTimer;
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var toastEl=document.getElementById('toast');
+  var betsEl=document.getElementById('bets');
+  var dealBtn=document.getElementById('deal');
+  var cashBtn=document.getElementById('cash');
+  var stockEl=document.getElementById('stock');
+  var wasteEl=document.getElementById('waste');
+  var tabEl=document.getElementById('tableau');
+  var foundEls=Array.prototype.slice.call(document.querySelectorAll('.found'));
+  var iCards=document.getElementById('iCards'),iRet=document.getElementById('iRet'),iPass=document.getElementById('iPass');
+  var picks=[],timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function setButtons(){
+    var idle=(phase==='idle');
+    dealBtn.hidden=!idle;
+    dealBtn.disabled=(chips<bet);
+    cashBtn.hidden=idle;
+    picks.forEach(function(p){p.disabled=!idle});
+  }
+
+  [5,10,25,50].forEach(function(v){
+    var b=document.createElement('button');
+    b.className='pick'+(v===bet?' sel':'');
+    b.textContent=v;
+    b.setAttribute('aria-label','Buy in for '+v+' chips');
+    b.addEventListener('click',function(){
+      if(phase!=='idle'){return}
+      bet=v;
+      picks.forEach(function(p){p.classList.remove('sel')});
+      b.classList.add('sel');
+      setButtons();
+    });
+    betsEl.appendChild(b);
+    picks.push(b);
+  });
+
+  /* ---------- Randomness ---------- */
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+  function shuffled(){
+    var d=[];for(var i=0;i<52;i++){d.push(i)}
+    for(var j=51;j>0;j--){
+      var k=randInt(j+1);
+      var t=d[j];d[j]=d[k];d[k]=t;
+    }
+    return d;
+  }
+
+  /* ---------- Saved game ---------- */
+  function saveState(){
+    try{localStorage.setItem(STATE_KEY,JSON.stringify({wager:wager,stock:stock,waste:waste,found:found,tab:tab,pass:pass}))}catch(e){}
+  }
+  function clearState(){try{localStorage.removeItem(STATE_KEY)}catch(e){}}
+  function loadState(){
+    try{
+      var raw=localStorage.getItem(STATE_KEY);
+      if(!raw){return false}
+      var s=JSON.parse(raw);
+      if(!s||[5,10,25,50].indexOf(s.wager)===-1||!Array.isArray(s.stock)||!Array.isArray(s.waste)||!Array.isArray(s.found)||s.found.length!==4||!Array.isArray(s.tab)||s.tab.length!==7){clearState();return false}
+      var seen={},count=0,ok=true;
+      function chk(id){if(typeof id!=='number'||id<0||id>51||seen[id]){ok=false}else{seen[id]=1;count++}}
+      s.stock.forEach(chk);s.waste.forEach(chk);
+      s.found.forEach(function(f){if(!Array.isArray(f)){ok=false}else{f.forEach(chk)}});
+      s.tab.forEach(function(c){if(!Array.isArray(c)){ok=false}else{c.forEach(function(x){chk(x&&x.id)})}});
+      if(!ok||count!==52){clearState();return false}
+      stock=s.stock;waste=s.waste;found=s.found;tab=s.tab;wager=s.wager;bet=s.wager;
+      pass=Math.min(Math.max(s.pass||1,1),MAX_PASSES);
+      return true;
+    }catch(e){return false}
+  }
+
+  /* ---------- Rendering ---------- */
+  function home(){return found[0].length+found[1].length+found[2].length+found[3].length}
+  function payout(){return Math.floor(wager*home()*PER_CARD+1e-9)}
+
+  function faceEl(id,extra){
+    var d=document.createElement('div');
+    d.className='card'+(isRed(id)?' red':'')+(extra?(' '+extra):'');
+    d.innerHTML='<span>'+label(id)+'</span><span class="big">'+SUITS[suitOf(id)]+'</span>';
+    d.setAttribute('aria-label',label(id));
+    return d;
+  }
+  function backEl(){var d=document.createElement('div');d.className='card back';return d}
+  function slotEl(txt,cls){var d=document.createElement('div');d.className='slot'+(cls?(' '+cls):'');d.textContent=txt||'';return d}
+
+  function isSelWaste(){return sel&&sel.src==='w'}
+  function render(){
+    /* stock */
+    stockEl.innerHTML='';
+    if(phase==='idle'&&!stock.length&&!waste.length&&!tab.length){stockEl.appendChild(slotEl(''))}
+    else if(stock.length){
+      var sc=backEl();sc.classList.add('stockcard');
+      sc.setAttribute('aria-label','Turn up cards from the stock');
+      stockEl.appendChild(sc);
+    }else{
+      var rec=slotEl(pass<MAX_PASSES?'↻':'✕');
+      rec.style.cursor=pass<MAX_PASSES?'pointer':'default';
+      stockEl.appendChild(rec);
+    }
+    /* waste: only the top card is shown */
+    wasteEl.innerHTML='';
+    wasteEl.appendChild(slotEl(''));
+    if(waste.length){
+      var wc=faceEl(waste[waste.length-1],isSelWaste()?'sel':'');
+      wc.style.marginTop='-140%';
+      wasteEl.appendChild(wc);
+    }
+    /* foundations */
+    foundEls.forEach(function(el,f){
+      el.innerHTML='';
+      var pile=found[f];
+      if(pile.length){el.appendChild(faceEl(pile[pile.length-1]))}
+      else{var s=slotEl(SUITS[f]);el.appendChild(s)}
+    });
+    /* tableau */
+    tabEl.innerHTML='';
+    for(var c=0;c<7;c++){
+      var col=document.createElement('div');
+      col.className='cell col';col.setAttribute('data-c',c);
+      col.appendChild(slotEl(''));
+      var pile2=tab[c]||[];
+      for(var i=0;i<pile2.length;i++){
+        var cd=pile2[i];
+        var el=cd.up?faceEl(cd.id,(sel&&sel.src==='t'&&sel.col===c&&i>=sel.idx)?'sel':''):backEl();
+        el.setAttribute('data-i',i);
+        if(i===0){el.style.marginTop='-140%'}
+        else{el.style.marginTop=pile2[i-1].up?'-100%':'-118%'}
+        col.appendChild(el);
+      }
+      tabEl.appendChild(col);
+    }
+    iCards.textContent='Cards home: '+home();
+    iRet.textContent='Return: '+payout()+' of '+wager;
+    iPass.textContent='Pass '+pass+' of '+MAX_PASSES;
+    if(phase==='idle'){iRet.textContent='Return: -';iCards.textContent='Cards home: -';iPass.textContent=''}
+  }
+
+  /* ---------- Rules ---------- */
+  function selCards(){
+    if(!sel){return []}
+    if(sel.src==='w'){return waste.length?[waste[waste.length-1]]:[]}
+    return tab[sel.col].slice(sel.idx).map(function(x){return x.id});
+  }
+  function removeSel(){
+    if(sel.src==='w'){waste.pop()}
+    else{
+      tab[sel.col].splice(sel.idx);
+      var col=tab[sel.col];
+      if(col.length&&!col[col.length-1].up){col[col.length-1].up=true}
+    }
+  }
+  function canFoundation(f){
+    var cs=selCards();
+    if(cs.length!==1){return false}
+    var id=cs[0];
+    return suitOf(id)===f&&rankOf(id)===found[f].length+1;
+  }
+  function canTableau(c){
+    var cs=selCards();
+    if(!cs.length){return false}
+    if(sel.src==='t'&&sel.col===c){return false}
+    var first=cs[0],col=tab[c];
+    if(!col.length){return rankOf(first)===13}
+    var top=col[col.length-1];
+    return top.up&&isRed(top.id)!==isRed(first)&&rankOf(top.id)===rankOf(first)+1;
+  }
+  function afterMove(){
+    sel=null;
+    saveState();
+    render();
+    if(home()===52){settle(true)}
+    else{updateHint()}
+  }
+  function updateHint(){
+    if(phase!=='play'){return}
+    if(!stock.length&&pass>=MAX_PASSES){msgEl.textContent='The stock is used up. Make any moves you still can, then Cash Out.'}
+    else{msgEl.textContent='Double-click a card to move it automatically, or tap it and then tap where it goes.'}
+  }
+  function toFoundation(f){
+    if(!canFoundation(f)){return false}
+    var id=selCards()[0];
+    removeSel();found[f].push(id);
+    afterMove();return true;
+  }
+  function toTableau(c){
+    if(!canTableau(c)){return false}
+    var cs=selCards();
+    removeSel();
+    cs.forEach(function(id){tab[c].push({id:id,up:true})});
+    afterMove();return true;
+  }
+
+  /* ---------- Auto move (double click / double tap) ---------- */
+  var lastKey=null,lastTime=0;
+  function isDouble(key){
+    var now=Date.now();
+    var d=(key===lastKey&&now-lastTime<400);
+    if(d){lastKey=null;lastTime=0}else{lastKey=key;lastTime=now}
+    return d;
+  }
+  function autoMove(src){
+    sel=src;
+    var cs=selCards();
+    if(!cs.length){sel=null;render();return}
+    if(cs.length===1&&toFoundation(suitOf(cs[0]))){return}
+    var pass2;
+    for(pass2=0;pass2<2;pass2++){            /* non-empty columns first, then empty ones */
+      for(var c=0;c<7;c++){
+        if((tab[c].length===0)!==(pass2===1)){continue}
+        if(pass2===1&&sel.src==='t'&&sel.idx===0){continue}   /* a King already at the bottom of a column */
+        if(toTableau(c)){return}
+      }
+    }
+    sel=null;render();
+    toast('No place for that card.');
+  }
+
+  /* ---------- Input ---------- */
+  function clickStock(){
+    if(phase!=='play'){return}
+    sel=null;
+    if(stock.length){
+      for(var n=0;n<DRAW&&stock.length;n++){waste.push(stock.shift())}
+      saveState();render();updateHint();
+    }else if(waste.length&&pass<MAX_PASSES){
+      stock=waste;waste=[];pass++;
+      saveState();render();updateHint();
+    }else{
+      msgEl.textContent='No more passes through the stock. Make any moves you still can, then Cash Out.';
+      render();
+    }
+  }
+  function clickWaste(){
+    if(phase!=='play'||!waste.length){return}
+    if(isDouble('w')){autoMove({src:'w'});return}
+    if(isSelWaste()){sel=null;render()}
+    else{sel={src:'w'};render()}
+  }
+  function clickFound(f){
+    if(phase!=='play'||!sel){return}
+    if(!toFoundation(f)){sel=null;render();toast('That card does not fit there.')}
+  }
+  function clickTab(c,idx){
+    if(phase!=='play'){return}
+    var col=tab[c];
+    if(idx>=0&&col[idx]&&col[idx].up&&isDouble('t:'+c+':'+idx)){autoMove({src:'t',col:c,idx:idx});return}
+    if(sel){
+      if(sel.src==='t'&&sel.col===c){
+        if(idx===sel.idx){sel=null;render();return}
+        if(idx>=0&&col[idx].up){sel={src:'t',col:c,idx:idx};render();return}
+        sel=null;render();return;
+      }
+      if(toTableau(c)){return}
+      if(idx>=0&&col[idx].up){sel={src:'t',col:c,idx:idx};render();return}
+      sel=null;render();toast('That move is not allowed.');
+      return;
+    }
+    if(idx>=0&&col[idx].up){sel={src:'t',col:c,idx:idx};render()}
+  }
+
+  stockEl.addEventListener('click',clickStock);
+  wasteEl.addEventListener('click',clickWaste);
+  foundEls.forEach(function(el,f){el.addEventListener('click',function(){clickFound(f)})});
+  tabEl.addEventListener('click',function(e){
+    var colEl=e.target.closest('.col');
+    if(!colEl){return}
+    var c=parseInt(colEl.getAttribute('data-c'),10);
+    var cardEl=e.target.closest('.card');
+    var idx=cardEl?parseInt(cardEl.getAttribute('data-i'),10):-1;
+    clickTab(c,isNaN(idx)?-1:idx);
+  });
+
+  /* ---------- Start and settle ---------- */
+  function deal(){
+    if(phase!=='idle'){return}
+    if(chips<bet){
+      msgEl.textContent=chips<BROKE?'You are out of chips. The main menu offers a loan, with interest.':'Not enough chips for that buy-in. Try a smaller one.';
+      return;
+    }
+    chips-=bet;setNum(CHIPS_KEY,chips);
+    wager=bet;
+    var d=shuffled(),p=0;
+    tab=[];
+    for(var c=0;c<7;c++){
+      var col=[];
+      for(var r=0;r<=c;r++){col.push({id:d[p++],up:(r===c)})}
+      tab.push(col);
+    }
+    stock=d.slice(p);waste=[];found=[[],[],[],[]];pass=1;sel=null;
+    phase='play';
+    saveState();
+    setBal();setButtons();render();
+    msgEl.textContent='Good luck! Tap the deck to turn up a card. Double-click a card to send it where it fits.';
+  }
+
+  function settle(cleared){
+    var ret=cleared?Math.floor(wager*52*PER_CARD+1e-9):payout();
+    var profit=ret-wager,toBank=0;
+    if(profit>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(profit,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,profit);
+    }else if(profit<0){
+      addNum(LOST_KEY,-profit);
+    }
+    var homeCount=home();
+    chips=chips+ret-toBank;
+    setNum(CHIPS_KEY,chips);
+    clearState();
+    phase='idle';sel=null;cashArmed=false;cashBtn.textContent='CASH OUT';
+    var text=(cleared?'You cleared the board! ':'')+homeCount+' card'+(homeCount===1?'':'s')+' home pays '+ret+'.';
+    if(profit>0){
+      text+=' Profit: +'+profit+' chips.';
+      if(toBank>0){text+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
+    }else if(profit===0){
+      text+=' You broke even.';
+    }else{
+      text+=' You lost '+(-profit)+' chips.';
+    }
+    if(chips<BROKE){text+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+    msgEl.textContent=text;
+    setBal();setButtons();render();
+  }
+
+  dealBtn.addEventListener('click',deal);
+  cashBtn.addEventListener('click',function(){
+    if(phase!=='play'){return}
+    if(!cashArmed){
+      cashArmed=true;
+      cashBtn.textContent='TAP AGAIN TO CONFIRM';
+      clearTimeout(cashTimer);
+      cashTimer=setTimeout(function(){cashArmed=false;cashBtn.textContent='CASH OUT'},3000);
+      return;
+    }
+    clearTimeout(cashTimer);
+    settle(false);
+  });
+
+  function refresh(){
+    chips=getNum(CHIPS_KEY,START);
+    setBal();setButtons();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase==='idle'){refresh()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase==='idle'){refresh()}});
+
+  /* Resume an unfinished game */
+  if(loadState()){
+    phase='play';
+    render();
+    msgEl.textContent='Welcome back. Your game was waiting. Cash Out when you are done.';
+  }else{
+    render();
+  }
+  setBal();setButtons();
+})();
+</script>
+</body>
+</html>
