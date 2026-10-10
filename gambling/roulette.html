@@ -56,6 +56,8 @@ canvas{max-width:100%;height:auto}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -238,6 +240,7 @@ canvas{max-width:100%;height:auto}
       return;
     }
     chips-=selected;saveChips(chips);
+    Sound.play('chip');
     bets[key]=(bets[key]||0)+selected;
     stack.push({key:key,amt:selected});
     setBal();renderBets();
@@ -265,7 +268,7 @@ canvas{max-width:100%;height:auto}
       bets[b.key]=(bets[b.key]||0)+b.amt;
       stack.push({key:b.key,amt:b.amt});
     });
-    saveChips(chips);setBal();renderBets();
+    saveChips(chips);Sound.play('chip');setBal();renderBets();
   });
 
   function multiplier(key,n){
@@ -366,24 +369,30 @@ canvas{max-width:100%;height:auto}
     if(win-stake>0){addNum(WON_KEY,win-stake)}else if(win-stake<0){addNum(LOST_KEY,stake-win)}
     saveChips(finalChips); /* result is saved right away, so leaving mid-spin cannot undo it */
     spinning=true;setButtons();
+    Sound.play('spin');
     msgEl.textContent='No more bets. The wheel is spinning...';
 
     var idx=WHEEL.indexOf(n);
     var desired=-(idx+0.5)*SEG;
     var delta=((((desired-rot)%TAU)+TAU)%TAU)+TAU*6;
-    var start=rot,dur=5000,t0=null;
+    var start=rot,dur=5000,t0=null,lastP=-1,lastTT=0;
 
     function step(ts){
       if(t0===null){t0=ts}
       var p=Math.min(1,(ts-t0)/dur);
       var e=1-Math.pow(1-p,3);
       rot=start+delta*e;
+      var pi=Math.floor((delta*e)/SEG);
+      if(pi!==lastP&&ts-lastTT>45){Sound.play('tick');lastTT=ts}
+      lastP=pi;
       draw();
       if(p<1){requestAnimationFrame(step)}
       else{
         rot=rot%TAU;draw();
         spinning=false;
         chips=finalChips;
+        Sound.play('stop');
+        setTimeout(function(){Sound.outcome(win-stake,stake)},350);
         bets={};stack=[];
         pushHistory(n);
         var net=win-stake;

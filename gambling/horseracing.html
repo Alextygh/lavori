@@ -58,6 +58,8 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -278,6 +280,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     setNum(CHIPS_KEY,finalChips); /* saved at the gate, so leaving mid-race cannot undo the result */
 
     phase='racing';
+    Sound.play('chip');Sound.play('start');
     chips-=bet;
     setBal();setButtons();
     msgEl.textContent='And they are off!';
@@ -288,7 +291,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
       wob[horseIdx]={a:0.05+Math.random()*0.05,f:0.003+Math.random()*0.004,ph:Math.random()*6.28};
     });
     var last=[0,0,0,0,0,0],endT=Math.max.apply(null,times);
-    var t0=null;
+    var t0=null,lastHoof=0;
     function frame(ts){
       if(t0===null){t0=ts}
       var t=ts-t0,pos=[];
@@ -304,6 +307,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
         last[i]=p;pos.push(p);
       }
       placeHorses(pos);
+      if(ts-lastHoof>170){Sound.play('hoof');lastHoof=ts}
       if(t<endT+200){requestAnimationFrame(frame)}
       else{
         placeHorses([1,1,1,1,1,1]);
@@ -315,6 +319,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     function done(){
       chips=finalChips;
       phase='done';
+      Sound.outcome(profit,bet);
       laneEls.forEach(function(l,k){l.classList.toggle('winner',k===order[0])});
       var w=field[order[0]],mine=field[selected];
       var podium='Winner: #'+w.n+' '+w.name+'. ';

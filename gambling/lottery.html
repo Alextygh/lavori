@@ -70,6 +70,8 @@ td:last-child,th:last-child{text-align:right}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -412,6 +414,7 @@ td:last-child,th:last-child{text-align:right}
 
     var draw={whites:whites,pb:pb};
     phase='drawing';
+    Sound.play('chip');
     chips-=cost;setBal();
     drawBtn.disabled=true;addBtn.disabled=true;
     msgEl.textContent='Drawing the balls...';
@@ -419,6 +422,7 @@ td:last-child,th:last-child{text-align:right}
     var shown=0;
     var iv=setInterval(function(){
       shown++;
+      Sound.play('ball');
       renderDrawn(draw,shown);
       if(shown>=6){clearInterval(iv);setTimeout(finish,600)}
     },800);
@@ -427,6 +431,7 @@ td:last-child,th:last-child{text-align:right}
       results={whites:whites,pb:pb,prizes:prizes};
       chips=finalChips;
       phase='done';
+      if(jackpotHit){Sound.play('big')}else{Sound.outcome(profit,cost)}
       var line='Drawn: '+whites.map(pad).join(' ')+' and Powerball '+pad(pb)+'. ';
       if(jackpotHit){
         line+='JACKPOT! You won '+fmt(jackpot)+' chips. This is a one in 292 million event.';

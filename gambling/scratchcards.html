@@ -66,6 +66,8 @@ td:last-child,th:last-child{text-align:right}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:5}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -289,6 +291,7 @@ td:last-child,th:last-child{text-align:right}
       ctx.globalCompositeOperation='destination-out';
       ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.fill();
       moves++;
+      if(moves%3===0){Sound.play('scratch')}
       if(moves%5===0){checkClear()}
     }
     function checkClear(){
@@ -342,6 +345,7 @@ td:last-child,th:last-child{text-align:right}
     card={tier:tier,price:t.price,cells:makeCells(t.price,m),prize:t.price*m};
     settled=false;
     chips-=t.price;setNum(CHIPS_KEY,chips);
+    Sound.play('chip');
     saveCard(); /* the card is fixed and saved at purchase; the prize is paid when it is revealed */
     msgEl.textContent='Scratch the cells. Three matching amounts win.';
     setBal();renderTiers();renderCard();setButtons();
@@ -361,6 +365,7 @@ td:last-child,th:last-child{text-align:right}
     }
     chips=chips+ret-toBank;
     setNum(CHIPS_KEY,chips);
+    Sound.outcome(profit,card.price);
     clearCard();
     if(ret>0){
       cellObjs.forEach(function(c,i){if(card.cells[i]===ret){c.el.classList.add('win')}});

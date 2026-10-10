@@ -76,6 +76,8 @@ tr.hit td{background:var(--gold);color:#fff;font-weight:800}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:5}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -570,6 +572,7 @@ function mjShanten(c){
   /* ---------- Game flow ---------- */
   function drawNext(){
     S.drawn=S.wall[S.pos];S.pos++;S.drawsLeft--;
+    Sound.play('tile');
     sel=null;
     var all=S.hand.slice();all.push(S.drawn);
     var c=cnt(all);
@@ -587,6 +590,7 @@ function mjShanten(c){
       return;
     }
     chips-=bet;setNum(CHIPS_KEY,chips);
+    Sound.play('chip');Sound.play('shuffle');
     var wall=newWall();
     S={bet:bet,wall:wall,pos:13,hand:sortTiles(wall.slice(0,13)),drawn:-1,discards:[],drawsLeft:DRAWS};
     result=null;fanEl.textContent='';
@@ -607,6 +611,7 @@ function mjShanten(c){
       S.hand=sortTiles(all);
     }
     S.discards.push(tile);
+    Sound.play('flip');
     S.drawn=-1;
     drawNext();
   }
@@ -636,6 +641,7 @@ function mjShanten(c){
     sortTiles(all);
     phase='ended';
     sel=null;
+    setTimeout(function(){Sound.outcome(profit,S.bet)},250);
     var line;
     if(win){
       line='MAHJONG! '+sc.fan+' fan, pays x'+multFor(sc.fan)+'. Profit: +'+profit+' chips.';

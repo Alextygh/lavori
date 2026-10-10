@@ -54,6 +54,8 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -275,11 +277,12 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
 
     var n=2;
     msgEl.textContent='Dealer turns over the hidden card...';
-    renderDealer(2,false,1);
+    Sound.play('flip');renderDealer(2,false,1);
     function next(){
       if(n<dealer.length){
         setTimeout(function(){
           n++;
+          Sound.play('card');
           renderDealer(n,false,n-1);
           next();
         },700);
@@ -290,6 +293,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     function done(){
       chips=finalChips;
       phase='idle';
+      Sound.outcome(profit,wager);
       if(profit>0){
         msgEl.textContent=label+'! Profit: +'+profit+' chips.';
         if(toBank>0){msgEl.textContent+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(profit-toBank)+'.'}
@@ -325,6 +329,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     }
     chips-=bet;setNum(CHIPS_KEY,chips);
     wager=bet;
+    Sound.play('chip');Sound.repeat('card',4,0.2);
     deck=shuffled();
     player=[deck[0],deck[2]];
     dealer=[deck[1],deck[3]];
@@ -348,6 +353,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
 
   function hit(){
     if(phase!=='player'){return}
+    Sound.play('card');
     player.push(deck[pos++]);
     renderPlayer();
     var v=value(player).total;
@@ -368,6 +374,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
   function dbl(){
     if(phase!=='player'||player.length!==2||chips<wager){return}
     chips-=wager;setNum(CHIPS_KEY,chips);
+    Sound.play('chip');Sound.play('card');
     wager=wager*2;
     setBal();
     player.push(deck[pos++]);

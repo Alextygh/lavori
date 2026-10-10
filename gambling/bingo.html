@@ -73,6 +73,8 @@ td:last-child,th:last-child{text-align:right}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -367,11 +369,13 @@ td:last-child,th:last-child{text-align:right}
     pending={prizes:prizes,lineCounts:lineCounts,total:total,cost:cost,profit:profit,toBank:toBank,finalChips:finalChips};
     phase='playing';
     chips-=cost;setBal();
+    Sound.play('chip');
     msgEl.textContent='Calling the balls...';
     var shown=0;
     renderCaller(0);renderCards(0,false,null);renderControls();
     timerId=setInterval(function(){
       shown++;
+      Sound.play('ball');
       renderCaller(shown);
       renderCards(shown,false,null);
       if(shown>=CALLS){finish()}
@@ -390,6 +394,7 @@ td:last-child,th:last-child{text-align:right}
     var r=pending;pending=null;
     chips=r.finalChips;
     phase='ready';
+    Sound.outcome(r.profit,r.cost);
     renderCaller(CALLS);
     renderCards(CALLS,true,r);
     var winners=r.prizes.filter(function(p){return p>0}).length;

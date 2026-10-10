@@ -44,7 +44,7 @@ h1{font-size:clamp(32px,7vw,52px);margin:0;letter-spacing:1px;color:var(--gold)}
 .foot a{color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;z-index:20}
 .toast.show{opacity:1}
-#gate{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:16px;z-index:10;overflow-y:auto}
+#gate,#resetGate{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:16px;z-index:10;overflow-y:auto}
 .modal{background:var(--panel);border-radius:16px;max-width:560px;width:100%;padding:24px;border:3px solid var(--warn-b);font-family:system-ui,sans-serif}
 .modal h2{margin:0 0 10px;font-family:Georgia,serif;color:var(--gold)}
 .modal ul{padding-left:20px;margin:10px 0}
@@ -56,7 +56,13 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
 .go:disabled{opacity:.4;cursor:not-allowed}
 .no{background:var(--line);color:var(--text)}
 .repayrow .btn{flex:none}
+.resetrow{margin-top:14px}
+button.reset{background:transparent;color:var(--neg);border:2px solid var(--neg);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:system-ui,sans-serif}
+button.reset:hover,button.reset:focus-visible{background:var(--neg);color:#fff;outline:none}
+.danger{background:var(--neg);color:#fff}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 
@@ -75,6 +81,17 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
     <div class="btns">
       <button class="btn go" id="enter" disabled>Enter the simulator</button>
       <button class="btn no" id="leave">Leave</button>
+    </div>
+  </div>
+</div>
+
+<div id="resetGate" role="dialog" aria-modal="true" aria-labelledby="rt" style="display:none">
+  <div class="modal">
+    <h2 id="rt">Reset all progress?</h2>
+    <p>This sets your chips back to <strong>50</strong> and erases your debt, loans, total won, total lost and any unfinished games or tickets. It cannot be undone.</p>
+    <div class="btns">
+      <button class="btn danger" id="resetYes">Yes, reset everything</button>
+      <button class="btn no" id="resetNo">Cancel</button>
     </div>
   </div>
 </div>
@@ -121,6 +138,7 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
     <p>Lucky Sim is a fictional project. No real-money gambling, no payments, no prizes.<br>
     The house always wins in real life, so please play responsibly.</p>
     <p><a href="#" id="info">Responsible gaming info</a></p>
+    <div class="resetrow"><button class="reset" id="reset">Reset progress</button></div>
   </div>
 </div>
 
@@ -218,6 +236,7 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
     if(!ok){return}
     set(K.chips,get(K.chips,START)+LOAN);
     set(K.debt,get(K.debt,0)+OWED);
+    Sound.play('chip');
     set(K.loans,get(K.loans,0)+1);
     set(K.ready,Date.now()+COOLDOWN);
     render();
@@ -229,6 +248,7 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
     if(debt===0){toast('You have no debt.');return}
     if(chips===0){toast('You have no chips to repay with.');return}
     var pay=Math.min(chips,debt);
+    Sound.play('chip');
     set(K.chips,chips-pay);set(K.debt,debt-pay);
     render();
     toast('Repaid '+fmt(pay)+' chips.'+(debt-pay>0?' You still owe '+fmt(debt-pay)+'.':' You are debt free.'));
@@ -236,6 +256,25 @@ button.btn{flex:1;min-width:140px;padding:12px;border-radius:10px;border:0;font-
 
   document.getElementById('info').addEventListener('click',function(e){
     e.preventDefault();ack.checked=false;enter.disabled=true;gate.style.display='flex';
+  });
+
+  var resetGate=document.getElementById('resetGate');
+  document.getElementById('reset').addEventListener('click',function(){resetGate.style.display='flex'});
+  document.getElementById('resetNo').addEventListener('click',function(){resetGate.style.display='none'});
+  document.getElementById('resetYes').addEventListener('click',function(){
+    /* remove every Lucky Sim save (chips, debt, stats, saved hands, jackpot...) but keep the
+       disclaimer acknowledgement and the sound setting */
+    try{
+      var keep=[K.ack,K.ver,'luckysim_sound'],drop=[];
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf('luckysim_')===0&&keep.indexOf(k)===-1){drop.push(k)}
+      }
+      drop.forEach(function(k){localStorage.removeItem(k)});
+    }catch(e){}
+    resetGate.style.display='none';
+    render();
+    toast('Progress reset. You are back to '+START+' chips.');
   });
 
   setInterval(renderLoan,1000);

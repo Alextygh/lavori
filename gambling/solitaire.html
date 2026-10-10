@@ -59,6 +59,8 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 .toast.show{opacity:1}
 </style>
+<script>window.Sound=window.Sound||{play:function(){},repeat:function(){},outcome:function(){},enabled:function(){return false}};</script>
+<script src="sounds.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -348,6 +350,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     if(!canFoundation(f)){return false}
     var id=selCards()[0];
     removeSel();found[f].push(id);
+    Sound.play('chip');
     afterMove();return true;
   }
   function toTableau(c){
@@ -355,6 +358,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     var cs=selCards();
     removeSel();
     cs.forEach(function(id){tab[c].push({id:id,up:true})});
+    Sound.play('card');
     afterMove();return true;
   }
 
@@ -389,9 +393,11 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     sel=null;
     if(stock.length){
       for(var n=0;n<DRAW&&stock.length;n++){waste.push(stock.shift())}
+      Sound.play('flip');
       saveState();render();updateHint();
     }else if(waste.length&&pass<MAX_PASSES){
       stock=waste;waste=[];pass++;
+      Sound.play('shuffle');
       saveState();render();updateHint();
     }else{
       msgEl.textContent='No more passes through the stock. Make any moves you still can, then Cash Out.';
@@ -447,6 +453,7 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     }
     chips-=bet;setNum(CHIPS_KEY,chips);
     wager=bet;
+    Sound.play('chip');Sound.play('shuffle');
     var d=shuffled(),p=0;
     tab=[];
     for(var c=0;c<7;c++){
@@ -476,7 +483,9 @@ h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
     chips=chips+ret-toBank;
     setNum(CHIPS_KEY,chips);
     clearState();
-    phase='idle';sel=null;cashArmed=false;cashBtn.textContent='CASH OUT';
+    phase='idle';sel=null;cashArmed=false;
+    if(cleared){Sound.play('big')}else{Sound.outcome(profit,wager)}
+    cashBtn.textContent='CASH OUT';
     var text=(cleared?'You cleared the board! ':'')+homeCount+' card'+(homeCount===1?'':'s')+' home pays '+ret+'.';
     if(profit>0){
       text+=' Profit: +'+profit+' chips.';
