@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Craps | Lucky Sim</title>
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#f4f1ea; --panel:#ffffff; --text:#1c1b19; --muted:#6b675e;
+  --gold:#b8860b; --accent:#0f6b4a; --warn:#fff3cd; --warn-b:#e0b400; --line:#ddd7c8;
+  --red:#b3262e; --felt:#14573d;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a15; --panel:#16251e; --text:#f1ece0; --muted:#a39f93;
+    --gold:#e6b422; --accent:#2fbf8a; --warn:#3a3210; --warn-b:#e6b422; --line:#2a3d34;
+    --red:#ff6b6b; --felt:#0f3d2b;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+.banner{background:var(--warn);border:2px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:13.5px;text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+h1{margin:0;font-family:Georgia,serif;color:var(--gold);font-size:28px}
+.balance{padding:8px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-weight:700}
+.debt{color:var(--red);margin-left:10px;font-size:13px}
+.table{background:var(--felt);border:5px solid var(--gold);border-radius:20px;padding:16px 12px}
+.stage{display:flex;align-items:center;justify-content:center;gap:clamp(12px,5vw,30px);flex-wrap:wrap;margin-bottom:12px}
+.dice{display:flex;gap:14px}
+.die{width:clamp(60px,18vw,84px);aspect-ratio:1;background:#fff;border-radius:14px;border:2px solid #999;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:11%;box-shadow:0 3px 6px rgba(0,0,0,.35)}
+.die i{display:block;border-radius:50%;margin:12%}
+.die i.on{background:#111}
+.die.rolling{animation:shake .12s linear infinite}
+@keyframes shake{0%{transform:rotate(-6deg)}50%{transform:rotate(6deg) translateY(-3px)}100%{transform:rotate(-6deg)}}
+.puck{width:84px;height:84px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;border:4px solid #fff;text-align:center;line-height:1.1}
+.puck.off{background:#111;color:#fff}
+.puck.on{background:#fff;color:#111;border-color:#111}
+.puck small{font-size:11px;letter-spacing:.5px}
+.puck b{font-size:26px}
+.hist{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;min-height:26px}
+.hist span{background:rgba(255,255,255,.18);color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;font-size:13px}
+.hist span.seven{background:var(--red)}
+.areas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.area{position:relative;text-align:center;padding:12px 8px;border-radius:12px;border:3px dashed var(--gold);background:rgba(0,0,0,.25);color:#fff;cursor:pointer;font-family:inherit;font-weight:800;font-size:17px;line-height:1.2}
+.area small{display:block;font-size:12px;font-weight:600;opacity:.85;margin-top:2px}
+.area .amt{display:block;margin-top:6px;font-size:15px;color:var(--gold)}
+.area.has{background:rgba(0,0,0,.45);border-style:solid}
+.area.wide{grid-column:1/-1}
+.area:disabled{opacity:.45;cursor:not-allowed}
+#msg{min-height:3.4em;margin:14px 0 8px;text-align:center;color:#fff;font-weight:600;font-size:15.5px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.bets{display:flex;gap:8px;align-items:center;color:#fff;font-size:14px;font-weight:600}
+.pick{width:52px;height:52px;border-radius:50%;border:3px dashed var(--gold);background:var(--panel);color:var(--text);font-weight:800;cursor:pointer;font-family:inherit}
+.pick.sel{background:var(--gold);color:#fff;border-style:solid}
+.pick:disabled{opacity:.5;cursor:not-allowed}
+.btn{padding:13px 26px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn.alt{background:var(--panel);color:var(--text);border:2px solid var(--gold);font-size:15px;padding:12px 16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rules{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
+.rules h2{margin:0 0 8px;font-size:16px;color:var(--gold);font-family:Georgia,serif}
+.rules ul{margin:0;padding-left:20px}
+.rules li{margin-bottom:4px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">🎭 SIMULATION ONLY: Fake chips, no real money, no real prizes. Not a real gambling website.</div>
+
+  <div class="top">
+    <a href="index.html">← Back to menu</a>
+    <h1>Craps</h1>
+    <div class="balance">🪙 <span id="bal">50</span><span id="debt" class="debt"></span></div>
+  </div>
+
+  <div class="table">
+    <div class="stage">
+      <div class="dice" aria-label="Dice">
+        <div class="die" id="d1"></div>
+        <div class="die" id="d2"></div>
+      </div>
+      <div class="puck off" id="puck" aria-live="polite"><small>COME OUT</small><b>OFF</b></div>
+    </div>
+    <div class="hist" id="hist" aria-label="Recent rolls"></div>
+
+    <div class="areas" id="areas"></div>
+
+    <div id="msg" aria-live="polite">Put chips on the Pass Line (or Don't Pass), then roll.</div>
+
+    <div class="controls">
+      <div class="bets"><span>Chip:</span><span id="bets"></span></div>
+    </div>
+    <div class="controls" style="margin-top:12px">
+      <button class="btn" id="roll">ROLL</button>
+      <button class="btn alt" id="clear">Take bets back</button>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h2>House rules</h2>
+    <ul>
+      <li>Tap a bet area to place the selected chip on it. The chips leave your balance right away.</li>
+      <li><strong>Come-out roll:</strong> on the Pass Line, 7 or 11 wins and 2, 3 or 12 loses. Any other number becomes the <strong>point</strong>. Then the shooter keeps rolling: hitting the point again wins, and a 7 loses.</li>
+      <li><strong>Don't Pass</strong> is the opposite. 2 or 3 wins, 7 or 11 loses, 12 is a push (your bet is returned), and after a point it wins on a 7 and loses if the point repeats.</li>
+      <li><strong>Pass and Don't Pass</strong> pay 1 to 1. You can only hold one of the two, and they are locked in once a point is set.</li>
+      <li><strong>Odds</strong> open once a point is set, up to 2 times your line bet, and pay true odds with no house edge. Pass odds pay 2 to 1 on 4 or 10, 3 to 2 on 5 or 9, and 6 to 5 on 6 or 8. Don't Pass odds pay the reverse (1 to 2, 2 to 3, 5 to 6). Payouts are rounded down to whole chips.</li>
+      <li><strong>Field</strong> is a one-roll bet. 3, 4, 9, 10 or 11 pays 1 to 1, 2 or 12 pays 2 to 1, and anything else loses.</li>
+      <li><strong>Any 7</strong> is a one-roll bet that pays 4 to 1 if the next roll is a 7.</li>
+      <li>Every roll is saved the moment it happens, and your table is kept if you leave. While you owe money, the profit from a roll goes to the bank first.</li>
+    </ul>
+  </div>
+
+  <p class="note">Your chips are saved in this browser and shared with the main menu. Out of chips? Only the main menu loan can save you, and it comes with debt.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var CHIPS_KEY='luckysim_chips',DEBT_KEY='luckysim_debt',WON_KEY='luckysim_won',LOST_KEY='luckysim_lost',STATE_KEY='luckysim_craps';
+  var START=50,BROKE=5,MAX_ODDS=2;
+
+  function getNum(key,def){
+    try{
+      var v=localStorage.getItem(key);
+      if(v===null){return def}
+      var n=parseInt(v,10);
+      return (isNaN(n)||n<0)?def:n;
+    }catch(e){return def}
+  }
+  function setNum(key,n){try{localStorage.setItem(key,String(n))}catch(e){}}
+  function addNum(key,amt){setNum(key,getNum(key,0)+amt)}
+  (function initStore(){
+    try{
+      if(localStorage.getItem('luckysim_v')!=='2'){
+        ['luckysim_chips','luckysim_debt','luckysim_loans','luckysim_won','luckysim_lost','luckysim_loan_ready','luckysim_poker','luckysim_blackjack','luckysim_solitaire','luckysim_craps'].forEach(function(k){localStorage.removeItem(k)});
+        localStorage.setItem('luckysim_v','2');
+      }
+    }catch(e){}
+  })();
+
+  var PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+  var chips=getNum(CHIPS_KEY,START);
+  var chip=5,phase='idle';       /* idle | rolling */
+  var point=0;                   /* 0 = come-out roll */
+  var b={pass:0,dp:0,odds:0,field:0,any7:0};
+  var hist=[];
+
+  var balEl=document.getElementById('bal');
+  var debtEl=document.getElementById('debt');
+  var msgEl=document.getElementById('msg');
+  var toastEl=document.getElementById('toast');
+  var betsEl=document.getElementById('bets');
+  var areasEl=document.getElementById('areas');
+  var puckEl=document.getElementById('puck');
+  var histEl=document.getElementById('hist');
+  var rollBtn=document.getElementById('roll');
+  var clearBtn=document.getElementById('clear');
+  var dieEls=[document.getElementById('d1'),document.getElementById('d2')];
+  var picks=[],areaBtns={},timer;
+
+  function toast(m){
+    toastEl.textContent=m;toastEl.classList.add('show');
+    clearTimeout(timer);timer=setTimeout(function(){toastEl.classList.remove('show')},2400);
+  }
+  function setBal(){
+    balEl.textContent=chips.toLocaleString('en-US');
+    var d=getNum(DEBT_KEY,0);
+    debtEl.textContent=d>0?('Debt: '+d.toLocaleString('en-US')):'';
+  }
+  function randInt(n){
+    try{
+      var a=new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0]%n;
+    }catch(e){return Math.floor(Math.random()*n)}
+  }
+
+  /* ---------- Saved table ---------- */
+  function saveState(){
+    try{localStorage.setItem(STATE_KEY,JSON.stringify({point:point,b:b,hist:hist}))}catch(e){}
+  }
+  function loadState(){
+    try{
+      var raw=localStorage.getItem(STATE_KEY);
+      if(!raw){return}
+      var s=JSON.parse(raw);
+      if(!s||!s.b){return}
+      var ok=[0,4,5,6,8,9,10].indexOf(s.point)!==-1;
+      ['pass','dp','odds','field','any7'].forEach(function(k){
+        var v=s.b[k];
+        if(typeof v!=='number'||v<0||v!==Math.floor(v)||v>100000){ok=false}
+      });
+      if(!ok){return}
+      point=s.point;
+      b={pass:s.b.pass,dp:s.b.dp,odds:s.b.odds,field:s.b.field,any7:s.b.any7};
+      if(point&&!b.pass&&!b.dp){point=0;b.odds=0}
+      hist=Array.isArray(s.hist)?s.hist.filter(function(n){return typeof n==='number'&&n>=2&&n<=12}).slice(-12):[];
+    }catch(e){}
+  }
+
+  /* ---------- Drawing ---------- */
+  function drawDie(el,v){
+    el.innerHTML='';
+    for(var i=0;i<9;i++){
+      var p=document.createElement('i');
+      if(PIPS[v].indexOf(i)!==-1){p.className='on'}
+      el.appendChild(p);
+    }
+    el.setAttribute('aria-label','Die showing '+v);
+  }
+  var AREAS=[
+    {k:'pass',name:'Pass Line',sub:'pays 1 to 1',wide:true},
+    {k:'dp',name:"Don't Pass Bar",sub:'pays 1 to 1 (12 pushes)',wide:true},
+    {k:'odds',name:'Odds',sub:'true odds, up to 2x your line bet'},
+    {k:'field',name:'Field',sub:'one roll, 1 to 1 (2 and 12 pay 2 to 1)'},
+    {k:'any7',name:'Any 7',sub:'one roll, pays 4 to 1'}
+  ];
+  AREAS.forEach(function(a){
+    var btn=document.createElement('button');
+    btn.className='area'+(a.wide?' wide':'');
+    btn.innerHTML=a.name+'<small>'+a.sub+'</small><span class="amt"></span>';
+    btn.addEventListener('click',function(){place(a.k)});
+    areasEl.appendChild(btn);
+    areaBtns[a.k]=btn;
+  });
+  [5,10,25,50].forEach(function(v){
+    var p=document.createElement('button');
+    p.className='pick'+(v===chip?' sel':'');
+    p.textContent=v;
+    p.setAttribute('aria-label','Chip of '+v);
+    p.addEventListener('click',function(){
+      if(phase!=='idle'){return}
+      chip=v;
+      picks.forEach(function(x){x.classList.remove('sel')});
+      p.classList.add('sel');
+    });
+    betsEl.appendChild(p);
+    picks.push(p);
+  });
+
+  function refreshUI(){
+    var idle=(phase==='idle');
+    AREAS.forEach(function(a){
+      var btn=areaBtns[a.k],amt=b[a.k];
+      btn.querySelector('.amt').textContent=amt?('🪙 '+amt):'';
+      btn.classList.toggle('has',amt>0);
+      var off=!idle;
+      if(a.k==='pass'||a.k==='dp'){off=off||point!==0}
+      if(a.k==='odds'){off=off||point===0}
+      btn.disabled=off;
+    });
+    picks.forEach(function(p){p.disabled=!idle});
+    var lineOn=(b.pass>0||b.dp>0);
+    rollBtn.disabled=!idle||!lineOn;
+    var takeable=b.field+b.any7+b.odds+(point===0?(b.pass+b.dp):0);
+    clearBtn.disabled=!idle||takeable===0;
+    if(point){
+      puckEl.className='puck on';
+      puckEl.innerHTML='<small>POINT</small><b>'+point+'</b>';
+    }else{
+      puckEl.className='puck off';
+      puckEl.innerHTML='<small>COME OUT</small><b>OFF</b>';
+    }
+    histEl.innerHTML='';
+    hist.slice(-12).forEach(function(n){
+      var s=document.createElement('span');
+      s.textContent=n;if(n===7){s.className='seven'}
+      histEl.appendChild(s);
+    });
+    setBal();
+  }
+
+  /* ---------- Placing bets ---------- */
+  function place(k){
+    if(phase!=='idle'){return}
+    if(chips<chip){toast('Not enough chips for that chip size.');return}
+    if(k==='pass'){
+      if(point){return}
+      if(b.dp){toast("You can't bet both Pass and Don't Pass.");return}
+    }
+    if(k==='dp'){
+      if(point){return}
+      if(b.pass){toast("You can't bet both Pass and Don't Pass.");return}
+    }
+    if(k==='odds'){
+      if(!point){return}
+      var flat=b.pass||b.dp;
+      if(b.odds+chip>flat*MAX_ODDS){toast('Odds are capped at '+MAX_ODDS+'x your line bet ('+(flat*MAX_ODDS)+').');return}
+    }
+    b[k]+=chip;
+    chips-=chip;setNum(CHIPS_KEY,chips);
+    saveState();
+    if(k==='pass'||k==='dp'){msgEl.textContent='Roll the dice when you are ready.'}
+    refreshUI();
+  }
+  function takeBack(){
+    if(phase!=='idle'){return}
+    var back=b.field+b.any7+b.odds;
+    b.field=0;b.any7=0;b.odds=0;
+    if(point===0){back+=b.pass+b.dp;b.pass=0;b.dp=0}
+    if(!back){return}
+    chips+=back;setNum(CHIPS_KEY,chips);
+    saveState();
+    msgEl.textContent='Took '+back+' chips back.';
+    refreshUI();
+  }
+
+  /* ---------- Rolling ---------- */
+  var MULT_PASS={4:[2,1],10:[2,1],5:[3,2],9:[3,2],6:[6,5],8:[6,5]};
+  var MULT_LAY={4:[1,2],10:[1,2],5:[2,3],9:[2,3],6:[5,6],8:[5,6]};
+  function payOdds(o,m){return Math.floor(o*m[0]/m[1])}
+
+  function roll(){
+    if(phase!=='idle'||(!b.pass&&!b.dp)){return}
+    phase='rolling';
+    var d1=1+randInt(6),d2=1+randInt(6),t=d1+d2;
+
+    /* work out the result now so leaving mid-roll cannot undo it */
+    var ret=0,stake=0,lines=[];
+    function note(name,delta){lines.push(name+(delta>0?' wins +'+delta:(delta<0?' loses '+(-delta):' pushes')))}
+
+    if(b.field>0){
+      var f=b.field,fr=0;
+      if(t===2||t===12){fr=f*3}else if([3,4,9,10,11].indexOf(t)!==-1){fr=f*2}
+      ret+=fr;stake+=f;note('Field',fr-f);
+    }
+    if(b.any7>0){
+      var a=b.any7,ar=(t===7)?a*5:0;
+      ret+=ar;stake+=a;note('Any 7',ar-a);
+    }
+    var newPoint=point,clearLine=false;
+    if(point===0){
+      if(b.pass>0){
+        var p=b.pass;
+        if(t===7||t===11){ret+=p*2;stake+=p;clearLine=true;note('Pass Line',p)}
+        else if(t===2||t===3||t===12){stake+=p;clearLine=true;note('Pass Line',-p)}
+        else{newPoint=t}
+      }
+      if(b.dp>0){
+        var d=b.dp;
+        if(t===2||t===3){ret+=d*2;stake+=d;clearLine=true;note("Don't Pass",d)}
+        else if(t===12){ret+=d;stake+=d;clearLine=true;note("Don't Pass",0)}
+        else if(t===7||t===11){stake+=d;clearLine=true;note("Don't Pass",-d)}
+        else{newPoint=t}
+      }
+    }else{
+      if(t===point){
+        if(b.pass>0){
+          var win=b.pass+payOdds(b.odds,MULT_PASS[point]);
+          ret+=b.pass*2+b.odds+payOdds(b.odds,MULT_PASS[point]);stake+=b.pass+b.odds;
+          clearLine=true;note('Pass Line'+(b.odds?' and odds':''),win);
+        }
+        if(b.dp>0){
+          stake+=b.dp+b.odds;clearLine=true;
+          note("Don't Pass"+(b.odds?' and odds':''),-(b.dp+b.odds));
+        }
+        newPoint=0;
+      }else if(t===7){
+        if(b.pass>0){
+          stake+=b.pass+b.odds;clearLine=true;
+          note('Pass Line'+(b.odds?' and odds':''),-(b.pass+b.odds));
+        }
+        if(b.dp>0){
+          var lay=payOdds(b.odds,MULT_LAY[point]);
+          ret+=b.dp*2+b.odds+lay;stake+=b.dp+b.odds;clearLine=true;
+          note("Don't Pass"+(b.odds?' and odds':''),b.dp+lay);
+        }
+        newPoint=0;
+      }
+    }
+
+    var net=ret-stake,toBank=0;
+    if(net>0){
+      var debtNow=getNum(DEBT_KEY,0);
+      toBank=Math.min(net,debtNow);
+      if(toBank>0){setNum(DEBT_KEY,debtNow-toBank)}
+      addNum(WON_KEY,net);
+    }else if(net<0){
+      addNum(LOST_KEY,-net);
+    }
+    var finalChips=chips+ret-toBank;
+    setNum(CHIPS_KEY,finalChips);
+
+    var oldPoint=point;
+    b.field=0;b.any7=0;
+    if(clearLine){b.pass=0;b.dp=0;b.odds=0}
+    point=newPoint;
+    hist.push(t);if(hist.length>12){hist.shift()}
+    saveState();
+
+    /* animate, then show the outcome */
+    rollBtn.disabled=true;clearBtn.disabled=true;
+    dieEls.forEach(function(el){el.classList.add('rolling')});
+    msgEl.textContent='Rolling...';
+    var ticks=0;
+    var iv=setInterval(function(){
+      drawDie(dieEls[0],1+randInt(6));drawDie(dieEls[1],1+randInt(6));
+      ticks++;
+      if(ticks>=8){
+        clearInterval(iv);
+        dieEls.forEach(function(el){el.classList.remove('rolling')});
+        drawDie(dieEls[0],d1);drawDie(dieEls[1],d2);
+        finish();
+      }
+    },90);
+
+    function finish(){
+      chips=finalChips;
+      phase='idle';
+      var text='Rolled '+t+' ('+d1+' and '+d2+').';
+      if(oldPoint===0&&newPoint!==0){text+=' The point is '+newPoint+'.'}
+      else if(oldPoint!==0&&newPoint===0&&t===oldPoint){text+=' The point is made!'}
+      else if(oldPoint!==0&&newPoint===0&&t===7){text+=' Seven out!'}
+      if(lines.length){text+=' '+lines.join('. ')+'.'}
+      if(stake>0){
+        if(net>0){
+          text+=' Net: +'+net+' chips.';
+          if(toBank>0){text+=' '+toBank+' went straight to the bank to pay your debt, you keep '+(net-toBank)+'.'}
+        }else if(net<0){text+=' Net: '+net+' chips.'}
+      }else if(newPoint!==0){text+=' Add odds or other bets, then roll again.'}
+      else if(!lines.length){text+=' Roll again.'}
+      if(chips<BROKE&&!b.pass&&!b.dp){text+=' You are out of chips. Visit the main menu for an emergency loan (it comes with debt).'}
+      else if(newPoint===0){text+=' Place your next bet.'}
+      msgEl.textContent=text;
+      refreshUI();
+    }
+  }
+
+  rollBtn.addEventListener('click',roll);
+  clearBtn.addEventListener('click',takeBack);
+
+  function refreshChips(){
+    chips=getNum(CHIPS_KEY,START);
+    refreshUI();
+  }
+  window.addEventListener('pageshow',function(e){if(e.persisted&&phase==='idle'){refreshChips()}});
+  window.addEventListener('storage',function(e){if(e.key===CHIPS_KEY&&phase==='idle'){refreshChips()}});
+
+  loadState();
+  drawDie(dieEls[0],1);drawDie(dieEls[1],1);
+  if(point||b.pass||b.dp||b.field||b.any7||b.odds){msgEl.textContent='Welcome back. Your table was waiting'+(point?' with the point on '+point+'.':'.')}
+  refreshUI();
+})();
+</script>
+</body>
+</html>
