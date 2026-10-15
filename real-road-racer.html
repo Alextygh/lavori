@@ -59,12 +59,9 @@
   <div class="check"><input id="bld" type="checkbox" checked><label for="bld" style="margin:0">Add buildings (OpenStreetMap)</label></div>
   <button id="go">Build track</button>
   <div id="status">Click the map to set the start, click again for the end. Then build the track.</div>
-  <h2>Garage</h2>
+  <h2>Car</h2>
   <div id="garage"></div>
-  <label for="plate">Unlock a car with a license plate</label>
-  <div class="row"><select id="country" aria-label="Country"><option value="NL">Netherlands (live lookup)</option><option value="XX">Other country (manual)</option></select><input id="plate" type="text" placeholder="12-AB-34" autocomplete="off"></div>
-  <div id="manual"><input id="mname" type="text" placeholder="Make and model"><select id="mclass" aria-label="Car class" style="margin-top:6px"><option value="hatch">Hatchback</option><option value="sedan">Sedan / estate</option><option value="suv">SUV / MPV</option><option value="sports">Sports car</option><option value="super">Supercar</option></select></div>
-  <button id="unlock">Unlock car</button>
+
 </div>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
 <div id="help">Arrows or WASD to drive &middot; Space to brake &middot; R to restart</div>
@@ -103,8 +100,6 @@ const CLASSES = {
   sports: { name:'Sports',    len:4.4, w:1.9,  h:.55, cab:.45, top:56, acc:19, grip:1.1 },
   super:  { name:'Supercar',  len:4.5, w:2.0,  h:.5,  cab:.4,  top:66, acc:24, grip:1.2 }
 };
-const COLORS = { ZWART:0x1a1a1a, WIT:0xeeeeee, GRIJS:0x777c84, ZILVER:0xb9bec6, BLAUW:0x2f5fb3, ROOD:0xc93030,
-  GROEN:0x2f8a4a, GEEL:0xe3c32d, ORANJE:0xe7822c, BRUIN:0x6a4a33, BEIGE:0xc9b693 };
 const car = new THREE.Group(); scene.add(car);
 let cur = CLASSES.hatch;
 function setCar(c) {
@@ -333,11 +328,20 @@ async function addBuildings(a, kx, kz, coords, pts, group, minY, hw) {
   let s = 90, w = 180, n = -90, e = -180;
   for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
   const pad = .0012;
-  const q = `[out:json][timeout:25];way["building"](${s-pad},${w-pad},${n+pad},${e+pad});out geom 1500;`;
-  const r = await fetch('https://overpass-api.de/api/interpreter', { method:'POST',
-    headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'data=' + encodeURIComponent(q) });
-  if (!r.ok) throw new Error('Overpass returned ' + r.status);
-  const j = await r.json();
+  const q = `[out:json][timeout:15];way["building"](${s-pad},${w-pad},${n+pad},${e+pad});out geom 1200;`;
+  const mirrors = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'];
+  let j = null, last = '';
+  for (const url of mirrors) {
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
+      const r = await fetch(url + '?data=' + encodeURIComponent(q), { signal:ctl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error('status ' + r.status);
+      j = await r.json(); break;
+    } catch (err) { last = err.name === 'AbortError' ? 'timeout' : err.message; }
+  }
+  if (!j) throw new Error('all Overpass servers failed (' + last + '), try again in a minute');
   const mats = [0xb7a99a, 0xa89d8f, 0xc4b6a3].map(c => new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide }));
   let count = 0;
   for (const el of j.elements) {
@@ -371,47 +375,26 @@ map.on('click', e => {
   clicks++;
 });
 
-/* ---------- Garage + plate unlock ---------- */
-let garage = [{ name:'Starter hatchback', cls:'hatch', color:0xd9482b }], sel = 0;
-try { const g = JSON.parse(localStorage.getItem('rrGarage')); if (Array.isArray(g) && g.length) garage = g; } catch (e) {}
+/* ---------- Car selection ---------- */
+const garage = [
+  { name:'City hatchback', cls:'hatch',  color:0xd9482b },
+  { name:'Family sedan',   cls:'sedan',  color:0x2f5fb3 },
+  { name:'Off-road SUV',   cls:'suv',    color:0x2f8a4a },
+  { name:'Sports coupe',   cls:'sports', color:0xe3c32d },
+  { name:'Supercar',       cls:'super',  color:0xc93030 }
+];
+let sel = 0;
 function renderGarage() {
   const box = $('garage'); box.innerHTML = '';
   garage.forEach((c, i) => {
     const b = document.createElement('button');
-    b.textContent = c.name + ' (' + CLASSES[c.cls].name + ')'; if (i === sel) b.className = 'sel';
-    b.onclick = () => { sel = i; setCar(garage[i]); renderGarage(); };
+    b.textContent = c.name + ' · ' + Math.round(CLASSES[c.cls].top * 3.6) + ' km/h top speed';
+    if (i === sel) b.className = 'sel';
+    b.onclick = () => { sel = i; setCar(garage[i]); renderGarage(); b.blur(); };
     box.appendChild(b);
   });
 }
 setCar(garage[0]); renderGarage();
-$('country').onchange = () => { $('manual').style.display = $('country').value === 'XX' ? 'block' : 'none'; };
-$('unlock').onclick = async () => {
-  const plate = $('plate').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (plate.length < 4) return say('Enter a license plate first.', true);
-  try {
-    let c;
-    if ($('country').value === 'NL') {
-      say('Looking up plate…');
-      const r = await fetch('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + plate);
-      const v = (await r.json())[0];
-      if (!v) throw new Error('No Dutch vehicle found for that plate.');
-      if (v.voertuigsoort !== 'Personenauto') throw new Error('That plate is not a passenger car.');
-      const price = +v.catalogusprijs || 0, bodyType = (v.inrichting || '').toLowerCase();
-      const cls = price > 100000 ? 'super' : (/coupe|cabrio/.test(bodyType) || price > 60000) ? 'sports'
-        : /mpv|multi/.test(bodyType) ? 'suv' : /sedan|station/.test(bodyType) ? 'sedan' : 'hatch';
-      c = { name:((v.merk || '') + ' ' + (v.handelsbenaming || '')).trim(), cls, color:COLORS[v.eerste_kleur] || 0x888888 };
-    } else {
-      const nm = $('mname').value.trim(); if (!nm) throw new Error('Enter the make and model.');
-      c = { name:nm.slice(0, 40), cls:$('mclass').value, color:0x8a9bb5 }; // honor system: no data source
-    }
-    // The plate itself is never stored, only the car it unlocked.
-    $('plate').value = '';
-    let i = garage.findIndex(g => g.name === c.name); if (i < 0) { garage.push(c); i = garage.length - 1; }
-    sel = i; setCar(garage[i]); renderGarage();
-    try { localStorage.setItem('rrGarage', JSON.stringify(garage)); } catch (e) {}
-    say('Unlocked: ' + c.name + ' (' + CLASSES[c.cls].name + ').');
-  } catch (err) { say(err.message, true); }
-};
 
 /* ---------- UI ---------- */
 $('go').addEventListener('click', async () => {
