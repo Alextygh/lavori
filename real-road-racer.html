@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real Road Racer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root { --ink:#f3ede4; --panel:rgba(22,28,40,.82); --accent:#f2a65a; --muted:#a9b3c4; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#1b2434; color:var(--ink);
+    font:15px/1.45 "Trebuchet MS","Segoe UI",system-ui,sans-serif; }
+  canvas { display:block; }
+  #panel { position:fixed; top:12px; left:12px; width:min(340px,calc(100% - 24px)); background:var(--panel);
+    border-radius:10px; padding:14px; backdrop-filter:blur(6px); }
+  #panel h1 { font-size:17px; margin:0 0 10px; font-weight:700; letter-spacing:.2px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:8px 0 3px; }
+  input[type=text], input[type=number] { width:100%; padding:7px 9px; border-radius:6px; border:1px solid #3a475e;
+    background:#121926; color:var(--ink); font:inherit; }
+  input:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .row > * { flex:1; }
+  .check { display:flex; gap:7px; align-items:center; margin-top:10px; color:var(--muted); font-size:13px; }
+  .check input { flex:none; }
+  button { margin-top:12px; width:100%; padding:9px; border:0; border-radius:6px; background:var(--accent);
+    color:#2a1c0c; font:inherit; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.55; cursor:wait; }
+  #status { margin-top:10px; font-size:13px; color:var(--muted); min-height:1.4em; }
+  #status.err { color:#ff9c8f; }
+  #hud { position:fixed; right:14px; bottom:14px; text-align:right; text-shadow:0 1px 6px rgba(0,0,0,.6); pointer-events:none; }
+  #speed { font-size:54px; font-weight:700; line-height:1; }
+  #speed small { font-size:16px; font-weight:400; margin-left:4px; }
+  #info { font-size:14px; color:var(--ink); }
+  #help { position:fixed; left:14px; bottom:12px; font-size:12px; color:var(--muted); }
+  #msg { position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); font-size:30px; font-weight:700;
+    text-shadow:0 2px 12px rgba(0,0,0,.7); display:none; text-align:center; }
+  #panel { max-height:calc(100% - 24px); overflow:auto; }
+  #map { height:170px; border-radius:6px; margin:6px 0 2px; }
+  h2 { font-size:14px; margin:16px 0 2px; }
+  select { width:100%; padding:7px 9px; border-radius:6px; border:1px solid #3a475e; background:#121926; color:var(--ink); font:inherit; }
+  #garage button { margin:4px 0 0; background:#26324a; color:var(--ink); text-align:left; font-weight:400; padding:7px 9px; }
+  #garage button.sel { outline:2px solid var(--accent); }
+  #manual { display:none; margin-top:6px; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Real Road Racer</h1>
+  <div id="map"></div>
+  <label for="a">Start (latitude, longitude)</label>
+  <input id="a" type="text" value="45.4641, 9.1919">
+  <label for="b">End (latitude, longitude)</label>
+  <input id="b" type="text" value="45.4705, 9.1795">
+  <div class="row">
+    <div><label for="w">Road width (m)</label><input id="w" type="number" value="9" min="4" max="20"></div>
+    <div><label for="ex">Hill exaggeration</label><input id="ex" type="number" value="1" min="0" max="5" step="0.5"></div>
+  </div>
+  <div class="check"><input id="elev" type="checkbox" checked><label for="elev" style="margin:0">Use real elevation</label></div>
+  <div class="check"><input id="bld" type="checkbox" checked><label for="bld" style="margin:0">Add buildings (OpenStreetMap)</label></div>
+  <button id="go">Build track</button>
+  <div id="status">Click the map to set the start, click again for the end. Then build the track.</div>
+  <h2>Garage</h2>
+  <div id="garage"></div>
+  <label for="plate">Unlock a car with a license plate</label>
+  <div class="row"><select id="country" aria-label="Country"><option value="NL">Netherlands (live lookup)</option><option value="XX">Other country (manual)</option></select><input id="plate" type="text" placeholder="12-AB-34" autocomplete="off"></div>
+  <div id="manual"><input id="mname" type="text" placeholder="Make and model"><select id="mclass" aria-label="Car class" style="margin-top:6px"><option value="hatch">Hatchback</option><option value="sedan">Sedan / estate</option><option value="suv">SUV / MPV</option><option value="sports">Sports car</option><option value="super">Supercar</option></select></div>
+  <button id="unlock">Unlock car</button>
+</div>
+<div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
+<div id="help">Arrows or WASD to drive &middot; Space to brake &middot; R to restart</div>
+<div id="msg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const statusEl = $('status');
+const say = (t, err) => { statusEl.textContent = t; statusEl.className = err ? 'err' : ''; };
+
+/* ---------- Three.js scene ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x9bb3cc);
+scene.fog = new THREE.Fog(0x9bb3cc, 120, 900);
+const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.5, 3000);
+scene.add(new THREE.HemisphereLight(0xdfe9f5, 0x3b4a3a, 0.9));
+const sun = new THREE.DirectionalLight(0xffe2b8, 0.8);
+sun.position.set(-200, 300, 120);
+scene.add(sun);
+addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+});
+
+// Car classes (generic archetypes; swap in real models later)
+const CLASSES = {
+  hatch:  { name:'Hatchback', len:3.9, w:1.75, h:.7,  cab:.55, top:42, acc:14, grip:1.0 },
+  sedan:  { name:'Sedan',     len:4.7, w:1.85, h:.7,  cab:.55, top:47, acc:15, grip:.95 },
+  suv:    { name:'SUV',       len:4.6, w:1.95, h:1.0, cab:.7,  top:40, acc:12, grip:.85 },
+  sports: { name:'Sports',    len:4.4, w:1.9,  h:.55, cab:.45, top:56, acc:19, grip:1.1 },
+  super:  { name:'Supercar',  len:4.5, w:2.0,  h:.5,  cab:.4,  top:66, acc:24, grip:1.2 }
+};
+const COLORS = { ZWART:0x1a1a1a, WIT:0xeeeeee, GRIJS:0x777c84, ZILVER:0xb9bec6, BLAUW:0x2f5fb3, ROOD:0xc93030,
+  GROEN:0x2f8a4a, GEEL:0xe3c32d, ORANJE:0xe7822c, BRUIN:0x6a4a33, BEIGE:0xc9b693 };
+const car = new THREE.Group(); scene.add(car);
+let cur = CLASSES.hatch;
+function setCar(c) {
+  cur = CLASSES[c.cls]; car.clear();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(cur.w, cur.h, cur.len), new THREE.MeshLambertMaterial({ color:c.color }));
+  body.position.y = .35 + cur.h / 2;
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(cur.w * .82, cur.cab, cur.len * .45), new THREE.MeshLambertMaterial({ color:0x1d2633 }));
+  cab.position.set(0, .35 + cur.h + cur.cab / 2, -cur.len * .05);
+  car.add(body, cab);
+}
+
+let trackGroup = null, track = null; // track = {pts:[Vector3], n, length}
+
+/* ---------- Geo helpers ---------- */
+function parseLatLon(s) {
+  const m = s.match(/(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)/);
+  if (!m) throw new Error('Could not read coordinates: "' + s + '". Use the form 45.4641, 9.1919');
+  return { lat:+m[1], lon:+m[2] };
+}
+function haversine(a, b) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat/2)**2 + Math.cos(a.lat*r) * Math.cos(b.lat*r) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/* ---------- Data fetching ---------- */
+async function fetchRoute(a, b) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=full&geometries=geojson`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Routing service returned ' + r.status);
+  const j = await r.json();
+  if (!j.routes || !j.routes.length) throw new Error('No drivable route found between those points.');
+  return j.routes[0].geometry.coordinates.map(c => ({ lon:c[0], lat:c[1] }));
+}
+async function fetchElevation(coords) {
+  // sample up to 100 evenly spaced points along the route, interpolate the rest later
+  const k = Math.min(100, coords.length);
+  const idx = Array.from({ length:k }, (_, i) => Math.round(i * (coords.length - 1) / (k - 1)));
+  const lat = idx.map(i => coords[i].lat.toFixed(5)).join(',');
+  const lon = idx.map(i => coords[i].lon.toFixed(5)).join(',');
+  const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+  if (!r.ok) throw new Error('Elevation service returned ' + r.status);
+  const j = await r.json();
+  return { idx, h:j.elevation };
+}
+
+/* ---------- Track building ---------- */
+function ribbon(pts, frames, half, lift, color) {
+  const pos = [], ind = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i], n = frames[i];
+    pos.push(p.x + n.x * half[0], p.y + lift, p.z + n.z * half[0],
+             p.x + n.x * half[1], p.y + lift, p.z + n.z * half[1]);
+    if (i < pts.length - 1) { const v = i * 2; ind.push(v, v+1, v+2, v+1, v+3, v+2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(ind); g.computeVertexNormals();
+  return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color, side:THREE.DoubleSide }));
+}
+
+async function buildTrack() {
+  const a = parseLatLon($('a').value), b = parseLatLon($('b').value);
+  const width = Math.max(4, +$('w').value || 9), exag = +$('ex').value;
+  if (haversine(a, b) > 15000) throw new Error('Points are over 15 km apart. Pick a shorter stretch for this prototype.');
+
+  say('Finding the road…');
+  const coords = await fetchRoute(a, b);
+
+  // Local flat projection: metres east (x) and south (z) of the start point
+  const kx = 111320 * Math.cos(a.lat * Math.PI / 180), kz = 110540;
+  const raw = coords.map(c => new THREE.Vector3((c.lon - a.lon) * kx, 0, -(c.lat - a.lat) * kz));
+
+  // Elevation (optional): interpolate sampled heights along the polyline
+  let heights = null;
+  if ($('elev').checked) {
+    try {
+      say('Fetching elevation…');
+      const e = await fetchElevation(coords);
+      heights = new Float32Array(coords.length);
+      for (let s = 0; s < e.idx.length - 1; s++) {
+        for (let i = e.idx[s]; i <= e.idx[s + 1]; i++) {
+          const t = (i - e.idx[s]) / Math.max(1, e.idx[s + 1] - e.idx[s]);
+          heights[i] = e.h[s] + (e.h[s + 1] - e.h[s]) * t;
+        }
+      }
+    } catch (err) { say('Elevation unavailable, using a flat track. (' + err.message + ')'); }
+  }
+  const h0 = heights ? heights[0] : 0;
+  raw.forEach((p, i) => { p.y = heights ? (heights[i] - h0) * exag : 0; });
+
+  // Smooth the jagged polyline into a spline, then sample it every ~3 m
+  say('Building the track…');
+  const curve = new THREE.CatmullRomCurve3(raw, false, 'centripetal');
+  const length = curve.getLength();
+  const n = Math.max(20, Math.round(length / 3));
+  const pts = curve.getSpacedPoints(n);
+  // light smoothing of heights so the road doesn't jitter
+  for (let pass = 0; pass < 6; pass++)
+    for (let i = 1; i < pts.length - 1; i++) pts[i].y = (pts[i-1].y + pts[i].y * 2 + pts[i+1].y) / 4;
+
+  // Left/right normal at each sample
+  const frames = pts.map((p, i) => {
+    const t = pts[Math.min(i + 1, pts.length - 1)].clone().sub(pts[Math.max(i - 1, 0)]); t.y = 0; t.normalize();
+    return new THREE.Vector3(-t.z, 0, t.x);
+  });
+
+  if (trackGroup) { scene.remove(trackGroup); trackGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+  trackGroup = new THREE.Group();
+  const hw = width / 2;
+  trackGroup.add(ribbon(pts, frames, [-hw, hw], 0, 0x3a3f48));              // asphalt
+  trackGroup.add(ribbon(pts, frames, [-hw + .25, -hw + .55], .03, 0xf3ede4)); // edge lines
+  trackGroup.add(ribbon(pts, frames, [hw - .55, hw - .25], .03, 0xf3ede4));
+  trackGroup.add(ribbon(pts, frames, [-hw - 1.2, -hw], -.02, 0x6a5f55));      // verges
+  trackGroup.add(ribbon(pts, frames, [hw, hw + 1.2], -.02, 0x6a5f55));
+  const wall = (off, h) => {
+    const pos = [], ind = [];
+    pts.forEach((p, i) => { const n = frames[i], x = p.x + n.x * off, z = p.z + n.z * off;
+      pos.push(x, p.y, z, x, p.y + h, z); if (i < pts.length - 1) { const v = i * 2; ind.push(v, v+1, v+2, v+1, v+3, v+2); } });
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(ind); g.computeVertexNormals();
+    return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:0xd0d3d8, side:THREE.DoubleSide }));
+  };
+  trackGroup.add(wall(-hw - 1.2, .9), wall(hw + 1.2, .9));
+  const minY = Math.min(...pts.map(p => p.y)) - 1;
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
+  trackGroup.add(ground);
+  scene.add(trackGroup);
+
+  track = { pts, n: pts.length, length, half: hw, frames };
+  let note = '';
+  if ($('bld').checked) {
+    try { say('Fetching buildings…'); const c = await addBuildings(a, kx, kz, coords, pts, trackGroup, minY, hw); note = ` ${c} buildings.`; }
+    catch (err) { note = ' Buildings unavailable (' + err.message + ').'; }
+  }
+  resetCar();
+  say(`Track ready: ${(length / 1000).toFixed(2)} km.${note} Drive!`);
+}
+
+/* ---------- Driving ---------- */
+const keys = {};
+addEventListener('keydown', e => {
+  if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  keys[e.code] = true;
+  if (e.code === 'KeyR') resetCar();
+  if (e.code === 'Space' && e.target === document.body) e.preventDefault();
+});
+addEventListener('keyup', e => keys[e.code] = false);
+
+const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false };
+function resetCar() {
+  if (!track) return;
+  const p = track.pts[0], q = track.pts[3];
+  st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
+  st.speed = 0; st.idx = 0; st.time = 0; st.done = false;
+  $('msg').style.display = 'none';
+}
+
+function step(dt) {
+  if (!track || st.done) return;
+  const up = keys.ArrowUp || keys.KeyW, down = keys.ArrowDown || keys.KeyS;
+  const left = keys.ArrowLeft || keys.KeyA, right = keys.ArrowRight || keys.KeyD;
+
+  // Find nearest centerline sample (search a window around the last one)
+  let best = st.idx, bd = Infinity;
+  for (let i = Math.max(0, st.idx - 25); i < Math.min(track.n, st.idx + 40); i++) {
+    const p = track.pts[i], d = (p.x - st.x) ** 2 + (p.z - st.z) ** 2;
+    if (d < bd) { bd = d; best = i; }
+  }
+  st.idx = best;
+  // Barrier collision: clamp to the wall and scrub speed
+  const bp = track.pts[best], bn = track.frames[best], lim = track.half + .2;
+  let d = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
+  if (Math.abs(d) > lim) {
+    const over = d - Math.sign(d) * lim; st.x -= bn.x * over; st.z -= bn.z * over;
+    st.speed *= 1 - Math.min(1, 2.5 * dt); d = Math.sign(d) * lim;
+  }
+  const offRoad = Math.abs(d) > track.half;
+
+  const topSpeed = offRoad ? 12 : cur.top;
+  if (up) st.speed += cur.acc * dt;
+  if (down) st.speed -= 22 * dt;
+  if (keys.Space) st.speed -= 30 * dt;
+  st.speed -= st.speed * (offRoad ? 1.6 : 0.12) * dt;           // drag
+  st.speed = Math.max(-8, Math.min(topSpeed, st.speed));
+
+  const steer = (left ? 1 : 0) - (right ? 1 : 0);
+  const grip = Math.min(1, Math.abs(st.speed) / 6);
+  st.heading += steer * 1.9 * cur.grip * grip * dt * Math.sign(st.speed || 1) * (1 - Math.min(.55, Math.abs(st.speed) / 110));
+  st.x += Math.sin(st.heading) * st.speed * dt;
+  st.z += Math.cos(st.heading) * st.speed * dt;
+  st.time += dt;
+
+  if (st.idx >= track.n - 3) {
+    st.done = true;
+    $('msg').innerHTML = `Finished in ${st.time.toFixed(1)} s<br><small style="font-size:16px;font-weight:400">Press R to go again</small>`;
+    $('msg').style.display = 'block';
+  }
+}
+
+const camPos = new THREE.Vector3();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
+  step(dt);
+  if (track) {
+    const y = track.pts[st.idx].y;
+    car.position.set(st.x, y, st.z); car.rotation.y = st.heading;
+    const tp = new THREE.Vector3(st.x - Math.sin(st.heading) * 9, y + 4.2, st.z - Math.cos(st.heading) * 9);
+    camPos.lerp(tp, 1 - Math.pow(0.001, dt));
+    camera.position.copy(camPos);
+    camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
+    $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
+    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s`;
+  } else {
+    camera.position.set(0, 30, 60); camera.lookAt(0, 0, 0);
+  }
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+
+/* ---------- Buildings (Overpass) ---------- */
+async function addBuildings(a, kx, kz, coords, pts, group, minY, hw) {
+  let s = 90, w = 180, n = -90, e = -180;
+  for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
+  const pad = .0012;
+  const q = `[out:json][timeout:25];way["building"](${s-pad},${w-pad},${n+pad},${e+pad});out geom 1500;`;
+  const r = await fetch('https://overpass-api.de/api/interpreter', { method:'POST',
+    headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'data=' + encodeURIComponent(q) });
+  if (!r.ok) throw new Error('Overpass returned ' + r.status);
+  const j = await r.json();
+  const mats = [0xb7a99a, 0xa89d8f, 0xc4b6a3].map(c => new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide }));
+  let count = 0;
+  for (const el of j.elements) {
+    if (!el.geometry || el.geometry.length < 4) continue;
+    const fp = el.geometry.map(g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz }));
+    let near = 1e12, by = 0;
+    for (const f of fp) for (let i = 0; i < pts.length; i += 3) {
+      const d = (pts[i].x - f.x) ** 2 + (pts[i].z - f.z) ** 2;
+      if (d < near) { near = d; by = pts[i].y; }
+    }
+    if (near < (hw + 3) ** 2) continue; // keep the road clear
+    const t = el.tags || {}, cx = fp[0].x, cz = fp[0].z;
+    const h = parseFloat(t.height) || (+t['building:levels'] || 0) * 3.2 || 8 + Math.abs(Math.round(cx + cz)) % 6 * 2;
+    try {
+      const sh = new THREE.Shape(fp.map(p => new THREE.Vector2(p.x, -p.z)));
+      const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth:h + (by - minY), bevelEnabled:false }), mats[count % 3]);
+      m.rotation.x = -Math.PI / 2; m.position.y = minY; group.add(m); count++;
+    } catch (err) { /* skip bad footprint */ }
+  }
+  return count;
+}
+
+/* ---------- Map (click start, then end) ---------- */
+const map = L.map('map').setView([45.4668, 9.1856], 14);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(map);
+const pins = []; let clicks = 0;
+map.on('click', e => {
+  const k = clicks % 2; $(k ? 'b' : 'a').value = e.latlng.lat.toFixed(5) + ', ' + e.latlng.lng.toFixed(5);
+  if (pins[k]) pins[k].remove();
+  pins[k] = L.circleMarker(e.latlng, { radius:8, color:k ? '#e74c3c' : '#2ecc71', fillOpacity:.9 }).addTo(map);
+  clicks++;
+});
+
+/* ---------- Garage + plate unlock ---------- */
+let garage = [{ name:'Starter hatchback', cls:'hatch', color:0xd9482b }], sel = 0;
+try { const g = JSON.parse(localStorage.getItem('rrGarage')); if (Array.isArray(g) && g.length) garage = g; } catch (e) {}
+function renderGarage() {
+  const box = $('garage'); box.innerHTML = '';
+  garage.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.textContent = c.name + ' (' + CLASSES[c.cls].name + ')'; if (i === sel) b.className = 'sel';
+    b.onclick = () => { sel = i; setCar(garage[i]); renderGarage(); };
+    box.appendChild(b);
+  });
+}
+setCar(garage[0]); renderGarage();
+$('country').onchange = () => { $('manual').style.display = $('country').value === 'XX' ? 'block' : 'none'; };
+$('unlock').onclick = async () => {
+  const plate = $('plate').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (plate.length < 4) return say('Enter a license plate first.', true);
+  try {
+    let c;
+    if ($('country').value === 'NL') {
+      say('Looking up plate…');
+      const r = await fetch('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + plate);
+      const v = (await r.json())[0];
+      if (!v) throw new Error('No Dutch vehicle found for that plate.');
+      if (v.voertuigsoort !== 'Personenauto') throw new Error('That plate is not a passenger car.');
+      const price = +v.catalogusprijs || 0, bodyType = (v.inrichting || '').toLowerCase();
+      const cls = price > 100000 ? 'super' : (/coupe|cabrio/.test(bodyType) || price > 60000) ? 'sports'
+        : /mpv|multi/.test(bodyType) ? 'suv' : /sedan|station/.test(bodyType) ? 'sedan' : 'hatch';
+      c = { name:((v.merk || '') + ' ' + (v.handelsbenaming || '')).trim(), cls, color:COLORS[v.eerste_kleur] || 0x888888 };
+    } else {
+      const nm = $('mname').value.trim(); if (!nm) throw new Error('Enter the make and model.');
+      c = { name:nm.slice(0, 40), cls:$('mclass').value, color:0x8a9bb5 }; // honor system: no data source
+    }
+    // The plate itself is never stored, only the car it unlocked.
+    $('plate').value = '';
+    let i = garage.findIndex(g => g.name === c.name); if (i < 0) { garage.push(c); i = garage.length - 1; }
+    sel = i; setCar(garage[i]); renderGarage();
+    try { localStorage.setItem('rrGarage', JSON.stringify(garage)); } catch (e) {}
+    say('Unlocked: ' + c.name + ' (' + CLASSES[c.cls].name + ').');
+  } catch (err) { say(err.message, true); }
+};
+
+/* ---------- UI ---------- */
+$('go').addEventListener('click', async () => {
+  $('go').disabled = true;
+  try { await buildTrack(); } catch (err) { say(err.message, true); }
+  $('go').disabled = false;
+  $('go').blur();
+});
+</script>
+</body>
+</html>
