@@ -52,11 +52,11 @@
   <label for="b">End (latitude, longitude)</label>
   <input id="b" type="text" value="45.4705, 9.1795">
   <div class="row">
-    <div><label for="w">Road width (m)</label><input id="w" type="number" value="9" min="4" max="20"></div>
+    <div><label for="w">Fallback width (m)</label><input id="w" type="number" value="9" min="4" max="20"></div>
     <div><label for="ex">Hill exaggeration</label><input id="ex" type="number" value="1" min="0" max="5" step="0.5"></div>
   </div>
   <div class="check"><input id="elev" type="checkbox" checked><label for="elev" style="margin:0">Use real elevation</label></div>
-  <div class="check"><input id="bld" type="checkbox" checked><label for="bld" style="margin:0">Add buildings (OpenStreetMap)</label></div>
+  <div class="check"><input id="bld" type="checkbox" checked><label for="bld" style="margin:0">Load real roads &amp; buildings (OpenStreetMap)</label></div>
   <button id="go">Build track</button>
   <div id="status">Click the map to set the start, click again for the end. Then build the track.</div>
   <h2>Car</h2>
@@ -148,18 +148,18 @@ async function fetchElevation(coords) {
 }
 
 /* ---------- Track building ---------- */
-function ribbon(pts, frames, half, lift, color) {
-  const pos = [], ind = [];
+function strip(pts, frames, f0, f1, y0, y1, color, mask, vc) {
+  const pos = [], ind = [], col = [];
   for (let i = 0; i < pts.length; i++) {
-    const p = pts[i], n = frames[i];
-    pos.push(p.x + n.x * half[0], p.y + lift, p.z + n.z * half[0],
-             p.x + n.x * half[1], p.y + lift, p.z + n.z * half[1]);
-    if (i < pts.length - 1) { const v = i * 2; ind.push(v, v+1, v+2, v+1, v+3, v+2); }
+    const p = pts[i], n = frames[i], a = f0(i), b = f1(i);
+    pos.push(p.x + n.x * a, p.y + y0, p.z + n.z * a, p.x + n.x * b, p.y + y1, p.z + n.z * b);
+    if (vc) col.push(vc[i].r, vc[i].g, vc[i].b, vc[i].r, vc[i].g, vc[i].b);
+    if (i < pts.length - 1 && !(mask && (mask[i] || mask[i + 1]))) { const v = i * 2; ind.push(v, v+1, v+2, v+1, v+3, v+2); }
   }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  if (vc) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   g.setIndex(ind); g.computeVertexNormals();
-  return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color, side:THREE.DoubleSide }));
+  return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:vc ? 0xffffff : color, vertexColors:!!vc, side:THREE.DoubleSide }));
 }
 
 async function buildTrack() {
@@ -208,37 +208,118 @@ async function buildTrack() {
     return new THREE.Vector3(-t.z, 0, t.x);
   });
 
+  let osm = null;
+  if ($('bld').checked) {
+    try { say('Loading roads and buildings…'); osm = await fetchOSM(a, kx, kz, coords); }
+    catch (err) { console.warn(err); say('Surroundings unavailable (' + err.message + '). Plain track instead.', true); }
+  }
+
+  // spatial grid so "nearest track point" lookups stay fast
+  const G = 40, grid = new Map(), gk = (x, z) => Math.floor(x / G) + ',' + Math.floor(z / G);
+  pts.forEach((p, i) => { const k = gk(p.x, p.z); if (!grid.has(k)) grid.set(k, []); grid.get(k).push(i); });
+  const nearTrack = (x, z, R) => {
+    let bi = -1, bd = R * R; const c = Math.ceil(R / G), cx = Math.floor(x / G), cz = Math.floor(z / G);
+    for (let i = -c; i <= c; i++) for (let j = -c; j <= c; j++) for (const t of grid.get((cx + i) + ',' + (cz + j)) || []) {
+      const d = (pts[t].x - x) ** 2 + (pts[t].z - z) ** 2; if (d < bd) { bd = d; bi = t; } }
+    return { i:bi, d:Math.sqrt(bd) };
+  };
+
+  // Race road: width and surface from the nearest real OSM road
+  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48));
+  if (osm) {
+    osm.roads.forEach(r => { r.dp = densify(r.pts); });
+    const best = new Array(pts.length).fill(null);
+    for (const r of osm.roads) for (const p of r.dp) {
+      const h = nearTrack(p.x, p.z, 8); if (h.i >= 0 && (!best[h.i] || h.d < best[h.i].d)) best[h.i] = { d:h.d, t:r.t };
+    }
+    let last = null;
+    for (let i = 0; i < pts.length; i++) { if (best[i]) last = best[i]; else if (last) best[i] = last; }
+    last = null;
+    for (let i = pts.length - 1; i >= 0; i--) { if (best[i]) last = best[i]; else if (last) best[i] = last; }
+    best.forEach((b, i) => { if (b) { halfs[i] = wOf(b.t) / 2; cols[i].setHex(surfOf(b.t)); } });
+    for (let pass = 0; pass < 8; pass++) for (let i = 1; i < pts.length - 1; i++) halfs[i] = (halfs[i-1] + halfs[i] * 2 + halfs[i+1]) / 4;
+  }
+
+  // Side roads: draw everything outside the race corridor; cut ends become blocked junctions
+  const gap = [new Uint8Array(pts.length), new Uint8Array(pts.length)], runs = [];
+  if (osm) for (const r of osm.roads) {
+    let cur = null, prevNear = false;
+    for (const p of r.dp) {
+      const h = nearTrack(p.x, p.z, 220);
+      if (h.i < 0) { if (cur) { runs.push(cur); cur = null; } prevNear = false; continue; }
+      if (h.d < halfs[h.i] + .3) { if (cur) { cur.endCut = true; runs.push(cur); cur = null; } prevNear = true; continue; }
+      if (!cur) cur = { t:r.t, p:[], startCut:prevNear, endCut:false };
+      cur.p.push({ x:p.x, y:pts[h.i].y, z:p.z }); prevNear = false;
+    }
+    if (cur) runs.push(cur);
+  }
+  const blocks = [];
+  for (const r of runs) {
+    if (r.p.length < 3) continue;
+    const w = wOf(r.t) / 2;
+    if (r.startCut) blocks.push({ q:r.p[0], n:r.p[2], w });
+    if (r.endCut) blocks.push({ q:r.p[r.p.length - 1], n:r.p[r.p.length - 3], w });
+  }
+  for (const b of blocks) { // open the race-road edge where the side road joins
+    const h = nearTrack(b.q.x, b.q.z, 40); if (h.i < 0) continue;
+    const nrm = frames[h.i], side = ((b.q.x - pts[h.i].x) * nrm.x + (b.q.z - pts[h.i].z) * nrm.z) > 0 ? 1 : 0;
+    const k = Math.ceil((b.w + 2) / 3);
+    for (let i = Math.max(0, h.i - k); i <= Math.min(pts.length - 1, h.i + k); i++) gap[side][i] = 1;
+  }
+
+  // ---- build the scene objects
   if (trackGroup) { scene.remove(trackGroup); trackGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
   trackGroup = new THREE.Group();
-  const hw = width / 2;
-  trackGroup.add(ribbon(pts, frames, [-hw, hw], 0, 0x3a3f48));              // asphalt
-  trackGroup.add(ribbon(pts, frames, [-hw + .25, -hw + .55], .03, 0xf3ede4)); // edge lines
-  trackGroup.add(ribbon(pts, frames, [hw - .55, hw - .25], .03, 0xf3ede4));
-  trackGroup.add(ribbon(pts, frames, [-hw - 1.2, -hw], -.02, 0x6a5f55));      // verges
-  trackGroup.add(ribbon(pts, frames, [hw, hw + 1.2], -.02, 0x6a5f55));
-  const wall = (off, h) => {
-    const pos = [], ind = [];
-    pts.forEach((p, i) => { const n = frames[i], x = p.x + n.x * off, z = p.z + n.z * off;
-      pos.push(x, p.y, z, x, p.y + h, z); if (i < pts.length - 1) { const v = i * 2; ind.push(v, v+1, v+2, v+1, v+3, v+2); } });
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    g.setIndex(ind); g.computeVertexNormals();
-    return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:0xd0d3d8, side:THREE.DoubleSide }));
-  };
-  trackGroup.add(wall(-hw - 1.2, .9), wall(hw + 1.2, .9));
+  const L = i => -halfs[i], R = i => halfs[i];
+  trackGroup.add(strip(pts, frames, L, R, 0, 0, 0, null, cols));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] + .25, i => -halfs[i] + .55, .03, .03, 0xf3ede4, gap[0]));
+  trackGroup.add(strip(pts, frames, i => halfs[i] - .55, i => halfs[i] - .25, .03, .03, 0xf3ede4, gap[1]));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, L, -.02, -.02, 0x6a5f55, gap[0]));
+  trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gap[1]));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, gap[0]));
+  trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, gap[1]));
+  for (const r of runs) if (r.p.length > 1) {
+    const w = wOf(r.t) / 2;
+    trackGroup.add(strip(r.p, framesOf(r.p), () => -w, () => w, 0, 0, surfOf(r.t)));
+  }
+  const xMat = new THREE.MeshBasicMaterial({ map:xTex, side:THREE.DoubleSide });
+  for (const b of blocks) { // barrier + yellow X across each blocked side road
+    const dx = b.n.x - b.q.x, dz = b.n.z - b.q.z, l = Math.hypot(dx, dz) || 1, ry = Math.atan2(dx, dz);
+    const px = b.q.x + dx / l * 1.5, pz = b.q.z + dz / l * 1.5;
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(b.w * 2, .9, .4), new THREE.MeshLambertMaterial({ color:0xe5e5e5 }));
+    bar.position.set(px, b.q.y + .45, pz); bar.rotation.y = ry;
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), xMat);
+    sign.position.set(px, b.q.y + 1.75, pz); sign.rotation.y = ry;
+    trackGroup.add(bar, sign);
+  }
   const minY = Math.min(...pts.map(p => p.y)) - 1;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
   trackGroup.add(ground);
-  scene.add(trackGroup);
 
-  track = { pts, n: pts.length, length, half: hw, frames };
-  let note = '';
-  if ($('bld').checked) {
-    try { say('Fetching buildings…'); const c = await addBuildings(a, kx, kz, coords, pts, trackGroup, minY, hw); note = ` ${c} buildings.`; }
-    catch (err) { note = ' Buildings unavailable (' + err.message + ').'; }
+  let nb = 0;
+  if (osm) {
+    const mats = [0xb7a99a, 0xa89d8f, 0xc4b6a3].map(c => new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide }));
+    for (const b of osm.buildings.slice(0, 1500)) {
+      let ok = true, by = 0, dm = 1e9;
+      for (const f of b.fp) {
+        const h = nearTrack(f.x, f.z, 150);
+        if (h.i < 0 || h.d < halfs[h.i] + 3) { ok = false; break; }
+        if (h.d < dm) { dm = h.d; by = pts[h.i].y; }
+      }
+      if (!ok) continue;
+      const t = b.t, hgt = parseFloat(t.height) || (+t['building:levels'] || 0) * 3.2 || 8 + Math.abs(Math.round(b.fp[0].x + b.fp[0].z)) % 6 * 2;
+      try {
+        const sh = new THREE.Shape(b.fp.map(p => new THREE.Vector2(p.x, -p.z)));
+        const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth:hgt + (by - minY), bevelEnabled:false }), mats[nb % 3]);
+        m.rotation.x = -Math.PI / 2; m.position.y = minY; trackGroup.add(m); nb++;
+      } catch (err) { /* skip bad footprint */ }
+    }
   }
+  scene.add(trackGroup);
+  track = { pts, n: pts.length, length, halfs, frames, gap };
   resetCar();
-  say(`Track ready: ${(length / 1000).toFixed(2)} km.${note} Drive!`);
+  say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.') + ' Drive!');
 }
 
 /* ---------- Driving ---------- */
@@ -273,13 +354,14 @@ function step(dt) {
   }
   st.idx = best;
   // Barrier collision: clamp to the wall and scrub speed
-  const bp = track.pts[best], bn = track.frames[best], lim = track.half + .2;
+  const bp = track.pts[best], bn = track.frames[best], hh = track.halfs[best];
   let d = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
+  const lim = hh + (track.gap[d > 0 ? 1 : 0][best] ? 1.6 : .2);
   if (Math.abs(d) > lim) {
     const over = d - Math.sign(d) * lim; st.x -= bn.x * over; st.z -= bn.z * over;
     st.speed *= 1 - Math.min(1, 2.5 * dt); d = Math.sign(d) * lim;
   }
-  const offRoad = Math.abs(d) > track.half;
+  const offRoad = Math.abs(d) > hh;
 
   const topSpeed = offRoad ? 12 : cur.top;
   if (up) st.speed += cur.acc * dt;
@@ -323,46 +405,54 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
-/* ---------- Buildings (Overpass) ---------- */
-async function addBuildings(a, kx, kz, coords, pts, group, minY, hw) {
+/* ---------- Real roads & buildings (Overpass) ---------- */
+const DEFW = { motorway:14, motorway_link:7, trunk:11, trunk_link:7, primary:9, primary_link:6, secondary:8, secondary_link:6,
+  tertiary:7, tertiary_link:5, unclassified:6, residential:6, living_street:5, service:4, road:6 };
+const wOf = t => { const w = parseFloat(t.width); if (w > 0) return Math.min(w, 30);
+  const l = parseInt(t.lanes); if (l > 0) return Math.min(l * 3.2, 30); return DEFW[t.highway] || 6; };
+const surfOf = t => { const v = t.surface || '';
+  if (/cobble|sett|paving|brick/.test(v)) return 0x7d6a58;
+  if (/gravel|dirt|ground|unpaved|compacted|sand|earth|grass/.test(v)) return 0x9b8660;
+  if (/concrete/.test(v)) return 0x9a9da3; return 0x3a3f48; };
+const densify = ps => { const o = [ps[0]];
+  for (let i = 1; i < ps.length; i++) { const a = ps[i-1], b = ps[i], n = Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 4);
+    for (let k = 1; k <= n; k++) o.push({ x:a.x + (b.x - a.x) * k / n, z:a.z + (b.z - a.z) * k / n }); }
+  return o; };
+const framesOf = ps => ps.map((p, i) => { const a = ps[Math.max(i - 1, 0)], b = ps[Math.min(i + 1, ps.length - 1)];
+  const l = Math.hypot(b.x - a.x, b.z - a.z) || 1; return { x:-(b.z - a.z) / l, z:(b.x - a.x) / l }; });
+const xTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#f2c230'; g.fillRect(0, 0, 128, 128); g.strokeStyle = '#111'; g.lineWidth = 8; g.strokeRect(4, 4, 120, 120);
+  g.lineWidth = 16; g.beginPath(); g.moveTo(26, 26); g.lineTo(102, 102); g.moveTo(102, 26); g.lineTo(26, 102); g.stroke();
+  return new THREE.CanvasTexture(c); })();
+
+async function fetchOSM(a, kx, kz, coords) {
   let s = 90, w = 180, n = -90, e = -180;
   for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
-  const pad = .0012;
-  const q = `[out:json][timeout:25];way["building"](${s-pad},${w-pad},${n+pad},${e+pad});out geom;`;
+  const pad = .0025, bb = `${s - pad},${w - pad},${n + pad},${e + pad}`;
+  const q = `[out:json][timeout:25];(way["building"](${bb});way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|road)(_link)?$"](${bb}););out geom;`;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
     'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
   let j = null, last = '';
   for (const url of mirrors) {
     try {
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
       const r = await fetch(url, { method:'POST', body:new URLSearchParams({ data:q }), signal:ctl.signal });
       clearTimeout(t);
       if (!r.ok) throw new Error('status ' + r.status);
       j = await r.json(); break;
     } catch (err) { last = err.name === 'AbortError' ? 'timeout' : err.message; console.warn('Overpass failed:', url, err); }
   }
-  if (!j) throw new Error('all Overpass servers failed (' + last + '), try again in a minute');
-  if (!j.elements || !j.elements.length) throw new Error(j.remark || 'no buildings found here');
-  const mats = [0xb7a99a, 0xa89d8f, 0xc4b6a3].map(c => new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide }));
-  let count = 0;
-  for (const el of j.elements.slice(0, 1500)) {
-    if (!el.geometry || el.geometry.length < 4) continue;
-    const fp = el.geometry.map(g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz }));
-    let near = 1e12, by = 0;
-    for (const f of fp) for (let i = 0; i < pts.length; i += 3) {
-      const d = (pts[i].x - f.x) ** 2 + (pts[i].z - f.z) ** 2;
-      if (d < near) { near = d; by = pts[i].y; }
-    }
-    if (near < (hw + 3) ** 2) continue; // keep the road clear
-    const t = el.tags || {}, cx = fp[0].x, cz = fp[0].z;
-    const h = parseFloat(t.height) || (+t['building:levels'] || 0) * 3.2 || 8 + Math.abs(Math.round(cx + cz)) % 6 * 2;
-    try {
-      const sh = new THREE.Shape(fp.map(p => new THREE.Vector2(p.x, -p.z)));
-      const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth:h + (by - minY), bevelEnabled:false }), mats[count % 3]);
-      m.rotation.x = -Math.PI / 2; m.position.y = minY; group.add(m); count++;
-    } catch (err) { /* skip bad footprint */ }
+  if (!j) throw new Error('all Overpass servers failed (' + last + ')');
+  const xz = g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz });
+  const roads = [], buildings = [];
+  for (const el of j.elements || []) {
+    if (!el.geometry || el.geometry.length < 2) continue;
+    const t = el.tags || {};
+    if (t.highway) { if (t.tunnel && t.tunnel !== 'no') continue; roads.push({ pts:el.geometry.map(xz), t }); }
+    else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), t });
   }
-  return count;
+  if (!roads.length && !buildings.length) throw new Error(j.remark || 'no data returned');
+  return { roads, buildings };
 }
 
 /* ---------- Map (click start, then end) ---------- */
