@@ -329,8 +329,8 @@ async function addBuildings(a, kx, kz, coords, pts, group, minY, hw) {
   for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
   const pad = .0012;
   const q = `[out:json][timeout:25];way["building"](${s-pad},${w-pad},${n+pad},${e+pad});out geom;`;
-  const mirrors = ['https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter',
-    'https://z.overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter'];
+  const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
+    'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
   let j = null, last = '';
   for (const url of mirrors) {
     try {
