@@ -230,7 +230,9 @@ async function buildTrack() {
     osm.roads.forEach(r => { r.dp = densify(r.pts); });
     const best = new Array(pts.length).fill(null);
     for (const r of osm.roads) for (const p of r.dp) {
-      const h = nearTrack(p.x, p.z, 8); if (h.i >= 0 && (!best[h.i] || h.d < best[h.i].d)) best[h.i] = { d:h.d, t:r.t };
+      const h = nearTrack(p.x, p.z, 8); if (h.i < 0) continue;
+      const w = wOf(r.t), c = best[h.i];
+      if (!c || h.d < c.d - 2 || (h.d < c.d + 2 && w > c.w)) best[h.i] = { d:h.d, t:r.t, w };
     }
     let last = null;
     for (let i = 0; i < pts.length; i++) { if (best[i]) last = best[i]; else if (last) best[i] = last; }
@@ -247,22 +249,23 @@ async function buildTrack() {
     for (const p of r.dp) {
       const h = nearTrack(p.x, p.z, 220);
       if (h.i < 0) { if (cur) { runs.push(cur); cur = null; } prevNear = false; continue; }
-      if (h.d < halfs[h.i] + .3) { if (cur) { cur.endCut = true; runs.push(cur); cur = null; } prevNear = true; continue; }
-      if (!cur) cur = { t:r.t, p:[], startCut:prevNear, endCut:false };
-      cur.p.push({ x:p.x, y:pts[h.i].y, z:p.z }); prevNear = false;
+      const pt = { x:p.x, y:pts[h.i].y, z:p.z };
+      if (h.d < halfs[h.i] + .3) { if (cur) { cur.p.push(pt); cur.endCut = true; runs.push(cur); cur = null; } prevNear = pt; continue; }
+      if (!cur) { cur = { t:r.t, p:[], startCut:!!prevNear, endCut:false }; if (prevNear) cur.p.push(prevNear); }
+      cur.p.push(pt); prevNear = false;
     }
     if (cur) runs.push(cur);
   }
   const blocks = [];
   for (const r of runs) {
-    if (r.p.length < 3) continue;
+    if (r.p.length < 5) continue;
     const w = wOf(r.t) / 2;
-    if (r.startCut) blocks.push({ q:r.p[0], n:r.p[2], w });
-    if (r.endCut) blocks.push({ q:r.p[r.p.length - 1], n:r.p[r.p.length - 3], w });
+    if (r.startCut) blocks.push({ j:r.p[0], q:r.p[1], n:r.p[3], w });
+    if (r.endCut) blocks.push({ j:r.p[r.p.length - 1], q:r.p[r.p.length - 2], n:r.p[r.p.length - 4], w });
   }
   for (const b of blocks) { // open the race-road edge where the side road joins
-    const h = nearTrack(b.q.x, b.q.z, 40); if (h.i < 0) continue;
-    const nrm = frames[h.i], side = ((b.q.x - pts[h.i].x) * nrm.x + (b.q.z - pts[h.i].z) * nrm.z) > 0 ? 1 : 0;
+    const h = nearTrack(b.j.x, b.j.z, 40); if (h.i < 0) continue;
+    const nrm = frames[h.i], side = ((b.j.x - pts[h.i].x) * nrm.x + (b.j.z - pts[h.i].z) * nrm.z) > 0 ? 1 : 0;
     const k = Math.ceil((b.w + 2) / 3);
     for (let i = Math.max(0, h.i - k); i <= Math.min(pts.length - 1, h.i + k); i++) gap[side][i] = 1;
   }
@@ -280,7 +283,7 @@ async function buildTrack() {
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, gap[1]));
   for (const r of runs) if (r.p.length > 1) {
     const w = wOf(r.t) / 2;
-    trackGroup.add(strip(r.p, framesOf(r.p), () => -w, () => w, 0, 0, surfOf(r.t)));
+    trackGroup.add(strip(r.p, framesOf(r.p), () => -w, () => w, -.01, -.01, surfOf(r.t)));
   }
   const xMat = new THREE.MeshBasicMaterial({ map:xTex, side:THREE.DoubleSide });
   for (const b of blocks) { // barrier + yellow X across each blocked side road
