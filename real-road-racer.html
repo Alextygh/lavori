@@ -94,12 +94,17 @@ addEventListener('resize', () => {
 
 // Car classes (generic archetypes; swap in real models later)
 const CLASSES = {
-  hatch:  { name:'Hatchback', len:3.9, w:1.75, h:.7,  cab:.55, top:42, acc:14, grip:1.0 },
-  sedan:  { name:'Sedan',     len:4.7, w:1.85, h:.7,  cab:.55, top:47, acc:15, grip:.95 },
-  suv:    { name:'SUV',       len:4.6, w:1.95, h:1.0, cab:.7,  top:40, acc:12, grip:.85 },
-  sports: { name:'Sports',    len:4.4, w:1.9,  h:.55, cab:.45, top:56, acc:19, grip:1.1 },
-  super:  { name:'Supercar',  len:4.5, w:2.0,  h:.5,  cab:.4,  top:66, acc:24, grip:1.2 }
+  hatch:  { name:'Hatchback', len:3.9, w:1.75, h:.7,  cab:.55, m:1100, P:55000,  cda:.70,  mu:1.00, df:0,      vmax:50 },
+  sedan:  { name:'Sedan',     len:4.7, w:1.85, h:.7,  cab:.55, m:1450, P:90000,  cda:.68,  mu:.95,  df:0,      vmax:58 },
+  suv:    { name:'SUV',       len:4.6, w:1.95, h:1.0, cab:.7,  m:1900, P:110000, cda:1.05, mu:.85,  df:0,      vmax:52 },
+  sports: { name:'Sports',    len:4.4, w:1.9,  h:.55, cab:.45, m:1350, P:190000, cda:.62,  mu:1.15, df:.00004, vmax:75 },
+  super:  { name:'Supercar',  len:4.5, w:2.0,  h:.5,  cab:.4,  m:1500, P:420000, cda:.62,  mu:1.25, df:.0001,  vmax:90 }
 };
+for (const c of Object.values(CLASSES)) { // top speed where engine power = air drag + rolling resistance
+  let lo = 1, hi = 150;
+  for (let i = 0; i < 40; i++) { const v = (lo + hi) / 2; if (c.P / v > .5 * 1.2 * c.cda * v * v + .012 * c.m * 9.81) lo = v; else hi = v; }
+  c.top = Math.min(lo, c.vmax);
+}
 const car = new THREE.Group(); scene.add(car);
 let cur = CLASSES.hatch;
 function setCar(c) {
@@ -361,6 +366,17 @@ async function buildTrack() {
 }
 
 /* ---------- Driving ---------- */
+// Ground under the car: height interpolated between track samples, plus the road's slope
+function groundAt(x, z, i) {
+  const P = track.pts; let bi = Math.max(0, Math.min(i, P.length - 2)), bt = 0, bd = 1e12;
+  for (const j of [i - 1, i]) { if (j < 0 || j >= P.length - 1) continue;
+    const a = P[j], b = P[j + 1], dx = b.x - a.x, dz = b.z - a.z, l2 = dx * dx + dz * dz || 1;
+    const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / l2));
+    const d = (a.x + dx * t - x) ** 2 + (a.z + dz * t - z) ** 2;
+    if (d < bd) { bd = d; bi = j; bt = t; } }
+  const a = P[bi], b = P[bi + 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+  return { y:a.y + (b.y - a.y) * bt, slope:(b.y - a.y) / l, tx:(b.x - a.x) / l, tz:(b.z - a.z) / l };
+}
 const keys = {};
 addEventListener('keydown', e => {
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
@@ -370,12 +386,13 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
-const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false };
+const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0 };
 function resetCar() {
   if (!track) return;
   const p = track.pts[0], q = track.pts[3];
   st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
   st.speed = 0; st.idx = 0; st.time = 0; st.done = false;
+  st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0;
   $('msg').style.display = 'none';
 }
 
@@ -401,18 +418,38 @@ function step(dt) {
   }
   const offRoad = Math.abs(d) > hh;
 
-  const topSpeed = offRoad ? 12 : cur.top;
-  if (up) st.speed += cur.acc * dt;
-  if (down) st.speed -= 22 * dt;
-  if (keys.Space) st.speed -= 30 * dt;
-  st.speed -= st.speed * (offRoad ? 1.6 : 0.12) * dt;           // drag
-  st.speed = Math.max(-8, Math.min(topSpeed, st.speed));
+  // ---- vehicle physics (forces along the heading, in m/s^2) ----
+  const G = 9.81, v0 = st.speed, hand = keys.Space;
+  const gr = groundAt(st.x, st.z, best);
+  const hx = Math.sin(st.heading), hz = Math.cos(st.heading);
+  const slope = gr.slope * (hx * gr.tx + hz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
+  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .45 : 1), rr = offRoad ? .12 : .012; // tyre grip (+downforce), rolling resistance
+  const trac = .7 * mu * cur.m * G * cosT; // max drive force the tyres can transmit
+  let v = v0, a = 0;
+  if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m;            // engine: power-limited, traction-limited
+  if (down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.3 * cur.P / Math.max(Math.abs(v), 2), .3 * trac) / cur.m : 0); // brake, then reverse
+  if (hand) a -= Math.sign(v) * Math.min(mu * G * cosT, 8);
+  if (!up && !down && v > 0) a -= .4;                                                                // engine braking
+  a -= G * sinT;                                                                                     // gravity along the slope
+  v += a * dt;
+  const res = (.5 * 1.2 * cur.cda * v0 * v0 / cur.m + rr * G * cosT) * dt;                           // air drag + rolling resistance
+  v = Math.abs(v) <= res ? 0 : v - Math.sign(v) * res;
+  if (!up && !down && !hand && Math.abs(v) < .4) v = 0;                                              // hill hold when stopped
 
-  const steer = (left ? 1 : 0) - (right ? 1 : 0);
-  const grip = Math.min(1, Math.abs(st.speed) / 6);
-  st.heading += steer * 1.9 * cur.grip * grip * dt * Math.sign(st.speed || 1) * (1 - Math.min(.55, Math.abs(st.speed) / 110));
-  st.x += Math.sin(st.heading) * st.speed * dt;
-  st.z += Math.cos(st.heading) * st.speed * dt;
+  st.steer += (((left ? 1 : 0) - (right ? 1 : 0)) - st.steer) * Math.min(1, 7 * dt);
+  const delta = st.steer * .45 / (1 + (v / 10) ** 2);                                                // less steering lock at speed
+  let k = Math.tan(delta) / (cur.len * .6);
+  const kmax = mu * G * cosT / Math.max(v * v, 4);                                                   // grip-limited curvature
+  if (Math.abs(k) > kmax) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; }                            // understeer scrubs speed
+  st.heading += v * k * dt;
+  st.aLat = v * v * k; st.speed = v;
+  const ds = v * cosT * dt; st.x += hx * ds; st.z += hz * ds;
+
+  // body: follow the road height, pitch with the slope and with acceleration, roll in corners
+  st.y = gr.y; st.slopeS += (slope - st.slopeS) * Math.min(1, 8 * dt);
+  st.aLongS += (((v - v0) / dt + G * sinT) - st.aLongS) * Math.min(1, 5 * dt);
+  const pT = -Math.atan(st.slopeS) - .006 * st.aLongS, rT = Math.max(-.08, Math.min(.08, .008 * st.aLat));
+  st.pitch += (pT - st.pitch) * Math.min(1, 9 * dt); st.roll += (rT - st.roll) * Math.min(1, 9 * dt);
   if (st.idx < 8) { // invisible backstop matching the start block
     const p0 = track.pts[0], a = (st.x - p0.x) * track.t0.x + (st.z - p0.z) * track.t0.z;
     if (a < -1.6) { st.x += track.t0.x * (-1.6 - a); st.z += track.t0.z * (-1.6 - a); if (st.speed < 0) st.speed = 0; }
@@ -432,14 +469,14 @@ function frame(now) {
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
   step(dt);
   if (track) {
-    const y = track.pts[st.idx].y;
-    car.position.set(st.x, y, st.z); car.rotation.y = st.heading;
+    const y = st.y;
+    car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
     const tp = new THREE.Vector3(st.x - Math.sin(st.heading) * 9, y + 4.2, st.z - Math.cos(st.heading) * 9);
     camPos.lerp(tp, 1 - Math.pow(0.001, dt));
     camera.position.copy(camPos);
     camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
     $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
-    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s`;
+    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
   } else {
     camera.position.set(0, 30, 60); camera.lookAt(0, 0, 0);
   }
