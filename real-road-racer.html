@@ -293,10 +293,24 @@ async function buildTrack() {
   trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gap[1]));
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, null));
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, null));
+  const RG = 12, rgrid = new Map();
+  runs.forEach((r, id) => { r.id = id; const hw = wOf(r.t) / 2;
+    r.p.forEach(p => { const k = Math.floor(p.x / RG) + ',' + Math.floor(p.z / RG); if (!rgrid.has(k)) rgrid.set(k, []); rgrid.get(k).push({ x:p.x, z:p.z, hw, id }); }); });
+  const crossed = (x, z, id) => { const cx = Math.floor(x / RG), cz = Math.floor(z / RG);
+    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) for (const q of rgrid.get((cx + i) + ',' + (cz + j)) || [])
+      if (q.id !== id && (q.x - x) ** 2 + (q.z - z) ** 2 < (q.hw + .6) ** 2) return true;
+    return false; };
+  const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 2.4; }; // never closer than 1.2 m to the race road's wall
   for (const r of runs) {
     if (r.p.length < 2) continue;
-    const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015;
-    accStrip(r.p, framesOf(r.p), -w, w, L, L, surfOf(r.t));
+    const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015, fr = framesOf(r.p);
+    accStrip(r.p, fr, -w, w, L, L, surfOf(r.t));
+    const mk = sd => r.p.map((p, i) => { const x = p.x + fr[i].x * sd * (w + 1.2), z = p.z + fr[i].z * sd * (w + 1.2);
+      return nearMain(x, z) || crossed(x, z, r.id) ? 1 : 0; });
+    const ml = mk(-1), mr = mk(1);
+    accStrip(r.p, fr, -w + .25, -w + .55, L + .015, L + .015, 0xf3ede4, ml); accStrip(r.p, fr, w - .55, w - .25, L + .015, L + .015, 0xf3ede4, mr);
+    accStrip(r.p, fr, -w - 1.2, -w, L - .01, L - .01, 0x6a5f55, ml); accStrip(r.p, fr, w, w + 1.2, L - .01, L - .01, 0x6a5f55, mr);
+    accStrip(r.p, fr, -w - 1.2, -w - 1.2, L, L + .9, 0xd0d3d8, ml); accStrip(r.p, fr, w + 1.2, w + 1.2, L, L + .9, 0xd0d3d8, mr);
   }
   flushAccs(trackGroup);
   const xMat = new THREE.MeshBasicMaterial({ map:xTex, side:THREE.DoubleSide }), grey = 0xd0d3d8;
@@ -330,7 +344,7 @@ async function buildTrack() {
   const cv = document.createElement('canvas'); cv.width = ncol * 8; cv.height = 32; const cg = cv.getContext('2d');
   for (let r = 0; r < 4; r++) for (let c = 0; c < ncol; c++) { cg.fillStyle = (r + c) % 2 ? '#111' : '#fff'; cg.fillRect(c * 8, r * 8, 8, 8); }
   flat(finI, new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(cv) }), 2.4);
-  flat(1, new THREE.MeshBasicMaterial({ color:0xf3ede4 }), .6);
+  flat(8, new THREE.MeshBasicMaterial({ color:0xf3ede4 }), .6);
   const t0 = { x:pts[3].x - pts[0].x, z:pts[3].z - pts[0].z }, tl = Math.hypot(t0.x, t0.z) || 1; t0.x /= tl; t0.z /= tl;
   const sb = new THREE.Mesh(new THREE.BoxGeometry(.8, .9, halfs[0] * 2 + 2.4), new THREE.MeshLambertMaterial({ color:grey }));
   sb.position.set(pts[0].x - t0.x * 4, pts[0].y + .45, pts[0].z - t0.z * 4); sb.rotation.y = Math.atan2(frames[0].x, frames[0].z); trackGroup.add(sb);
@@ -339,6 +353,20 @@ async function buildTrack() {
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
   trackGroup.add(ground);
+  const piers = [], addPier = (p, n, w, y) => { if (y - minY > 1.2 && piers.length < 4000) piers.push({ x:p.x, z:p.z, y, n, w }); };
+  for (let i = 0; i < pts.length; i += 4) addPier(pts[i], frames[i], halfs[i] * 2, pts[i].y);
+  for (const r of runs) { if (r.p.length < 2) continue; const fr = framesOf(r.p), w = wOf(r.t);
+    for (let i = 0; i < r.p.length; i += 4) addPier(r.p[i], fr[i], w, r.p[i].y - .14); }
+  if (piers.length) {
+    const mat = new THREE.MeshLambertMaterial({ color:0x8d8f94 }), o = new THREE.Object3D(), box = new THREE.BoxGeometry(1, 1, 1);
+    const colm = new THREE.InstancedMesh(box, mat, piers.length), beam = new THREE.InstancedMesh(box, mat, piers.length);
+    piers.forEach((q, i) => {
+      const hgt = q.y - .7 - minY; o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
+      o.position.set(q.x, minY + hgt / 2, q.z); o.scale.set(1.4, hgt, 1.4); o.updateMatrix(); colm.setMatrixAt(i, o.matrix);
+      o.position.set(q.x, q.y - .4, q.z); o.scale.set(q.w * .9, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
+    });
+    colm.frustumCulled = beam.frustumCulled = false; trackGroup.add(colm, beam);
+  }
 
   let nb = 0;
   if (osm) {
@@ -389,9 +417,9 @@ addEventListener('keyup', e => keys[e.code] = false);
 const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0 };
 function resetCar() {
   if (!track) return;
-  const p = track.pts[0], q = track.pts[3];
+  const p = track.pts[5], q = track.pts[8];
   st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
-  st.speed = 0; st.idx = 0; st.time = 0; st.done = false;
+  st.speed = 0; st.idx = 5; st.time = 0; st.done = false;
   st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0;
   $('msg').style.display = 'none';
 }
