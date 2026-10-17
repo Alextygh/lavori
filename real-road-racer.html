@@ -41,28 +41,53 @@
   #garage button { margin:4px 0 0; background:#26324a; color:var(--ink); text-align:left; font-weight:400; padding:7px 9px; }
   #garage button.sel { outline:2px solid var(--accent); }
   #manual { display:none; margin-top:6px; }
+  .card { background:var(--panel); border-radius:12px; padding:18px; width:min(380px,100%); backdrop-filter:blur(6px); }
+  #menu, #loading, #countdown, #finish { display:none; position:fixed; inset:0; }
+  body[data-s=menu] #menu, body[data-s=confirm] #menu { display:flex; }
+  body[data-s=loading] #loading, body[data-s=countdown] #countdown, body[data-s=race] #countdown, body[data-s=finished] #finish { display:flex; }
+  body[data-s=menu] #confirmPanel, body[data-s=confirm] #formPanel { display:none; }
+  #menu { background:linear-gradient(160deg,#18202e,#26344d); padding:16px; gap:16px; align-items:stretch; }
+  #menu #map { flex:1; height:auto; margin:0; min-height:240px; }
+  #formPanel, #confirmPanel { align-self:flex-start; max-height:100%; overflow:auto; }
+  @media (max-width:760px) { #menu { flex-direction:column; } #formPanel, #confirmPanel { width:100%; } }
+  .row2 { display:flex; gap:8px; } .row2 input[type=text] { flex:1; min-width:0; } .row2 button { width:auto; margin:0; padding:0 12px; }
+  input[type=color] { width:52px; height:38px; padding:2px; border:1px solid #3a475e; border-radius:6px; background:#121926; cursor:pointer; }
+  button.alt { background:#26324a; color:var(--ink); }
+  #sum div { margin:7px 0; word-break:break-word; } #sum b { color:var(--accent); }
+  #loading, #countdown, #finish { align-items:center; justify-content:center; flex-direction:column; }
+  #loading { background:#18202e; } #finish { background:rgba(10,14,22,.72); } #countdown { pointer-events:none; }
+  .big { font-size:min(22vw,160px); font-weight:800; text-shadow:0 4px 24px rgba(0,0,0,.6); }
+  #loadmsg { font-size:20px; font-weight:600; } #ftime { font-size:22px; margin:8px 0 4px; }
+  #note { position:fixed; left:50%; transform:translateX(-50%); bottom:38px; font-size:12px; color:#ff9c8f; text-align:center; }
+  #hud, #help, #note { display:none; }
+  body[data-s=countdown] :is(#hud,#help,#note), body[data-s=race] :is(#hud,#help,#note), body[data-s=finished] :is(#hud,#help,#note) { display:block; }
 </style>
 </head>
 <body>
-<div id="panel">
-  <h1>Real Road Racer</h1>
-  <div id="map"></div>
-  <label for="a">Start (latitude, longitude)</label>
-  <input id="a" type="text" value="45.4641, 9.1919">
-  <label for="b">End (latitude, longitude)</label>
-  <input id="b" type="text" value="45.4705, 9.1795">
-  <div class="row">
-    <div><label for="w">Fallback width (m)</label><input id="w" type="number" value="9" min="4" max="20"></div>
-    <div><label for="ex">Hill exaggeration</label><input id="ex" type="number" value="1" min="0" max="5" step="0.5"></div>
+<div id="menu">
+  <div id="formPanel" class="card">
+    <h1>Real Road Racer</h1>
+    <label for="a">Start (address or latitude, longitude)</label>
+    <div class="row2"><input id="a" type="text" placeholder="e.g. Piazza del Duomo, Milano" autocomplete="off"><button class="alt" id="locA" title="Use my location" aria-label="Use my location as start">📍</button></div>
+    <label for="b">Finish (address or latitude, longitude)</label>
+    <div class="row2"><input id="b" type="text" placeholder="e.g. Castello Sforzesco, Milano" autocomplete="off"><button class="alt" id="locB" title="Use my location" aria-label="Use my location as finish">📍</button></div>
+    <label for="hex">Car colour</label>
+    <div class="row2"><input id="col" type="color" value="#d9482b" aria-label="Colour picker"><input id="hex" type="text" value="#d9482b" maxlength="7" aria-label="Hex colour code"></div>
+    <button id="go">Start</button>
+    <div id="status"></div>
   </div>
-  <div class="check"><input id="elev" type="checkbox" checked><label for="elev" style="margin:0">Use real elevation</label></div>
-  <div class="check"><input id="bld" type="checkbox" checked><label for="bld" style="margin:0">Load real roads &amp; buildings (OpenStreetMap)</label></div>
-  <button id="go">Build track</button>
-  <div id="status">Click the map to set the start, click again for the end. Then build the track.</div>
-  <h2>Car</h2>
-  <div id="garage"></div>
-
+  <div id="confirmPanel" class="card">
+    <h1>Confirm your race</h1>
+    <div id="sum"></div>
+    <button id="ok">Confirm and start</button>
+    <button id="back" class="alt">Back</button>
+  </div>
+  <div id="map"></div>
 </div>
+<div id="loading"><div id="loadmsg">Building track…</div></div>
+<div id="countdown"><div class="big" id="cd"></div></div>
+<div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Main menu</button></div></div>
+<div id="note"></div>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
 <div id="help">Arrows or WASD to drive &middot; Space to brake &middot; R to restart</div>
 <div id="msg"></div>
@@ -72,7 +97,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const statusEl = $('status');
-const say = (t, err) => { statusEl.textContent = t; statusEl.className = err ? 'err' : ''; };
+const say = (t, err) => { statusEl.textContent = t; statusEl.className = err ? 'err' : ''; $('loadmsg').textContent = t; };
 
 /* ---------- Three.js scene ---------- */
 const renderer = new THREE.WebGLRenderer({ antialias:true });
@@ -95,10 +120,6 @@ addEventListener('resize', () => {
 // Car classes (generic archetypes; swap in real models later)
 const CLASSES = {
   hatch:  { name:'Hatchback', len:3.9, w:1.75, h:.7,  cab:.55, m:1100, P:55000,  cda:.70,  mu:1.00, df:0,      vmax:50 },
-  sedan:  { name:'Sedan',     len:4.7, w:1.85, h:.7,  cab:.55, m:1450, P:90000,  cda:.68,  mu:.95,  df:0,      vmax:58 },
-  suv:    { name:'SUV',       len:4.6, w:1.95, h:1.0, cab:.7,  m:1900, P:110000, cda:1.05, mu:.85,  df:0,      vmax:52 },
-  sports: { name:'Sports',    len:4.4, w:1.9,  h:.55, cab:.45, m:1350, P:190000, cda:.62,  mu:1.15, df:.00004, vmax:75 },
-  super:  { name:'Supercar',  len:4.5, w:2.0,  h:.5,  cab:.4,  m:1500, P:420000, cda:.62,  mu:1.25, df:.0001,  vmax:90 }
 };
 for (const c of Object.values(CLASSES)) { // top speed where engine power = air drag + rolling resistance
   let lo = 1, hi = 150;
@@ -178,13 +199,8 @@ function strip(pts, frames, f0, f1, y0, y1, color, mask, vc) {
   return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:vc ? 0xffffff : color, vertexColors:!!vc, side:THREE.DoubleSide }));
 }
 
-async function buildTrack() {
-  const a = parseLatLon($('a').value), b = parseLatLon($('b').value);
-  const width = Math.max(4, +$('w').value || 9), exag = +$('ex').value;
-  if (haversine(a, b) > 15000) throw new Error('Points are over 15 km apart. Pick a shorter stretch for this prototype.');
-
-  say('Finding the road…');
-  const coords = await fetchRoute(a, b);
+async function buildTrack(a, b, coords) {
+  const width = 9, exag = 1; // defaults: fallback road width and hill exaggeration
 
   // Local flat projection: metres east (x) and south (z) of the start point
   const kx = 111320 * Math.cos(a.lat * Math.PI / 180), kz = 110540;
@@ -192,7 +208,7 @@ async function buildTrack() {
 
   // Elevation (optional): interpolate sampled heights along the polyline
   let heights = null, elevNote = '';
-  if ($('elev').checked) {
+  if (true) {
     try {
       say('Fetching elevation…');
       const e = await fetchElevation(coords);
@@ -225,7 +241,7 @@ async function buildTrack() {
   });
 
   let osm = null;
-  if ($('bld').checked) {
+  if (true) {
     try { say('Loading roads and buildings…'); osm = await fetchOSM(a, kx, kz, coords); }
     catch (err) { console.warn(err); say('Surroundings unavailable (' + err.message + '). Plain track instead.', true); }
   }
@@ -408,7 +424,8 @@ async function buildTrack() {
   scene.add(trackGroup);
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0 };
   resetCar();
-  say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.') + ' Drive!' + elevNote, !!elevNote);
+  say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.'));
+  $('note').textContent = (elevNote + (osm ? '' : ' Roads and buildings unavailable.')).trim();
 }
 
 /* ---------- Driving ---------- */
@@ -427,7 +444,7 @@ const keys = {};
 addEventListener('keydown', e => {
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   keys[e.code] = true;
-  if (e.code === 'KeyR') resetCar();
+  if (e.code === 'KeyR') retry();
   if (e.code === 'Space' && e.target === document.body) e.preventDefault();
 });
 addEventListener('keyup', e => keys[e.code] = false);
@@ -443,7 +460,7 @@ function resetCar() {
 }
 
 function step(dt) {
-  if (!track || st.done) return;
+  if (!track || st.done || state !== 'race') return;
   const up = keys.ArrowUp || keys.KeyW, down = keys.ArrowDown || keys.KeyS;
   const left = keys.ArrowLeft || keys.KeyA, right = keys.ArrowRight || keys.KeyD;
 
@@ -502,11 +519,7 @@ function step(dt) {
   }
   st.time += dt;
 
-  if (st.idx >= track.fin) {
-    st.done = true;
-    $('msg').innerHTML = `Finished in ${st.time.toFixed(1)} s<br><small style="font-size:16px;font-weight:400">Press R to go again</small>`;
-    $('msg').style.display = 'block';
-  }
+  if (st.idx >= track.fin) { st.done = true; finishRace(); }
 }
 
 const camPos = new THREE.Vector3();
@@ -605,34 +618,80 @@ map.on('click', e => {
   clicks++;
 });
 
-/* ---------- Car selection ---------- */
-const garage = [
-  { name:'City hatchback', cls:'hatch',  color:0xd9482b },
-  { name:'Family sedan',   cls:'sedan',  color:0x2f5fb3 },
-  { name:'Off-road SUV',   cls:'suv',    color:0x2f8a4a },
-  { name:'Sports coupe',   cls:'sports', color:0xe3c32d },
-  { name:'Supercar',       cls:'super',  color:0xc93030 }
-];
-let sel = 0;
-function renderGarage() {
-  const box = $('garage'); box.innerHTML = '';
-  garage.forEach((c, i) => {
-    const b = document.createElement('button');
-    b.textContent = c.name + ' · ' + Math.round(CLASSES[c.cls].top * 3.6) + ' km/h top speed';
-    if (i === sel) b.className = 'sel';
-    b.onclick = () => { sel = i; setCar(garage[i]); renderGarage(); b.blur(); };
-    box.appendChild(b);
-  });
+/* ---------- Car colour ---------- */
+setCar({ cls:'hatch', color:0xd9482b });
+const HEX = /^#?[0-9a-f]{6}$/i;
+function applyColor(v) {
+  if (!HEX.test(v)) return;
+  const h = v.replace('#', '').toLowerCase();
+  setCar({ cls:'hatch', color:parseInt(h, 16) }); $('col').value = '#' + h; $('hex').value = '#' + h;
 }
-setCar(garage[0]); renderGarage();
+$('col').oninput = e => applyColor(e.target.value);
+$('hex').oninput = e => applyColor(e.target.value);
 
-/* ---------- UI ---------- */
-$('go').addEventListener('click', async () => {
-  $('go').disabled = true;
-  try { await buildTrack(); } catch (err) { say(err.message, true); }
+/* ---------- Menu flow ---------- */
+let state = 'menu', pending = null, routeLine = null;
+const setState = v => { state = v; document.body.dataset.s = v; if (v === 'menu' || v === 'confirm') setTimeout(() => map.invalidateSize(), 50); };
+setState('menu');
+
+async function resolvePlace(text) { // "lat, lon" or an address
+  text = text.trim(); if (!text) throw new Error('Enter a start and a finish.');
+  const m = text.match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+  if (m) return { lat:+m[1], lon:+m[2], label:text };
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encodeURIComponent(text));
+  if (!r.ok) throw new Error('Address search failed (status ' + r.status + ').');
+  const j = await r.json(); if (!j.length) throw new Error('Could not find "' + text + '".');
+  return { lat:+j[0].lat, lon:+j[0].lon, label:j[0].display_name };
+}
+function locate(id) {
+  if (!navigator.geolocation) return say('Your browser can\'t share a location here.', true);
+  say('Waiting for location permission…');
+  navigator.geolocation.getCurrentPosition(p => {
+    $(id).value = p.coords.latitude.toFixed(5) + ', ' + p.coords.longitude.toFixed(5);
+    map.setView([p.coords.latitude, p.coords.longitude], 15); say('');
+  }, e => say(e.code === 1 ? 'Location permission was denied.' : 'Could not get your location.', true), { enableHighAccuracy:true, timeout:15000 });
+}
+$('locA').onclick = () => locate('a'); $('locB').onclick = () => locate('b');
+
+$('go').onclick = async () => {
+  $('go').disabled = true; say('Looking up places…');
+  try {
+    const a = await resolvePlace($('a').value), b = await resolvePlace($('b').value);
+    say('Finding the route…');
+    const coords = await fetchRoute(a, b);
+    let len = 0; for (let i = 1; i < coords.length; i++) len += haversine(coords[i - 1], coords[i]);
+    if (len > 15000) throw new Error('That route is ' + (len / 1000).toFixed(1) + ' km. The maximum is 15 km.');
+    pending = { a, b, coords };
+    if (routeLine) routeLine.remove();
+    routeLine = L.polyline(coords.map(c => [c.lat, c.lon]), { color:'#f2a65a', weight:5 }).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding:[30, 30] });
+    const row = (k, v) => { const d = document.createElement('div'), t = document.createElement('b'); t.textContent = k + ': '; d.append(t, v); return d; };
+    $('sum').replaceChildren(row('Start', a.label), row('Finish', b.label), row('Route', (len / 1000).toFixed(2) + ' km'));
+    say(''); setState('confirm');
+  } catch (e) { say(e.message, true); }
   $('go').disabled = false;
-  $('go').blur();
-});
+};
+$('back').onclick = () => setState('menu');
+$('ok').onclick = async () => {
+  setState('loading'); say('Building track…');
+  try { await buildTrack(pending.a, pending.b, pending.coords); startCountdown(); }
+  catch (e) { setState('menu'); say(e.message, true); }
+};
+
+function startCountdown() {
+  setState('countdown'); resetCar();
+  let n = 3; const cd = $('cd');
+  const tick = () => {
+    if (state !== 'countdown') return;
+    if (n > 0) { cd.textContent = n--; setTimeout(tick, 1000); }
+    else { cd.textContent = 'GO!'; setState('race'); setTimeout(() => { if (state === 'race') cd.textContent = ''; }, 900); }
+  };
+  tick();
+}
+function finishRace() { setState('finished'); $('ftime').textContent = 'Time: ' + st.time.toFixed(1) + ' s'; }
+function retry() { if (track && (state === 'race' || state === 'finished')) startCountdown(); }
+$('retry').onclick = () => startCountdown();
+$('tomenu').onclick = () => setState('menu');
 </script>
 </body>
 </html>
