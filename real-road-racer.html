@@ -144,12 +144,23 @@ async function fetchElevation(coords) {
   // sample up to 100 evenly spaced points along the route, interpolate the rest later
   const k = Math.min(100, coords.length);
   const idx = Array.from({ length:k }, (_, i) => Math.round(i * (coords.length - 1) / (k - 1)));
-  const lat = idx.map(i => coords[i].lat.toFixed(5)).join(',');
-  const lon = idx.map(i => coords[i].lon.toFixed(5)).join(',');
-  const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
-  if (!r.ok) throw new Error('Elevation service returned ' + r.status);
-  const j = await r.json();
-  return { idx, h:j.elevation };
+  const f4 = c => c.lat.toFixed(4) + ',' + c.lon.toFixed(4);
+  const ckey = 'rrElev|' + f4(coords[0]) + '|' + f4(coords[coords.length - 1]) + '|' + coords.length;
+  try { const c = JSON.parse(localStorage.getItem(ckey)); if (c && c.length === k) return { idx, h:c }; } catch (e) {}
+  const get = async (url) => { const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
+    try { const r = await fetch(url, { signal:ctl.signal }); if (!r.ok) throw new Error('status ' + r.status); return await r.json(); } finally { clearTimeout(t); } };
+  const providers = [
+    async () => (await get('https://api.open-meteo.com/v1/elevation?latitude=' + idx.map(i => coords[i].lat.toFixed(5)).join(',') +
+      '&longitude=' + idx.map(i => coords[i].lon.toFixed(5)).join(','))).elevation,
+    async () => (await get('https://api.opentopodata.org/v1/mapzen?locations=' + idx.map(i => coords[i].lat.toFixed(5) + ',' + coords[i].lon.toFixed(5)).join('|'))).results.map(r => r.elevation)
+  ];
+  let last = 'no provider';
+  for (const p of providers) {
+    try { const h = await p();
+      if (Array.isArray(h) && h.length === k && h.every(Number.isFinite)) { try { localStorage.setItem(ckey, JSON.stringify(h)); } catch (e) {} return { idx, h }; }
+      last = 'bad data'; } catch (err) { last = err.name === 'AbortError' ? 'timeout' : err.message; console.warn('Elevation failed:', err); }
+  }
+  throw new Error(last);
 }
 
 /* ---------- Track building ---------- */
@@ -180,7 +191,7 @@ async function buildTrack() {
   const raw = coords.map(c => new THREE.Vector3((c.lon - a.lon) * kx, 0, -(c.lat - a.lat) * kz));
 
   // Elevation (optional): interpolate sampled heights along the polyline
-  let heights = null;
+  let heights = null, elevNote = '';
   if ($('elev').checked) {
     try {
       say('Fetching elevation…');
@@ -192,7 +203,7 @@ async function buildTrack() {
           heights[i] = e.h[s] + (e.h[s + 1] - e.h[s]) * t;
         }
       }
-    } catch (err) { say('Elevation unavailable, using a flat track. (' + err.message + ')'); }
+    } catch (err) { elevNote = ' Elevation unavailable (' + err.message + '), so the track is flat.'; }
   }
   const h0 = heights ? heights[0] : 0;
   raw.forEach((p, i) => { p.y = heights ? (heights[i] - h0) * exag : 0; });
@@ -349,7 +360,7 @@ async function buildTrack() {
   const sb = new THREE.Mesh(new THREE.BoxGeometry(.8, .9, halfs[0] * 2 + 2.4), new THREE.MeshLambertMaterial({ color:grey }));
   sb.position.set(pts[0].x - t0.x * 4, pts[0].y + .45, pts[0].z - t0.z * 4); sb.rotation.y = Math.atan2(frames[0].x, frames[0].z); trackGroup.add(sb);
   addX(sb.position.x, pts[0].y, sb.position.z, Math.atan2(t0.x, t0.z));
-  const minY = Math.min(...pts.map(p => p.y)) - 1;
+  const minY = Math.min(...pts.map(p => p.y)) - 3;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
   trackGroup.add(ground);
@@ -359,11 +370,12 @@ async function buildTrack() {
     for (let i = 0; i < r.p.length; i += 4) addPier(r.p[i], fr[i], w, r.p[i].y - .14); }
   if (piers.length) {
     const mat = new THREE.MeshLambertMaterial({ color:0x8d8f94 }), o = new THREE.Object3D(), box = new THREE.BoxGeometry(1, 1, 1);
-    const colm = new THREE.InstancedMesh(box, mat, piers.length), beam = new THREE.InstancedMesh(box, mat, piers.length);
+    const colm = new THREE.InstancedMesh(box, mat, piers.length * 2), beam = new THREE.InstancedMesh(box, mat, piers.length);
     piers.forEach((q, i) => {
       const hgt = q.y - .7 - minY; o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
-      o.position.set(q.x, minY + hgt / 2, q.z); o.scale.set(1.4, hgt, 1.4); o.updateMatrix(); colm.setMatrixAt(i, o.matrix);
-      o.position.set(q.x, q.y - .4, q.z); o.scale.set(q.w * .9, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
+      for (const sd of [-1, 1]) { const off = sd * (q.w / 2 + 1.6);
+        o.position.set(q.x + q.n.x * off, minY + hgt / 2, q.z + q.n.z * off); o.scale.set(1.2, hgt, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
+      o.position.set(q.x, q.y - .4, q.z); o.scale.set(q.w + 3.6, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
     });
     colm.frustumCulled = beam.frustumCulled = false; trackGroup.add(colm, beam);
   }
@@ -390,7 +402,7 @@ async function buildTrack() {
   scene.add(trackGroup);
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0 };
   resetCar();
-  say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.') + ' Drive!');
+  say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.') + ' Drive!' + elevNote, !!elevNote);
 }
 
 /* ---------- Driving ---------- */
