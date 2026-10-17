@@ -244,29 +244,36 @@ async function buildTrack() {
 
   // Side roads: draw everything outside the race corridor; cut ends become blocked junctions
   const gap = [new Uint8Array(pts.length), new Uint8Array(pts.length)], runs = [];
+  const lerp = (a, b, t) => ({ x:a.x + (b.x - a.x) * t, y:a.y + (b.y - a.y) * t, z:a.z + (b.z - a.z) * t });
   if (osm) for (const r of osm.roads) {
-    let cur = null, prevNear = false;
+    let cur = null, prev = null;
     for (const p of r.dp) {
       const h = nearTrack(p.x, p.z, 220);
-      if (h.i < 0) { if (cur) { runs.push(cur); cur = null; } prevNear = false; continue; }
-      if (h.d < halfs[h.i] + .3) { if (cur) { cur.endCut = true; runs.push(cur); cur = null; } prevNear = true; continue; }
-      if (!cur) cur = { t:r.t, p:[], startCut:prevNear, endCut:false };
-      cur.p.push({ x:p.x, y:pts[h.i].y, z:p.z }); prevNear = false;
+      if (h.i < 0) { if (cur) { runs.push(cur); cur = null; } prev = null; continue; }
+      const c = { x:p.x, y:pts[h.i].y, z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
+      if (c.e < 0) {
+        if (cur) { cur.p.push(lerp(prev, c, prev.e / (prev.e - c.e))); cur.endCut = true; runs.push(cur); cur = null; }
+      } else {
+        if (!cur) { cur = { t:r.t, p:[], startCut:!!(prev && prev.e < 0), endCut:false };
+          if (cur.startCut) cur.p.push(lerp(prev, c, -prev.e / (c.e - prev.e))); }
+        cur.p.push(c);
+      }
+      prev = c;
     }
     if (cur) runs.push(cur);
   }
-  const ext = (a, b) => { const l = Math.hypot(a.x - b.x, a.z - b.z) || 1; return { x:a.x + (a.x - b.x) / l * 10, y:a.y, z:a.z + (a.z - b.z) / l * 10 }; };
   const blocks = [];
   for (const r of runs) {
-    if (r.p.length < 4) continue;
+    if (r.p.length < 2) continue;
     const w = wOf(r.t) / 2;
-    if (r.startCut) { r.p.unshift(ext(r.p[0], r.p[2])); blocks.push({ q:r.p[1], w }); }
-    if (r.endCut) { blocks.push({ q:r.p[r.p.length - 1], w }); r.p.push(ext(r.p[r.p.length - 1], r.p[r.p.length - 3])); }
+    if (r.startCut) blocks.push({ q:r.p[0], w });
+    if (r.endCut) blocks.push({ q:r.p[r.p.length - 1], w });
   }
   for (const b of blocks) { // open the race-road edge where the side road joins
     const h = nearTrack(b.q.x, b.q.z, 40); if (h.i < 0) continue;
-    const nrm = frames[h.i], side = ((b.q.x - pts[h.i].x) * nrm.x + (b.q.z - pts[h.i].z) * nrm.z) > 0 ? 1 : 0;
-    const k = Math.ceil((b.w + 2) / 3);
+    const nrm = frames[h.i], lat = (b.q.x - pts[h.i].x) * nrm.x + (b.q.z - pts[h.i].z) * nrm.z;
+    b.lat = lat; b.cap = Math.abs(lat) < halfs[h.i]; if (b.cap) continue; // road continuing past the track's start/end
+    const side = lat > 0 ? 1 : 0, k = Math.ceil((b.w + 1.2) / 3);
     for (let i = Math.max(0, h.i - k); i <= Math.min(pts.length - 1, h.i + k); i++) gap[side][i] = 1;
   }
 
@@ -274,41 +281,28 @@ async function buildTrack() {
   if (trackGroup) { scene.remove(trackGroup); trackGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
   trackGroup = new THREE.Group();
   const L = i => -halfs[i], R = i => halfs[i];
-  trackGroup.add(strip(pts, frames, L, R, 0, 0, 0, null, cols));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - (gap[0][i] ? 1.2 : 0), i => halfs[i] + (gap[1][i] ? 1.2 : 0), 0, 0, 0, null, cols));
   trackGroup.add(strip(pts, frames, i => -halfs[i] + .25, i => -halfs[i] + .55, .03, .03, 0xf3ede4, gap[0]));
   trackGroup.add(strip(pts, frames, i => halfs[i] - .55, i => halfs[i] - .25, .03, .03, 0xf3ede4, gap[1]));
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, L, -.02, -.02, 0x6a5f55, gap[0]));
   trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gap[1]));
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, null));
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, null));
-  const RG = 12, rgrid = new Map();
-  const addRP = (x, z, hw, id) => { const k = Math.floor(x / RG) + ',' + Math.floor(z / RG); if (!rgrid.has(k)) rgrid.set(k, []); rgrid.get(k).push({ x, z, hw, id }); };
-  pts.forEach((p, i) => addRP(p.x, p.z, halfs[i], -1));
-  runs.forEach((r, id) => { r.id = id; const hw = wOf(r.t) / 2; r.p.forEach(p => addRP(p.x, p.z, hw, id)); });
-  const covered = (x, z, id) => { const cx = Math.floor(x / RG), cz = Math.floor(z / RG);
-    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) for (const q of rgrid.get((cx + i) + ',' + (cz + j)) || [])
-      if (q.id !== id && (q.x - x) ** 2 + (q.z - z) ** 2 < (q.hw + (q.id < 0 ? 1.4 : .6)) ** 2) return true;
-    return false; };
   for (const r of runs) {
     if (r.p.length < 2) continue;
-    const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015, fr = framesOf(r.p);
-    accStrip(r.p, fr, -w, w, L, L, surfOf(r.t));
-    const mk = sd => r.p.map((p, i) => covered(p.x + fr[i].x * sd * (w + 1.2), p.z + fr[i].z * sd * (w + 1.2), r.id) ? 1 : 0);
-    const ml = mk(-1), mr = mk(1);
-    accStrip(r.p, fr, -w + .25, -w + .55, L + .015, L + .015, 0xf3ede4, ml); accStrip(r.p, fr, w - .55, w - .25, L + .015, L + .015, 0xf3ede4, mr);
-    accStrip(r.p, fr, -w - 1.2, -w, L - .01, L - .01, 0x6a5f55, ml); accStrip(r.p, fr, w, w + 1.2, L - .01, L - .01, 0x6a5f55, mr);
-    accStrip(r.p, fr, -w - 1.2, -w - 1.2, L, L + .9, 0xd0d3d8, ml); accStrip(r.p, fr, w + 1.2, w + 1.2, L, L + .9, 0xd0d3d8, mr);
+    const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015;
+    accStrip(r.p, framesOf(r.p), -w, w, L, L, surfOf(r.t));
   }
   flushAccs(trackGroup);
   const xMat = new THREE.MeshBasicMaterial({ map:xTex, side:THREE.DoubleSide });
   for (const b of blocks) { // X block built into the race road's wall, across the mouth of the side road
     const h = nearTrack(b.q.x, b.q.z, 40); if (h.i < 0) continue;
-    const nrm = frames[h.i], p = pts[h.i], sd = ((b.q.x - p.x) * nrm.x + (b.q.z - p.z) * nrm.z) > 0 ? 1 : -1;
-    const off = sd * (halfs[h.i] + 1.2), px = p.x + nrm.x * off, pz = p.z + nrm.z * off;
+    const nrm = frames[h.i], p = pts[h.i], sd = b.lat > 0 ? 1 : -1, off = sd * (halfs[h.i] + 1.2);
+    const px = b.cap ? b.q.x : p.x + nrm.x * off, pz = b.cap ? b.q.z : p.z + nrm.z * off;
     const blk = new THREE.Mesh(new THREE.BoxGeometry(.5, .9, b.w * 2 + 2.4), new THREE.MeshLambertMaterial({ color:0xd0d3d8 }));
-    blk.position.set(px, p.y + .45, pz); blk.rotation.y = Math.atan2(nrm.z, -nrm.x);
+    blk.position.set(px, p.y + .45, pz); blk.rotation.y = b.cap ? Math.atan2(nrm.x, nrm.z) : Math.atan2(nrm.z, -nrm.x);
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), xMat);
-    sign.position.set(px, p.y + 1.75, pz); sign.rotation.y = Math.atan2(nrm.x, nrm.z);
+    sign.position.set(px, p.y + 1.75, pz); sign.rotation.y = b.cap ? Math.atan2(nrm.z, -nrm.x) : Math.atan2(nrm.x, nrm.z);
     trackGroup.add(blk, sign);
   }
   const minY = Math.min(...pts.map(p => p.y)) - 1;
@@ -481,7 +475,7 @@ async function fetchOSM(a, kx, kz, coords) {
   for (const el of j.elements || []) {
     if (!el.geometry || el.geometry.length < 2) continue;
     const t = el.tags || {};
-    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no') continue; roads.push({ pts:el.geometry.map(xz), t }); }
+    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), t });
   }
   if (!roads.length && !buildings.length) throw new Error(j.remark || 'no data returned');
