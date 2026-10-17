@@ -304,6 +304,9 @@ async function buildTrack() {
   trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gap[1]));
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, null));
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, null));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => halfs[i] + 1.2, -.5, -.5, 0x7a7d82));      // slab underside
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, -.5, -.03, 0x7a7d82));    // slab sides
+  trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, -.5, -.03, 0x7a7d82));
   const RG = 12, rgrid = new Map();
   runs.forEach((r, id) => { r.id = id; const hw = wOf(r.t) / 2;
     r.p.forEach(p => { const k = Math.floor(p.x / RG) + ',' + Math.floor(p.z / RG); if (!rgrid.has(k)) rgrid.set(k, []); rgrid.get(k).push({ x:p.x, z:p.z, hw, id }); }); });
@@ -364,18 +367,21 @@ async function buildTrack() {
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
   trackGroup.add(ground);
-  const piers = [], addPier = (p, n, w, y) => { if (y - minY > 1.2 && piers.length < 4000) piers.push({ x:p.x, z:p.z, y, n, w }); };
-  for (let i = 0; i < pts.length; i += 4) addPier(pts[i], frames[i], halfs[i] * 2, pts[i].y);
+  const piers = [], addPier = (p, n, w, top, side) => {
+    if (top - minY < 1.2 || piers.length >= 4000) return;
+    if (side) { const h = nearTrack(p.x, p.z, 60); if (h.i >= 0 && h.d < halfs[h.i] + w / 2 + 4.9) return; } // clear of the main road and its supports
+    piers.push({ x:p.x, z:p.z, top, n, w }); };
+  for (let i = 0; i < pts.length; i += 4) addPier(pts[i], frames[i], halfs[i] * 2, pts[i].y - .5, false);
   for (const r of runs) { if (r.p.length < 2) continue; const fr = framesOf(r.p), w = wOf(r.t);
-    for (let i = 0; i < r.p.length; i += 4) addPier(r.p[i], fr[i], w, r.p[i].y - .14); }
+    for (let i = 0; i < r.p.length; i += 4) addPier(r.p[i], fr[i], w, r.p[i].y - .24, true); }
   if (piers.length) {
     const mat = new THREE.MeshLambertMaterial({ color:0x8d8f94 }), o = new THREE.Object3D(), box = new THREE.BoxGeometry(1, 1, 1);
     const colm = new THREE.InstancedMesh(box, mat, piers.length * 2), beam = new THREE.InstancedMesh(box, mat, piers.length);
     piers.forEach((q, i) => {
-      const hgt = q.y - .7 - minY; o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
+      const hgt = q.top - .6 - minY; o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
       for (const sd of [-1, 1]) { const off = sd * (q.w / 2 + 1.6);
         o.position.set(q.x + q.n.x * off, minY + hgt / 2, q.z + q.n.z * off); o.scale.set(1.2, hgt, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
-      o.position.set(q.x, q.y - .4, q.z); o.scale.set(q.w + 3.6, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
+      o.position.set(q.x, q.top - .3, q.z); o.scale.set(q.w + 3.6, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
     });
     colm.frustumCulled = beam.frustumCulled = false; trackGroup.add(colm, beam);
   }
