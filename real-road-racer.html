@@ -59,8 +59,9 @@
   .big { font-size:min(22vw,160px); font-weight:800; text-shadow:0 4px 24px rgba(0,0,0,.6); }
   #loadmsg { font-size:20px; font-weight:600; } #ftime { font-size:22px; margin:8px 0 4px; }
   #note { position:fixed; left:50%; transform:translateX(-50%); bottom:38px; font-size:12px; color:#ff9c8f; text-align:center; }
-  #hud, #help, #note { display:none; }
-  body[data-s=countdown] :is(#hud,#help,#note), body[data-s=race] :is(#hud,#help,#note), body[data-s=finished] :is(#hud,#help,#note) { display:block; }
+  #mini { position:fixed; top:12px; right:12px; width:220px; height:160px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,.4); }
+  #hud, #help, #note, #mini { display:none; }
+  body[data-s=countdown] :is(#hud,#help,#note,#mini), body[data-s=race] :is(#hud,#help,#note,#mini), body[data-s=finished] :is(#hud,#help,#note,#mini) { display:block; }
 </style>
 </head>
 <body>
@@ -88,6 +89,7 @@
 <div id="countdown"><div class="big" id="cd"></div></div>
 <div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Main menu</button></div></div>
 <div id="note"></div>
+<canvas id="mini" width="220" height="160"></canvas>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
 <div id="help">Arrows or WASD to drive &middot; Space to brake &middot; R to restart</div>
 <div id="msg"></div>
@@ -256,6 +258,17 @@ async function buildTrack(a, b, coords) {
     return { i:bi, d:Math.sqrt(bd) };
   };
 
+  // coarse lookup for roads far from the track (every 8th point), exact lookup once they get close
+  const FG = 150, fgrid = new Map();
+  for (let i = 0; i < pts.length; i += 8) { const k = Math.floor(pts[i].x / FG) + ',' + Math.floor(pts[i].z / FG); if (!fgrid.has(k)) fgrid.set(k, []); fgrid.get(k).push(i); }
+  const nearAny = (x, z, R) => {
+    const c = Math.ceil(R / FG), cx = Math.floor(x / FG), cz = Math.floor(z / FG); let bi = -1, bd = R * R;
+    for (let i = -c; i <= c; i++) for (let j = -c; j <= c; j++) for (const t of fgrid.get((cx + i) + ',' + (cz + j)) || []) {
+      const d = (pts[t].x - x) ** 2 + (pts[t].z - z) ** 2; if (d < bd) { bd = d; bi = t; } }
+    if (bi >= 0 && bd < 65 * 65) return nearTrack(x, z, 70);
+    return { i:bi, d:Math.sqrt(bd) };
+  };
+
   // Race road: width and surface from the nearest real OSM road
   const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48));
   if (osm) {
@@ -280,7 +293,7 @@ async function buildTrack(a, b, coords) {
   if (osm) for (const r of osm.roads) {
     let cur = null, prev = null;
     for (const p of r.dp) {
-      const h = nearTrack(p.x, p.z, 220);
+      const h = nearAny(p.x, p.z, 450);
       if (h.i < 0) { if (cur) { runs.push(cur); cur = null; } prev = null; continue; }
       const c = { x:p.x, y:pts[h.i].y, z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
       if (c.e < 0) {
@@ -432,6 +445,7 @@ async function buildTrack(a, b, coords) {
   }
   scene.add(trackGroup);
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0 };
+  buildMinimap(pts, runs, finI);
   resetCar();
   say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.'));
   $('note').textContent = (elevNote + (osm ? '' : ' Roads and buildings unavailable.')).trim();
@@ -439,6 +453,29 @@ async function buildTrack(a, b, coords) {
 
 /* ---------- Driving ---------- */
 // Ground under the car: height interpolated between track samples, plus the road's slope
+let mm = null; // minimap: static background (route + roads) drawn once per track
+function buildMinimap(pts, runs, fin) {
+  const W = 220, H = 160, pad = 14; let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+  for (const p of pts) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z); }
+  const sc = Math.min((W - 2 * pad) / Math.max(x1 - x0, 1), (H - 2 * pad) / Math.max(z1 - z0, 1));
+  const ox = (W - (x1 - x0) * sc) / 2 - x0 * sc, oz = (H - (z1 - z0) * sc) / 2 - z0 * sc;
+  const bg = document.createElement('canvas'); bg.width = W; bg.height = H; const g = bg.getContext('2d');
+  g.fillStyle = 'rgba(22,28,40,.86)'; g.fillRect(0, 0, W, H); g.lineJoin = 'round';
+  const line = (ps, w, c, step) => { g.beginPath(); ps.forEach((p, i) => { if (i % step && i !== ps.length - 1) return;
+    const X = p.x * sc + ox, Y = p.z * sc + oz; if (i) g.lineTo(X, Y); else g.moveTo(X, Y); }); g.lineWidth = w; g.strokeStyle = c; g.stroke(); };
+  for (const r of runs) if (r.p.length > 1) line(r.p, 1, 'rgba(169,179,196,.4)', 1);
+  line(pts, 3.5, '#f2a65a', 2);
+  const dot = (p, c) => { g.beginPath(); g.arc(p.x * sc + ox, p.z * sc + oz, 4.5, 0, 7); g.fillStyle = c; g.fill(); g.lineWidth = 1.5; g.strokeStyle = '#fff'; g.stroke(); };
+  dot(pts[0], '#4cd37b'); dot(pts[fin], '#f3ede4');
+  mm = { bg, sc, ox, oz };
+}
+function drawMini() {
+  if (!mm) return; const g = $('mini').getContext('2d');
+  g.drawImage(mm.bg, 0, 0);
+  g.save(); g.translate(st.x * mm.sc + mm.ox, st.z * mm.sc + mm.oz); g.rotate(Math.PI - st.heading);
+  g.beginPath(); g.moveTo(0, -8); g.lineTo(6, 7); g.lineTo(-6, 7); g.closePath();
+  g.fillStyle = '#fff'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#d9482b'; g.stroke(); g.restore();
+}
 function groundAt(x, z, i) {
   const P = track.pts; let bi = Math.max(0, Math.min(i, P.length - 2)), bt = 0, bd = 1e12;
   for (const j of [i - 1, i]) { if (j < 0 || j >= P.length - 1) continue;
@@ -495,11 +532,11 @@ function step(dt) {
   const gr = groundAt(st.x, st.z, best);
   const hx = Math.sin(st.heading), hz = Math.cos(st.heading);
   const slope = gr.slope * (hx * gr.tx + hz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
-  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .45 : 1), rr = offRoad ? .12 : .012; // tyre grip (+downforce), rolling resistance
+  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .6 : 1), rr = offRoad ? .06 : .012; // tyre grip (+downforce), rolling resistance
   const trac = .7 * mu * cur.m * G * cosT; // max drive force the tyres can transmit
   let v = v0, a = 0;
   if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m;            // engine: power-limited, traction-limited
-  if (down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.3 * cur.P / Math.max(Math.abs(v), 2), .3 * trac) / cur.m : 0); // brake, then reverse
+  if (down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * cur.P / Math.max(Math.abs(v), 2), .5 * trac) / cur.m : 0); // brake, then reverse
   if (hand) a -= Math.sign(v) * Math.min(mu * G * cosT, 8);
   if (!up && !down && v > 0) a -= .4;                                                                // engine braking
   a -= G * sinT;                                                                                     // gravity along the slope
@@ -545,6 +582,7 @@ function frame(now) {
     camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
     $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
     $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
+    drawMini();
   } else {
     camera.position.set(0, 30, 60); camera.lookAt(0, 0, 0);
   }
@@ -611,8 +649,8 @@ async function fetchOSM(a, kx, kz, coords) {
   for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
   const step = Math.max(1, Math.ceil(coords.length / 150));
   const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
-  const ar = `(around:300,${poly})`;
-  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road)(_link)?$"]${ar};);out geom;`;
+  const ar = `(around:300,${poly})`, ar2 = `(around:500,${poly})`;
+  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};);out geom;`;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
     'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
   let j = null, last = '';
@@ -639,7 +677,7 @@ async function fetchOSM(a, kx, kz, coords) {
       continue;
     }
     if (!el.geometry || el.geometry.length < 2) continue;
-    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ pts:el.geometry.map(xz), t }); }
+    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
   }
   if (!roads.length && !buildings.length) throw new Error(j.remark || 'no data returned');
