@@ -404,22 +404,31 @@ async function buildTrack(a, b, coords) {
 
   let nb = 0;
   if (osm) {
-    const mats = [0xb7a99a, 0xa89d8f, 0xc4b6a3].map(c => new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide }));
-    for (const b of osm.buildings.slice(0, 1500)) {
-      let ok = true, by = 0, dm = 1e9;
-      for (const f of b.fp) {
-        const h = nearTrack(f.x, f.z, 150);
-        if (h.i < 0 || h.d < halfs[h.i] + 3) { ok = false; break; }
-        if (h.d < dm) { dm = h.d; by = pts[h.i].y; }
-      }
-      if (!ok) continue;
+    const cand = [];
+    for (const b of osm.buildings) {
+      const h0 = nearTrack(b.fp[0].x, b.fp[0].z, 250); if (h0.i < 0) continue;
+      let ok = true;
+      for (const f of b.fp) { const h = nearTrack(f.x, f.z, 20); if (h.i >= 0 && h.d < halfs[h.i] + 3) { ok = false; break; } } // keep the road clear
+      if (ok) cand.push({ b, by:pts[h0.i].y, dm:h0.d });
+    }
+    cand.sort((p, q) => p.dm - q.dm);
+    const bufs = [[], [], []];
+    for (const { b, by } of cand.slice(0, 5000)) {
       const t = b.t, hgt = parseFloat(t.height) || (+t['building:levels'] || 0) * 3.2 || 8 + Math.abs(Math.round(b.fp[0].x + b.fp[0].z)) % 6 * 2;
       try {
         const sh = new THREE.Shape(b.fp.map(p => new THREE.Vector2(p.x, -p.z)));
-        const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth:hgt + (by - minY), bevelEnabled:false }), mats[nb % 3]);
-        m.rotation.x = -Math.PI / 2; m.position.y = minY; trackGroup.add(m); nb++;
+        for (const hole of b.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
+        const g = new THREE.ExtrudeGeometry(sh, { depth:hgt + (by - minY), bevelEnabled:false });
+        g.rotateX(-Math.PI / 2); g.translate(0, minY, 0);
+        bufs[nb % 3].push(g.attributes.position.array); g.dispose(); nb++;
       } catch (err) { /* skip bad footprint */ }
     }
+    [0xb7a99a, 0xa89d8f, 0xc4b6a3].forEach((c, k) => {
+      const n = bufs[k].reduce((sum, a) => sum + a.length, 0); if (!n) return;
+      const pos = new Float32Array(n); let o = 0; for (const a of bufs[k]) { pos.set(a, o); o += a.length; }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+      trackGroup.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide })));
+    });
   }
   scene.add(trackGroup);
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0 };
@@ -570,6 +579,26 @@ function flushAccs(group) {
     g.setAttribute('position', new THREE.Float32BufferAttribute(A.pos, 3)); g.setIndex(A.ind); g.computeVertexNormals();
     group.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:A.hex, side:THREE.DoubleSide }))); delete accs[k]; }
 }
+const stitch = segs => { // join ways into closed rings
+  const rings = [], pool = segs.filter(q => q.length > 1).map(q => q.slice());
+  const eq = (a, b) => Math.abs(a.x - b.x) < .01 && Math.abs(a.z - b.z) < .01;
+  while (pool.length) {
+    let ring = pool.pop(), guard = 0;
+    while (!eq(ring[0], ring[ring.length - 1]) && guard++ < 300) {
+      const end = ring[ring.length - 1]; let found = false;
+      for (let i = 0; i < pool.length; i++) { const q = pool[i];
+        if (eq(q[0], end)) { ring = ring.concat(q.slice(1)); pool.splice(i, 1); found = true; break; }
+        if (eq(q[q.length - 1], end)) { ring = ring.concat(q.slice(0, -1).reverse()); pool.splice(i, 1); found = true; break; } }
+      if (!found) break;
+    }
+    if (ring.length >= 4 && eq(ring[0], ring[ring.length - 1])) rings.push(ring);
+  }
+  return rings;
+};
+const inPoly = (p, ring) => { let c = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++)
+    if ((ring[i].z > p.z) !== (ring[j].z > p.z) && p.x < (ring[j].x - ring[i].x) * (p.z - ring[i].z) / (ring[j].z - ring[i].z) + ring[i].x) c = !c;
+  return c; };
 const framesOf = ps => ps.map((p, i) => { const a = ps[Math.max(i - 1, 0)], b = ps[Math.min(i + 1, ps.length - 1)];
   const l = Math.hypot(b.x - a.x, b.z - a.z) || 1; return { x:-(b.z - a.z) / l, z:(b.x - a.x) / l }; });
 const xTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
@@ -580,14 +609,16 @@ const xTex = (() => { const c = document.createElement('canvas'); c.width = c.he
 async function fetchOSM(a, kx, kz, coords) {
   let s = 90, w = 180, n = -90, e = -180;
   for (const c of coords) { s = Math.min(s, c.lat); n = Math.max(n, c.lat); w = Math.min(w, c.lon); e = Math.max(e, c.lon); }
-  const pad = .0025, bb = `${s - pad},${w - pad},${n + pad},${e + pad}`;
-  const q = `[out:json][timeout:25];(way["building"](${bb});way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road)(_link)?$"](${bb}););out geom;`;
+  const step = Math.max(1, Math.ceil(coords.length / 150));
+  const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
+  const ar = `(around:300,${poly})`;
+  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road)(_link)?$"]${ar};);out geom;`;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
     'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
   let j = null, last = '';
   for (const url of mirrors) {
     try {
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 40000);
       const r = await fetch(url, { method:'POST', body:new URLSearchParams({ data:q }), signal:ctl.signal });
       clearTimeout(t);
       if (!r.ok) throw new Error('status ' + r.status);
@@ -598,10 +629,18 @@ async function fetchOSM(a, kx, kz, coords) {
   const xz = g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz });
   const roads = [], buildings = [];
   for (const el of j.elements || []) {
-    if (!el.geometry || el.geometry.length < 2) continue;
     const t = el.tags || {};
+    if (el.type === 'relation') {
+      if (!t.building) continue;
+      const outs = [], ins = [];
+      for (const m of el.members || []) if (m.type === 'way' && m.geometry) (m.role === 'inner' ? ins : outs).push(m.geometry.map(xz));
+      const holes = stitch(ins);
+      for (const ring of stitch(outs)) buildings.push({ fp:ring, holes:holes.filter(h => inPoly(h[0], ring)), t });
+      continue;
+    }
+    if (!el.geometry || el.geometry.length < 2) continue;
     if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ pts:el.geometry.map(xz), t }); }
-    else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), t });
+    else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
   }
   if (!roads.length && !buildings.length) throw new Error(j.remark || 'no data returned');
   return { roads, buildings };
