@@ -60,6 +60,15 @@
   #loadmsg { font-size:20px; font-weight:600; } #ftime { font-size:22px; margin:8px 0 4px; }
   #note { position:fixed; left:50%; transform:translateX(-50%); bottom:38px; font-size:12px; color:#ff9c8f; text-align:center; }
   #mini { position:fixed; top:12px; right:12px; width:220px; height:160px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,.4); }
+  #tools { position:fixed; top:12px; left:12px; display:none; gap:8px; }
+  .tool { width:auto; margin:0; padding:7px 12px; background:rgba(22,28,40,.78); color:var(--ink); font-weight:600; }
+  #touch { display:none; }
+  #touch button { position:fixed; bottom:18px; width:78px; height:78px; margin:0; padding:0; border-radius:50%; background:rgba(22,28,40,.6);
+    color:#fff; font-size:26px; touch-action:none; user-select:none; -webkit-user-select:none; border:2px solid rgba(255,255,255,.25); }
+  #touch [data-k=left] { left:12px; } #touch [data-k=right] { left:100px; } #touch [data-k=down] { right:100px; } #touch [data-k=up] { right:12px; }
+  body[data-touch="1"] #hud { bottom:110px; } body[data-touch="1"] #help { display:none !important; }
+  body[data-s=countdown] #tools, body[data-s=race] #tools, body[data-s=finished] #tools { display:flex; }
+  body[data-touch="1"][data-s=countdown] #touch, body[data-touch="1"][data-s=race] #touch { display:block; }
   #hud, #help, #note, #mini { display:none; }
   body[data-s=countdown] :is(#hud,#help,#note,#mini), body[data-s=race] :is(#hud,#help,#note,#mini), body[data-s=finished] :is(#hud,#help,#note,#mini) { display:block; }
 </style>
@@ -89,9 +98,11 @@
 <div id="countdown"><div class="big" id="cd"></div></div>
 <div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Main menu</button></div></div>
 <div id="note"></div>
+<div id="tools"><button class="tool" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera (C)">🎥 Chase</button></div>
+<div id="touch"><button data-k="left" aria-label="Steer left">◀</button><button data-k="right" aria-label="Steer right">▶</button><button data-k="down" aria-label="Brake and reverse">▼</button><button data-k="up" aria-label="Accelerate">▲</button></div>
 <canvas id="mini" width="220" height="160"></canvas>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
-<div id="help">Arrows or WASD to drive &middot; Space to brake &middot; R to restart</div>
+<div id="help">Arrows or WASD to drive &middot; Space handbrake &middot; C camera &middot; M sound &middot; R restart</div>
 <div id="msg"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -137,6 +148,23 @@ function setCar(c) {
   const cab = new THREE.Mesh(new THREE.BoxGeometry(cur.w * .82, cur.cab, cur.len * .45), new THREE.MeshLambertMaterial({ color:0x1d2633 }));
   cab.position.set(0, .35 + cur.h + cur.cab / 2, -cur.len * .05);
   car.add(body, cab);
+  const wr = .33, ww = .25, tire = new THREE.MeshLambertMaterial({ color:0x15171b }), hub = new THREE.MeshLambertMaterial({ color:0xb7bcc6 });
+  car.userData.wheels = []; car.userData.pivots = [];
+  for (const [sx, sz] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
+    const piv = new THREE.Group(), spin = new THREE.Group();
+    piv.position.set(sx * (cur.w / 2 - .05), wr, sz * cur.len * .32);
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(wr, wr, ww, 18), tire); t.rotation.z = Math.PI / 2;
+    const hb = new THREE.Mesh(new THREE.CylinderGeometry(wr * .55, wr * .55, ww + .02, 10), hub); hb.rotation.z = Math.PI / 2;
+    const spoke = new THREE.Mesh(new THREE.BoxGeometry(ww + .04, wr * 1.5, .07), tire);
+    spin.add(t, hb, spoke); piv.add(spin); car.add(piv);
+    car.userData.wheels.push(spin); if (sz > 0) car.userData.pivots.push(piv);
+  }
+  const hl = new THREE.MeshBasicMaterial({ color:0xfff3c4 }), tl = new THREE.MeshBasicMaterial({ color:0x6b1111 }); car.userData.tail = tl;
+  for (const sx of [-1, 1]) {
+    const a = new THREE.Mesh(new THREE.BoxGeometry(.32, .14, .06), hl); a.position.set(sx * cur.w * .32, .35 + cur.h * .62, cur.len / 2 + .01);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(.34, .14, .06), tl); b.position.set(sx * cur.w * .32, .35 + cur.h * .68, -cur.len / 2 - .01);
+    car.add(a, b);
+  }
 }
 
 let trackGroup = null, track = null; // track = {pts:[Vector3], n, length}
@@ -491,11 +519,13 @@ addEventListener('keydown', e => {
   if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   keys[e.code] = true;
   if (e.code === 'KeyR') retry();
+  if (!e.repeat && e.code === 'KeyC') setCam(camMode + 1);
+  if (!e.repeat && e.code === 'KeyM') toggleMute();
   if (e.code === 'Space' && e.target === document.body) e.preventDefault();
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
-const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0 };
+const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0 };
 function resetCar() {
   if (!track) return;
   const p = track.pts[5], q = track.pts[8];
@@ -507,8 +537,9 @@ function resetCar() {
 
 function step(dt) {
   if (!track || st.done || state !== 'race') return;
-  const up = keys.ArrowUp || keys.KeyW, down = keys.ArrowDown || keys.KeyS;
-  const left = keys.ArrowLeft || keys.KeyA, right = keys.ArrowRight || keys.KeyD;
+  const up = keys.ArrowUp || keys.KeyW || touch.up || pad.up > .08, down = keys.ArrowDown || keys.KeyS || touch.down || pad.down > .08;
+  const left = keys.ArrowLeft || keys.KeyA || touch.left, right = keys.ArrowRight || keys.KeyD || touch.right;
+  const thrA = (keys.ArrowUp || keys.KeyW || touch.up) ? 1 : pad.up, hand = keys.Space || pad.hand;
 
   // Find nearest centerline sample (search a window around the last one)
   let best = st.idx, bd = Infinity;
@@ -522,20 +553,20 @@ function step(dt) {
   let d = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
   const lim = hh + .2;
   if (Math.abs(d) > lim) {
-    const over = d - Math.sign(d) * lim; st.x -= bn.x * over; st.z -= bn.z * over;
+    st.bump = Math.max(st.bump, Math.abs(st.speed)); const over = d - Math.sign(d) * lim; st.x -= bn.x * over; st.z -= bn.z * over;
     st.speed *= 1 - Math.min(1, 2.5 * dt); d = Math.sign(d) * lim;
   }
   const offRoad = Math.abs(d) > hh;
 
   // ---- vehicle physics (forces along the heading, in m/s^2) ----
-  const G = 9.81, v0 = st.speed, hand = keys.Space;
+  const G = 9.81, v0 = st.speed;
   const gr = groundAt(st.x, st.z, best);
   const hx = Math.sin(st.heading), hz = Math.cos(st.heading);
   const slope = gr.slope * (hx * gr.tx + hz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
   const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .6 : 1), rr = offRoad ? .06 : .012; // tyre grip (+downforce), rolling resistance
   const trac = .7 * mu * cur.m * G * cosT; // max drive force the tyres can transmit
   let v = v0, a = 0;
-  if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m;            // engine: power-limited, traction-limited
+  if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m * thrA;            // engine: power-limited, traction-limited
   if (down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * cur.P / Math.max(Math.abs(v), 2), .5 * trac) / cur.m : 0); // brake, then reverse
   if (hand) a -= Math.sign(v) * Math.min(mu * G * cosT, 8);
   if (!up && !down && v > 0) a -= .4;                                                                // engine braking
@@ -545,11 +576,12 @@ function step(dt) {
   v = Math.abs(v) <= res ? 0 : v - Math.sign(v) * res;
   if (!up && !down && !hand && Math.abs(v) < .4) v = 0;                                              // hill hold when stopped
 
-  st.steer += (((left ? 1 : 0) - (right ? 1 : 0)) - st.steer) * Math.min(1, 7 * dt);
+  st.steer += (Math.max(-1, Math.min(1, (left ? 1 : 0) - (right ? 1 : 0) - pad.steer)) - st.steer) * Math.min(1, 7 * dt);
   const delta = st.steer * .45 / (1 + (v / 10) ** 2);                                                // less steering lock at speed
   let k = Math.tan(delta) / (cur.len * .6);
   const kmax = mu * G * cosT / Math.max(v * v, 4);                                                   // grip-limited curvature
-  if (Math.abs(k) > kmax) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; }                            // understeer scrubs speed
+  st.slip = Math.abs(k) > kmax ? 1 : 0; st.rough = offRoad ? 1 : 0;
+  if (st.slip) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; }                            // understeer scrubs speed
   st.heading += v * k * dt;
   st.aLat = v * v * k; st.speed = v;
   const ds = v * cosT * dt; st.x += hx * ds; st.z += hz * ds;
@@ -572,14 +604,28 @@ const camPos = new THREE.Vector3();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-  step(dt);
+  pollPad(); step(dt); updateAudio();
   if (track) {
     const y = st.y;
     car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
-    const tp = new THREE.Vector3(st.x - Math.sin(st.heading) * 9, y + 4.2, st.z - Math.cos(st.heading) * 9);
-    camPos.lerp(tp, 1 - Math.pow(0.001, dt));
-    camera.position.copy(camPos);
-    camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
+    const U = car.userData;
+    if (U.wheels) {
+      for (const w of U.wheels) w.rotation.x += st.speed * dt / .33;
+      for (const p of U.pivots) p.rotation.y = st.steer * .4;
+      const brk = ((keys.ArrowDown || keys.KeyS || touch.down || pad.down > .08) && st.speed > .5) || keys.Space || pad.hand;
+      U.tail.color.setHex(brk ? 0xff2a2a : 0x6b1111);
+    }
+    const th = -st.pitch, f3 = new THREE.Vector3(Math.sin(st.heading) * Math.cos(th), Math.sin(th), Math.cos(st.heading) * Math.cos(th));
+    if (camMode >= 2) { // hood / cockpit
+      const zo = camMode === 2 ? cur.len / 2 - .3 : .1, yo = camMode === 2 ? 1.0 : 1.12;
+      camera.position.set(st.x + f3.x * zo, y + yo + f3.y * zo, st.z + f3.z * zo); camPos.copy(camera.position);
+      camera.lookAt(camera.position.x + f3.x * 30, camera.position.y + f3.y * 30, camera.position.z + f3.z * 30);
+    } else {
+      const dd = camMode === 0 ? 9 : 17, hh = camMode === 0 ? 4.2 : 8;
+      camPos.lerp(new THREE.Vector3(st.x - Math.sin(st.heading) * dd, y + hh, st.z - Math.cos(st.heading) * dd), 1 - Math.pow(0.001, dt));
+      camera.position.copy(camPos);
+      camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
+    }
     $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
     $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
     drawMini();
@@ -706,6 +752,75 @@ function applyColor(v) {
 $('col').oninput = e => applyColor(e.target.value);
 $('hex').oninput = e => applyColor(e.target.value);
 
+/* ---------- Sound (generated in the browser) ---------- */
+const audio = { ctx:null, on:true };
+function initAudio() {
+  if (audio.ctx) { audio.ctx.resume(); return; }
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  const c = audio.ctx = new AC(), master = audio.master = c.createGain();
+  master.gain.value = audio.on ? .5 : 0; master.connect(c.destination);
+  audio.f = c.createBiquadFilter(); audio.f.type = 'lowpass'; audio.f.frequency.value = 900;
+  audio.eg = c.createGain(); audio.eg.gain.value = 0;
+  audio.o1 = c.createOscillator(); audio.o2 = c.createOscillator(); audio.o1.type = 'sawtooth'; audio.o2.type = 'square';
+  audio.o1.connect(audio.f); audio.o2.connect(audio.f); audio.f.connect(audio.eg); audio.eg.connect(master); audio.o1.start(); audio.o2.start();
+  const nb = audio.nb = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = nb.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const noise = (type, freq, q) => { const src = c.createBufferSource(); src.buffer = nb; src.loop = true;
+    const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = freq; fl.Q.value = q;
+    const g = c.createGain(); g.gain.value = 0; src.connect(fl); fl.connect(g); g.connect(master); src.start(); return g; };
+  audio.squeal = noise('bandpass', 1800, 6); audio.rough = noise('lowpass', 600, .6);
+}
+function thud(p) {
+  const c = audio.ctx; if (!c || !audio.on) return; const t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain(); o.type = 'sine';
+  o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(35, t + .25);
+  g.gain.setValueAtTime(.7 * p, t); g.gain.exponentialRampToValueAtTime(.001, t + .3);
+  o.connect(g); g.connect(audio.master); o.start(t); o.stop(t + .32);
+  const s2 = c.createBufferSource(), gg = c.createGain(); s2.buffer = audio.nb;
+  gg.gain.setValueAtTime(.4 * p, t); gg.gain.exponentialRampToValueAtTime(.001, t + .15);
+  s2.connect(gg); gg.connect(audio.master); s2.start(t, 0, .2);
+}
+function updateAudio() {
+  const c = audio.ctx; if (!c) return;
+  const t = c.currentTime, racing = state === 'race', live = racing || state === 'countdown';
+  const v = racing ? Math.abs(st.speed) : 0, lim = [12, 22, 33, 50]; // simple 4-speed gearbox sets the revs
+  let g = 0; while (g < 3 && v > lim[g]) g++;
+  const lo = g ? lim[g - 1] * .6 : 0, rpm = 900 + 5600 * Math.min(1, Math.max(0, (v - lo) / (lim[g] - lo)));
+  const thr = racing && (keys.ArrowUp || keys.KeyW || touch.up || pad.up > .08) ? 1 : 0;
+  audio.o1.frequency.setTargetAtTime(rpm / 30, t, .04); audio.o2.frequency.setTargetAtTime(rpm / 60, t, .04);
+  audio.f.frequency.setTargetAtTime(350 + rpm * .3 + thr * 500, t, .08);
+  audio.eg.gain.setTargetAtTime(live ? .07 + .08 * thr + .05 * rpm / 6500 : 0, t, .06);
+  audio.squeal.gain.setTargetAtTime(racing && st.slip && v > 8 ? Math.min(.2, .04 + v * .003) : 0, t, .05);
+  audio.rough.gain.setTargetAtTime(racing && st.rough && v > 2 ? Math.min(.35, v * .012) : 0, t, .08);
+  if (racing && st.bump > 4) thud(Math.min(1, st.bump / 25));
+  st.bump = 0;
+}
+function toggleMute() { audio.on = !audio.on; if (audio.master) audio.master.gain.value = audio.on ? .5 : 0; $('muteBtn').textContent = audio.on ? '🔊' : '🔇'; }
+$('muteBtn').onclick = e => { toggleMute(); e.currentTarget.blur(); };
+
+/* ---------- Cameras ---------- */
+const CAMS = ['Chase', 'Far', 'Hood', 'Cockpit']; let camMode = 0;
+function setCam(m) {
+  camMode = m % CAMS.length; $('camBtn').textContent = '🎥 ' + CAMS[camMode];
+  camera.fov = camMode >= 2 ? 78 : 65; camera.updateProjectionMatrix(); car.visible = camMode !== 3;
+}
+$('camBtn').onclick = e => { setCam(camMode + 1); e.currentTarget.blur(); };
+
+/* ---------- Gamepad + touch ---------- */
+const pad = { up:0, down:0, steer:0, hand:0 }, touch = { up:false, down:false, left:false, right:false }, prevBtn = {};
+function pollPad() {
+  const gp = (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
+  if (!gp) { pad.up = pad.down = pad.steer = pad.hand = 0; return; }
+  const btn = i => gp.buttons[i] ? gp.buttons[i].value : 0, dz = x => Math.abs(x) < .12 ? 0 : x;
+  pad.steer = dz(gp.axes[0] || 0); pad.up = btn(7); pad.down = btn(6); pad.hand = btn(0) > .5 ? 1 : 0; // stick, triggers, A button
+  const edge = (i, fn) => { const p = btn(i) > .5; if (p && !prevBtn[i]) fn(); prevBtn[i] = p; };
+  edge(3, () => setCam(camMode + 1)); edge(9, () => retry()); edge(2, toggleMute);       // Y camera, Start retry, X sound
+}
+if (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window) document.body.dataset.touch = '1';
+document.querySelectorAll('#touch button').forEach(b => { const k = b.dataset.k;
+  const on = e => { e.preventDefault(); touch[k] = true; }, off = e => { e.preventDefault(); touch[k] = false; };
+  b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off); });
+
 /* ---------- Menu flow ---------- */
 let state = 'menu', pending = null, routeLine = null;
 const setState = v => { state = v; document.body.dataset.s = v; if (v === 'menu' || v === 'confirm') setTimeout(() => map.invalidateSize(), 50); };
@@ -750,7 +865,7 @@ $('go').onclick = async () => {
 };
 $('back').onclick = () => setState('menu');
 $('ok').onclick = async () => {
-  setState('loading'); say('Building track…');
+  initAudio(); setState('loading'); say('Building track…');
   try { await buildTrack(pending.a, pending.b, pending.coords); startCountdown(); }
   catch (e) { setState('menu'); say(e.message, true); }
 };
