@@ -803,7 +803,7 @@ $('muteBtn').onclick = e => { toggleMute(); e.currentTarget.blur(); };
 const CAMS = ['Chase', 'Far', 'Hood', 'Reverse']; let camMode = 0;
 function setCam(m) {
   camMode = m % CAMS.length; $('camBtn').textContent = '🎥 ' + CAMS[camMode];
-  camera.fov = camMode === 2 ? 78 : camMode === 3 ? 70 : 65; camera.updateProjectionMatrix();
+  camera.fov = camMode === 2 ? 78 : camMode === 3 ? 70 : 65; camera.updateProjectionMatrix(); car.visible = camMode < 2; // hide the car in hood and reverse views
 }
 $('camBtn').onclick = e => { setCam(camMode + 1); e.currentTarget.blur(); };
 
