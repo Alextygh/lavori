@@ -93,6 +93,7 @@
     <div class="row2"><div style="flex:1"><label for="wx">Weather</label><select id="wx"><option>Clear</option><option>Cloudy</option><option>Rain</option><option>Fog</option></select></div>
     <div style="flex:1"><label for="tod">Time of day</label><select id="tod"><option>Morning</option><option selected>Day</option><option>Sunset</option><option>Night</option></select></div></div>
     <label class="check"><input id="legal" type="checkbox"> Legal mode: obey speed limits (+10 s each time you stay over for 3 s)</label>
+    <label class="check"><input id="shadows" type="checkbox" checked> Shadows (turn off if the game runs slowly)</label>
     <button id="go">Start</button>
     <div id="status"></div>
   </div>
@@ -126,6 +127,7 @@ const say = (t, err) => { statusEl.textContent = t; statusEl.className = err ? '
 
 /* ---------- Three.js scene ---------- */
 const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 document.body.prepend(renderer.domElement);
@@ -136,7 +138,10 @@ const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.5, 30
 const hemi = new THREE.HemisphereLight(0xdfe9f5, 0x3b4a3a, 0.9); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffe2b8, 0.8);
 sun.position.set(-200, 300, 120);
-scene.add(sun);
+scene.add(sun); scene.add(sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -.0004; sun.shadow.normalBias = .4;
+Object.assign(sun.shadow.camera, { left:-90, right:90, top:90, bottom:-90, near:1, far:420 }); sun.shadow.camera.updateProjectionMatrix();
+const sunDir = new THREE.Vector3(-200, 300, 120).normalize();
 addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
@@ -153,7 +158,7 @@ for (const c of Object.values(CLASSES)) { // top speed where engine power = air 
 }
 const car = new THREE.Group(); scene.add(car);
 const head = new THREE.SpotLight(0xfff1d0, 0, 80, .55, .6, 1); // headlights
-let env = { weather:'Clear', time:'Day', legal:false };
+let env = { weather:'Clear', time:'Day', legal:false, shadows:true };
 let cur = CLASSES.hatch;
 function setCar(c) {
   cur = CLASSES[c.cls]; car.clear();
@@ -179,6 +184,7 @@ function setCar(c) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(.34, .14, .06), tl); b.position.set(sx * cur.w * .32, .35 + cur.h * .68, -cur.len / 2 - .01);
     car.add(a, b);
   }
+  car.traverse(o => { if (o.isMesh) o.castShadow = true; });
   head.position.set(0, .35 + cur.h * .7, cur.len / 2); head.target.position.set(0, .2, cur.len / 2 + 20); car.add(head, head.target);
 }
 
@@ -241,7 +247,9 @@ function strip(pts, frames, f0, f1, y0, y1, color, mask, vc) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   if (vc) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   g.setIndex(ind); g.computeVertexNormals();
-  return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:vc ? 0xffffff : color, vertexColors:!!vc, side:THREE.DoubleSide }));
+  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:vc ? 0xffffff : color, vertexColors:!!vc, side:THREE.DoubleSide }));
+  m.receiveShadow = true; m.castShadow = Math.abs(y1 - y0) > .5; // walls cast shadows, flat road strips only receive them
+  return m;
 }
 
 async function buildTrack(a, b, coords) {
@@ -329,7 +337,7 @@ async function buildTrack(a, b, coords) {
     osm.roads.forEach(r => { r.dp = densify(r.pts); });
     const best = new Array(pts.length).fill(null);
     for (const r of osm.roads) for (const p of r.dp) {
-      const h = nearTrack(p.x, p.z, 8); if (h.i < 0) continue;
+      const h = nearTrack(p.x, p.z, 8); if (h.i < 0 || (r.hi && h.d > 3.5)) continue;
       const w = wOf(r.t), c = best[h.i];
       if (!c || h.d < c.d - 2 || (h.d < c.d + 2 && w > c.w)) best[h.i] = { d:h.d, t:r.t, w };
     }
@@ -342,6 +350,14 @@ async function buildTrack(a, b, coords) {
     for (let i = 0; i < raw.length; i++) { const cnt = {}; let bv = raw[i], bc = 0;
       for (let q = Math.max(0, i - 6); q <= Math.min(raw.length - 1, i + 6); q++) cnt[raw[q]] = (cnt[raw[q]] || 0) + 1;
       for (const kk in cnt) if (cnt[kk] > bc) { bc = cnt[kk]; bv = +kk; } lims[i] = bv; }
+    // bridges: the deck runs straight between its two ends instead of following the valley floor
+    const br = best.map(b => !!(b && b.d < 3.5 && b.t.bridge && b.t.bridge !== 'no'));
+    for (let i = 0; i < pts.length;) {
+      if (!br[i]) { i++; continue; }
+      let j = i; while (j + 1 < pts.length && br[j + 1]) j++;
+      if (j - i >= 3 && i > 0 && j < pts.length - 1) { const y0 = pts[i - 1].y, y1 = pts[j + 1].y; for (let q = i; q <= j; q++) pts[q].y = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2); }
+      i = j + 1;
+    }
     for (let pass = 0; pass < 8; pass++) for (let i = 1; i < pts.length - 1; i++) halfs[i] = (halfs[i-1] + halfs[i] * 2 + halfs[i+1]) / 4;
   }
 
@@ -355,6 +371,7 @@ async function buildTrack(a, b, coords) {
   const makeRuns = (roads, keep) => { // road pieces outside the race road's walls (optionally only those near a chunk)
     const out = [];
     for (const r of roads) {
+      if (r.hi) continue; // bridges and other layers are not drawn as side roads
       let cur = null, prev = null;
       for (const p of r.dp) {
         const h = nearAny(p.x, p.z, 450);
@@ -414,7 +431,7 @@ async function buildTrack(a, b, coords) {
     return false; };
   const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 2.4; }; // never closer than 1.2 m to the race road's wall
   const addPier = (list, p, n, w, top, side) => {
-    if (terr.ok || top - minY < 1.2 || list.length >= 4000) return;
+    const gnd = terr.ok ? terrH(p.x, p.z) : minY; if (list.length >= 4000 || !(top - (Number.isFinite(gnd) ? gnd : minY) >= 1.2)) return;
     if (side) { const h = nearTrack(p.x, p.z, 60); if (h.i >= 0 && h.d < halfs[h.i] + w / 2 + 4.9) return; } // clear of the main road and its supports
     list.push({ x:p.x, z:p.z, top, n, w });
   };
@@ -423,12 +440,13 @@ async function buildTrack(a, b, coords) {
     const mat = new THREE.MeshLambertMaterial({ color:0x8d8f94 }), o = new THREE.Object3D(), box = new THREE.BoxGeometry(1, 1, 1);
     const colm = new THREE.InstancedMesh(box, mat, list.length * 2), beam = new THREE.InstancedMesh(box, mat, list.length);
     list.forEach((q, i) => {
-      const hgt = q.top - .6 - minY; o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
-      for (const sd of [-1, 1]) { const off = sd * (q.w / 2 + 1.6);
-        o.position.set(q.x + q.n.x * off, minY + hgt / 2, q.z + q.n.z * off); o.scale.set(1.2, hgt, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
+      o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
+      for (const sd of [-1, 1]) { const off = sd * (q.w / 2 + 1.6), cxp = q.x + q.n.x * off, czp = q.z + q.n.z * off, gv = terrH(cxp, czp);
+        const gb = Number.isFinite(gv) ? gv - .6 : minY, hc = Math.max(.1, q.top - .6 - gb); // column stands on the terrain below it
+        o.position.set(cxp, gb + hc / 2, czp); o.scale.set(1.2, hc, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
       o.position.set(q.x, q.top - .3, q.z); o.scale.set(q.w + 3.6, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
     });
-    colm.frustumCulled = beam.frustumCulled = false; group.add(colm, beam);
+    colm.frustumCulled = beam.frustumCulled = false; colm.castShadow = beam.castShadow = true; group.add(colm, beam);
   };
   const drawRuns = (rs, group) => { // asphalt, borders and supports of side roads
     const piers = [];
@@ -484,7 +502,7 @@ async function buildTrack(a, b, coords) {
   sb.position.set(pts[0].x - t0.x * 4, pts[0].y + .45, pts[0].z - t0.z * 4); sb.rotation.y = Math.atan2(frames[0].x, frames[0].z); trackGroup.add(sb);
   addX(sb.position.x, pts[0].y, sb.position.z, Math.atan2(t0.x, t0.z));
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
-  ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
+  ground.rotation.x = -Math.PI / 2; ground.position.y = minY; ground.receiveShadow = true;
   if (terr.ok) groundMesh = null; else { groundMesh = ground; trackGroup.add(ground); } // the flat ground follows the player; with terrain tiles the terrain is the ground
   const mainPiers = [];
   for (let i = 0; i < pts.length; i += 4) addPier(mainPiers, pts[i], frames[i], halfs[i] * 2, pts[i].y - .5, false);
@@ -517,7 +535,7 @@ async function buildTrack(a, b, coords) {
       const n = bufs[k].reduce((sum, a2) => sum + a2.length, 0); if (!n) return;
       const pos = new Float32Array(n); let o = 0; for (const a2 of bufs[k]) { pos.set(a2, o); o += a2.length; }
       const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); gg.computeVertexNormals();
-      g.add(new THREE.Mesh(gg, new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide })));
+      const bm = new THREE.Mesh(gg, new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide })); bm.castShadow = bm.receiveShadow = true; g.add(bm);
     });
   };
   const CH = 200, nCh = Math.ceil(pts.length / CH), chunks = new Array(nCh).fill(null), failAt = new Array(nCh).fill(0), spc = length / (pts.length - 1);
@@ -571,7 +589,7 @@ async function buildTrack(a, b, coords) {
         const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) { const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1; ind.push(A, C, B, B, C, D); }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
         g.setIndex(ind); g.computeVertexNormals();
-        c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); trackGroup.add(c.mesh);
+        c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); c.mesh.castShadow = c.mesh.receiveShadow = true; trackGroup.add(c.mesh);
       } catch (e) { console.warn('Terrain cell failed:', e); if (cells.get(key) === c) { cells.delete(key); retryAt.set(key, Date.now() + 20000); } }
       c.done = true;
     })();
@@ -733,12 +751,13 @@ const camPos = new THREE.Vector3();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-  pollPad(); step(dt); updateAudio(); updateRain(dt);
+  pollPad(); step(dt); updateAudio(); updateRain(dt); updateClouds(dt);
   if (groundMesh) groundMesh.position.set(st.x, groundMesh.position.y, st.z);
   if (streamer && (state === 'race' || state === 'countdown') && (frame.sT = (frame.sT || 0) + dt) > .5) { frame.sT = 0; streamer.update(st.idx, st.x, st.z); }
   if (track) {
     const y = st.y;
     car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
+    sun.target.position.set(st.x, y, st.z); sun.position.set(st.x + sunDir.x * 170, y + sunDir.y * 170, st.z + sunDir.z * 170); // shadow box follows the car
     const U = car.userData;
     if (U.wheels) {
       for (const w of U.wheels) w.rotation.x += st.speed * dt / .33;
@@ -793,7 +812,7 @@ const densify = ps => { const o = [ps[0]];
   return o; };
 const accs = {};
 function accStrip(ps, fr, a, b, y0, y1, hex, mask) {
-  const key = hex + '|' + y0 + '|' + y1, A = accs[key] || (accs[key] = { pos:[], ind:[], hex }), base = A.pos.length / 3;
+  const key = hex + '|' + y0 + '|' + y1, A = accs[key] || (accs[key] = { pos:[], ind:[], hex, wall:Math.abs(y1 - y0) > .5 }), base = A.pos.length / 3;
   ps.forEach((p, i) => { const n = fr[i];
     A.pos.push(p.x + n.x * a, p.y + y0, p.z + n.z * a, p.x + n.x * b, p.y + y1, p.z + n.z * b);
     if (i < ps.length - 1 && !(mask && (mask[i] || mask[i + 1]))) { const v = base + i * 2; A.ind.push(v, v + 1, v + 2, v + 1, v + 3, v + 2); } });
@@ -801,7 +820,7 @@ function accStrip(ps, fr, a, b, y0, y1, hex, mask) {
 function flushAccs(group) {
   for (const k in accs) { const A = accs[k], g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(A.pos, 3)); g.setIndex(A.ind); g.computeVertexNormals();
-    group.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:A.hex, side:THREE.DoubleSide }))); delete accs[k]; }
+    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:A.hex, side:THREE.DoubleSide })); m.receiveShadow = true; m.castShadow = A.wall; group.add(m); delete accs[k]; }
 }
 const stitch = segs => { // join ways into closed rings
   const rings = [], pool = segs.filter(q => q.length > 1).map(q => q.slice());
@@ -867,7 +886,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
     }
     if (el.type === 'node') { if (t.natural === 'tree') trees.push(xz(el)); continue; }
     if (!el.geometry || el.geometry.length < 2) continue;
-    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ id:el.id, pts:el.geometry.map(xz), t }); }
+    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) ) continue; roads.push({ id:el.id, hi:!!((t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)), pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
     else if (t.waterway) waterways.push({ pts:el.geometry.map(xz), t });
     else { const kind = kindOf(t); if (kind && el.geometry.length >= 4) areas.push({ fp:el.geometry.map(xz), holes:[], t, kind }); }
@@ -997,8 +1016,27 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
       o.position.set(p.x, g0 + th + 1.6 * sc, p.z); o.scale.set(2.1 * sc, 2.3 * sc, 2.1 * sc); o.updateMatrix(); crown.setMatrixAt(i, o.matrix);
       c.setHSL(.24 + rnd() * .08, .45, .26 + rnd() * .1); crown.setColorAt(i, c);
     });
-    trunk.frustumCulled = crown.frustumCulled = false; group.add(trunk, crown);
+    trunk.frustumCulled = crown.frustumCulled = false; trunk.castShadow = crown.castShadow = true; group.add(trunk, crown);
   }
+}
+
+/* ---------- Clouds ---------- */
+const CN = 300, cloudBase = [], cloudMat = new THREE.MeshLambertMaterial({ color:0xffffff, transparent:true, opacity:.93, fog:false, depthWrite:false });
+const clouds = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), cloudMat, CN); clouds.frustumCulled = false; scene.add(clouds);
+(function () { // fixed random layout: groups of 3-6 flattened puffs
+  let sd = 777; const r = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296; let i = 0;
+  while (i < CN) { const cx = (r() - .5) * 7000, cz = (r() - .5) * 7000, cy = 260 + r() * 140, k = 3 + Math.floor(r() * 4);
+    for (let q = 0; q < k && i < CN; q++, i++) cloudBase.push({ x:cx + (r() - .5) * 220, z:cz + (r() - .5) * 140, y:cy + (r() - .5) * 18, sx:60 + r() * 70, sy:22 + r() * 18, sz:50 + r() * 60 }); }
+})();
+let cloudN = 0, cloudWind = 0;
+function updateClouds(dt) { // clouds drift with the wind and wrap around the player, so the sky is never empty
+  clouds.visible = cloudN > 0 && state !== 'menu' && state !== 'confirm'; if (!clouds.visible) return;
+  cloudWind += dt * 6; clouds.count = cloudN;
+  const o = updateClouds.o || (updateClouds.o = new THREE.Object3D()), H = 3500, M = 2 * H;
+  for (let i = 0; i < cloudN; i++) { const b = cloudBase[i];
+    const x = ((b.x + cloudWind - st.x + H) % M + M) % M - H + st.x, z = ((b.z - st.z + H) % M + M) % M - H + st.z;
+    o.position.set(x, st.y + b.y, z); o.scale.set(b.sx, b.sy, b.sz); o.updateMatrix(); clouds.setMatrixAt(i, o.matrix); }
+  clouds.instanceMatrix.needsUpdate = true;
 }
 
 /* ---------- Weather + time of day ---------- */
@@ -1014,8 +1052,11 @@ function applyEnv() {
   const sky = new THREE.Color(T.sky).lerp(new THREE.Color(night ? 0x0a0f1a : 0x7b838f), gm);
   scene.background.copy(sky); scene.fog.color.copy(sky); scene.fog.near = FOGS[env.weather][0]; scene.fog.far = FOGS[env.weather][1];
   hemi.color.setHex(T.hc); hemi.groundColor.setHex(T.gc); hemi.intensity = T.hi * (1 - .2 * gm);
-  sun.color.setHex(T.sc); sun.intensity = T.si * (1 - .6 * gm); sun.position.set(...T.sp);
+  sun.color.setHex(T.sc); sun.intensity = T.si * (1 - .6 * gm); sun.position.set(...T.sp); sunDir.set(...T.sp).normalize();
   head.intensity = night ? 2.2 : (env.time === 'Sunset' || env.weather === 'Fog' || env.weather === 'Rain') ? 1.1 : 0;
+  cloudN = { Clear:80, Cloudy:300, Rain:300, Fog:0 }[env.weather];
+  cloudMat.color.setHex({ Clear:0xffffff, Cloudy:0xdfe3e8, Rain:0x8a929e, Fog:0xffffff }[env.weather]);
+  if (env.time === 'Sunset') cloudMat.color.lerp(new THREE.Color(0xffb98a), .5);
   rain.visible = env.weather === 'Rain';
 }
 const RN = 1600, rainPos = new Float32Array(RN * 6), rainL = new Float32Array(RN * 3);
@@ -1036,6 +1077,7 @@ function updateRain(dt) {
   }
   rainGeo.attributes.position.needsUpdate = true; rain.position.copy(camera.position);
 }
+function applyShadows() { renderer.shadowMap.enabled = !!env.shadows; sun.castShadow = !!env.shadows; scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); }
 function showToast(m) { const e = $('toast'); e.textContent = m; e.style.display = 'block'; clearTimeout(showToast.t); showToast.t = setTimeout(() => { e.style.display = 'none'; }, 2200); }
 
 /* ---------- Sound (generated in the browser) ---------- */
@@ -1152,7 +1194,7 @@ $('go').onclick = async () => {
 };
 $('back').onclick = () => setState('menu');
 $('ok').onclick = async () => {
-  env = { weather:$('wx').value, time:$('tod').value, legal:$('legal').checked }; document.body.dataset.legal = env.legal ? '1' : '0'; applyEnv();
+  env = { weather:$('wx').value, time:$('tod').value, legal:$('legal').checked, shadows:$('shadows').checked }; document.body.dataset.legal = env.legal ? '1' : '0'; applyEnv(); applyShadows();
   initAudio(); setState('loading'); say('Building track…');
   try { await buildTrack(pending.a, pending.b, pending.coords); startCountdown(); }
   catch (e) { setState('menu'); say(e.message, true); }
