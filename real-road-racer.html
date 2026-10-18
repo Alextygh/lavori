@@ -431,7 +431,10 @@ async function buildTrack(a, b, coords) {
     return false; };
   const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 2.4; }; // never closer than 1.2 m to the race road's wall
   const addPier = (list, p, n, w, top, side) => {
-    const gnd = terr.ok ? terrH(p.x, p.z) : minY; if (list.length >= 4000 || !(top - (Number.isFinite(gnd) ? gnd : minY) >= 1.2)) return;
+    if (list.length >= 4000) return;
+    const off = w / 2 + 1.6, gl = (x, z) => { const v = terr.ok ? terrH(x, z) - .6 : minY; return Number.isFinite(v) ? v : minY; };
+    const gap = Math.max(top - gl(p.x + n.x * off, p.z + n.z * off), top - gl(p.x - n.x * off, p.z - n.z * off)); // gap under either edge of the road
+    if (!(gap > (terr.ok ? .5 : 1.2))) return;
     if (side) { const h = nearTrack(p.x, p.z, 60); if (h.i >= 0 && h.d < halfs[h.i] + w / 2 + 4.9) return; } // clear of the main road and its supports
     list.push({ x:p.x, z:p.z, top, n, w });
   };
@@ -442,8 +445,8 @@ async function buildTrack(a, b, coords) {
     list.forEach((q, i) => {
       o.rotation.set(0, Math.atan2(-q.n.z, q.n.x), 0);
       for (const sd of [-1, 1]) { const off = sd * (q.w / 2 + 1.6), cxp = q.x + q.n.x * off, czp = q.z + q.n.z * off, gv = terrH(cxp, czp);
-        const gb = Number.isFinite(gv) ? gv - .6 : minY, hc = Math.max(.1, q.top - .6 - gb); // column stands on the terrain below it
-        o.position.set(cxp, gb + hc / 2, czp); o.scale.set(1.2, hc, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
+        const gb = Number.isFinite(gv) ? gv - .6 : minY, hc = Math.max(.1, q.top - .6 - gb + 5); // column stands on the terrain and reaches 5 m below it
+        o.position.set(cxp, gb - 5 + hc / 2, czp); o.scale.set(1.2, hc, 1.2); o.updateMatrix(); colm.setMatrixAt(i * 2 + (sd + 1) / 2, o.matrix); }
       o.position.set(q.x, q.top - .3, q.z); o.scale.set(q.w + 3.6, .6, 1.2); o.updateMatrix(); beam.setMatrixAt(i, o.matrix);
     });
     colm.frustumCulled = beam.frustumCulled = false; colm.castShadow = beam.castShadow = true; group.add(colm, beam);
@@ -510,12 +513,27 @@ async function buildTrack(a, b, coords) {
 
   // ---- scenery streaming: buildings, trees, parks, water and far-away roads load in ~600 m chunks near the player
   const addBuildings = (list, g, keepPt) => {
+    const tunnelParts = b => { // null unless the building covers part of the race road; otherwise a 3 m grid of its footprint with the road cells marked
+      let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+      for (const p of b.fp) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z); }
+      const rad = Math.hypot(x1 - x0, z1 - z0) / 2, hc = nearTrack((x0 + x1) / 2, (z0 + z1) / 2, rad + 40);
+      if (hc.i < 0 || hc.d > rad + halfs[hc.i] + 4) return null;
+      const cs = Math.max(3, Math.max(x1 - x0, z1 - z0) / 60), nx = Math.ceil((x1 - x0) / cs), nz = Math.ceil((z1 - z0) / cs), solid = [];
+      let hit = false, ymax = -1e9;
+      for (let j = 0; j < nz; j++) { const row = [];
+        for (let i = 0; i < nx; i++) {
+          const q = { x:x0 + (i + .5) * cs, z:z0 + (j + .5) * cs };
+          if (!inPoly(q, b.fp) || (b.holes || []).some(h => inPoly(q, h))) { row.push(0); continue; }
+          const h = nearTrack(q.x, q.z, 30);
+          if (h.i >= 0 && h.d < halfs[h.i] + 1.4 + cs * .71) { row.push(2); hit = true; ymax = Math.max(ymax, pts[h.i].y); } else row.push(1);
+        }
+        solid.push(row); }
+      return hit ? { x0, z0, cs, nx, nz, solid, ymax } : null;
+    };
     const cand = [];
     for (const b of list) {
       const h0 = nearTrack(b.fp[0].x, b.fp[0].z, 250); if (h0.i < 0 || !keepPt(b.fp[0])) continue;
-      let ok = true;
-      for (const f of b.fp) { const h = nearTrack(f.x, f.z, 20); if (h.i >= 0 && h.d < halfs[h.i] + 3) { ok = false; break; } } // keep the road clear
-      if (ok) cand.push({ b, by:pts[h0.i].y, dm:h0.d });
+      cand.push({ b, by:pts[h0.i].y, dm:h0.d });
     }
     cand.sort((p, q) => p.dm - q.dm);
     const bufs = [[], [], []]; let nb = 0;
@@ -524,8 +542,22 @@ async function buildTrack(a, b, coords) {
       try {
         const sh = new THREE.Shape(b.fp.map(p => new THREE.Vector2(p.x, -p.z)));
         for (const hole of b.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
-        let low = minY, top = by;
-        if (terr.ok) { const gz = b.fp.map(p => terrH(p.x, p.z)).filter(Number.isFinite); if (gz.length) { low = Math.min(...gz) - 1.5; top = Math.max(...gz); } }
+        let low = minY - 5, top = by;
+        if (terr.ok) { const gz = b.fp.map(p => terrH(p.x, p.z)).filter(Number.isFinite); if (gz.length) { low = Math.min(...gz) - 5; top = Math.max(...gz); } }
+        const tp = tunnelParts(b);
+        if (tp) { // the road runs through this building: open a 6 m tunnel and keep the floors above it
+          const ceil = tp.ymax + 6, roof = Math.max(top + hgt, ceil + 3);
+          const gu = new THREE.ExtrudeGeometry(sh, { depth:roof - ceil, bevelEnabled:false });
+          gu.rotateX(-Math.PI / 2); gu.translate(0, ceil, 0); bufs[nb % 3].push(gu.attributes.position.array); gu.dispose();
+          const lo = [];
+          for (let j = 0; j < tp.nz; j++) for (let i = 0; i < tp.nx; i++) {
+            if (tp.solid[j][i] !== 1) continue;
+            let e = i; while (e + 1 < tp.nx && tp.solid[j][e + 1] === 1) e++;
+            lo.push(...boxTris(tp.x0 + i * tp.cs, tp.x0 + (e + 1) * tp.cs, low, ceil, tp.z0 + j * tp.cs, tp.z0 + (j + 1) * tp.cs)); i = e;
+          }
+          if (lo.length) bufs[nb % 3].push(new Float32Array(lo));
+          nb++; continue;
+        }
         const gg = new THREE.ExtrudeGeometry(sh, { depth:hgt + (top - low), bevelEnabled:false });
         gg.rotateX(-Math.PI / 2); gg.translate(0, low, 0);
         bufs[nb % 3].push(gg.attributes.position.array); gg.dispose(); nb++;
@@ -842,6 +874,11 @@ const inPoly = (p, ring) => { let c = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++)
     if ((ring[i].z > p.z) !== (ring[j].z > p.z) && p.x < (ring[j].x - ring[i].x) * (p.z - ring[i].z) / (ring[j].z - ring[i].z) + ring[i].x) c = !c;
   return c; };
+const boxTris = (x0, x1, y0, y1, z0, z1) => { // box as plain triangles (positions only)
+  const v = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]], out = [];
+  for (const q of [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [3, 7, 6, 2], [0, 4, 7, 3], [1, 2, 6, 5]]) for (const k of [0, 1, 2, 0, 2, 3]) out.push(...v[q[k]]);
+  return out;
+};
 const framesOf = ps => ps.map((p, i) => { const a = ps[Math.max(i - 1, 0)], b = ps[Math.min(i + 1, ps.length - 1)];
   const l = Math.hypot(b.x - a.x, b.z - a.z) || 1; return { x:-(b.z - a.z) / l, z:(b.x - a.x) / l }; });
 const xTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
@@ -1012,7 +1049,7 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
     const o = new THREE.Object3D(), c = new THREE.Color();
     trees.forEach((p, i) => {
       const sc = .8 + rnd() * .7, th = 2.4 * sc, gt = terrH(p.x, p.z), g0 = Number.isFinite(gt) ? gt - .5 : minY;
-      o.position.set(p.x, g0 + th / 2, p.z); o.scale.set(sc, th, sc); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix);
+      o.position.set(p.x, g0 + (th - 5) / 2, p.z); o.scale.set(sc, th + 5, sc); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix);
       o.position.set(p.x, g0 + th + 1.6 * sc, p.z); o.scale.set(2.1 * sc, 2.3 * sc, 2.1 * sc); o.updateMatrix(); crown.setMatrixAt(i, o.matrix);
       c.setHSL(.24 + rnd() * .08, .45, .26 + rnd() * .1); crown.setColorAt(i, c);
     });
