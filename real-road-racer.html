@@ -70,6 +70,12 @@
   body[data-touch="1"] #hud { bottom:110px; } body[data-touch="1"] #help { display:none !important; }
   body[data-s=countdown] #tools, body[data-s=race] #tools, body[data-s=finished] #tools { display:flex; }
   body[data-touch="1"][data-s=countdown] #touch, body[data-touch="1"][data-s=race] #touch { display:block; }
+  #limit { position:fixed; top:12px; left:50%; transform:translateX(-50%); display:none; text-align:center; pointer-events:none; }
+  #limNum { width:68px; height:68px; border-radius:50%; background:#fff; border:7px solid #d62d2d; color:#111; font:800 24px/54px "Trebuchet MS",sans-serif; margin:0 auto; }
+  #limit.over #limNum { animation:pulse .45s infinite alternate; } @keyframes pulse { to { background:#ffd0d0; } }
+  #limWarn { margin-top:6px; color:#ff9c8f; font-weight:700; text-shadow:0 1px 6px rgba(0,0,0,.8); min-height:1.4em; }
+  #toast { position:fixed; top:140px; left:50%; transform:translateX(-50%); font-size:32px; font-weight:800; color:#ff6b5e; text-shadow:0 2px 14px rgba(0,0,0,.8); display:none; pointer-events:none; white-space:nowrap; }
+  body[data-legal="1"][data-s=countdown] #limit, body[data-legal="1"][data-s=race] #limit { display:block; }
   #hud, #help, #note, #mini { display:none; }
   body[data-s=countdown] :is(#hud,#help,#note,#mini), body[data-s=race] :is(#hud,#help,#note,#mini), body[data-s=finished] :is(#hud,#help,#note,#mini) { display:block; }
 </style>
@@ -84,6 +90,9 @@
     <div class="row2"><input id="b" type="text" placeholder="e.g. Castello Sforzesco, Milano" autocomplete="off"><button class="alt" id="locB" title="Use my location" aria-label="Use my location as finish">📍</button></div>
     <label for="hex">Car colour</label>
     <div class="row2"><input id="col" type="color" value="#d9482b" aria-label="Colour picker"><input id="hex" type="text" value="#d9482b" maxlength="7" aria-label="Hex colour code"></div>
+    <div class="row2"><div style="flex:1"><label for="wx">Weather</label><select id="wx"><option>Clear</option><option>Cloudy</option><option>Rain</option><option>Fog</option></select></div>
+    <div style="flex:1"><label for="tod">Time of day</label><select id="tod"><option>Morning</option><option selected>Day</option><option>Sunset</option><option>Night</option></select></div></div>
+    <label class="check"><input id="legal" type="checkbox"> Legal mode: obey speed limits (+10 s each time you stay over for 3 s)</label>
     <button id="go">Start</button>
     <div id="status"></div>
   </div>
@@ -99,6 +108,8 @@
 <div id="countdown"><div class="big" id="cd"></div></div>
 <div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Main menu</button></div></div>
 <div id="note"></div>
+<div id="limit"><div id="limNum">50</div><div id="limWarn"></div></div>
+<div id="toast"></div>
 <div id="tools"><button class="tool" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera (C)">🎥 Chase</button></div>
 <div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button></div>
 <canvas id="mini" width="220" height="160"></canvas>
@@ -122,7 +133,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x9bb3cc);
 scene.fog = new THREE.Fog(0x9bb3cc, 120, 900);
 const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.5, 3000);
-scene.add(new THREE.HemisphereLight(0xdfe9f5, 0x3b4a3a, 0.9));
+const hemi = new THREE.HemisphereLight(0xdfe9f5, 0x3b4a3a, 0.9); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffe2b8, 0.8);
 sun.position.set(-200, 300, 120);
 scene.add(sun);
@@ -141,6 +152,8 @@ for (const c of Object.values(CLASSES)) { // top speed where engine power = air 
   c.top = Math.min(lo, c.vmax);
 }
 const car = new THREE.Group(); scene.add(car);
+const head = new THREE.SpotLight(0xfff1d0, 0, 80, .55, .6, 1); // headlights
+let env = { weather:'Clear', time:'Day', legal:false };
 let cur = CLASSES.hatch;
 function setCar(c) {
   cur = CLASSES[c.cls]; car.clear();
@@ -166,6 +179,7 @@ function setCar(c) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(.34, .14, .06), tl); b.position.set(sx * cur.w * .32, .35 + cur.h * .68, -cur.len / 2 - .01);
     car.add(a, b);
   }
+  head.position.set(0, .35 + cur.h * .7, cur.len / 2); head.target.position.set(0, .2, cur.len / 2 + 20); car.add(head, head.target);
 }
 
 let trackGroup = null, track = null; // track = {pts:[Vector3], n, length}
@@ -299,7 +313,7 @@ async function buildTrack(a, b, coords) {
   };
 
   // Race road: width and surface from the nearest real OSM road
-  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48));
+  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48)), lims = new Array(pts.length).fill(50), gs = new Float32Array(pts.length).fill(1);
   if (osm) {
     osm.roads.forEach(r => { r.dp = densify(r.pts); });
     const best = new Array(pts.length).fill(null);
@@ -312,10 +326,15 @@ async function buildTrack(a, b, coords) {
     for (let i = 0; i < pts.length; i++) { if (best[i]) last = best[i]; else if (last) best[i] = last; }
     last = null;
     for (let i = pts.length - 1; i >= 0; i--) { if (best[i]) last = best[i]; else if (last) best[i] = last; }
-    best.forEach((b, i) => { if (b) { halfs[i] = wOf(b.t) / 2; cols[i].setHex(surfOf(b.t)); } });
+    best.forEach((b, i) => { if (b) { halfs[i] = wOf(b.t) / 2; cols[i].setHex(surfOf(b.t)); lims[i] = limitOf(b.t); gs[i] = gripOf(b.t); } });
+    const raw = lims.slice(); // speed limit: most common value within 18 m, so junction glitches don't flicker
+    for (let i = 0; i < raw.length; i++) { const cnt = {}; let bv = raw[i], bc = 0;
+      for (let q = Math.max(0, i - 6); q <= Math.min(raw.length - 1, i + 6); q++) cnt[raw[q]] = (cnt[raw[q]] || 0) + 1;
+      for (const kk in cnt) if (cnt[kk] > bc) { bc = cnt[kk]; bv = +kk; } lims[i] = bv; }
     for (let pass = 0; pass < 8; pass++) for (let i = 1; i < pts.length - 1; i++) halfs[i] = (halfs[i-1] + halfs[i] * 2 + halfs[i+1]) / 4;
   }
 
+  if (env.weather === 'Rain') cols.forEach(c => c.multiplyScalar(.7)); // wet asphalt is darker
   // Side roads: draw everything outside the race corridor; cut ends become blocked junctions
   const gap = [new Uint8Array(pts.length), new Uint8Array(pts.length)], runs = [];
   const lerp = (a, b, t) => ({ x:a.x + (b.x - a.x) * t, y:a.y + (b.y - a.y) * t, z:a.z + (b.z - a.z) * t });
@@ -376,7 +395,7 @@ async function buildTrack(a, b, coords) {
   for (const r of runs) {
     if (r.p.length < 2) continue;
     const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015, fr = framesOf(r.p);
-    accStrip(r.p, fr, -w, w, L, L, surfOf(r.t));
+    accStrip(r.p, fr, -w, w, L, L, wetHex(surfOf(r.t)));
     const mk = sd => r.p.map((p, i) => { const x = p.x + fr[i].x * sd * (w + 1.2), z = p.z + fr[i].z * sd * (w + 1.2);
       return nearMain(x, z) || crossed(x, z, r.id) ? 1 : 0; });
     const ml = mk(-1), mr = mk(1);
@@ -472,8 +491,9 @@ async function buildTrack(a, b, coords) {
       trackGroup.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide })));
     });
   }
+  if (osm) addNature(osm, trackGroup, minY, pts, halfs, nearTrack, crossed);
   scene.add(trackGroup);
-  track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0 };
+  track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0, lims, gripS:gs };
   buildMinimap(pts, runs, finI);
   resetCar();
   say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), ${nb} buildings.` : '.'));
@@ -526,13 +546,13 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
-const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0 };
+const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, overT:0, pen:0 };
 function resetCar() {
   if (!track) return;
   const p = track.pts[5], q = track.pts[8];
   st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
   st.speed = 0; st.idx = 5; st.time = 0; st.done = false;
-  st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0;
+  st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0; st.overT = st.pen = 0;
   $('msg').style.display = 'none';
 }
 
@@ -564,7 +584,7 @@ function step(dt) {
   const gr = groundAt(st.x, st.z, best);
   const hx = Math.sin(st.heading), hz = Math.cos(st.heading);
   const slope = gr.slope * (hx * gr.tx + hz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
-  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .6 : 1), rr = offRoad ? .06 : .012; // tyre grip (+downforce), rolling resistance
+  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .6 : 1) * (env.weather === 'Rain' ? .65 : 1) * track.gripS[best], rr = offRoad ? .06 : .012; // tyre grip (+downforce), rolling resistance
   const trac = .7 * mu * cur.m * G * cosT; // max drive force the tyres can transmit
   let v = v0, a = 0;
   if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m * thrA;            // engine: power-limited, traction-limited
@@ -585,6 +605,10 @@ function step(dt) {
   if (st.slip) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; }                            // understeer scrubs speed
   st.heading += v * k * dt;
   st.aLat = v * v * k; st.speed = v;
+  if (env.legal) { // speed limit: 3 s over in a row = +10 s
+    if (Math.abs(v) * 3.6 > track.lims[best]) { st.overT += dt; if (st.overT >= 3) { st.overT = 0; st.pen += 10; showToast('+10 s penalty: speeding'); } }
+    else st.overT = 0;
+  }
   const ds = v * cosT * dt; st.x += hx * ds; st.z += hz * ds;
 
   // body: follow the road height, pitch with the slope and with acceleration, roll in corners
@@ -605,7 +629,7 @@ const camPos = new THREE.Vector3();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-  pollPad(); step(dt); updateAudio();
+  pollPad(); step(dt); updateAudio(); updateRain(dt);
   if (track) {
     const y = st.y;
     car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
@@ -628,8 +652,11 @@ function frame(now) {
       camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
     }
     $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
-    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${st.time.toFixed(1)} s  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
+    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${(st.time + st.pen).toFixed(1)} s${st.pen ? ' (+' + st.pen + ')' : ''}  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
     drawMini();
+    if (env.legal) { const lim = track.lims[st.idx];
+      $('limNum').textContent = lim; $('limit').classList.toggle('over', Math.abs(st.speed) * 3.6 > lim);
+      $('limWarn').textContent = st.overT > 0 ? 'Slow down! ' + (3 - st.overT).toFixed(1) + ' s' : ''; }
   } else {
     camera.position.set(0, 30, 60); camera.lookAt(0, 0, 0);
   }
@@ -644,6 +671,12 @@ const wOf = t => { const w = parseFloat(t.width); if (w > 0) return Math.min(w, 
   const l = parseInt(t.lanes); if (l > 0) return Math.min(l * 3.2, 30); return DEFW[t.highway] || 6; };
 const RANKS = { motorway:7, trunk:6, primary:5, secondary:4, tertiary:3, unclassified:2, residential:2, living_street:1, road:1 };
 const rankOf = t => RANKS[(t.highway || '').replace('_link', '')] || 1;
+const DEFL = { motorway:130, trunk:110, primary:70, secondary:70, tertiary:50, unclassified:50, residential:50, living_street:20, road:50, service:20 };
+const limitOf = t => { const m = String(t.maxspeed || ''), n = parseFloat(m);
+  if (n > 0) return Math.round(/mph/i.test(m) ? n * 1.609 : n); if (/walk/i.test(m)) return 10;
+  return DEFL[(t.highway || '').replace('_link', '')] || 50; };
+const gripOf = t => { const v = t.surface || ''; if (/cobble|sett|paving|brick/.test(v)) return .8; if (/gravel|dirt|ground|unpaved|compacted|sand|earth|grass|mud/.test(v)) return .6; return 1; };
+const wetHex = h => env.weather === 'Rain' ? new THREE.Color(h).multiplyScalar(.7).getHex() : h;
 const surfOf = t => { const v = t.surface || '';
   if (/cobble|sett|paving|brick/.test(v)) return 0x7d6a58;
   if (/gravel|dirt|ground|unpaved|compacted|sand|earth|grass/.test(v)) return 0x9b8660;
@@ -697,7 +730,7 @@ async function fetchOSM(a, kx, kz, coords) {
   const step = Math.max(1, Math.ceil(coords.length / 150));
   const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
   const ar = `(around:300,${poly})`, ar2 = `(around:500,${poly})`;
-  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};);out geom;`;
+  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};node["natural"="tree"]${ar};way["natural"~"^(water|wood|scrub)$"]${ar};way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${ar};way["leisure"~"^(park|garden|pitch|playground|nature_reserve)$"]${ar};way["waterway"~"^(river|canal|stream|ditch)$"]${ar};relation["natural"~"^(water|wood)$"]["type"="multipolygon"]${ar};relation["landuse"~"^(forest|grass)$"]["type"="multipolygon"]${ar};relation["leisure"~"^(park|garden)$"]["type"="multipolygon"]${ar};);out geom;`;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
     'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
   let j = null, last = '';
@@ -712,23 +745,27 @@ async function fetchOSM(a, kx, kz, coords) {
   }
   if (!j) throw new Error('all Overpass servers failed (' + last + ')');
   const xz = g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz });
-  const roads = [], buildings = [];
+  const roads = [], buildings = [], trees = [], areas = [], waterways = [];
+  const kindOf = t => t.natural === 'water' ? 'water' : (t.natural === 'wood' || t.natural === 'scrub' || t.landuse === 'forest') ? 'forest' : (t.leisure || t.landuse || t.natural) ? 'park' : null;
   for (const el of j.elements || []) {
     const t = el.tags || {};
     if (el.type === 'relation') {
-      if (!t.building) continue;
+      const isB = !!t.building, kind = isB ? null : kindOf(t); if (!isB && !kind) continue;
       const outs = [], ins = [];
       for (const m of el.members || []) if (m.type === 'way' && m.geometry) (m.role === 'inner' ? ins : outs).push(m.geometry.map(xz));
       const holes = stitch(ins);
-      for (const ring of stitch(outs)) buildings.push({ fp:ring, holes:holes.filter(h => inPoly(h[0], ring)), t });
+      for (const ring of stitch(outs)) { const o = { fp:ring, holes:holes.filter(h => inPoly(h[0], ring)), t }; if (isB) buildings.push(o); else { o.kind = kind; areas.push(o); } }
       continue;
     }
+    if (el.type === 'node') { if (t.natural === 'tree') trees.push(xz(el)); continue; }
     if (!el.geometry || el.geometry.length < 2) continue;
     if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)) continue; roads.push({ pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
+    else if (t.waterway) waterways.push({ pts:el.geometry.map(xz), t });
+    else { const kind = kindOf(t); if (kind && el.geometry.length >= 4) areas.push({ fp:el.geometry.map(xz), holes:[], t, kind }); }
   }
   if (!roads.length && !buildings.length) throw new Error(j.remark || 'no data returned');
-  return { roads, buildings };
+  return { roads, buildings, trees, areas, waterways };
 }
 
 /* ---------- Map (click start, then end) ---------- */
@@ -753,6 +790,93 @@ function applyColor(v) {
 $('col').oninput = e => applyColor(e.target.value);
 $('hex').oninput = e => applyColor(e.target.value);
 
+/* ---------- Trees, parks, water ---------- */
+function addNature(osm, group, minY, pts, halfs, nearTrack, crossed) {
+  const gy = minY + .05, colors = { water:0x3a6ea5, forest:0x3f6e3c, park:0x628f4e }, bufs = { water:[], forest:[], park:[] }, trees = [];
+  let seed = 12345; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const ok = (x, z) => { const h = nearTrack(x, z, 20); return !(h.i >= 0 && h.d < halfs[h.i] + 4.5) && !crossed(x, z, -2); }; // keep roads clear
+  for (const p of osm.trees) if (trees.length < 4000 && nearTrack(p.x, p.z, 250).i >= 0 && ok(p.x, p.z)) trees.push(p);
+  for (const a of osm.areas) {
+    try {
+      const sh = new THREE.Shape(a.fp.map(p => new THREE.Vector2(p.x, -p.z)));
+      for (const hole of a.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
+      const g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2); g.translate(0, gy + (a.kind === 'water' ? .02 : 0), 0);
+      bufs[a.kind].push(g.toNonIndexed().attributes.position.array); g.dispose();
+    } catch (e) { /* skip bad polygon */ }
+    if (a.kind === 'water') continue;
+    let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+    for (const p of a.fp) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.z); z1 = Math.max(z1, p.z); }
+    const sp = a.kind === 'forest' ? 9 : 24;
+    if ((x1 - x0) * (z1 - z0) / (sp * sp) > 8000) continue; // skip huge areas
+    for (let x = x0; x < x1; x += sp) for (let z = z0; z < z1; z += sp) {
+      if (trees.length >= 4000) break;
+      const p = { x:x + rnd() * sp, z:z + rnd() * sp };
+      if (inPoly(p, a.fp) && !(a.holes || []).some(h => inPoly(p, h)) && nearTrack(p.x, p.z, 250).i >= 0 && ok(p.x, p.z)) trees.push(p);
+    }
+  }
+  for (const k in bufs) {
+    const n = bufs[k].reduce((sum, a) => sum + a.length, 0); if (!n) continue;
+    const pos = new Float32Array(n); let o = 0; for (const a of bufs[k]) { pos.set(a, o); o += a.length; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+    group.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color:colors[k], side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 })));
+  }
+  for (const w of osm.waterways) {
+    const ps = w.pts.map(p => ({ x:p.x, y:0, z:p.z })); if (ps.length < 2) continue;
+    const hw = { river:12, canal:5, stream:1.5, ditch:.8 }[w.t.waterway] || 2;
+    accStrip(ps, framesOf(ps), -hw, hw, gy + .03, gy + .03, colors.water);
+  }
+  flushAccs(group);
+  if (trees.length) {
+    const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.22, .3, 1, 6), new THREE.MeshLambertMaterial({ color:0x6b4a2f }), trees.length);
+    const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color:0xffffff }), trees.length);
+    const o = new THREE.Object3D(), c = new THREE.Color();
+    trees.forEach((p, i) => {
+      const sc = .8 + rnd() * .7, th = 2.4 * sc;
+      o.position.set(p.x, minY + th / 2, p.z); o.scale.set(sc, th, sc); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix);
+      o.position.set(p.x, minY + th + 1.6 * sc, p.z); o.scale.set(2.1 * sc, 2.3 * sc, 2.1 * sc); o.updateMatrix(); crown.setMatrixAt(i, o.matrix);
+      c.setHSL(.24 + rnd() * .08, .45, .26 + rnd() * .1); crown.setColorAt(i, c);
+    });
+    trunk.frustumCulled = crown.frustumCulled = false; group.add(trunk, crown);
+  }
+}
+
+/* ---------- Weather + time of day ---------- */
+const TIMES = {
+  Morning:{ sky:0xc9d9ea, hc:0xe4edf7, gc:0x4a5a44, hi:.95, sc:0xffe3b8, si:.8,  sp:[-150, 120, 220] },
+  Day:    { sky:0x9bb3cc, hc:0xdfe9f5, gc:0x3b4a3a, hi:.9,  sc:0xffe2b8, si:.8,  sp:[-200, 300, 120] },
+  Sunset: { sky:0xe59a6b, hc:0xf2c9a8, gc:0x4a3a3a, hi:.7,  sc:0xff9a4d, si:.75, sp:[300, 60, -100] },
+  Night:  { sky:0x070c18, hc:0x4a5a8a, gc:0x10151f, hi:.55, sc:0x8fa0d8, si:.3,  sp:[-100, 200, 100] }
+};
+const FOGS = { Clear:[120, 900], Cloudy:[100, 700], Rain:[40, 380], Fog:[8, 160] };
+function applyEnv() {
+  const T = TIMES[env.time], night = env.time === 'Night', gm = { Clear:0, Cloudy:.45, Rain:.65, Fog:.7 }[env.weather];
+  const sky = new THREE.Color(T.sky).lerp(new THREE.Color(night ? 0x0a0f1a : 0x7b838f), gm);
+  scene.background.copy(sky); scene.fog.color.copy(sky); scene.fog.near = FOGS[env.weather][0]; scene.fog.far = FOGS[env.weather][1];
+  hemi.color.setHex(T.hc); hemi.groundColor.setHex(T.gc); hemi.intensity = T.hi * (1 - .2 * gm);
+  sun.color.setHex(T.sc); sun.intensity = T.si * (1 - .6 * gm); sun.position.set(...T.sp);
+  head.intensity = night ? 2.2 : (env.time === 'Sunset' || env.weather === 'Fog' || env.weather === 'Rain') ? 1.1 : 0;
+  rain.visible = env.weather === 'Rain';
+}
+const RN = 1600, rainPos = new Float32Array(RN * 6), rainL = new Float32Array(RN * 3);
+for (let i = 0; i < RN; i++) { rainL[i * 3] = (Math.random() - .5) * 44; rainL[i * 3 + 1] = Math.random() * 22 - 10; rainL[i * 3 + 2] = (Math.random() - .5) * 44; }
+const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+const rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({ color:0xb9c6d6, transparent:true, opacity:.45 }));
+rain.frustumCulled = false; rain.visible = false; scene.add(rain);
+function updateRain(dt) {
+  if (!rain.visible || state === 'menu' || state === 'confirm' || state === 'loading') return;
+  const vx = Math.sin(st.heading) * st.speed, vz = Math.cos(st.heading) * st.speed;
+  for (let i = 0; i < RN; i++) {
+    let x = rainL[i * 3] - vx * dt, y = rainL[i * 3 + 1] - 28 * dt, z = rainL[i * 3 + 2] - vz * dt;
+    if (x < -22) x += 44; else if (x > 22) x -= 44;
+    if (z < -22) z += 44; else if (z > 22) z -= 44;
+    if (y < -10) y += 22;
+    rainL[i * 3] = x; rainL[i * 3 + 1] = y; rainL[i * 3 + 2] = z;
+    const o = i * 6; rainPos[o] = x; rainPos[o + 1] = y; rainPos[o + 2] = z; rainPos[o + 3] = x + vx * .03; rainPos[o + 4] = y + .8; rainPos[o + 5] = z + vz * .03;
+  }
+  rainGeo.attributes.position.needsUpdate = true; rain.position.copy(camera.position);
+}
+function showToast(m) { const e = $('toast'); e.textContent = m; e.style.display = 'block'; clearTimeout(showToast.t); showToast.t = setTimeout(() => { e.style.display = 'none'; }, 2200); }
+
 /* ---------- Sound (generated in the browser) ---------- */
 const audio = { ctx:null, on:true };
 function initAudio() {
@@ -769,7 +893,7 @@ function initAudio() {
   const noise = (type, freq, q) => { const src = c.createBufferSource(); src.buffer = nb; src.loop = true;
     const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = freq; fl.Q.value = q;
     const g = c.createGain(); g.gain.value = 0; src.connect(fl); fl.connect(g); g.connect(master); src.start(); return g; };
-  audio.squeal = noise('bandpass', 1800, 6); audio.rough = noise('lowpass', 600, .6);
+  audio.squeal = noise('bandpass', 1800, 6); audio.rough = noise('lowpass', 600, .6); audio.rain = noise('highpass', 2500, .4);
 }
 function thud(p) {
   const c = audio.ctx; if (!c || !audio.on) return; const t = c.currentTime;
@@ -793,6 +917,7 @@ function updateAudio() {
   audio.eg.gain.setTargetAtTime(live ? .07 + .08 * thr + .05 * rpm / 6500 : 0, t, .06);
   audio.squeal.gain.setTargetAtTime(racing && st.slip && v > 8 ? Math.min(.2, .04 + v * .003) : 0, t, .05);
   audio.rough.gain.setTargetAtTime(racing && st.rough && v > 2 ? Math.min(.35, v * .012) : 0, t, .08);
+  audio.rain.gain.setTargetAtTime(live && env.weather === 'Rain' ? .07 : 0, t, .3);
   if (racing && st.bump > 4) thud(Math.min(1, st.bump / 25));
   st.bump = 0;
 }
@@ -859,13 +984,14 @@ $('go').onclick = async () => {
     routeLine = L.polyline(coords.map(c => [c.lat, c.lon]), { color:'#f2a65a', weight:5 }).addTo(map);
     map.fitBounds(routeLine.getBounds(), { padding:[30, 30] });
     const row = (k, v) => { const d = document.createElement('div'), t = document.createElement('b'); t.textContent = k + ': '; d.append(t, v); return d; };
-    $('sum').replaceChildren(row('Start', a.label), row('Finish', b.label), row('Route', (len / 1000).toFixed(2) + ' km'));
+    $('sum').replaceChildren(row('Start', a.label), row('Finish', b.label), row('Route', (len / 1000).toFixed(2) + ' km'), row('Conditions', $('wx').value + ', ' + $('tod').value.toLowerCase()), row('Legal mode', $('legal').checked ? 'On: speed limits apply' : 'Off'));
     say(''); setState('confirm');
   } catch (e) { say(e.message, true); }
   $('go').disabled = false;
 };
 $('back').onclick = () => setState('menu');
 $('ok').onclick = async () => {
+  env = { weather:$('wx').value, time:$('tod').value, legal:$('legal').checked }; document.body.dataset.legal = env.legal ? '1' : '0'; applyEnv();
   initAudio(); setState('loading'); say('Building track…');
   try { await buildTrack(pending.a, pending.b, pending.coords); startCountdown(); }
   catch (e) { setState('menu'); say(e.message, true); }
@@ -881,7 +1007,13 @@ function startCountdown() {
   };
   tick();
 }
-function finishRace() { setState('finished'); $('ftime').textContent = 'Time: ' + st.time.toFixed(1) + ' s'; }
+function finishRace() {
+  setState('finished');
+  const L = (k, v) => { const d = document.createElement('div'); d.textContent = k + v; return d; };
+  const rows = [L('Race time: ', st.time.toFixed(1) + ' s')];
+  if (env.legal) rows.push(L('Penalties: ', st.pen / 10 + ' \u00d7 10 s = ' + st.pen + ' s'), L('Final time: ', (st.time + st.pen).toFixed(1) + ' s'));
+  $('ftime').replaceChildren(...rows);
+}
 function retry() { if (track && (state === 'race' || state === 'finished')) startCountdown(); }
 $('retry').onclick = () => startCountdown();
 $('tomenu').onclick = () => setState('menu');
