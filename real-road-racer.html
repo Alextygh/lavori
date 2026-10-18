@@ -254,7 +254,17 @@ async function buildTrack(a, b, coords) {
 
   // Elevation (optional): interpolate sampled heights along the polyline
   let heights = null, elevNote = '';
-  if (true) {
+  terr.ctx = { a, kx, kz }; terr.ok = false;
+  try { // elevation from terrain tiles; the same tiles build the ground
+    say('Loading terrain…');
+    let la0 = 90, la1 = -90, lo0 = 180, lo1 = -180;
+    for (const c of coords) { la0 = Math.min(la0, c.lat); la1 = Math.max(la1, c.lat); lo0 = Math.min(lo0, c.lon); lo1 = Math.max(lo1, c.lon); }
+    await terrEnsure(la0 - .014, lo0 - .02, la1 + .014, lo1 + .02);
+    const hh = Float32Array.from(coords, c => demAt(c.lat, c.lon));
+    if (hh.some(v => !Number.isFinite(v))) throw new Error('terrain tiles incomplete');
+    heights = hh; terr.y0 = hh[0]; terr.ok = true;
+  } catch (e0) {
+    console.warn('Terrain tiles unavailable, using point elevation:', e0);
     try {
       say('Fetching elevation…');
       const e = await fetchElevation(coords);
@@ -277,7 +287,7 @@ async function buildTrack(a, b, coords) {
   const n = Math.max(20, Math.round(length / 3));
   const pts = curve.getSpacedPoints(n);
   // light smoothing of heights so the road doesn't jitter
-  for (let pass = 0; pass < 6; pass++)
+  for (let pass = 0; pass < (terr.ok ? 14 : 6); pass++)
     for (let i = 1; i < pts.length - 1; i++) pts[i].y = (pts[i-1].y + pts[i].y * 2 + pts[i+1].y) / 4;
 
   // Left/right normal at each sample
@@ -339,6 +349,9 @@ async function buildTrack(a, b, coords) {
   // Side roads: draw everything outside the race corridor; cut ends become blocked junctions
   const gap = [new Uint8Array(pts.length), new Uint8Array(pts.length)], runs = [];
   const lerp = (a, b, t) => ({ x:a.x + (b.x - a.x) * t, y:a.y + (b.y - a.y) * t, z:a.z + (b.z - a.z) * t });
+  const gY = (x, z, i, d) => { // height for a road point: blend from the race road's height to the terrain
+    const g = terrH(x, z); if (!Number.isFinite(g)) return pts[i].y;
+    const w = Math.min(1, d / 40); return pts[i].y * (1 - w) + g * w; };
   const makeRuns = (roads, keep) => { // road pieces outside the race road's walls (optionally only those near a chunk)
     const out = [];
     for (const r of roads) {
@@ -346,7 +359,7 @@ async function buildTrack(a, b, coords) {
       for (const p of r.dp) {
         const h = nearAny(p.x, p.z, 450);
         if (h.i < 0 || (keep && !keep(h.i))) { if (cur) { out.push(cur); cur = null; } prev = null; continue; }
-        const c = { x:p.x, y:pts[h.i].y, z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
+        const c = { x:p.x, y:gY(p.x, p.z, h.i, h.d), z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
         if (c.e < 0) {
           if (cur) { cur.p.push(lerp(prev, c, prev.e / (prev.e - c.e))); cur.endCut = true; out.push(cur); cur = null; }
         } else {
@@ -401,7 +414,7 @@ async function buildTrack(a, b, coords) {
     return false; };
   const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 2.4; }; // never closer than 1.2 m to the race road's wall
   const addPier = (list, p, n, w, top, side) => {
-    if (top - minY < 1.2 || list.length >= 4000) return;
+    if (terr.ok || top - minY < 1.2 || list.length >= 4000) return;
     if (side) { const h = nearTrack(p.x, p.z, 60); if (h.i >= 0 && h.d < halfs[h.i] + w / 2 + 4.9) return; } // clear of the main road and its supports
     list.push({ x:p.x, z:p.z, top, n, w });
   };
@@ -472,7 +485,7 @@ async function buildTrack(a, b, coords) {
   addX(sb.position.x, pts[0].y, sb.position.z, Math.atan2(t0.x, t0.z));
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), new THREE.MeshLambertMaterial({ color:0x4c5e45 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = minY;
-  trackGroup.add(ground);
+  if (terr.ok) groundMesh = null; else { groundMesh = ground; trackGroup.add(ground); } // the flat ground follows the player; with terrain tiles the terrain is the ground
   const mainPiers = [];
   for (let i = 0; i < pts.length; i += 4) addPier(mainPiers, pts[i], frames[i], halfs[i] * 2, pts[i].y - .5, false);
   makePiers(mainPiers, trackGroup);
@@ -493,8 +506,10 @@ async function buildTrack(a, b, coords) {
       try {
         const sh = new THREE.Shape(b.fp.map(p => new THREE.Vector2(p.x, -p.z)));
         for (const hole of b.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
-        const gg = new THREE.ExtrudeGeometry(sh, { depth:hgt + (by - minY), bevelEnabled:false });
-        gg.rotateX(-Math.PI / 2); gg.translate(0, minY, 0);
+        let low = minY, top = by;
+        if (terr.ok) { const gz = b.fp.map(p => terrH(p.x, p.z)).filter(Number.isFinite); if (gz.length) { low = Math.min(...gz) - 1.5; top = Math.max(...gz); } }
+        const gg = new THREE.ExtrudeGeometry(sh, { depth:hgt + (top - low), bevelEnabled:false });
+        gg.rotateX(-Math.PI / 2); gg.translate(0, low, 0);
         bufs[nb % 3].push(gg.attributes.position.array); gg.dispose(); nb++;
       } catch (err) { /* skip bad footprint */ }
     }
@@ -528,20 +543,60 @@ async function buildTrack(a, b, coords) {
     })();
   };
   const unloadChunk = ci => { const c = chunks[ci]; if (c && c.group) { trackGroup.remove(c.group); disposeGroup(c.group); } chunks[ci] = null; };
+  const CS = 600, RS = 24, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 24 m grid
+  const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44);
+  const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
+  const buildCell = (cx, cz) => {
+    const key = cx + ',' + cz, c = { mesh:null, done:false }; cells.set(key, c);
+    const x0 = cx * CS, z0 = cz * CS;
+    c.promise = (async () => {
+      try {
+        await terrEnsure(a.lat - (z0 + CS + RS) / kz, a.lon + (x0 - RS) / kx, a.lat - (z0 - RS) / kz, a.lon + (x0 + CS + RS) / kx);
+        if (cells.get(key) !== c) return;
+        const H = new Float32Array(NV * NV), pos = new Float32Array(NV * NV * 3), col = new Float32Array(NV * NV * 3), tmp = new THREE.Color();
+        for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
+          const x = x0 + i * RS, z = z0 + j * RS; let y = terrH(x, z);
+          if (!Number.isFinite(y)) throw new Error('no terrain data');
+          y -= .6; const h = nearTrack(x, z, 40);
+          if (h.i >= 0 && h.d < halfs[h.i] + 18) y = Math.min(y, pts[h.i].y - .6); // cut a bed for the race road
+          const o = j * NV + i; H[o] = y; pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
+        }
+        for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
+          const o = j * NV + i, gx = (H[j * NV + Math.min(NV - 1, i + 1)] - H[j * NV + Math.max(0, i - 1)]) / (2 * RS);
+          const gz = (H[Math.min(NV - 1, j + 1) * NV + i] - H[Math.max(0, j - 1) * NV + i]) / (2 * RS), sl = Math.hypot(gx, gz), abs = H[o] + terr.y0;
+          tmp.copy(GRASS).lerp(ROCK, Math.min(1, Math.max(0, (sl - .35) / .35)));
+          if (abs > 1900) tmp.lerp(SNOW, Math.min(1, (abs - 1900) / 500));
+          col[o * 3] = tmp.r; col[o * 3 + 1] = tmp.g; col[o * 3 + 2] = tmp.b;
+        }
+        const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) { const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1; ind.push(A, C, B, B, C, D); }
+        const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+        g.setIndex(ind); g.computeVertexNormals();
+        c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); trackGroup.add(c.mesh);
+      } catch (e) { console.warn('Terrain cell failed:', e); if (cells.get(key) === c) { cells.delete(key); retryAt.set(key, Date.now() + 20000); } }
+      c.done = true;
+    })();
+  };
   const streamerObj = {
-    update(idx) { // load chunks within 700 m of the player, drop those further than 1100 m
+    update(idx, px, pz) { // load chunks within 700 m of the player, drop those further than 1100 m; terrain cells within ~1.1 km
       for (let ci = 0; ci < nCh; ci++) {
         const lo = ci * CH, hi = (ci + 1) * CH, d = (idx < lo ? lo - idx : idx > hi ? idx - hi : 0) * spc, c = chunks[ci];
         if (!c) { if (d < 700 && active < 2 && Date.now() > failAt[ci]) loadChunk(ci); }
         else if (c.state === 'loaded' && d > 1100) unloadChunk(ci);
       }
+      if (terr.ok && px !== undefined) {
+        const R = 1100;
+        for (let cz = Math.floor((pz - R) / CS); cz <= Math.floor((pz + R) / CS); cz++) for (let cx = Math.floor((px - R) / CS); cx <= Math.floor((px + R) / CS); cx++) {
+          const key = cx + ',' + cz; if (!cells.has(key) && Date.now() > (retryAt.get(key) || 0)) buildCell(cx, cz);
+        }
+        for (const [key, c] of cells) { const [cx, cz] = key.split(',').map(Number); if (Math.hypot((cx + .5) * CS - px, (cz + .5) * CS - pz) > R + 800) removeCell(key, c); }
+      }
     },
-    pending() { return chunks.filter(c => c && c.state === 'loading').map(c => c.promise); }
+    pending() { return chunks.filter(c => c && c.state === 'loading').map(c => c.promise).concat([...cells.values()].filter(c => !c.done).map(c => c.promise)); }
   };
   scene.add(trackGroup);
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0, lims, gripS:gs };
   buildMinimap(pts, runs, finI);
-  streamer = streamerObj; streamer.update(5);
+  streamer = streamerObj; streamer.update(5, pts[5].x, pts[5].z);
   await Promise.race([Promise.all(streamer.pending()), new Promise(r => setTimeout(r, 8000))]); // wait briefly for the first scenery
   resetCar();
   say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), scenery streams in as you drive.` : '.'));
@@ -550,7 +605,7 @@ async function buildTrack(a, b, coords) {
 
 /* ---------- Driving ---------- */
 // Ground under the car: height interpolated between track samples, plus the road's slope
-let streamer = null;
+let streamer = null, groundMesh = null;
 let mm = null; // minimap: static background (route + roads) drawn once per track
 function buildMinimap(pts, runs, fin) {
   const W = 220, H = 160, pad = 14; let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
@@ -679,7 +734,8 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
   pollPad(); step(dt); updateAudio(); updateRain(dt);
-  if (streamer && (state === 'race' || state === 'countdown') && (frame.sT = (frame.sT || 0) + dt) > .5) { frame.sT = 0; streamer.update(st.idx); }
+  if (groundMesh) groundMesh.position.set(st.x, groundMesh.position.y, st.z);
+  if (streamer && (state === 'race' || state === 'countdown') && (frame.sT = (frame.sT || 0) + dt) > .5) { frame.sT = 0; streamer.update(st.idx, st.x, st.z); }
   if (track) {
     const y = st.y;
     car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
@@ -856,6 +912,41 @@ function applyColor(v) {
 $('col').oninput = e => applyColor(e.target.value);
 $('hex').oninput = e => applyColor(e.target.value);
 
+/* ---------- Terrain (elevation tiles) ---------- */
+const TZ = 12, terr = { ok:false, y0:0, ctx:null, tiles:new Map() };
+const tileXY = (lat, lon) => { const n = 2 ** TZ, r = lat * Math.PI / 180;
+  return { x:(lon + 180) / 360 * n, y:(1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n }; };
+function loadTile(tx, ty) {
+  const key = tx + ',' + ty; let t = terr.tiles.get(key); if (t) return t.p;
+  t = { h:null }; terr.tiles.set(key, t);
+  t.p = new Promise((res, rej) => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => { try {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+      const g = cv.getContext('2d', { willReadFrequently:true }); g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, 256, 256).data, h = new Float32Array(65536);
+      for (let i = 0; i < 65536; i++) h[i] = d[i * 4] * 256 + d[i * 4 + 1] + d[i * 4 + 2] / 256 - 32768; // Terrarium encoding
+      t.h = h; res();
+    } catch (e) { terr.tiles.delete(key); rej(e); } };
+    img.onerror = () => { terr.tiles.delete(key); rej(new Error('terrain tile failed')); };
+    img.src = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/' + TZ + '/' + tx + '/' + ty + '.png';
+  });
+  return t.p;
+}
+async function terrEnsure(lat0, lon0, lat1, lon1) { // south-west and north-east corners
+  const a = tileXY(lat1, lon0), b = tileXY(lat0, lon1), ps = [];
+  for (let ty = Math.floor(a.y); ty <= Math.floor(b.y); ty++) for (let tx = Math.floor(a.x); tx <= Math.floor(b.x); tx++) ps.push(loadTile(tx, ty));
+  await Promise.all(ps);
+}
+function demAt(lat, lon) { // bilinear elevation in metres, NaN if the tile isn't loaded
+  const p = tileXY(lat, lon), tx = Math.floor(p.x), ty = Math.floor(p.y), t = terr.tiles.get(tx + ',' + ty);
+  if (!t || !t.h) return NaN;
+  const fx = (p.x - tx) * 256 - .5, fy = (p.y - ty) * 256 - .5, x0 = Math.max(0, Math.min(254, Math.floor(fx))), y0 = Math.max(0, Math.min(254, Math.floor(fy)));
+  const ax = Math.max(0, Math.min(1, fx - x0)), ay = Math.max(0, Math.min(1, fy - y0)), h = t.h, i = y0 * 256 + x0;
+  return (h[i] * (1 - ax) + h[i + 1] * ax) * (1 - ay) + (h[i + 256] * (1 - ax) + h[i + 257] * ax) * ay;
+}
+const terrH = (x, z) => terr.ok ? demAt(terr.ctx.a.lat - z / terr.ctx.kz, terr.ctx.a.lon + x / terr.ctx.kx) - terr.y0 : NaN; // world height (start = 0)
+
 /* ---------- Trees, parks, water ---------- */
 function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = () => true) {
   const gy = minY + .05, colors = { water:0x3a6ea5, forest:0x3f6e3c, park:0x628f4e }, bufs = { water:[], forest:[], park:[] }, trees = [];
@@ -867,7 +958,9 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
     try {
       const sh = new THREE.Shape(a.fp.map(p => new THREE.Vector2(p.x, -p.z)));
       for (const hole of a.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
-      const g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2); g.translate(0, gy + (a.kind === 'water' ? .02 : 0), 0);
+      if (terr.ok && a.kind !== 'water') throw new Error('terrain colours the land'); // parks are shown through their trees
+      const hv = a.fp.map(p => terrH(p.x, p.z)).filter(Number.isFinite), wy = hv.length ? hv.reduce((q, v) => q + v, 0) / hv.length - .3 : gy;
+      const g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2); g.translate(0, terr.ok ? wy : gy + (a.kind === 'water' ? .02 : 0), 0);
       bufs[a.kind].push(g.toNonIndexed().attributes.position.array); g.dispose();
     } catch (e) { /* skip bad polygon */ }
     if (a.kind === 'water') continue;
@@ -889,9 +982,9 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
   }
   for (const w of osm.waterways) {
     if (!keepPt(w.pts[0])) continue;
-    const ps = w.pts.map(p => ({ x:p.x, y:0, z:p.z })); if (ps.length < 2) continue;
+    const ps = w.pts.map(p => { const t2 = terrH(p.x, p.z); return { x:p.x, y:Number.isFinite(t2) ? t2 : 0, z:p.z }; }); if (ps.length < 2) continue;
     const hw = { river:12, canal:5, stream:1.5, ditch:.8 }[w.t.waterway] || 2;
-    accStrip(ps, framesOf(ps), -hw, hw, gy + .03, gy + .03, colors.water);
+    const yy = terr.ok ? -.3 : gy + .03; accStrip(ps, framesOf(ps), -hw, hw, yy, yy, colors.water);
   }
   flushAccs(group);
   if (trees.length) {
@@ -899,9 +992,9 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
     const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color:0xffffff }), trees.length);
     const o = new THREE.Object3D(), c = new THREE.Color();
     trees.forEach((p, i) => {
-      const sc = .8 + rnd() * .7, th = 2.4 * sc;
-      o.position.set(p.x, minY + th / 2, p.z); o.scale.set(sc, th, sc); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix);
-      o.position.set(p.x, minY + th + 1.6 * sc, p.z); o.scale.set(2.1 * sc, 2.3 * sc, 2.1 * sc); o.updateMatrix(); crown.setMatrixAt(i, o.matrix);
+      const sc = .8 + rnd() * .7, th = 2.4 * sc, gt = terrH(p.x, p.z), g0 = Number.isFinite(gt) ? gt - .5 : minY;
+      o.position.set(p.x, g0 + th / 2, p.z); o.scale.set(sc, th, sc); o.updateMatrix(); trunk.setMatrixAt(i, o.matrix);
+      o.position.set(p.x, g0 + th + 1.6 * sc, p.z); o.scale.set(2.1 * sc, 2.3 * sc, 2.1 * sc); o.updateMatrix(); crown.setMatrixAt(i, o.matrix);
       c.setHSL(.24 + rnd() * .08, .45, .26 + rnd() * .1); crown.setColorAt(i, c);
     });
     trunk.frustumCulled = crown.frustumCulled = false; group.add(trunk, crown);
