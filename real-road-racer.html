@@ -158,7 +158,7 @@ for (const c of Object.values(CLASSES)) { // top speed where engine power = air 
 }
 const car = new THREE.Group(); scene.add(car);
 const head = new THREE.SpotLight(0xfff1d0, 0, 80, .55, .6, 1); // headlights
-let env = { weather:'Clear', time:'Day', legal:false, shadows:true };
+let env = { weather:'Clear', time:'Day', legal:false, shadows:true }, headBase = 0;
 let cur = CLASSES.hatch;
 function setCar(c) {
   cur = CLASSES[c.cls]; car.clear();
@@ -184,7 +184,7 @@ function setCar(c) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(.34, .14, .06), tl); b.position.set(sx * cur.w * .32, .35 + cur.h * .68, -cur.len / 2 - .01);
     car.add(a, b);
   }
-  car.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  car.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = true; });
   head.position.set(0, .35 + cur.h * .7, cur.len / 2); head.target.position.set(0, .2, cur.len / 2 + 20); car.add(head, head.target);
 }
 
@@ -332,7 +332,7 @@ async function buildTrack(a, b, coords) {
   };
 
   // Race road: width and surface from the nearest real OSM road
-  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48)), lims = new Array(pts.length).fill(50), gs = new Float32Array(pts.length).fill(1);
+  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48)), lims = new Array(pts.length).fill(50), gs = new Float32Array(pts.length).fill(1), tun = new Uint8Array(pts.length);
   if (osm) {
     osm.roads.forEach(r => { r.dp = densify(r.pts); });
     const best = new Array(pts.length).fill(null);
@@ -358,6 +358,14 @@ async function buildTrack(a, b, coords) {
       if (j - i >= 3 && i > 0 && j < pts.length - 1) { const y0 = pts[i - 1].y, y1 = pts[j + 1].y; for (let q = i; q <= j; q++) pts[q].y = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2); }
       i = j + 1;
     }
+    // tunnels: the road runs straight between the portals, underground
+    const tn = best.map(b => !!(b && b.d < 3.5 && b.t.tunnel && !['no', 'culvert'].includes(b.t.tunnel)));
+    for (let i = 0; i < pts.length;) {
+      if (!tn[i]) { i++; continue; }
+      let j = i; while (j + 1 < pts.length && tn[j + 1]) j++;
+      if (j - i >= 3 && i > 0 && j < pts.length - 1) { const y0 = pts[i - 1].y, y1 = pts[j + 1].y; for (let q = i; q <= j; q++) { pts[q].y = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2); tun[q] = 1; } }
+      i = j + 1;
+    }
     for (let pass = 0; pass < 8; pass++) for (let i = 1; i < pts.length - 1; i++) halfs[i] = (halfs[i-1] + halfs[i] * 2 + halfs[i+1]) / 4;
   }
 
@@ -372,15 +380,15 @@ async function buildTrack(a, b, coords) {
     const out = [];
     for (const r of roads) {
       if (r.hi) continue; // bridges and other layers are not drawn as side roads
-      let cur = null, prev = null;
+      let cur = null, prev = null, far = false;
       for (const p of r.dp) {
         const h = nearAny(p.x, p.z, 450);
-        if (h.i < 0 || (keep && !keep(h.i))) { if (cur) { out.push(cur); cur = null; } prev = null; continue; }
+        if (h.i < 0 || (keep && !keep(h.i))) { if (cur) { cur.artEnd = true; out.push(cur); cur = null; } prev = null; far = true; continue; }
         const c = { x:p.x, y:gY(p.x, p.z, h.i, h.d), z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
         if (c.e < 0) {
           if (cur) { cur.p.push(lerp(prev, c, prev.e / (prev.e - c.e))); cur.endCut = true; out.push(cur); cur = null; }
         } else {
-          if (!cur) { cur = { id:r.id, t:r.t, p:[], startCut:!!(prev && prev.e < 0), endCut:false };
+          if (!cur) { cur = { id:r.id, t:r.t, p:[], startCut:!!(prev && prev.e < 0), endCut:false, artStart:far }; far = false;
             if (cur.startCut) cur.p.push(lerp(prev, c, -prev.e / (c.e - prev.e))); }
           cur.p.push(c);
         }
@@ -420,6 +428,14 @@ async function buildTrack(a, b, coords) {
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => halfs[i] + 1.2, -.5, -.5, 0x7a7d82));      // slab underside
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, -.5, -.03, 0x7a7d82));    // slab sides
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, -.5, -.03, 0x7a7d82));
+  for (let i = 0; i < pts.length;) { // tunnel tubes: roof and walls around the road, with the terrain left above
+    if (!tun[i]) { i++; continue; }
+    let j = i; while (j + 1 < pts.length && tun[j + 1]) j++;
+    const a0 = Math.max(0, i - 1), b0 = Math.min(pts.length - 1, j + 1), sp = pts.slice(a0, b0 + 1), sf = frames.slice(a0, b0 + 1), hw2 = k => halfs[a0 + k] + 1.2;
+    const roof = strip(sp, sf, k => -hw2(k), k => hw2(k), 5.5, 5.5, 0x5d6068); roof.castShadow = true; trackGroup.add(roof);
+    trackGroup.add(strip(sp, sf, k => -hw2(k), k => -hw2(k), -.5, 5.5, 0x6b6e75), strip(sp, sf, k => hw2(k), k => hw2(k), -.5, 5.5, 0x6b6e75));
+    i = j + 1;
+  }
   const minY = Math.min(...pts.map(p => p.y)) - 3;
   const RG = 12, rgrid = new Map();
   const addRuns = rs => rs.forEach(r => { const hw = wOf(r.t) / 2;
@@ -427,9 +443,9 @@ async function buildTrack(a, b, coords) {
   addRuns(runs);
   const crossed = (x, z, id) => { const cx = Math.floor(x / RG), cz = Math.floor(z / RG);
     for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) for (const q of rgrid.get((cx + i) + ',' + (cz + j)) || [])
-      if (q.id !== id && (q.x - x) ** 2 + (q.z - z) ** 2 < (q.hw + .6) ** 2) return true;
+      if (q.id !== id && (q.x - x) ** 2 + (q.z - z) ** 2 < (q.hw + .05) ** 2) return true;
     return false; };
-  const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 2.4; }; // never closer than 1.2 m to the race road's wall
+  const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 1.3; }; // borders run right up to the race road's wall but never over it
   const addPier = (list, p, n, w, top, side) => {
     if (list.length >= 4000) return;
     const off = w / 2 + 1.6, gl = (x, z) => { const v = terr.ok ? terrH(x, z) - .6 : minY; return Number.isFinite(v) ? v : minY; };
@@ -463,6 +479,16 @@ async function buildTrack(a, b, coords) {
       accStrip(r.p, fr, -w + .25, -w + .55, L + .015, L + .015, 0xf3ede4, ml); accStrip(r.p, fr, w - .55, w - .25, L + .015, L + .015, 0xf3ede4, mr);
       accStrip(r.p, fr, -w - 1.2, -w, L - .01, L - .01, 0x6a5f55, ml); accStrip(r.p, fr, w, w + 1.2, L - .01, L - .01, 0x6a5f55, mr);
       accStrip(r.p, fr, -w - 1.2, -w - 1.2, L, L + .9, 0xd0d3d8, ml); accStrip(r.p, fr, w + 1.2, w + 1.2, L, L + .9, 0xd0d3d8, mr);
+      const cap = (E, from) => { // close a dead end: verge, edge line and wall across the road
+        const dx = E.x - from.x, dz = E.z - from.z, l = Math.hypot(dx, dz) || 1, d = { x:dx / l, z:dz / l }, nn = { x:-d.z, z:d.x }, W = w + 1.2;
+        const ps = [{ x:E.x - nn.x * W, y:E.y, z:E.z - nn.z * W }, { x:E.x + nn.x * W, y:E.y, z:E.z + nn.z * W }];
+        const ps2 = ps.map(q => ({ x:q.x + d.x * 1.2, y:q.y, z:q.z + d.z * 1.2 }));
+        for (const q of [E, ps2[0], ps2[1]]) if (nearMain(q.x, q.z) || crossed(q.x, q.z, r.id)) return; // it opens into another road
+        accStrip(ps, [d, d], 0, 1.2, L - .01, L - .01, 0x6a5f55); accStrip(ps, [d, d], -.55, -.25, L + .015, L + .015, 0xf3ede4);
+        accStrip(ps2, [{ x:0, z:0 }, { x:0, z:0 }], 0, 0, L, L + .9, 0xd0d3d8);
+      };
+      if (!r.startCut && !r.artStart) cap(r.p[0], r.p[1]);
+      if (!r.endCut && !r.artEnd) cap(r.p[r.p.length - 1], r.p[r.p.length - 2]);
       for (let i = 0; i < r.p.length; i += 4) addPier(piers, r.p[i], fr[i], w * 2, r.p[i].y - .24, true);
     }
     flushAccs(group); makePiers(piers, group);
@@ -593,7 +619,12 @@ async function buildTrack(a, b, coords) {
     })();
   };
   const unloadChunk = ci => { const c = chunks[ci]; if (c && c.group) { trackGroup.remove(c.group); disposeGroup(c.group); } chunks[ci] = null; };
-  const CS = 600, RS = 24, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 24 m grid
+  const lowRoad = (x, z, r) => { // lowest road height within r metres
+    let m = 1e9; const cx = Math.floor(x / G), cz = Math.floor(z / G);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const t of grid.get((cx + i) + ',' + (cz + j)) || []) {
+      if ((pts[t].x - x) ** 2 + (pts[t].z - z) ** 2 < r * r && pts[t].y < m) m = pts[t].y; }
+    return m; };
+  const CS = 600, RS = 12, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
   const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44);
   const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
   const buildCell = (cx, cz) => {
@@ -608,7 +639,7 @@ async function buildTrack(a, b, coords) {
           const x = x0 + i * RS, z = z0 + j * RS; let y = terrH(x, z);
           if (!Number.isFinite(y)) throw new Error('no terrain data');
           y -= .6; const h = nearTrack(x, z, 40);
-          if (h.i >= 0 && h.d < halfs[h.i] + 18) y = Math.min(y, pts[h.i].y - .6); // cut a bed for the race road
+          if (h.i >= 0 && !tun[h.i] && h.d < halfs[h.i] + 18) y = Math.min(y, lowRoad(x, z, 20) - .6); // terrain stays below the road, except over tunnels
           const o = j * NV + i; H[o] = y; pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
         }
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
@@ -644,7 +675,7 @@ async function buildTrack(a, b, coords) {
     pending() { return chunks.filter(c => c && c.state === 'loading').map(c => c.promise).concat([...cells.values()].filter(c => !c.done).map(c => c.promise)); }
   };
   scene.add(trackGroup);
-  track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0, lims, gripS:gs };
+  track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0, lims, gripS:gs, tun };
   buildMinimap(pts, runs, finI);
   streamer = streamerObj; streamer.update(5, pts[5].x, pts[5].z);
   await Promise.race([Promise.all(streamer.pending()), new Promise(r => setTimeout(r, 8000))]); // wait briefly for the first scenery
@@ -790,6 +821,7 @@ function frame(now) {
     const y = st.y;
     car.position.set(st.x, y, st.z); car.rotation.order = 'YXZ'; car.rotation.set(st.pitch, st.heading, st.roll);
     sun.target.position.set(st.x, y, st.z); sun.position.set(st.x + sunDir.x * 170, y + sunDir.y * 170, st.z + sunDir.z * 170); // shadow box follows the car
+    head.intensity = track.tun && track.tun[st.idx] ? Math.max(headBase, 1.6) : headBase; // headlights come on inside tunnels
     const U = car.userData;
     if (U.wheels) {
       for (const w of U.wheels) w.rotation.x += st.speed * dt / .33;
@@ -923,7 +955,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
     }
     if (el.type === 'node') { if (t.natural === 'tree') trees.push(xz(el)); continue; }
     if (!el.geometry || el.geometry.length < 2) continue;
-    if (t.highway) { if ((t.tunnel && t.tunnel !== 'no') || t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) ) continue; roads.push({ id:el.id, hi:!!((t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)), pts:el.geometry.map(xz), t }); }
+    if (t.highway) { if (t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) ) continue; roads.push({ id:el.id, hi:!!((t.tunnel && !['no', 'culvert'].includes(t.tunnel)) || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)), pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
     else if (t.waterway) waterways.push({ pts:el.geometry.map(xz), t });
     else { const kind = kindOf(t); if (kind && el.geometry.length >= 4) areas.push({ fp:el.geometry.map(xz), holes:[], t, kind }); }
@@ -1078,9 +1110,9 @@ function updateClouds(dt) { // clouds drift with the wind and wrap around the pl
 
 /* ---------- Weather + time of day ---------- */
 const TIMES = {
-  Morning:{ sky:0xc9d9ea, hc:0xe4edf7, gc:0x4a5a44, hi:.95, sc:0xffe3b8, si:.8,  sp:[-150, 120, 220] },
-  Day:    { sky:0x9bb3cc, hc:0xdfe9f5, gc:0x3b4a3a, hi:.9,  sc:0xffe2b8, si:.8,  sp:[-200, 300, 120] },
-  Sunset: { sky:0xe59a6b, hc:0xf2c9a8, gc:0x4a3a3a, hi:.7,  sc:0xff9a4d, si:.75, sp:[300, 60, -100] },
+  Morning:{ sky:0xc9d9ea, hc:0xe4edf7, gc:0x4a5a44, hi:.68, sc:0xffe3b8, si:1.05,  sp:[-150, 120, 220] },
+  Day:    { sky:0x9bb3cc, hc:0xdfe9f5, gc:0x3b4a3a, hi:.62, sc:0xffe2b8, si:1.15,  sp:[-200, 300, 120] },
+  Sunset: { sky:0xe59a6b, hc:0xf2c9a8, gc:0x4a3a3a, hi:.5,  sc:0xff9a4d, si:1.0, sp:[300, 60, -100] },
   Night:  { sky:0x070c18, hc:0x4a5a8a, gc:0x10151f, hi:.55, sc:0x8fa0d8, si:.3,  sp:[-100, 200, 100] }
 };
 const FOGS = { Clear:[120, 900], Cloudy:[100, 700], Rain:[40, 380], Fog:[8, 160] };
@@ -1090,7 +1122,7 @@ function applyEnv() {
   scene.background.copy(sky); scene.fog.color.copy(sky); scene.fog.near = FOGS[env.weather][0]; scene.fog.far = FOGS[env.weather][1];
   hemi.color.setHex(T.hc); hemi.groundColor.setHex(T.gc); hemi.intensity = T.hi * (1 - .2 * gm);
   sun.color.setHex(T.sc); sun.intensity = T.si * (1 - .6 * gm); sun.position.set(...T.sp); sunDir.set(...T.sp).normalize();
-  head.intensity = night ? 2.2 : (env.time === 'Sunset' || env.weather === 'Fog' || env.weather === 'Rain') ? 1.1 : 0;
+  headBase = night ? 2.2 : (env.time === 'Sunset' || env.weather === 'Fog' || env.weather === 'Rain') ? 1.1 : 0; head.intensity = headBase;
   cloudN = { Clear:80, Cloudy:300, Rain:300, Fog:0 }[env.weather];
   cloudMat.color.setHex({ Clear:0xffffff, Cloudy:0xdfe3e8, Rain:0x8a929e, Fog:0xffffff }[env.weather]);
   if (env.time === 'Sunset') cloudMat.color.lerp(new THREE.Color(0xffb98a), .5);
