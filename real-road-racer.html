@@ -65,6 +65,7 @@
   #touch { display:none; }
   #touch button { position:fixed; bottom:18px; width:78px; height:78px; margin:0; padding:0; border-radius:50%; background:rgba(22,28,40,.6);
     color:#fff; font-size:26px; touch-action:none; user-select:none; -webkit-user-select:none; border:2px solid rgba(255,255,255,.25); }
+  #touch svg { width:36px; height:36px; stroke:#fff; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; pointer-events:none; }
   #touch [data-k=left] { left:12px; } #touch [data-k=right] { left:100px; } #touch [data-k=down] { right:100px; } #touch [data-k=up] { right:12px; }
   body[data-touch="1"] #hud { bottom:110px; } body[data-touch="1"] #help { display:none !important; }
   body[data-s=countdown] #tools, body[data-s=race] #tools, body[data-s=finished] #tools { display:flex; }
@@ -99,7 +100,7 @@
 <div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Main menu</button></div></div>
 <div id="note"></div>
 <div id="tools"><button class="tool" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera (C)">🎥 Chase</button></div>
-<div id="touch"><button data-k="left" aria-label="Steer left">◀</button><button data-k="right" aria-label="Steer right">▶</button><button data-k="down" aria-label="Brake and reverse">▼</button><button data-k="up" aria-label="Accelerate">▲</button></div>
+<div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button></div>
 <canvas id="mini" width="220" height="160"></canvas>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
 <div id="help">Arrows or WASD to drive &middot; Space handbrake &middot; C camera &middot; M sound &middot; R restart</div>
@@ -616,10 +617,10 @@ function frame(now) {
       U.tail.color.setHex(brk ? 0xff2a2a : 0x6b1111);
     }
     const th = -st.pitch, f3 = new THREE.Vector3(Math.sin(st.heading) * Math.cos(th), Math.sin(th), Math.cos(st.heading) * Math.cos(th));
-    if (camMode >= 2) { // hood / cockpit
-      const zo = camMode === 2 ? cur.len / 2 - .3 : .1, yo = camMode === 2 ? 1.0 : 1.12;
+    if (camMode >= 2) { // hood, or reverse (rear view looking back along the road)
+      const rev = camMode === 3, zo = rev ? -(cur.len / 2 - .4) : cur.len / 2 - .3, yo = rev ? 1.25 : 1.0, sg = rev ? -1 : 1;
       camera.position.set(st.x + f3.x * zo, y + yo + f3.y * zo, st.z + f3.z * zo); camPos.copy(camera.position);
-      camera.lookAt(camera.position.x + f3.x * 30, camera.position.y + f3.y * 30, camera.position.z + f3.z * 30);
+      camera.lookAt(camera.position.x + f3.x * 30 * sg, camera.position.y + f3.y * 30 * sg, camera.position.z + f3.z * 30 * sg);
     } else {
       const dd = camMode === 0 ? 9 : 17, hh = camMode === 0 ? 4.2 : 8;
       camPos.lerp(new THREE.Vector3(st.x - Math.sin(st.heading) * dd, y + hh, st.z - Math.cos(st.heading) * dd), 1 - Math.pow(0.001, dt));
@@ -799,10 +800,10 @@ function toggleMute() { audio.on = !audio.on; if (audio.master) audio.master.gai
 $('muteBtn').onclick = e => { toggleMute(); e.currentTarget.blur(); };
 
 /* ---------- Cameras ---------- */
-const CAMS = ['Chase', 'Far', 'Hood', 'Cockpit']; let camMode = 0;
+const CAMS = ['Chase', 'Far', 'Hood', 'Reverse']; let camMode = 0;
 function setCam(m) {
   camMode = m % CAMS.length; $('camBtn').textContent = '🎥 ' + CAMS[camMode];
-  camera.fov = camMode >= 2 ? 78 : 65; camera.updateProjectionMatrix(); car.visible = camMode !== 3;
+  camera.fov = camMode === 2 ? 78 : camMode === 3 ? 70 : 65; camera.updateProjectionMatrix();
 }
 $('camBtn').onclick = e => { setCam(camMode + 1); e.currentTarget.blur(); };
 
@@ -812,9 +813,9 @@ function pollPad() {
   const gp = (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
   if (!gp) { pad.up = pad.down = pad.steer = pad.hand = 0; return; }
   const btn = i => gp.buttons[i] ? gp.buttons[i].value : 0, dz = x => Math.abs(x) < .12 ? 0 : x;
-  pad.steer = dz(gp.axes[0] || 0); pad.up = btn(7); pad.down = btn(6); pad.hand = btn(0) > .5 ? 1 : 0; // stick, triggers, A button
+  pad.steer = dz(gp.axes[0] || 0); pad.up = btn(7); pad.down = btn(6); pad.hand = btn(2) > .5 ? 1 : 0; // stick, triggers, X button
   const edge = (i, fn) => { const p = btn(i) > .5; if (p && !prevBtn[i]) fn(); prevBtn[i] = p; };
-  edge(3, () => setCam(camMode + 1)); edge(9, () => retry()); edge(2, toggleMute);       // Y camera, Start retry, X sound
+  edge(3, () => setCam(camMode + 1)); edge(9, () => retry()); edge(0, toggleMute);       // Y camera, Start retry, A sound
 }
 if (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window) document.body.dataset.touch = '1';
 document.querySelectorAll('#touch button').forEach(b => { const k = b.dataset.k;
