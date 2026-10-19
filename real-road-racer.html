@@ -304,11 +304,15 @@ async function buildTrack(a, b, coords) {
     return new THREE.Vector3(-t.z, 0, t.x);
   });
 
+  const seaP = terr.ok ? fetchCoast(a, kx, kz, coords).catch(e => { console.warn('Coastline unavailable:', e); return null; }) : Promise.resolve(null);
   let osm = null;
   if (true) {
     try { say('Loading roads and buildings…'); osm = await fetchNearRoads(a, kx, kz, coords); }
     catch (err) { console.warn(err); say('Surroundings unavailable (' + err.message + '). Plain track instead.', true); }
   }
+
+  let sea = null; // sea / ocean: built from the OSM coastline (land is on the left of each coastline way)
+  try { const cw = await seaP; if (cw && cw.length) sea = makeSea(cw); } catch (e) { console.warn(e); }
 
   // spatial grid so "nearest track point" lookups stay fast
   const G = 40, grid = new Map(), gk = (x, z) => Math.floor(x / G) + ',' + Math.floor(z / G);
@@ -582,7 +586,7 @@ async function buildTrack(a, b, coords) {
   makePiers(mainPiers, trackGroup);
 
   // ---- scenery streaming: buildings, trees, parks, water and far-away roads load in ~600 m chunks near the player
-  const inTun = (x, z) => { const h = nearTrack(x, z, 60); return h.i >= 0 && tun[h.i] && h.d < halfs[h.i] + 22; }; // ground above a tunnel is empty
+  const inTun = (x, z) => { const h = nearTrack(x, z, 60); return h.i >= 0 && tun[h.i] && h.d < halfs[h.i] + 3.5; }; // only the ground right above the tunnel is empty
   const addBuildings = (list, g, keepPt) => {
     const tunnelParts = b => { // null unless the building covers part of the race road; otherwise a 3 m grid of its footprint with the road cells marked
       let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
@@ -670,7 +674,6 @@ async function buildTrack(a, b, coords) {
         const rs = makeRuns(far, i => i >= i0 - 8 && i <= i1 + 8); addRuns(rs); drawRuns(rs, g);
         addBuildings(data.buildings, g, keepPt);
         addNature(data, g, minY, pts, halfs, nearTrack, (x, z, id) => crossed(x, z, id) || inTun(x, z), keepPt);
-        addFurniture(data, g, { pts, frames, halfs, nearTrack, inTun, keepPt });
         trackGroup.add(g); c.group = g; c.state = 'loaded';
       } catch (err) { console.warn('Scenery chunk failed:', ci, err); if (chunks[ci] === c) { chunks[ci] = null; failAt[ci] = Date.now() + 20000; } }
       finally { active--; }
@@ -680,7 +683,7 @@ async function buildTrack(a, b, coords) {
   const lowRoad = (x, z, r) => { // lowest road height within r metres
     let m = 1e9; const cx = Math.floor(x / G), cz = Math.floor(z / G);
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const t of grid.get((cx + i) + ',' + (cz + j)) || []) {
-      if ((pts[t].x - x) ** 2 + (pts[t].z - z) ** 2 < r * r && pts[t].y < m) m = pts[t].y; }
+      if (!tun[t] && (pts[t].x - x) ** 2 + (pts[t].z - z) ** 2 < r * r && pts[t].y < m) m = pts[t].y; } // tunnel points lie underground, so they don't pull the ground down
     return m; };
   const hiRoad = (x, z, r) => { // highest road height within r metres
     let m = -1e9; const cx = Math.floor(x / G), cz = Math.floor(z / G);
@@ -688,7 +691,7 @@ async function buildTrack(a, b, coords) {
       if ((pts[t].x - x) ** 2 + (pts[t].z - z) ** 2 < r * r && pts[t].y > m) m = pts[t].y; }
     return m; };
   const CS = 600, RS = 12, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
-  const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44);
+  const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44), WATER = new THREE.Color(0x2f6196), SAND = new THREE.Color(0xcdbf94), SEA_Y = -terr.y0 - .9;
   const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
   const buildCell = (cx, cz) => {
     const key = cx + ',' + cz, c = { mesh:null, done:false }; cells.set(key, c);
@@ -697,12 +700,13 @@ async function buildTrack(a, b, coords) {
       try {
         await terrEnsure(a.lat - (z0 + CS + RS) / kz, a.lon + (x0 - RS) / kx, a.lat - (z0 - RS) / kz, a.lon + (x0 + CS + RS) / kx);
         if (cells.get(key) !== c) return;
-        const hole = new Uint8Array(NV * NV), H = new Float32Array(NV * NV), pos = new Float32Array(NV * NV * 3), col = new Float32Array(NV * NV * 3), tmp = new THREE.Color();
+        const W = new Uint8Array(NV * NV), CD = new Float32Array(NV * NV).fill(1e9), H = new Float32Array(NV * NV), pos = new Float32Array(NV * NV * 3), col = new Float32Array(NV * NV * 3), tmp = new THREE.Color();
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
           const x = x0 + i * RS, z = z0 + j * RS; let y = terrH(x, z);
           if (!Number.isFinite(y)) throw new Error('no terrain data');
           y -= .6; const h = nearTrack(x, z, 40), o = j * NV + i;
-          if (h.i >= 0 && h.d < halfs[h.i] + 18) { if (tun[h.i]) hole[o] = 1; else y = Math.min(y, lowRoad(x, z, 20) - .6); } // no terrain at all around a tunnel
+          if (h.i >= 0 && h.d < halfs[h.i] + 18 && !tun[h.i]) y = Math.min(y, lowRoad(x, z, 20) - .6); // flatten the ground beside the road (beside a tunnel it stays natural)
+          if (sea) { const sd = sea.q(x, z); CD[o] = sd.d; if (sd.water) { y = SEA_Y; W[o] = 1; } } // sea: flat at sea level
           H[o] = y; pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
         }
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
@@ -710,9 +714,14 @@ async function buildTrack(a, b, coords) {
           const gz = (H[Math.min(NV - 1, j + 1) * NV + i] - H[Math.max(0, j - 1) * NV + i]) / (2 * RS), sl = Math.hypot(gx, gz), abs = H[o] + terr.y0;
           tmp.copy(GRASS).lerp(ROCK, Math.min(1, Math.max(0, (sl - .35) / .35)));
           if (abs > 1900) tmp.lerp(SNOW, Math.min(1, (abs - 1900) / 500));
+          if (W[o]) tmp.copy(WATER); else if (CD[o] < 30 && abs < 15) tmp.lerp(SAND, 1 - CD[o] / 30); // sea, and a beach strip along the shore
           col[o * 3] = tmp.r; col[o * 3 + 1] = tmp.g; col[o * 3 + 2] = tmp.b;
         }
-        const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) { const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1; if (!(hole[A] || hole[B] || hole[C] || hole[D])) ind.push(A, C, B, B, C, D); }
+        const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) {
+          const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1;
+          const hq = nearTrack(x0 + (i + .5) * RS, z0 + (j + .5) * RS, 40);
+          if (hq.i >= 0 && tun[hq.i] && hq.d < halfs[hq.i] + 3.2) continue; // only the ground right over the tunnel is cut away
+          ind.push(A, C, B, B, C, D); }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
         g.setIndex(ind); g.computeVertexNormals();
         c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); c.mesh.castShadow = c.mesh.receiveShadow = true; trackGroup.add(c.mesh);
@@ -987,7 +996,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
   const step = Math.max(1, Math.ceil(coords.length / 150));
   const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
   const ar = `(around:300,${poly})`, ar2 = `(around:500,${poly})`;
-  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};node["natural"="tree"]${ar};node["highway"="street_lamp"]${ar};node["highway"~"^(stop|give_way)$"]${ar};node["traffic_sign"]${ar};way["natural"~"^(water|wood|scrub)$"]${ar};way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${ar};way["leisure"~"^(park|garden|pitch|playground|nature_reserve)$"]${ar};way["waterway"~"^(river|canal|stream|ditch)$"]${ar};relation["natural"~"^(water|wood)$"]["type"="multipolygon"]${ar};relation["landuse"~"^(forest|grass)$"]["type"="multipolygon"]${ar};relation["leisure"~"^(park|garden)$"]["type"="multipolygon"]${ar};);out geom;`;
+  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};node["natural"="tree"]${ar};way["natural"~"^(water|wood|scrub)$"]${ar};way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${ar};way["leisure"~"^(park|garden|pitch|playground|nature_reserve)$"]${ar};way["waterway"~"^(river|canal|stream|ditch)$"]${ar};relation["natural"~"^(water|wood)$"]["type"="multipolygon"]${ar};relation["landuse"~"^(forest|grass)$"]["type"="multipolygon"]${ar};relation["leisure"~"^(park|garden)$"]["type"="multipolygon"]${ar};);out geom;`;
   const qNear = `[out:json][timeout:60];(way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"](around:40,${poly}););out geom;`;
   const query = mode === 'near' ? qNear : q;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
@@ -1004,7 +1013,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
   }
   if (!j) throw new Error('all Overpass servers failed (' + last + ')');
   const xz = g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz });
-  const roads = [], buildings = [], trees = [], areas = [], waterways = [], lamps = [], signs = [];
+  const roads = [], buildings = [], trees = [], areas = [], waterways = [];
   const kindOf = t => t.natural === 'water' ? 'water' : (t.natural === 'wood' || t.natural === 'scrub' || t.landuse === 'forest') ? 'forest' : (t.leisure || t.landuse || t.natural) ? 'park' : null;
   for (const el of j.elements || []) {
     const t = el.tags || {};
@@ -1018,11 +1027,6 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
     }
     if (el.type === 'node') {
       if (t.natural === 'tree') trees.push(xz(el));
-      else if (t.highway === 'street_lamp') lamps.push(xz(el));
-      else if (t.highway === 'stop' || t.highway === 'give_way' || t.traffic_sign) {
-        const v = parseInt(t.maxspeed) || parseInt((String(t.traffic_sign).match(/\[(\d+)\]/) || [])[1]) || 0;
-        signs.push({ ...xz(el), v, k: t.highway === 'stop' ? 'stop' : t.highway === 'give_way' ? 'yield' : (v || /maxspeed/.test(t.traffic_sign)) ? 'limit' : 'info' });
-      }
       continue;
     }
     if (!el.geometry || el.geometry.length < 2) continue;
@@ -1032,7 +1036,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
     else { const kind = kindOf(t); if (kind && el.geometry.length >= 4) areas.push({ fp:el.geometry.map(xz), holes:[], t, kind }); }
   }
   if (j.remark && !(j.elements || []).length) throw new Error(j.remark);
-  return { roads, buildings, trees, areas, waterways, lamps, signs };
+  return { roads, buildings, trees, areas, waterways };
 }
 
 // Roads that touch the route, fetched in ~1.5 km windows (3 at a time) so long routes still load
@@ -1047,6 +1051,58 @@ async function fetchNearRoads(a, kx, kz, coords) {
   await Promise.all([worker(), worker(), worker()]);
   if (fails === segs.length) throw new Error(last || 'no data');
   return { roads:out, buildings:[], trees:[], areas:[], waterways:[] };
+}
+
+
+/* ---------- Sea and oceans (OSM coastline) ---------- */
+async function fetchCoast(a, kx, kz, coords) { // coastline ways within 3 km of the route
+  const step = Math.max(1, Math.ceil(coords.length / 100));
+  const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
+  const query = `[out:json][timeout:40];way["natural"="coastline"](around:3000,${poly});out geom;`;
+  const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
+    'https://overpass-api.de/api/interpreter', 'https://lz4.overpass-api.de/api/interpreter'];
+  let j = null, last = '';
+  for (const url of mirrors) {
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+      const r = await fetch(url, { method:'POST', body:new URLSearchParams({ data:query }), signal:ctl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error('status ' + r.status);
+      j = await r.json(); break;
+    } catch (err) { last = err.name === 'AbortError' ? 'timeout' : err.message; }
+  }
+  if (!j) throw new Error('coastline servers failed (' + last + ')');
+  return (j.elements || []).filter(e => e.geometry && e.geometry.length > 1)
+    .map(e => e.geometry.map(g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz })));
+}
+function makeSea(ways) { // q(x, z) -> { d: distance to the nearest coastline (m), water: true if on the sea side }
+  const S = [];
+  for (const w of ways) for (let i = 0; i + 1 < w.length; i++) S.push(w[i].x, w[i].z, w[i + 1].x, w[i + 1].z);
+  const n = S.length / 4; if (!n) return null;
+  const C = 250, grid = new Map(), key = (i, j) => i * 100003 + j;
+  const put = (i, j, s) => { const k = key(i, j); let l = grid.get(k); if (!l) grid.set(k, l = []); if (l[l.length - 1] !== s) l.push(s); };
+  for (let s = 0; s < n; s++) {
+    const ax = S[s * 4], az = S[s * 4 + 1], bx = S[s * 4 + 2], bz = S[s * 4 + 3];
+    const i0 = Math.floor(Math.min(ax, bx) / C), i1 = Math.floor(Math.max(ax, bx) / C), j0 = Math.floor(Math.min(az, bz) / C), j1 = Math.floor(Math.max(az, bz) / C);
+    if ((i1 - i0 + 1) * (j1 - j0 + 1) <= 64) { for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) put(i, j, s); }
+    else { const m = Math.ceil(Math.hypot(bx - ax, bz - az) / (C * .4)); for (let k = 0; k <= m; k++) put(Math.floor((ax + (bx - ax) * k / m) / C), Math.floor((az + (bz - az) * k / m) / C), s); }
+  }
+  const MAXR = 12;
+  return { q(x, z) {
+    const ci = Math.floor(x / C), cj = Math.floor(z / C); let best = Infinity, water = false;
+    const scan = (i, j) => { const l = grid.get(key(ci + i, cj + j)); if (!l) return;
+      for (const s of l) {
+        const ax = S[s * 4], az = S[s * 4 + 1], dx = S[s * 4 + 2] - ax, dz = S[s * 4 + 3] - az, px = x - ax, pz = z - az, l2 = dx * dx + dz * dz || 1;
+        const t = Math.max(0, Math.min(1, (px * dx + pz * dz) / l2)), ex = px - dx * t, ez = pz - dz * t, d2 = ex * ex + ez * ez;
+        if (d2 < best) { best = d2; water = dx * pz - dz * px > 0; } // x = east, z = south, so water lies on the right of the way's direction
+      } };
+    for (let r = 0; r <= MAXR; r++) {
+      if (!r) scan(0, 0);
+      else for (let i = -r; i <= r; i++) { if (Math.abs(i) === r) for (let j = -r; j <= r; j++) scan(i, j); else { scan(i, -r); scan(i, r); } }
+      if (best < Infinity && Math.sqrt(best) <= r * C) break;
+    }
+    return { d:Math.sqrt(best), water:best < Infinity && water };
+  } };
 }
 
 /* ---------- Map (click start, then end) ---------- */
@@ -1160,7 +1216,7 @@ function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = ()
   }
 }
 
-/* ---------- Building look, street lamps, road signs ---------- */
+/* ---------- Building look ---------- */
 const BPAL = [0x8f9eae, 0x7d8d9d, 0xa3b2bf, 0xc4b6a3, 0xb7a99a, 0xb08a74, 0xe6dccb, 0xd8c8b0, 0xcfd6d8]; // 3 tints each: towers, mid-rise, houses
 const BSTY = [{ cell:[3.0, 3.6], win:[.04, .1, .12], roof:0x6c7178, glass:1 }, { cell:[3.4, 3.2], win:[.2, .22, .25], roof:0x77726c, glass:0 }, { cell:[4.2, 3.0], win:[.28, .24, .3], roof:0x9a4f38, glass:0 }];
 const rnd01 = b => { const q = Math.sin(b.fp[0].x * 12.9898 + b.fp[0].z * 78.233) * 43758.5453; return q - Math.floor(q); };
@@ -1186,47 +1242,6 @@ float rrLit = 0.;
   };
   return m;
 }
-const signCache = new Map();
-function signTex(k, v) {
-  const key = k + v; if (signCache.has(key)) return signCache.get(key);
-  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-  const poly = (n, r, rot) => { g.beginPath(); for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; g[i ? 'lineTo' : 'moveTo'](64 + r * Math.cos(a), 64 + r * Math.sin(a)); } g.closePath(); };
-  const txt = (q, size, col, dy) => { g.fillStyle = col; g.font = 'bold ' + size + 'px sans-serif'; g.fillText(q, 64, 64 + dy); };
-  if (k === 'stop') { poly(8, 60, Math.PI / 8); g.fillStyle = '#c8201c'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#fff'; g.stroke(); txt('STOP', 34, '#fff', 2); }
-  else if (k === 'yield') { poly(3, 62, Math.PI / 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 14; g.strokeStyle = '#d62d2d'; g.stroke(); }
-  else if (k === 'limit') { g.beginPath(); g.arc(64, 64, 58, 0, 7); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 12; g.strokeStyle = '#d62d2d'; g.stroke(); txt(String(v || ''), 54, '#111', 4); }
-  else { g.fillStyle = '#1c5fb5'; g.fillRect(8, 8, 112, 112); g.lineWidth = 6; g.strokeStyle = '#fff'; g.strokeRect(14, 14, 100, 100); txt('i', 70, '#fff', 4); }
-  const t = new THREE.CanvasTexture(c); signCache.set(key, t); return t;
-}
-function addFurniture(osm, group, X) { // OSM street lamps (highway=street_lamp) and signs (stop, give_way, traffic_sign)
-  const { pts, frames, halfs, nearTrack, inTun, keepPt } = X;
-  const place = p => { // items standing on the race road move to its verge; the rest stay where OSM puts them
-    if (!keepPt(p) || inTun(p.x, p.z)) return null;
-    const h = nearTrack(p.x, p.z, 250); if (h.i < 0) return null;
-    const P = pts[h.i], n = frames[h.i], lat = (p.x - P.x) * n.x + (p.z - P.z) * n.z, s = lat < 0 ? -1 : 1, e = halfs[h.i] + 1.9;
-    let x = p.x, z = p.z, y;
-    if (h.d < halfs[h.i] + 14) { if (Math.abs(lat) < e) { x = P.x + n.x * s * e; z = P.z + n.z * s * e; } y = P.y; }
-    else { const gy = terrH(x, z); y = Number.isFinite(gy) ? gy - .6 : P.y; }
-    return { x, y, z, s, ry:Math.atan2(n.z, -n.x) };
-  };
-  const lamps = (osm.lamps || []).map(place).filter(Boolean).slice(0, 1500);
-  const signs = (osm.signs || []).map(q => { const r = place(q); return r && { ...r, k:q.k, v:q.v }; }).filter(Boolean).slice(0, 600);
-  const M = new THREE.Matrix4(), Pm = new THREE.Matrix4(), qt = new THREE.Quaternion(), qi = new THREE.Quaternion(), V = new THREE.Vector3(), S1 = new THREE.Vector3(1, 1, 1), L = new THREE.Vector3(), S2 = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0);
-  const inst = (geo, mat, list, part) => { if (!list.length) return;
-    const m = new THREE.InstancedMesh(geo, mat, list.length);
-    list.forEach((q, i) => { const [lx, ly, sx, sy, sz] = part(q);
-      M.compose(V.set(q.x, q.y, q.z), qt.setFromAxisAngle(Y, q.ry), S1).multiply(Pm.compose(L.set(lx, ly, 0), qi, S2.set(sx, sy, sz))); m.setMatrixAt(i, M); });
-    m.frustumCulled = false; m.castShadow = true; group.add(m); };
-  const grey = new THREE.MeshLambertMaterial({ color:0x5b6068 }), box = new THREE.BoxGeometry(1, 1, 1);
-  inst(new THREE.CylinderGeometry(.06, .09, 1, 6), grey, lamps, () => [0, 3.5, 1, 7, 1]);
-  inst(box, grey, lamps, q => [q.s, 7, 2, .12, .12]);
-  inst(box, new THREE.MeshBasicMaterial({ color:0xfff3c4 }), lamps, q => [q.s * 1.9, 6.92, .9, .14, .35]);
-  const by = {}; for (const q of signs) (by[q.k + q.v] = by[q.k + q.v] || []).push(q);
-  inst(new THREE.CylinderGeometry(.04, .04, 1, 6), grey, signs, () => [0, 1.2, 1, 2.4, 1]);
-  const plate = new THREE.PlaneGeometry(1, 1);
-  for (const k in by) inst(plate, new THREE.MeshLambertMaterial({ map:signTex(by[k][0].k, by[k][0].v), alphaTest:.4, side:THREE.DoubleSide }), by[k], () => [0, 2.55, .75, .75, 1]);
-}
-
 /* ---------- Clouds ---------- */
 const CN = 300, cloudBase = [], cloudMat = new THREE.MeshLambertMaterial({ color:0xffffff, transparent:true, opacity:.93, fog:false, depthWrite:false });
 const clouds = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), cloudMat, CN); clouds.frustumCulled = false; scene.add(clouds);
