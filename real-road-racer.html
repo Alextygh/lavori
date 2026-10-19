@@ -690,7 +690,7 @@ async function buildTrack(a, b, coords) {
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const t of grid.get((cx + i) + ',' + (cz + j)) || []) {
       if ((pts[t].x - x) ** 2 + (pts[t].z - z) ** 2 < r * r && pts[t].y > m) m = pts[t].y; }
     return m; };
-  const CS = 600, RS = 12, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
+  const CS = 600, RS = 6, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
   const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44), WATER = new THREE.Color(0x2f6196), SAND = new THREE.Color(0xcdbf94), SEA_Y = -terr.y0 - .9;
   const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
   const inTube = (x, z, y) => { // is this 3D point inside the tunnel tube (road half-width + wall wide, floor to roof tall)?
