@@ -332,7 +332,7 @@ async function buildTrack(a, b, coords) {
   };
 
   // Race road: width and surface from the nearest real OSM road
-  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48)), lims = new Array(pts.length).fill(50), gs = new Float32Array(pts.length).fill(1), tun = new Uint8Array(pts.length);
+  const halfs = new Float32Array(pts.length).fill(width / 2), cols = pts.map(() => new THREE.Color(0x3a3f48)), lims = new Array(pts.length).fill(50), gs = new Float32Array(pts.length).fill(1), tun = new Uint8Array(pts.length), deep = new Uint8Array(pts.length);
   if (osm) {
     osm.roads.forEach(r => { r.dp = densify(r.pts); });
     const best = new Array(pts.length).fill(null);
@@ -358,14 +358,27 @@ async function buildTrack(a, b, coords) {
       if (j - i >= 3 && i > 0 && j < pts.length - 1) { const y0 = pts[i - 1].y, y1 = pts[j + 1].y; for (let q = i; q <= j; q++) pts[q].y = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2); }
       i = j + 1;
     }
-    // tunnels: the road runs straight between the portals, underground
+    // tunnels: the road leaves the surface on a gentle ramp (9 %), runs straight underground, and climbs out the same way
+    const ySurf = pts.map(p => p.y), spc0 = length / (pts.length - 1);
     const tn = best.map(b => !!(b && b.d < 3.5 && b.t.tunnel && !['no', 'culvert'].includes(b.t.tunnel)));
     for (let i = 0; i < pts.length;) {
       if (!tn[i]) { i++; continue; }
       let j = i; while (j + 1 < pts.length && tn[j + 1]) j++;
-      if (j - i >= 3 && i > 0 && j < pts.length - 1) { const y0 = pts[i - 1].y, y1 = pts[j + 1].y; for (let q = i; q <= j; q++) { pts[q].y = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2); tun[q] = 1; } }
+      if (j - i >= 3 && i > 0 && j < pts.length - 1) {
+        const y0 = ySurf[i - 1], y1 = ySurf[j + 1];
+        for (let q = i; q <= j; q++) {
+          const line = y0 + (y1 - y0) * (q - i + 1) / (j - i + 2), dm = Math.min(q - i + 1, j - q + 1) * spc0;
+          pts[q].y = Math.min(line, ySurf[q] - Math.min(7.6, dm * .09)); tun[q] = 1;
+        }
+        const a = Math.max(0, i - 50), b = Math.min(pts.length - 1, j + 50); // blend the slopes over ~150 m each side, never above the ground
+        for (let round = 0; round < 2; round++) {
+          for (let pass = 0; pass < (round ? 40 : 150); pass++) for (let q = a + 1; q < b; q++) pts[q].y = (pts[q - 1].y + 2 * pts[q].y + pts[q + 1].y) / 4;
+          for (let q = a; q <= b; q++) if (!tun[q]) pts[q].y = Math.min(pts[q].y, ySurf[q]);
+        }
+      }
       i = j + 1;
     }
+    for (let q = 0; q < pts.length; q++) if (tun[q]) deep[q] = terr.ok && terrH(pts[q].x, pts[q].z) - .6 > pts[q].y + 6.2 ? 1 : 0; // earth covers the tube only where the ground is high enough
     for (let pass = 0; pass < 8; pass++) for (let i = 1; i < pts.length - 1; i++) halfs[i] = (halfs[i-1] + halfs[i] * 2 + halfs[i+1]) / 4;
   }
 
@@ -456,6 +469,16 @@ async function buildTrack(a, b, coords) {
       if (q.id !== id && (q.x - x) ** 2 + (q.z - z) ** 2 < (q.hw + .05) ** 2) return true;
     return false; };
   const nearMain = (x, z) => { const h = nearTrack(x, z, 40); return h.i >= 0 && h.d < halfs[h.i] + 1.1; }; // borders start exactly at the race road's wall but never over it
+  const refine = ps => { // 1 m steps near the race road, so borders can stop exactly at its wall
+    const near = p => { const h = nearTrack(p.x, p.z, 40); return h.i >= 0 && h.d < halfs[h.i] + 14; };
+    const out = [ps[0]];
+    for (let i = 1; i < ps.length; i++) {
+      const a = ps[i - 1], b = ps[i], L = Math.hypot(b.x - a.x, b.z - a.z);
+      if (L > 1.5 && (near(a) || near(b))) { const n = Math.ceil(L); for (let k = 1; k < n; k++) out.push(lerp(a, b, k / n)); }
+      out.push(b);
+    }
+    return out;
+  };
   const addPier = (list, p, n, w, top, side) => {
     if (list.length >= 4000) return;
     const off = w / 2 + 1.6, gl = (x, z) => { const v = terr.ok ? terrH(x, z) - .6 : minY; return Number.isFinite(v) ? v : minY; };
@@ -481,12 +504,15 @@ async function buildTrack(a, b, coords) {
     const piers = [];
     for (const r of rs) {
       if (r.p.length < 2) continue;
+      r.p = refine(r.p);
       for (let pass = 0; pass < 2; pass++) for (let i = 1; i < r.p.length - 1; i++) { const a0 = r.p[i - 1], b0 = r.p[i], c0 = r.p[i + 1]; b0.x = (a0.x + 2 * b0.x + c0.x) / 4; b0.z = (a0.z + 2 * b0.z + c0.z) / 4; } // round the corners
       const w = wOf(r.t) / 2, L = -.14 + rankOf(r.t) * .015, fr = framesOf(r.p);
       accStrip(r.p, fr, -w, w, L, L, wetHex(surfOf(r.t)));
       const mk = sd => {
         const P = r.p.map((p, i) => ({ x:p.x + fr[i].x * sd * (w + 1.2), z:p.z + fr[i].z * sd * (w + 1.2) }));
-        const m = P.map(q => nearMain(q.x, q.z) || crossed(q.x, q.z, r.id) ? 1 : 0);
+        const Q = r.p.map((p, i) => ({ x:p.x + fr[i].x * sd * w, z:p.z + fr[i].z * sd * w })); // inner edge of the border
+        const m = P.map((q, i) => nearMain(q.x, q.z) || nearMain(Q[i].x, Q[i].z) || crossed(q.x, q.z, r.id) ? 1 : 0);
+        for (let i = 0; i < P.length - 1; i++) if (nearMain((P[i].x + P[i + 1].x) / 2, (P[i].z + P[i + 1].z) / 2) || nearMain((Q[i].x + Q[i + 1].x) / 2, (Q[i].z + Q[i + 1].z) / 2)) { m[i] = 1; m[i + 1] = 1; }
         for (let i = 0; i < P.length - 1; i++) { // skip pieces where the offset line folds back on itself or stretches at a sharp turn
           const a2 = r.p[i], b2 = r.p[i + 1], sl = Math.hypot(b2.x - a2.x, b2.z - a2.z) || 1;
           const pr = ((P[i + 1].x - P[i].x) * (b2.x - a2.x) + (P[i + 1].z - P[i].z) * (b2.z - a2.z)) / sl;
@@ -662,7 +688,7 @@ async function buildTrack(a, b, coords) {
           const x = x0 + i * RS, z = z0 + j * RS; let y = terrH(x, z);
           if (!Number.isFinite(y)) throw new Error('no terrain data');
           y -= .6; const h = nearTrack(x, z, 40);
-          if (h.i >= 0 && h.d < halfs[h.i] + 18) y = tun[h.i] ? Math.max(y, hiRoad(x, z, 20) + 6.5) : Math.min(y, lowRoad(x, z, 20) - .6); // below the road; over a tunnel the earth stays above the roof
+          if (h.i >= 0 && h.d < halfs[h.i] + 18) y = tun[h.i] && deep[h.i] ? Math.max(y, hiRoad(x, z, 20) + 6.5) : Math.min(y, lowRoad(x, z, 20) - .6); // below the road; the real ground stays over a tunnel, but is cut away at the entrances and exits
           const o = j * NV + i; H[o] = y; pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
         }
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
