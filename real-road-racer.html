@@ -693,6 +693,18 @@ async function buildTrack(a, b, coords) {
   const CS = 600, RS = 12, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
   const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44), WATER = new THREE.Color(0x2f6196), SAND = new THREE.Color(0xcdbf94), SEA_Y = -terr.y0 - .9;
   const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
+  const inTube = (x, z) => { // is this point inside the tunnel tube's footprint (road half-width + wall)?
+    const h = nearTrack(x, z, 40); if (h.i < 0 || h.d > halfs[h.i] + 1.3) return false;
+    for (let k = Math.max(0, h.i - 2); k <= Math.min(pts.length - 1, h.i + 2); k++) if (tun[k]) return true;
+    return false; };
+  const tunQuad = (qx, qz) => { // true if the RS x RS quad with corner (qx, qz) touches or lies inside a tunnel
+    const hq = nearTrack(qx + RS / 2, qz + RS / 2, 40);
+    if (hq.i < 0 || hq.d > halfs[hq.i] + 1.3 + RS) return false; // too far from any road to touch a tube
+    let near = false; for (let k = Math.max(0, hq.i - 8); k <= Math.min(pts.length - 1, hq.i + 8); k++) if (tun[k]) { near = true; break; }
+    if (!near) return false;
+    const N = 8; // 9 x 9 samples (1.5 m apart) over the quad, edges included
+    for (let a = 0; a <= N; a++) for (let b = 0; b <= N; b++) if (inTube(qx + RS * a / N, qz + RS * b / N)) return true;
+    return false; };
   const buildCell = (cx, cz) => {
     const key = cx + ',' + cz, c = { mesh:null, done:false }; cells.set(key, c);
     const x0 = cx * CS, z0 = cz * CS;
@@ -719,8 +731,7 @@ async function buildTrack(a, b, coords) {
         }
         const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) {
           const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1;
-          const hq = nearTrack(x0 + (i + .5) * RS, z0 + (j + .5) * RS, 40);
-          if (hq.i >= 0 && tun[hq.i] && hq.d < halfs[hq.i] + 3.2) continue; // only the ground right over the tunnel is cut away
+          if (tunQuad(x0 + i * RS, z0 + j * RS)) continue; // only quads that overlap the tunnel tube are cut away
           ind.push(A, C, B, B, C, D); }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
         g.setIndex(ind); g.computeVertexNormals();
