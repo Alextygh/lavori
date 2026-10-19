@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Real Road Racer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <a class="btn" href="index.html">← Main menu</a>
+  <h1>Settings</h1>
+  <div class="layout">
+    <div class="card preview"><canvas id="car3d" aria-label="Car preview. Drag to rotate."></canvas></div>
+    <div class="card">
+      <div class="group">
+        <h2>Car colour</h2>
+        <div class="row" style="justify-content:flex-start">
+          <input id="col" type="color" aria-label="Colour picker">
+          <input id="hex" type="text" maxlength="7" aria-label="Hex colour code" spellcheck="false">
+        </div>
+        <div class="swatches" id="sw" role="group" aria-label="Preset colours"></div>
+      </div>
+      <div class="group row">
+        <div><h2>Legal mode</h2><p class="desc">Obey speed limits. Staying over for 3 s adds +10 s to your time.</p></div>
+        <label class="switch"><input id="legal" type="checkbox" aria-label="Legal mode"><span></span></label>
+      </div>
+      <div class="group row">
+        <div><h2>Shadows</h2><p class="desc">Looks better. Turn off if the game runs slowly.</p></div>
+        <label class="switch"><input id="shadows" type="checkbox" aria-label="Shadows"><span></span></label>
+      </div>
+      <div class="group row">
+        <div><h2>Sound</h2><p class="desc">Whether the engine sound starts on or muted.</p></div>
+        <label class="switch"><input id="sound" type="checkbox" aria-label="Sound"><span></span></label>
+      </div>
+      <div class="bar"><button class="btn" id="reset">Reset to defaults</button><span id="saved" role="status">Saved ✓</span></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="shared.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let S = RR.load();
+const v = RR.viewer($('car3d'), { color:S.color, shadows:S.shadows });
+const PRESETS = ['#d9482b','#e8a23a','#f2d04a','#3fa34d','#2a9d8f','#2f6fdb','#7b4fd1','#e0559b','#f3ede4','#6b7280','#15171b'];
+let tm;
+function commit() {
+  const ok = RR.save(S), s = $('saved'); s.textContent = ok ? 'Saved ✓' : 'Could not save (storage blocked)';
+  s.classList.add('on'); clearTimeout(tm); tm = setTimeout(() => s.classList.remove('on'), 1500);
+}
+function showColor() {
+  $('col').value = S.color; if (document.activeElement !== $('hex')) $('hex').value = S.color;
+  document.querySelectorAll('.sw').forEach(b => b.classList.toggle('sel', b.dataset.c === S.color));
+  v.setColor(S.color);
+}
+function setColor(h) { const n = RR.normHex(h); if (!n) return; S.color = n; showColor(); commit(); }
+function showAll() { showColor(); $('legal').checked = S.legal; $('shadows').checked = S.shadows; $('sound').checked = S.sound; v.setShadows(S.shadows); }
+PRESETS.forEach(c => { const b = document.createElement('button'); b.className = 'sw'; b.dataset.c = c; b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Colour ' + c); b.onclick = () => setColor(c); $('sw').append(b); });
+$('col').oninput = e => setColor(e.target.value);
+$('hex').oninput = e => setColor(e.target.value);
+$('hex').onblur = () => { $('hex').value = S.color; };
+for (const k of ['legal', 'shadows', 'sound']) $(k).onchange = e => { S[k] = e.target.checked; if (k === 'shadows') v.setShadows(S.shadows); commit(); };
+$('reset').onclick = () => { S = Object.assign({}, RR.DEFAULTS); showAll(); commit(); };
+showAll();
+</script>
+</body>
+</html>

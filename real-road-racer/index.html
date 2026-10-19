@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real Road Racer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="stage">
+  <header>
+    <h1 class="logo"><span>REAL ROAD</span> RACER</h1>
+    <p class="tag">Race on real roads, anywhere in the world</p>
+  </header>
+  <canvas id="car3d" aria-label="3D model of your car. Drag to rotate, scroll to zoom."></canvas>
+  <p class="hint">Drag the car to rotate it &middot; scroll to zoom</p>
+  <nav class="buttons">
+    <a class="mbtn primary" href="freeplay.html">Free-Play</a>
+    <a class="mbtn" href="story.html">Story Mode <small>Coming soon</small></a>
+    <a class="mbtn" href="contracts.html">Contracts <small>Coming soon</small></a>
+    <a class="mbtn" href="settings.html">Settings</a>
+  </nav>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="shared.js"></script>
+<script>
+const S = RR.load();
+const v = RR.viewer(document.getElementById('car3d'), { color:S.color, shadows:S.shadows });
+addEventListener('pageshow', () => { const s = RR.load(); v.setColor(s.color); v.setShadows(s.shadows); }); // refresh after coming back from Settings
+</script>
+</body>
+</html>
