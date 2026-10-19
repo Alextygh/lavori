@@ -693,17 +693,20 @@ async function buildTrack(a, b, coords) {
   const CS = 600, RS = 12, NV = CS / RS + 1, cells = new Map(), retryAt = new Map(); // terrain cells: 600 m squares, 12 m grid
   const ROCK = new THREE.Color(0x7d7a72), SNOW = new THREE.Color(0xeef2f5), GRASS = new THREE.Color(0x4f6b44), WATER = new THREE.Color(0x2f6196), SAND = new THREE.Color(0xcdbf94), SEA_Y = -terr.y0 - .9;
   const removeCell = (key, c) => { cells.delete(key); if (c.mesh) { trackGroup.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); } };
-  const inTube = (x, z) => { // is this point inside the tunnel tube's footprint (road half-width + wall)?
+  const inTube = (x, z, y) => { // is this 3D point inside the tunnel tube (road half-width + wall wide, floor to roof tall)?
     const h = nearTrack(x, z, 40); if (h.i < 0 || h.d > halfs[h.i] + 1.3) return false;
-    for (let k = Math.max(0, h.i - 2); k <= Math.min(pts.length - 1, h.i + 2); k++) if (tun[k]) return true;
-    return false; };
-  const tunQuad = (qx, qz) => { // true if the RS x RS quad with corner (qx, qz) touches or lies inside a tunnel
-    const hq = nearTrack(qx + RS / 2, qz + RS / 2, 40);
-    if (hq.i < 0 || hq.d > halfs[hq.i] + 1.3 + RS) return false; // too far from any road to touch a tube
-    let near = false; for (let k = Math.max(0, hq.i - 8); k <= Math.min(pts.length - 1, hq.i + 8); k++) if (tun[k]) { near = true; break; }
-    if (!near) return false;
-    const N = 8; // 9 x 9 samples (1.5 m apart) over the quad, edges included
-    for (let a = 0; a <= N; a++) for (let b = 0; b <= N; b++) if (inTube(qx + RS * a / N, qz + RS * b / N)) return true;
+    let ok = false; for (let k = Math.max(0, h.i - 2); k <= Math.min(pts.length - 1, h.i + 2); k++) if (tun[k]) { ok = true; break; }
+    if (!ok) return false;
+    const ry = pts[h.i].y; return y >= ry - .5 && y <= ry + 6.2; };
+  const tunTri = (H, x0, z0, A, B, C) => { // true if this terrain triangle touches the tube volume
+    const ax = x0 + (A % NV) * RS, az = z0 + Math.floor(A / NV) * RS, bx = x0 + (B % NV) * RS, bz = z0 + Math.floor(B / NV) * RS, cx = x0 + (C % NV) * RS, cz = z0 + Math.floor(C / NV) * RS;
+    const ay = H[A], by = H[B], cy = H[C], P = [[ax, az, ay], [bx, bz, by], [cx, cz, cy]];
+    for (let i = 0; i < 3; i++) for (let j = i; j < 3; j++) for (let q = 0; q < 3; q++) { // vertices, edge points and interior points
+      const t = q / 2, u = i === j ? 0 : t; if (i === j && q) break;
+      const x = P[i][0] + (P[j][0] - P[i][0]) * u, z = P[i][1] + (P[j][1] - P[i][1]) * u, y = P[i][2] + (P[j][2] - P[i][2]) * u;
+      if (inTube(x, z, y)) return true; }
+    for (const [w1, w2] of [[.5, .25], [.25, .5], [.25, .25], [1 / 3, 1 / 3], [.75, .125], [.125, .75], [.125, .125]]) { const w3 = 1 - w1 - w2;
+      if (inTube(ax * w1 + bx * w2 + cx * w3, az * w1 + bz * w2 + cz * w3, ay * w1 + by * w2 + cy * w3)) return true; }
     return false; };
   const buildCell = (cx, cz) => {
     const key = cx + ',' + cz, c = { mesh:null, done:false }; cells.set(key, c);
@@ -731,8 +734,8 @@ async function buildTrack(a, b, coords) {
         }
         const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) {
           const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1;
-          if (tunQuad(x0 + i * RS, z0 + j * RS)) continue; // only quads that overlap the tunnel tube are cut away
-          ind.push(A, C, B, B, C, D); }
+          if (!tunTri(H, x0, z0, A, C, B)) ind.push(A, C, B); // triangles touching the tunnel volume are left out
+          if (!tunTri(H, x0, z0, B, C, D)) ind.push(B, C, D); }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
         g.setIndex(ind); g.computeVertexNormals();
         c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); c.mesh.castShadow = c.mesh.receiveShadow = true; trackGroup.add(c.mesh);
