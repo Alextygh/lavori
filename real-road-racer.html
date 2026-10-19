@@ -396,7 +396,7 @@ async function buildTrack(a, b, coords) {
       let cur = null, prev = null, far = false;
       for (const p of r.dp) {
         const h = nearAny(p.x, p.z, 450);
-        if (h.i < 0 || (keep && !keep(h.i)) || (tun[h.i] && h.d < halfs[h.i] + 30)) { if (cur) { cur.artEnd = true; out.push(cur); cur = null; } prev = null; far = true; continue; }
+        if (h.i < 0 || (keep && !keep(h.i)) || (tun[h.i] && h.d < halfs[h.i] + 16)) { if (cur) { cur.artEnd = true; out.push(cur); cur = null; } prev = null; far = true; continue; }
         const c = { x:p.x, y:gY(p.x, p.z, h.i, h.d), z:p.z, e:h.d - (halfs[h.i] + 1.2) }; // e < 0: inside the race road's walls
         if (c.e < 0) {
           if (cur) { cur.p.push(lerp(prev, c, prev.e / (prev.e - c.e))); cur.endCut = true; out.push(cur); cur = null; }
@@ -440,21 +440,20 @@ async function buildTrack(a, b, coords) {
   if (trackGroup) { scene.remove(trackGroup); trackGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
   trackGroup = new THREE.Group();
   const L = i => -halfs[i], R = i => halfs[i];
-  const gT = [0, 1].map(sd => gap[sd].map((v, i) => v | tun[i])); // junction mouths and tunnels have no verge or wall of their own
-  trackGroup.add(strip(pts, frames, i => -halfs[i] - (gT[0][i] ? 1.2 : 0), i => halfs[i] + (gT[1][i] ? 1.2 : 0), 0, 0, 0, null, cols));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - (gap[0][i] ? 1.2 : 0), i => halfs[i] + (gap[1][i] ? 1.2 : 0), 0, 0, 0, null, cols));
   trackGroup.add(strip(pts, frames, i => -halfs[i] + .25, i => -halfs[i] + .55, .03, .03, 0xf3ede4, gap[0]));
   trackGroup.add(strip(pts, frames, i => halfs[i] - .55, i => halfs[i] - .25, .03, .03, 0xf3ede4, gap[1]));
-  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, L, -.02, -.02, 0x6a5f55, gT[0]));
-  trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gT[1]));
-  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, tun));
-  trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, tun));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, L, -.02, -.02, 0x6a5f55, gap[0]));
+  trackGroup.add(strip(pts, frames, R, i => halfs[i] + 1.2, -.02, -.02, 0x6a5f55, gap[1]));
+  trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, 0, .9, 0xd0d3d8, null));
+  trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, 0, .9, 0xd0d3d8, null));
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => halfs[i] + 1.2, -.5, -.5, 0x7a7d82));      // slab underside
   trackGroup.add(strip(pts, frames, i => -halfs[i] - 1.2, i => -halfs[i] - 1.2, -.5, -.03, 0x7a7d82));    // slab sides
   trackGroup.add(strip(pts, frames, i => halfs[i] + 1.2, i => halfs[i] + 1.2, -.5, -.03, 0x7a7d82));
   for (let i = 0; i < pts.length;) { // tunnel tubes: roof and walls around the road, with the terrain left above
     if (!tun[i]) { i++; continue; }
     let j = i; while (j + 1 < pts.length && tun[j + 1]) j++;
-    const a0 = Math.max(0, i - 1), b0 = Math.min(pts.length - 1, j + 1), sp = pts.slice(a0, b0 + 1), sf = frames.slice(a0, b0 + 1), hw2 = k => halfs[a0 + k] + 1.2;
+    const a0 = Math.max(0, i - 1), b0 = Math.min(pts.length - 1, j + 1), sp = pts.slice(a0, b0 + 1), sf = frames.slice(a0, b0 + 1), hw2 = k => halfs[a0 + k] + 1.6;
     const roof = strip(sp, sf, k => -hw2(k), k => hw2(k), 5.5, 5.5, 0x5d6068); roof.castShadow = true; trackGroup.add(roof);
     const rt = strip(sp, sf, k => -hw2(k), k => hw2(k), 6, 6, 0x5d6068); rt.castShadow = true; trackGroup.add(rt);
     trackGroup.add(strip(sp, sf, k => -hw2(k), k => -hw2(k), -.5, 6, 0x6b6e75), strip(sp, sf, k => hw2(k), k => hw2(k), -.5, 6, 0x6b6e75));
@@ -607,39 +606,9 @@ async function buildTrack(a, b, coords) {
       cand.push({ b, by:pts[h0.i].y, dm:h0.d });
     }
     cand.sort((p, q) => p.dm - q.dm);
-    const use = cand.slice(0, 3000), DG = 120, dg = new Map();
-    for (const u of use) { // centre, floor area, and how built-up the surroundings are
-      const f = u.b.fp; let x = 0, z = 0, ar = 0;
-      for (const p of f) { x += p.x; z += p.z; }
-      for (let i = 0; i < f.length - 1; i++) ar += f[i].x * f[i + 1].z - f[i + 1].x * f[i].z;
-      u.c = { x:x / f.length, z:z / f.length }; u.area = Math.abs(ar) / 2;
-      const k = Math.floor(u.c.x / DG) + ',' + Math.floor(u.c.z / DG); dg.set(k, (dg.get(k) || 0) + 1);
-    }
-    const dens = c => { let n = 0; const cx = Math.floor(c.x / DG), cz = Math.floor(c.z / DG);
-      for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) n += dg.get((cx + i) + ',' + (cz + j)) || 0; return n; };
-    const hash = (x, z, k) => { const v = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return v - Math.floor(v); };
-    const wb = [0, 1, 2, 3].map(() => ({ pos:[], uv:[], col:[] })), rb = { pos:[], col:[] }, tint = new THREE.Color();
-    const emit = (gg, style, wallHex, roofHex) => { // extruded faces: sides get the window texture, tops stay plain
-      const P = gg.attributes.position.array, UV = gg.attributes.uv.array;
-      for (const grp of gg.groups) {
-        if (grp.materialIndex === 1) { const w = wb[style]; tint.setHex(wallHex);
-          for (let i = grp.start * 3; i < (grp.start + grp.count) * 3; i++) w.pos.push(P[i]);
-          for (let i = grp.start * 2; i < (grp.start + grp.count) * 2; i++) w.uv.push(UV[i]);
-          for (let i = 0; i < grp.count; i++) w.col.push(tint.r, tint.g, tint.b);
-        } else { tint.setHex(roofHex);
-          for (let i = grp.start * 3; i < (grp.start + grp.count) * 3; i++) rb.pos.push(P[i]);
-          for (let i = 0; i < grp.count; i++) rb.col.push(tint.r, tint.g, tint.b); }
-      }
-    };
-    const PAL = [[0x9fb3c8, 0x8aa0b5, 0xb7c4cf], [0xc9c3b8, 0xb8b4ae, 0xd2cabb], [0xe3d3b5, 0xd9c7a4, 0xe8b99a, 0xcfc7b8], [0xf0e4cf, 0xe9d3b0, 0xf2d7c0, 0xdcd6c8]];
-    for (const u of use) {
-      const { b, by } = u, t = b.t, d = dens(u.c), q = hash(u.c.x, u.c.z, 1), q2 = hash(u.c.x, u.c.z, 2);
-      let lv = parseFloat(t['building:levels']); if (!(lv > 0)) { const hm = parseFloat(t.height); lv = hm > 0 ? hm / 3.3 : 0; }
-      if (!(lv > 0)) lv = d > 120 ? (u.area > 900 ? 16 + q * 40 : 5 + q * 14) : d > 40 ? (u.area > 700 ? 4 + q * 8 : 2 + q * 5) : d > 12 ? 2 + q * 2.5 : 1 + q * 1.3; // big city: towers, countryside: low houses
-      lv = Math.max(1, Math.min(80, lv)); const hgt = lv * 3.3;
-      const style = lv >= 14 ? 0 : lv >= 5 ? 1 : lv >= 3 ? 2 : 3, pal = PAL[style];
-      let wallHex = pal[Math.floor(q2 * pal.length)]; const bc = String(t['building:colour'] || '').replace('#', ''); if (/^[0-9a-f]{6}$/i.test(bc)) wallHex = parseInt(bc, 16);
-      const pitched = lv <= 3.4 && u.area < 450 && t['roof:shape'] !== 'flat', roofHex = pitched ? [0xa5563a, 0x9a4a35, 0x8a8f98][Math.floor(q * 3)] : 0x8c8f94;
+    const bufs = [[], [], []]; let nb = 0;
+    for (const { b, by } of cand.slice(0, 3000)) {
+      const t = b.t, hgt = parseFloat(t.height) || (+t['building:levels'] || 0) * 3.2 || 8 + Math.abs(Math.round(b.fp[0].x + b.fp[0].z)) % 6 * 2;
       try {
         const sh = new THREE.Shape(b.fp.map(p => new THREE.Vector2(p.x, -p.z)));
         for (const hole of b.holes || []) sh.holes.push(new THREE.Path(hole.map(p => new THREE.Vector2(p.x, -p.z))));
@@ -649,70 +618,27 @@ async function buildTrack(a, b, coords) {
         if (tp) { // the road runs through this building: open a 6 m tunnel and keep the floors above it
           const ceil = tp.ymax + 6, roof = Math.max(top + hgt, ceil + 3);
           const gu = new THREE.ExtrudeGeometry(sh, { depth:roof - ceil, bevelEnabled:false });
-          gu.rotateX(-Math.PI / 2); gu.translate(0, ceil, 0); emit(gu, Math.max(1, style), wallHex, 0x8c8f94); gu.dispose();
+          gu.rotateX(-Math.PI / 2); gu.translate(0, ceil, 0); bufs[nb % 3].push(gu.attributes.position.array); gu.dispose();
           const lo = [];
           for (let j = 0; j < tp.nz; j++) for (let i = 0; i < tp.nx; i++) {
             if (tp.solid[j][i] !== 1) continue;
             let e = i; while (e + 1 < tp.nx && tp.solid[j][e + 1] === 1) e++;
             lo.push(...boxTris(tp.x0 + i * tp.cs, tp.x0 + (e + 1) * tp.cs, low, ceil, tp.z0 + j * tp.cs, tp.z0 + (j + 1) * tp.cs)); i = e;
           }
-          tint.setHex(0x9a9da3); for (let i = 0; i < lo.length; i++) rb.pos.push(lo[i]); for (let i = 0; i < lo.length / 3; i++) rb.col.push(tint.r, tint.g, tint.b);
-          continue;
+          if (lo.length) bufs[nb % 3].push(new Float32Array(lo));
+          nb++; continue;
         }
         const gg = new THREE.ExtrudeGeometry(sh, { depth:hgt + (top - low), bevelEnabled:false });
-        gg.rotateX(-Math.PI / 2); gg.translate(0, low, 0); emit(gg, style, wallHex, roofHex); gg.dispose();
-        if (pitched) { // simple hipped roof up to a ridge point over the middle
-          const eave = top + hgt, f = b.fp, n = f.length - 1, rh = 1.8 + q * 1.4; tint.setHex(roofHex);
-          for (let i = 0; i < n; i++) { const a = f[i], c = f[(i + 1) % n]; rb.pos.push(a.x, eave, a.z, c.x, eave, c.z, u.c.x, eave + rh, u.c.z); for (let k = 0; k < 3; k++) rb.col.push(tint.r, tint.g, tint.b); }
-        }
+        gg.rotateX(-Math.PI / 2); gg.translate(0, low, 0);
+        bufs[nb % 3].push(gg.attributes.position.array); gg.dispose(); nb++;
       } catch (err) { /* skip bad footprint */ }
     }
-    wb.forEach((w, i) => {
-      if (!w.pos.length) return;
-      const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(w.pos, 3));
-      gg.setAttribute('uv', new THREE.Float32BufferAttribute(w.uv, 2)); gg.setAttribute('color', new THREE.Float32BufferAttribute(w.col, 3)); gg.computeVertexNormals();
-      const m = new THREE.Mesh(gg, BLD.walls[i]); m.castShadow = m.receiveShadow = true; g.add(m);
+    [0xb7a99a, 0xa89d8f, 0xc4b6a3].forEach((c, k) => {
+      const n = bufs[k].reduce((sum, a2) => sum + a2.length, 0); if (!n) return;
+      const pos = new Float32Array(n); let o = 0; for (const a2 of bufs[k]) { pos.set(a2, o); o += a2.length; }
+      const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); gg.computeVertexNormals();
+      const bm = new THREE.Mesh(gg, new THREE.MeshLambertMaterial({ color:c, side:THREE.DoubleSide })); bm.castShadow = bm.receiveShadow = true; g.add(bm);
     });
-    if (rb.pos.length) {
-      const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(rb.pos, 3)); gg.setAttribute('color', new THREE.Float32BufferAttribute(rb.col, 3)); gg.computeVertexNormals();
-      const m = new THREE.Mesh(gg, BLD.roof); m.castShadow = m.receiveShadow = true; g.add(m);
-    }
-  };
-  const addFurniture = (list, g, keepPt) => { // street lamps, stop / give way / speed / signal signs and other signs mapped in OpenStreetMap
-    const lamps = [], signs = [];
-    for (const f of list) {
-      if (!keepPt(f)) continue;
-      const h = nearTrack(f.x, f.z, 120); if (h.i >= 0 && h.d < halfs[h.i] + 1) continue; // not on the race road
-      const gb = h.i >= 0 && h.d < 40 ? gY(f.x, f.z, h.i, h.d) : NaN, gt = terrH(f.x, f.z);
-      const y = Number.isFinite(gb) ? gb : Number.isFinite(gt) ? gt : h.i >= 0 ? pts[h.i].y : minY;
-      let dx = 0, dz = 1; if (h.i >= 0) { dx = pts[h.i].x - f.x; dz = pts[h.i].z - f.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l; } // faces the road
-      const t = f.t;
-      if (t.highway === 'street_lamp') { if (lamps.length < 1500) lamps.push({ x:f.x, z:f.z, y, dx, dz }); }
-      else if (signs.length < 400) {
-        const kind = t.highway === 'stop' ? 'stop' : t.highway === 'give_way' ? 'yield' : t.highway === 'traffic_signals' ? 'signal' : parseFloat(t.maxspeed) > 0 ? 'speed:' + parseInt(t.maxspeed) : 'info';
-        signs.push({ x:f.x, z:f.z, y, dx, dz, kind });
-      }
-    }
-    const o = new THREE.Object3D();
-    if (lamps.length) {
-      const n = lamps.length, poles = new THREE.InstancedMesh(new THREE.CylinderGeometry(.08, .11, 7.5, 6), lampPoleMat, n);
-      const heads = new THREE.InstancedMesh(new THREE.BoxGeometry(1.5, .14, .4), lampMat, n), pools = new THREE.InstancedMesh(poolGeo, poolMat, n);
-      lamps.forEach((l, i) => {
-        o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); o.position.set(l.x, l.y + 3.75, l.z); o.updateMatrix(); poles.setMatrixAt(i, o.matrix);
-        o.rotation.set(0, Math.atan2(-l.dz, l.dx), 0); o.position.set(l.x + l.dx * .75, l.y + 7.45, l.z + l.dz * .75); o.updateMatrix(); heads.setMatrixAt(i, o.matrix);
-        o.rotation.set(0, 0, 0); o.position.set(l.x + l.dx * 3.5, l.y + .25, l.z + l.dz * 3.5); o.updateMatrix(); pools.setMatrixAt(i, o.matrix);
-      });
-      poles.castShadow = true; for (const m of [poles, heads, pools]) { m.frustumCulled = false; g.add(m); }
-    }
-    if (signs.length) {
-      const sp = new THREE.InstancedMesh(new THREE.CylinderGeometry(.04, .04, 1, 5), lampPoleMat, signs.length);
-      signs.forEach((sg, i) => {
-        const hh = sg.kind === 'signal' ? 4.2 : 2.3, big = sg.kind === 'signal';
-        o.rotation.set(0, 0, 0); o.scale.set(1, hh, 1); o.position.set(sg.x, sg.y + hh / 2, sg.z); o.updateMatrix(); sp.setMatrixAt(i, o.matrix);
-        const m = new THREE.Mesh(signGeo, signMat(sg.kind)); m.position.set(sg.x, sg.y + hh, sg.z); m.rotation.y = Math.atan2(sg.dx, sg.dz); m.scale.set(big ? .5 : .8, big ? 1.3 : .8, 1); m.castShadow = true; g.add(m);
-      });
-      sp.frustumCulled = false; g.add(sp);
-    }
   };
   const CH = 200, nCh = Math.ceil(pts.length / CH), chunks = new Array(nCh).fill(null), failAt = new Array(nCh).fill(0), spc = length / (pts.length - 1);
   const nearIds = new Set(osm ? osm.roads.map(r => r.id) : []);
@@ -726,12 +652,11 @@ async function buildTrack(a, b, coords) {
       try {
         const data = await fetchOSM(a, kx, kz, sub, 'chunk');
         if (chunks[ci] !== c) return;
-        const g = new THREE.Group(), keepPt = p => { const h = nearTrack(p.x, p.z, 250); return h.i >= 0 && Math.floor(h.i / CH) === ci && !(tun[h.i] && h.d < halfs[h.i] + 30); };
+        const g = new THREE.Group(), keepPt = p => { const h = nearTrack(p.x, p.z, 250); return h.i >= 0 && Math.floor(h.i / CH) === ci; };
         const far = data.roads.filter(r => !nearIds.has(r.id)); far.forEach(r => { r.dp = densify(r.pts); });
         const rs = makeRuns(far, i => i >= i0 - 8 && i <= i1 + 8); addRuns(rs); drawRuns(rs, g);
         addBuildings(data.buildings, g, keepPt);
         addNature(data, g, minY, pts, halfs, nearTrack, crossed, keepPt);
-        addFurniture(data.furn || [], g, keepPt);
         trackGroup.add(g); c.group = g; c.state = 'loaded';
       } catch (err) { console.warn('Scenery chunk failed:', ci, err); if (chunks[ci] === c) { chunks[ci] = null; failAt[ci] = Date.now() + 20000; } }
       finally { active--; }
@@ -758,12 +683,12 @@ async function buildTrack(a, b, coords) {
       try {
         await terrEnsure(a.lat - (z0 + CS + RS) / kz, a.lon + (x0 - RS) / kx, a.lat - (z0 - RS) / kz, a.lon + (x0 + CS + RS) / kx);
         if (cells.get(key) !== c) return;
-        const H = new Float32Array(NV * NV), pos = new Float32Array(NV * NV * 3), col = new Float32Array(NV * NV * 3), tmp = new THREE.Color(), hole = new Uint8Array(NV * NV);
+        const H = new Float32Array(NV * NV), pos = new Float32Array(NV * NV * 3), col = new Float32Array(NV * NV * 3), tmp = new THREE.Color();
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
           const x = x0 + i * RS, z = z0 + j * RS; let y = terrH(x, z);
           if (!Number.isFinite(y)) throw new Error('no terrain data');
           y -= .6; const h = nearTrack(x, z, 40);
-          if (h.i >= 0 && h.d < halfs[h.i] + 18) { if (!tun[h.i]) y = Math.min(y, lowRoad(x, z, 20) - .6); else if (h.d < halfs[h.i] + 14) hole[j * NV + i] = 1; } // below the road; no ground at all over a tunnel
+          if (h.i >= 0 && h.d < halfs[h.i] + 18) y = tun[h.i] && deep[h.i] ? Math.max(y, hiRoad(x, z, 20) + 6.5) : Math.min(y, lowRoad(x, z, 20) - .6); // below the road; the real ground stays over a tunnel, but is cut away at the entrances and exits
           const o = j * NV + i; H[o] = y; pos[o * 3] = x; pos[o * 3 + 1] = y; pos[o * 3 + 2] = z;
         }
         for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
@@ -773,7 +698,7 @@ async function buildTrack(a, b, coords) {
           if (abs > 1900) tmp.lerp(SNOW, Math.min(1, (abs - 1900) / 500));
           col[o * 3] = tmp.r; col[o * 3 + 1] = tmp.g; col[o * 3 + 2] = tmp.b;
         }
-        const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) { const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1; if (hole[A] || hole[B] || hole[C] || hole[D]) continue; ind.push(A, C, B, B, C, D); }
+        const ind = []; for (let j = 0; j < NV - 1; j++) for (let i = 0; i < NV - 1; i++) { const A = j * NV + i, B = A + 1, C = A + NV, D = C + 1; ind.push(A, C, B, B, C, D); }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
         g.setIndex(ind); g.computeVertexNormals();
         c.mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide })); c.mesh.castShadow = c.mesh.receiveShadow = true; trackGroup.add(c.mesh);
@@ -1048,7 +973,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
   const step = Math.max(1, Math.ceil(coords.length / 150));
   const poly = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).map(c => c.lat.toFixed(5) + ',' + c.lon.toFixed(5)).join(',');
   const ar = `(around:300,${poly})`, ar2 = `(around:500,${poly})`;
-  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};node["natural"="tree"]${ar};node["highway"~"^(street_lamp|stop|give_way|traffic_signals)$"]${ar};node["traffic_sign"]${ar};way["natural"~"^(water|wood|scrub)$"]${ar};way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${ar};way["leisure"~"^(park|garden|pitch|playground|nature_reserve)$"]${ar};way["waterway"~"^(river|canal|stream|ditch)$"]${ar};relation["natural"~"^(water|wood)$"]["type"="multipolygon"]${ar};relation["landuse"~"^(forest|grass)$"]["type"="multipolygon"]${ar};relation["leisure"~"^(park|garden)$"]["type"="multipolygon"]${ar};);out geom;`;
+  const q = `[out:json][timeout:60];(way["building"]${ar};relation["building"]["type"="multipolygon"]${ar};way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"]${ar2};node["natural"="tree"]${ar};way["natural"~"^(water|wood|scrub)$"]${ar};way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${ar};way["leisure"~"^(park|garden|pitch|playground|nature_reserve)$"]${ar};way["waterway"~"^(river|canal|stream|ditch)$"]${ar};relation["natural"~"^(water|wood)$"]["type"="multipolygon"]${ar};relation["landuse"~"^(forest|grass)$"]["type"="multipolygon"]${ar};relation["leisure"~"^(park|garden)$"]["type"="multipolygon"]${ar};);out geom;`;
   const qNear = `[out:json][timeout:60];(way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|service)(_link)?$"](around:40,${poly}););out geom;`;
   const query = mode === 'near' ? qNear : q;
   const mirrors = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
@@ -1065,7 +990,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
   }
   if (!j) throw new Error('all Overpass servers failed (' + last + ')');
   const xz = g => ({ x:(g.lon - a.lon) * kx, z:-(g.lat - a.lat) * kz });
-  const roads = [], buildings = [], trees = [], areas = [], waterways = [], furn = [];
+  const roads = [], buildings = [], trees = [], areas = [], waterways = [];
   const kindOf = t => t.natural === 'water' ? 'water' : (t.natural === 'wood' || t.natural === 'scrub' || t.landuse === 'forest') ? 'forest' : (t.leisure || t.landuse || t.natural) ? 'park' : null;
   for (const el of j.elements || []) {
     const t = el.tags || {};
@@ -1077,7 +1002,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
       for (const ring of stitch(outs)) { const o = { fp:ring, holes:holes.filter(h => inPoly(h[0], ring)), t }; if (isB) buildings.push(o); else { o.kind = kind; areas.push(o); } }
       continue;
     }
-    if (el.type === 'node') { if (t.natural === 'tree') trees.push(xz(el)); else if (['street_lamp', 'stop', 'give_way', 'traffic_signals'].includes(t.highway) || t.traffic_sign) furn.push({ ...xz(el), t }); continue; }
+    if (el.type === 'node') { if (t.natural === 'tree') trees.push(xz(el)); continue; }
     if (!el.geometry || el.geometry.length < 2) continue;
     if (t.highway) { if (t.access === 'private' || t.access === 'no' || ['parking_aisle', 'driveway', 'drive-through', 'emergency_access'].includes(t.service) ) continue; roads.push({ id:el.id, hi:!!((t.tunnel && !['no', 'culvert'].includes(t.tunnel)) || (t.bridge && t.bridge !== 'no') || (t.layer && +t.layer !== 0)), pts:el.geometry.map(xz), t }); }
     else if (t.building && el.geometry.length >= 4) buildings.push({ fp:el.geometry.map(xz), holes:[], t });
@@ -1085,7 +1010,7 @@ async function fetchOSM(a, kx, kz, coords, mode) { // mode 'near': only roads wi
     else { const kind = kindOf(t); if (kind && el.geometry.length >= 4) areas.push({ fp:el.geometry.map(xz), holes:[], t, kind }); }
   }
   if (j.remark && !(j.elements || []).length) throw new Error(j.remark);
-  return { roads, buildings, trees, areas, waterways, furn };
+  return { roads, buildings, trees, areas, waterways };
 }
 
 // Roads that touch the route, fetched in ~1.5 km windows (3 at a time) so long routes still load
@@ -1158,48 +1083,6 @@ function demAt(lat, lon) { // bilinear elevation in metres, NaN if the tile isn'
   return (h[i] * (1 - ax) + h[i + 1] * ax) * (1 - ay) + (h[i + 256] * (1 - ax) + h[i + 257] * ax) * ay;
 }
 const terrH = (x, z) => terr.ok ? demAt(terr.ctx.a.lat - z / terr.ctx.kz, terr.ctx.a.lon + x / terr.ctx.kx) - terr.y0 : NaN; // world height (start = 0)
-
-/* ---------- Building facades, street lamps, road signs ---------- */
-const BLD = (() => { // window textures: 8 x 8 windows, one repeat = 27 m x 26 m; lit windows live in a separate emissive map for night
-  const mk = (win, lit, px, py, frame, seed) => {
-    const N = 8, S = 32, c = document.createElement('canvas'), e = document.createElement('canvas'); c.width = c.height = e.width = e.height = N * S;
-    const g = c.getContext('2d'), ge = e.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, N * S, N * S); ge.fillStyle = '#000'; ge.fillRect(0, 0, N * S, N * S);
-    let sd = seed; const r = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296;
-    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-      const x = i * S + px, y = j * S + py, w = S - 2 * px, h = S - 2 * py;
-      g.fillStyle = frame; g.fillRect(x - 1, y - 1, w + 2, h + 2); g.fillStyle = win; g.fillRect(x, y, w, h);
-      if (r() < lit) { g.fillStyle = '#e9d9a0'; g.fillRect(x, y, w, h); ge.fillStyle = '#ffd98a'; ge.fillRect(x, y, w, h); }
-    }
-    const tex = new THREE.CanvasTexture(c), em = new THREE.CanvasTexture(e);
-    for (const t of [tex, em]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / (N * 3.4), 1 / (N * 3.3)); t.anisotropy = 4; }
-    return new THREE.MeshLambertMaterial({ map:tex, emissiveMap:em, emissive:0xffffff, emissiveIntensity:0, vertexColors:true, side:THREE.DoubleSide });
-  };
-  return { walls:[ mk('#4c6a8c', .25, 1, 3, '#d8dde3', 11),   // glass tower: ribbon windows
-                   mk('#4a6580', .22, 6, 6, '#bfbab0', 23),   // office or apartment block
-                   mk('#44566c', .18, 9, 7, '#fbf6ea', 37),   // residential block
-                   mk('#50647a', .12, 10, 9, '#ffffff', 51) ], // house
-           roof:new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide }) };
-})();
-const lampPoleMat = new THREE.MeshLambertMaterial({ color:0x5d6066 }), lampMat = new THREE.MeshBasicMaterial({ color:0xcfd3d8 });
-const poolGeo = new THREE.PlaneGeometry(16, 16); poolGeo.rotateX(-Math.PI / 2);
-const poolMat = new THREE.MeshBasicMaterial({ map:(() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, 'rgba(255,225,160,.9)'); gr.addColorStop(1, 'rgba(255,225,160,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })(),
-  transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4, polygonOffsetUnits:-4 });
-const signGeo = new THREE.PlaneGeometry(1, 1), signCache = {};
-function signMat(kind) {
-  if (signCache[kind]) return signCache[kind];
-  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
-  const poly = (n, r, rot) => { g.beginPath(); for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; g.lineTo(64 + Math.cos(a) * r, 64 + Math.sin(a) * r); } g.closePath(); };
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  if (kind === 'stop') { g.fillStyle = '#fff'; poly(8, 62, Math.PI / 8); g.fill(); g.fillStyle = '#c4191d'; poly(8, 55, Math.PI / 8); g.fill(); g.fillStyle = '#fff'; g.font = 'bold 34px sans-serif'; g.fillText('STOP', 64, 66); }
-  else if (kind === 'yield') { g.fillStyle = '#c4191d'; poly(3, 66, Math.PI / 2); g.fill(); g.fillStyle = '#fff'; poly(3, 46, Math.PI / 2); g.fill(); }
-  else if (kind === 'signal') { g.fillStyle = '#1b1d21'; g.fillRect(34, 0, 60, 128); [['#e0302b', 24], ['#f2b21b', 64], ['#35b34a', 104]].forEach(([col, y]) => { g.fillStyle = col; g.beginPath(); g.arc(64, y, 17, 0, 7); g.fill(); }); }
-  else if (kind.startsWith('speed')) { g.fillStyle = '#d62d2d'; g.beginPath(); g.arc(64, 64, 62, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(64, 64, 47, 0, 7); g.fill();
-    g.fillStyle = '#111'; g.font = 'bold 54px sans-serif'; g.fillText(kind.split(':')[1], 64, 68); }
-  else { g.fillStyle = '#fff'; g.fillRect(6, 6, 116, 116); g.fillStyle = '#1f5fae'; g.fillRect(12, 12, 104, 104); g.strokeStyle = '#fff'; g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round';
-    g.beginPath(); g.moveTo(64, 100); g.lineTo(64, 30); g.moveTo(40, 54); g.lineTo(64, 30); g.lineTo(88, 54); g.stroke(); }
-  return signCache[kind] = new THREE.MeshLambertMaterial({ map:new THREE.CanvasTexture(c), transparent:true, alphaTest:.3, side:THREE.DoubleSide });
-}
 
 /* ---------- Trees, parks, water ---------- */
 function addNature(osm, group, minY, pts, halfs, nearTrack, crossed, keepPt = () => true) {
@@ -1292,9 +1175,6 @@ function applyEnv() {
   cloudN = { Clear:80, Cloudy:300, Rain:300, Fog:0 }[env.weather];
   cloudMat.color.setHex({ Clear:0xffffff, Cloudy:0xdfe3e8, Rain:0x8a929e, Fog:0xffffff }[env.weather]);
   if (env.time === 'Sunset') cloudMat.color.lerp(new THREE.Color(0xffb98a), .5);
-  BLD.walls.forEach(m => { m.emissiveIntensity = night ? 1 : env.time === 'Sunset' ? .45 : 0; }); // lit windows after dark
-  lampMat.color.setHex(night ? 0xffe6a8 : env.time === 'Sunset' ? 0xffd9a0 : 0xcfd3d8);
-  poolMat.opacity = night ? .55 : env.time === 'Sunset' ? .25 : (env.weather === 'Fog' || env.weather === 'Rain') ? .12 : 0;
   rain.visible = env.weather === 'Rain';
 }
 const RN = 1600, rainPos = new Float32Array(RN * 6), rainL = new Float32Array(RN * 3);
