@@ -825,7 +825,7 @@ function resetCar() {
   if (!track) return;
   const p = track.pts[5], q = track.pts[8];
   st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
-  st.speed = 0; st.idx = 5; st.time = 0; st.done = false; st.course = st.heading; st.drift = false; st.slipAng = 0;
+  st.speed = 0; st.idx = 5; st.time = 0; st.done = false; st.course = st.heading; st.drift = false; st.slipAng = 0; st.oilT = 0;
   st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0; st.overT = st.pen = 0;
   $('msg').style.display = 'none';
 }
@@ -850,7 +850,7 @@ function vehicleStep(S, I, dt, C) {
   const G = 9.81, v0 = S.speed, gr = groundAt(S.x, S.z, best);
   const cx = Math.sin(S.course), cz = Math.cos(S.course);
   const slope = gr.slope * (cx * gr.tx + cz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
-  const mu = C.mu * (1 + C.df * v0 * v0) * (offRoad ? .6 : 1) * (env.weather === 'Rain' ? .65 : 1) * track.gripS[best], rr = offRoad ? .06 : .012;
+  const mu = C.mu * (1 + C.df * v0 * v0) * (offRoad ? .6 : 1) * (env.weather === 'Rain' ? .65 : 1) * track.gripS[best] * (S.oilT > 0 ? .3 : 1), rr = offRoad ? .06 : .012; if (S.oilT > 0) S.oilT -= dt;
   const trac = .7 * mu * C.m * G * cosT;
   // drift: hold the handbrake while steering at speed; stays on until you let go or slow down
   const drifting = !!I.hand && (S.drift ? v0 > 6 : (Math.abs(S.steer) > .3 && v0 > 10));
