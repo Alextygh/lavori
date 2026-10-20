@@ -856,7 +856,7 @@ function vehicleStep(S, I, dt, C) {
   const drifting = !!I.hand && (S.drift ? v0 > 6 : (Math.abs(S.steer) > .3 && v0 > 10));
   let v = v0, a = 0;
   if (I.up && v < C.vmax) a += Math.min(C.P / Math.max(Math.abs(v), 2), trac) / C.m * I.thr;
-  if (I.down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * C.P / Math.max(Math.abs(v), 2), .5 * trac) / C.m : 0);
+  if (I.down) a += v > .5 ? -Math.min(mu * G * cosT, C.brake || 10) : (v > -8 ? -Math.min(.5 * C.P / Math.max(Math.abs(v), 2), .5 * trac) / C.m : 0);
   if (I.hand) a -= Math.sign(v) * (drifting ? 1.2 : Math.min(mu * G * cosT, 8));
   if (!I.up && !I.down && v > 0) a -= .4;
   a -= G * sinT; v += a * dt;
@@ -865,7 +865,7 @@ function vehicleStep(S, I, dt, C) {
   if (!I.up && !I.down && !I.hand && Math.abs(v) < .4) v = 0;
   S.steer += (I.steer - S.steer) * Math.min(1, 7 * dt);
   S.drift = drifting;
-  const delta = S.steer * .45 / (1 + (v / (drifting ? 16 : 10)) ** 2);
+  const delta = S.steer * .45 * (C.steerK || 1) / (1 + (v / (drifting ? 16 : 10)) ** 2);
   let k = Math.tan(delta) / (C.len * .6);
   const kmax = mu * G * cosT / Math.max(v * v, 4);
   if (drifting) { k = Math.sign(k) * Math.min(Math.abs(k) * 1.5, kmax * 1.6); S.slip = 1; v *= 1 - .22 * dt; } // tighter than grip allows, but it costs speed
