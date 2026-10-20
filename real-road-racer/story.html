@@ -82,6 +82,8 @@
   .row2 button.pick { white-space:nowrap; } .row2 button.pick.on[data-k=a] { background:#2ecc71; color:#0c2a16; } .row2 button.pick.on[data-k=b] { background:#e74c3c; color:#fff; }
   .hint { font-size:12px; color:var(--muted); margin:8px 0 0; }
   #map.picking, #map.picking.leaflet-grab, #map.picking .leaflet-interactive { cursor:crosshair !important; }
+  #driftTag { font-size:22px; font-weight:800; letter-spacing:2px; color:var(--accent); visibility:hidden; }
+  #touch [data-k=hand] { right:12px; bottom:106px; font-size:13px; font-weight:800; letter-spacing:.5px; }
   #chapters, #cut { display:none; position:fixed; inset:0; }
   body[data-s=chapters] #chapters { display:block; overflow:auto; background:linear-gradient(160deg,#18202e,#26344d); padding:20px 16px 40px; }
   body[data-s=cutscene] #cut { display:block; background:#000; }
@@ -104,10 +106,13 @@
   @keyframes dash { to { stroke-dashoffset:-130; } } @keyframes rain { to { transform:translate(-80px,200px); } }
   #chase, #tmark { display:none; position:fixed; pointer-events:none; text-shadow:0 1px 6px rgba(0,0,0,.8); }
   #chase { top:12px; left:50%; transform:translateX(-50%); text-align:center; min-width:190px; }
-  body[data-s=countdown] :is(#chase,#tmark), body[data-s=race] :is(#chase,#tmark) { display:block; }
+  body[data-s=countdown] :is(#chase,#tmark,#talk), body[data-s=race] :is(#chase,#tmark,#talk) { display:block; }
   #cName { font-size:12px; letter-spacing:2px; color:var(--muted); } #cDist { font-size:34px; font-weight:800; line-height:1.05; }
   #cBars { position:relative; height:8px; background:rgba(0,0,0,.5); border-radius:4px; overflow:hidden; margin-top:4px; }
-  #cBar { height:100%; width:0; background:var(--accent); } #cCatch { position:absolute; left:0; top:0; height:100%; width:0; background:#2ecc71; } #cNote { min-height:1.4em; font-weight:800; color:#2ecc71; }
+  #cBar { height:100%; width:0; background:var(--accent); } #cNote { min-height:1.4em; font-weight:800; color:#ff9c4d; }
+  #cHits { margin-top:6px; } #cHits i { display:inline-block; width:18px; height:18px; margin:0 3px; border-radius:50%; border:2px solid #fff; background:rgba(0,0,0,.45); } #cHits i.on { background:#ff4d4d; border-color:#ff4d4d; }
+  #talk { display:none; position:fixed; top:128px; left:50%; transform:translateX(-50%); max-width:min(560px,90%); padding:8px 14px; border-radius:10px; background:rgba(10,14,22,.82); font-size:17px; font-weight:600; text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; }
+  #tWho { text-transform:uppercase; letter-spacing:1px; font-size:13px; margin-right:6px; }
   #tmark { transform:translate(-50%,-50%); padding:2px 9px; border-radius:11px; background:rgba(220,60,60,.88); color:#fff; font-weight:700; font-size:13px; white-space:nowrap; }
 </style>
 </head>
@@ -124,7 +129,8 @@
   <button id="cutSkip" class="alt">Skip ▸▸</button>
   <div id="cutBox"><div id="cutWho"></div><div id="cutTxt"></div><div id="cutHint">Click or press Space to continue</div></div>
 </div>
-<div id="chase"><div id="cName"></div><div id="cDist">0 m</div><div id="cBars"><div id="cBar"></div><div id="cCatch"></div></div><div id="cNote"></div></div>
+<div id="chase"><div id="cName"></div><div id="cDist">0 m</div><div id="cBars"><div id="cBar"></div></div><div id="cHits"><i></i><i></i><i></i></div><div id="cNote"></div></div>
+<div id="talk"><b id="tWho"></b><span id="tTxt"></span></div>
 <div id="tmark"></div>
 <div id="loading"><div id="loadmsg">Building track…</div></div>
 <div id="countdown"><div class="big" id="cd"></div></div>
@@ -133,10 +139,10 @@
 <div id="limit"><div id="limNum">50</div><div id="limWarn"></div></div>
 <div id="toast"></div>
 <div id="tools"><button class="tool" id="chapBtn" title="Back to chapters">☰ Chapters</button><button class="tool" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera (C)">🎥 Chase</button></div>
-<div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button></div>
+<div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="hand" aria-label="Handbrake / drift">DRIFT</button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button></div>
 <canvas id="mini" width="220" height="160"></canvas>
-<div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div></div>
-<div id="help">Arrows or WASD to drive &middot; Space handbrake &middot; C camera &middot; M sound &middot; R restart</div>
+<div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div><div id="driftTag">DRIFT!</div></div>
+<div id="help">Arrows or WASD to drive &middot; Space handbrake (hold it while steering to drift) &middot; C camera &middot; M sound &middot; R restart</div>
 <div id="msg"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -813,7 +819,7 @@ function drawMini() {
   g.save(); g.translate(st.x * mm.sc + mm.ox, st.z * mm.sc + mm.oz); g.rotate(Math.PI - st.heading);
   g.beginPath(); g.moveTo(0, -8); g.lineTo(6, 7); g.lineTo(-6, 7); g.closePath();
   g.fillStyle = '#fff'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#d9482b'; g.stroke(); g.restore();
-  if (CH && tcar.visible) { g.beginPath(); g.arc(tcar.position.x * mm.sc + mm.ox, tcar.position.z * mm.sc + mm.oz, 5, 0, 7); g.fillStyle = '#ff4d4d'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#fff'; g.stroke(); }
+  if (CH && tcar.visible) { g.beginPath(); g.arc(A.x * mm.sc + mm.ox, A.z * mm.sc + mm.oz, 5, 0, 7); g.fillStyle = '#ff4d4d'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#fff'; g.stroke(); }
 }
 function groundAt(x, z, i) {
   const P = track.pts; let bi = Math.max(0, Math.min(i, P.length - 2)), bt = 0, bd = 1e12;
@@ -836,90 +842,111 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
-const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, overT:0, pen:0 };
+const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, overT:0, pen:0, course:0, drift:false, slipAng:0, smk:0 };
 function resetCar() {
   if (!track) return;
   const p = track.pts[5], q = track.pts[8];
   st.x = p.x; st.z = p.z; st.heading = Math.atan2(q.x - p.x, q.z - p.z);
-  st.speed = 0; st.idx = 5; st.time = 0; st.done = false;
+  st.speed = 0; st.idx = 5; st.time = 0; st.done = false; st.course = st.heading; st.drift = false; st.slipAng = 0;
   st.y = p.y; st.steer = st.pitch = st.roll = st.slopeS = st.aLongS = st.aLat = 0; st.overT = st.pen = 0;
   $('msg').style.display = 'none';
+}
+
+const wrapA = a => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
+// One vehicle model for every car (you and the AI): S = state, I = inputs {up,down,hand,thr,steer}, C = car class
+function vehicleStep(S, I, dt, C) {
+  let best = S.idx, bd = Infinity; // nearest centre-line sample (search a window around the last one)
+  for (let i = Math.max(0, S.idx - 25); i < Math.min(track.n, S.idx + 40); i++) {
+    const p = track.pts[i], d = (p.x - S.x) ** 2 + (p.z - S.z) ** 2;
+    if (d < bd) { bd = d; best = i; }
+  }
+  S.idx = best;
+  const bp = track.pts[best], bn = track.frames[best], hh = track.halfs[best];
+  let d = (S.x - bp.x) * bn.x + (S.z - bp.z) * bn.z;
+  const lim = hh + .2;
+  if (Math.abs(d) > lim) { // barrier: clamp to the wall and scrub speed
+    S.bump = Math.max(S.bump, Math.abs(S.speed)); const over = d - Math.sign(d) * lim; S.x -= bn.x * over; S.z -= bn.z * over;
+    S.speed *= 1 - Math.min(1, 2.5 * dt); d = Math.sign(d) * lim;
+  }
+  const offRoad = Math.abs(d) > hh;
+  const G = 9.81, v0 = S.speed, gr = groundAt(S.x, S.z, best);
+  const cx = Math.sin(S.course), cz = Math.cos(S.course);
+  const slope = gr.slope * (cx * gr.tx + cz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
+  const mu = C.mu * (1 + C.df * v0 * v0) * (offRoad ? .6 : 1) * (env.weather === 'Rain' ? .65 : 1) * track.gripS[best], rr = offRoad ? .06 : .012;
+  const trac = .7 * mu * C.m * G * cosT;
+  // drift: hold the handbrake while steering at speed; stays on until you let go or slow down
+  const drifting = !!I.hand && (S.drift ? v0 > 6 : (Math.abs(S.steer) > .3 && v0 > 10));
+  let v = v0, a = 0;
+  if (I.up && v < C.vmax) a += Math.min(C.P / Math.max(Math.abs(v), 2), trac) / C.m * I.thr;
+  if (I.down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * C.P / Math.max(Math.abs(v), 2), .5 * trac) / C.m : 0);
+  if (I.hand) a -= Math.sign(v) * (drifting ? 1.2 : Math.min(mu * G * cosT, 8));
+  if (!I.up && !I.down && v > 0) a -= .4;
+  a -= G * sinT; v += a * dt;
+  const res = (.5 * 1.2 * C.cda * v0 * v0 / C.m + rr * G * cosT) * dt;
+  v = Math.abs(v) <= res ? 0 : v - Math.sign(v) * res;
+  if (!I.up && !I.down && !I.hand && Math.abs(v) < .4) v = 0;
+  S.steer += (I.steer - S.steer) * Math.min(1, 7 * dt);
+  S.drift = drifting;
+  const delta = S.steer * .45 / (1 + (v / (drifting ? 16 : 10)) ** 2);
+  let k = Math.tan(delta) / (C.len * .6);
+  const kmax = mu * G * cosT / Math.max(v * v, 4);
+  if (drifting) { k = Math.sign(k) * Math.min(Math.abs(k) * 1.5, kmax * 1.6); S.slip = 1; v *= 1 - .22 * dt; } // tighter than grip allows, but it costs speed
+  else { S.slip = Math.abs(k) > kmax ? 1 : 0; if (S.slip) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; } } // understeer scrubs speed
+  S.rough = offRoad ? 1 : 0;
+  S.heading += v * k * dt;
+  // the direction of travel (course) follows the nose: tightly when gripping, loosely when drifting (the car slides sideways)
+  let diff = wrapA(S.heading - S.course);
+  S.course += diff * Math.min(1, (drifting ? 2.5 : 14) * dt);
+  diff = wrapA(S.heading - S.course);
+  if (Math.abs(diff) > .8) { diff = Math.sign(diff) * .8; S.course = S.heading - diff; }
+  S.slipAng = diff; S.aLat = v * v * k; S.speed = v;
+  const ds = v * cosT * dt; S.x += Math.sin(S.course) * ds; S.z += Math.cos(S.course) * ds;
+  S.y = gr.y; S.slopeS += (slope - S.slopeS) * Math.min(1, 8 * dt);
+  S.aLongS += (((v - v0) / dt + G * sinT) - S.aLongS) * Math.min(1, 5 * dt);
+  const pT = -Math.atan(S.slopeS) - .006 * S.aLongS, rT = Math.max(-.08, Math.min(.08, .008 * S.aLat));
+  S.pitch += (pT - S.pitch) * Math.min(1, 9 * dt); S.roll += (rT - S.roll) * Math.min(1, 9 * dt);
 }
 
 function step(dt) {
   if (!track || st.done || state !== 'race') return;
   const up = keys.ArrowUp || keys.KeyW || touch.up || pad.up > .08, down = keys.ArrowDown || keys.KeyS || touch.down || pad.down > .08;
   const left = keys.ArrowLeft || keys.KeyA || touch.left, right = keys.ArrowRight || keys.KeyD || touch.right;
-  const thrA = (keys.ArrowUp || keys.KeyW || touch.up) ? 1 : pad.up, hand = keys.Space || pad.hand;
-
-  // Find nearest centerline sample (search a window around the last one)
-  let best = st.idx, bd = Infinity;
-  for (let i = Math.max(0, st.idx - 25); i < Math.min(track.n, st.idx + 40); i++) {
-    const p = track.pts[i], d = (p.x - st.x) ** 2 + (p.z - st.z) ** 2;
-    if (d < bd) { bd = d; best = i; }
-  }
-  st.idx = best;
-  // Barrier collision: clamp to the wall and scrub speed
-  const bp = track.pts[best], bn = track.frames[best], hh = track.halfs[best];
-  let d = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
-  const lim = hh + .2;
-  if (Math.abs(d) > lim) {
-    st.bump = Math.max(st.bump, Math.abs(st.speed)); const over = d - Math.sign(d) * lim; st.x -= bn.x * over; st.z -= bn.z * over;
-    st.speed *= 1 - Math.min(1, 2.5 * dt); d = Math.sign(d) * lim;
-  }
-  const offRoad = Math.abs(d) > hh;
-
-  // ---- vehicle physics (forces along the heading, in m/s^2) ----
-  const G = 9.81, v0 = st.speed;
-  const gr = groundAt(st.x, st.z, best);
-  const hx = Math.sin(st.heading), hz = Math.cos(st.heading);
-  const slope = gr.slope * (hx * gr.tx + hz * gr.tz), cosT = 1 / Math.hypot(1, slope), sinT = slope * cosT;
-  const mu = cur.mu * (1 + cur.df * v0 * v0) * (offRoad ? .6 : 1) * (env.weather === 'Rain' ? .65 : 1) * track.gripS[best], rr = offRoad ? .06 : .012; // tyre grip (+downforce), rolling resistance
-  const trac = .7 * mu * cur.m * G * cosT; // max drive force the tyres can transmit
-  let v = v0, a = 0;
-  if (up && v < cur.vmax) a += Math.min(cur.P / Math.max(Math.abs(v), 2), trac) / cur.m * thrA;            // engine: power-limited, traction-limited
-  if (down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * cur.P / Math.max(Math.abs(v), 2), .5 * trac) / cur.m : 0); // brake, then reverse
-  if (hand) a -= Math.sign(v) * Math.min(mu * G * cosT, 8);
-  if (!up && !down && v > 0) a -= .4;                                                                // engine braking
-  a -= G * sinT;                                                                                     // gravity along the slope
-  v += a * dt;
-  const res = (.5 * 1.2 * cur.cda * v0 * v0 / cur.m + rr * G * cosT) * dt;                           // air drag + rolling resistance
-  v = Math.abs(v) <= res ? 0 : v - Math.sign(v) * res;
-  if (!up && !down && !hand && Math.abs(v) < .4) v = 0;                                              // hill hold when stopped
-
-  st.steer += (Math.max(-1, Math.min(1, (left ? 1 : 0) - (right ? 1 : 0) - pad.steer)) - st.steer) * Math.min(1, 7 * dt);
-  const delta = st.steer * .45 / (1 + (v / 10) ** 2);                                                // less steering lock at speed
-  let k = Math.tan(delta) / (cur.len * .6);
-  const kmax = mu * G * cosT / Math.max(v * v, 4);                                                   // grip-limited curvature
-  st.slip = Math.abs(k) > kmax ? 1 : 0; st.rough = offRoad ? 1 : 0;
-  if (st.slip) { k = Math.sign(k) * kmax; v *= 1 - .12 * dt; }                            // understeer scrubs speed
-  st.heading += v * k * dt;
-  st.aLat = v * v * k; st.speed = v;
+  const thr = (keys.ArrowUp || keys.KeyW || touch.up) ? 1 : pad.up, hand = !!(keys.Space || pad.hand || touch.hand);
+  vehicleStep(st, { up, down, hand, thr, steer:Math.max(-1, Math.min(1, (left ? 1 : 0) - (right ? 1 : 0) - pad.steer)) }, dt, cur);
   if (env.legal) { // speed limit: 3 s over in a row = +10 s
-    if (Math.abs(v) * 3.6 > track.lims[best]) { st.overT += dt; if (st.overT >= 3) { st.overT = 0; st.pen += 10; showToast('+10 s penalty: speeding'); } }
+    if (Math.abs(st.speed) * 3.6 > track.lims[st.idx]) { st.overT += dt; if (st.overT >= 3) { st.overT = 0; st.pen += 10; showToast('+10 s penalty: speeding'); } }
     else st.overT = 0;
   }
-  const ds = v * cosT * dt; st.x += hx * ds; st.z += hz * ds;
-
-  // body: follow the road height, pitch with the slope and with acceleration, roll in corners
-  st.y = gr.y; st.slopeS += (slope - st.slopeS) * Math.min(1, 8 * dt);
-  st.aLongS += (((v - v0) / dt + G * sinT) - st.aLongS) * Math.min(1, 5 * dt);
-  const pT = -Math.atan(st.slopeS) - .006 * st.aLongS, rT = Math.max(-.08, Math.min(.08, .008 * st.aLat));
-  st.pitch += (pT - st.pitch) * Math.min(1, 9 * dt); st.roll += (rT - st.roll) * Math.min(1, 9 * dt);
   if (st.idx < 8) { // invisible backstop matching the start block
     const p0 = track.pts[0], a = (st.x - p0.x) * track.t0.x + (st.z - p0.z) * track.t0.z;
     if (a < -1.6) { st.x += track.t0.x * (-1.6 - a); st.z += track.t0.z * (-1.6 - a); if (st.speed < 0) st.speed = 0; }
   }
   st.time += dt;
-
   if (st.idx >= track.fin) { st.done = true; finishRace(); }
+}
+
+/* ---------- Tyre smoke (drifting) ---------- */
+const smokeTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 2, 32, 32, 30);
+  gr.addColorStop(0, 'rgba(235,235,235,.9)'); gr.addColorStop(1, 'rgba(235,235,235,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+const smoke = [], SMK = 100; let smokeI = 0;
+for (let i = 0; i < SMK; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:smokeTex, transparent:true, depthWrite:false, opacity:0 })); s.visible = false; s.userData.t = 0; scene.add(s); smoke.push(s); }
+function puff(x, y, z) { const s = smoke[smokeI++ % SMK]; s.position.set(x + (Math.random() - .5) * .4, y + .3, z + (Math.random() - .5) * .4); s.userData.t = 0; s.scale.setScalar(1); s.visible = true; }
+function emitDrift(S, dt) { // smoke from both rear tyres
+  S.smk = (S.smk || 0) + dt * 24;
+  const h = S.heading, fx = Math.sin(h), fz = Math.cos(h), px = Math.cos(h), pz = -Math.sin(h);
+  while (S.smk >= 1) { S.smk -= 1; for (const sd of [-.82, .82]) puff(S.x - fx * 1.25 + px * sd, S.y, S.z - fz * 1.25 + pz * sd); }
+}
+function driftFx(dt) {
+  if (track && state === 'race' && st.drift && Math.abs(st.slipAng) > .08 && st.speed > 6) emitDrift(st, dt);
+  for (const s of smoke) { if (!s.visible) continue; s.userData.t += dt; const k = s.userData.t / .9; if (k >= 1) { s.visible = false; continue; }
+    s.scale.setScalar(1 + k * 3.2); s.material.opacity = .55 * (1 - k); s.position.y += dt * .6; }
 }
 
 const camPos = new THREE.Vector3();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-  pollPad(); step(dt); chaseUpdate(dt); updateAudio(); updateRain(dt); updateClouds(dt);
+  pollPad(); step(dt); chaseUpdate(dt); updateAudio(); updateRain(dt); updateClouds(dt); driftFx(dt);
   if (groundMesh) groundMesh.position.set(st.x, groundMesh.position.y, st.z);
   if (streamer && (state === 'race' || state === 'countdown') && (frame.sT = (frame.sT || 0) + dt) > .5) { frame.sT = 0; streamer.update(st.idx, st.x, st.z); }
   if (track) {
@@ -946,7 +973,7 @@ function frame(now) {
       camera.lookAt(st.x + Math.sin(st.heading) * 6, y + 1.2, st.z + Math.cos(st.heading) * 6);
     }
     $('speed').firstChild.nodeValue = Math.round(Math.abs(st.speed) * 3.6);
-    $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${(st.time + st.pen).toFixed(1)} s${st.pen ? ' (+' + st.pen + ')' : ''}  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
+    $('driftTag').style.visibility = st.drift && Math.abs(st.slipAng) > .1 ? 'visible' : 'hidden'; $('info').textContent = `${Math.round(st.idx / (track.n - 1) * 100)}%  ·  ${(st.time + st.pen).toFixed(1)} s${st.pen ? ' (+' + st.pen + ')' : ''}  ·  grade ${(st.slopeS * 100).toFixed(0)}%`;
     drawMini(); updateMarker();
     if (env.legal) { const lim = track.lims[st.idx];
       $('limNum').textContent = lim; $('limit').classList.toggle('over', Math.abs(st.speed) * 3.6 > lim);
@@ -1411,9 +1438,38 @@ const FINALE = { bg:'milan', tod:'dawn', wx:'clear', cars:'caught', tcolor:'#e0a
   ["Silas", "Hang up, kid. The road is yours."],
   ["", "For the first time in years, nobody is telling you where to drive."],
   ["", "STORY COMPLETE. Thanks for playing."] ] };
+
+/* ---------- Personalities: how each driver talks, and how they drive ---------- */
+const VOICE = {
+  Dex: { start:["Try to keep up, old timer!", "I have Silas's blessing. You have nothing!"],
+    behind:["Is that a car or a shopping cart back there?", "Do not strain yourself, grandpa!", "I will wave from the finish line!"],
+    near:["Hey, back off! This is a nice car!", "You are too close, man!"],
+    hit1:["HEY! Do you know what this paint cost?!", "Ow! Okay, okay, you can drive!"], hit2:["Stop hitting me!", "That is it, I am flooring it!"],
+    drift:["Showoff!", "Where did you learn that?!"], escape:["Ha! Tell Vega I said hi."] },
+  "Inês": { start:["Catch me if you can, querido!", "Mind the tram tracks!"],
+    behind:["Aww, are you lost? The castle is that way!", "Slow down, you will miss the view!", "Are the hills too steep for you?"],
+    near:["Careful, you are scratching my paint!", "Close, but not close enough!"],
+    hit1:["Ei! That was rude!", "Okay, now I am angry!"], hit2:["You hit like a tram!", "Enough games!"],
+    drift:["Pretty slide! Still too slow!"], escape:["Obrigada for the race! Adeus!"] },
+  Ryo: { start:["Rain is perfect. Do not spin out.", "Try to keep up."],
+    behind:["Too slow.", "Watch the lines. You cannot follow them.", "Is that all?"],
+    near:["Close. Interesting.", "Hm. You are better than Dex."],
+    hit1:["...Noted.", "Hm. Not bad."], hit2:["Now I am serious.", "Enough. Watch this."],
+    drift:["Heh. You can slide. Good.", "Finally, someone who drifts."], escape:["Another night, another ghost lost."] },
+  Anselm: { start:["No tricks. Just the road.", "Keep your eyes on my taillights."],
+    behind:["You are losing me.", "Fog hides the weak.", "Patience will not catch me."],
+    near:["I see your headlights.", "Closer than expected."],
+    hit1:["One.", "Impact noted."], hit2:["Two. Careful.", "Do that again and the mountain wins."],
+    drift:["Controlled. Respect."], escape:["The mountain keeps what it takes."] },
+  Silas: { start:["Show me what I taught you, kid.", "Brake late, turn early. Remember?"],
+    behind:["You are braking too early, kid.", "I taught you better than this.", "Look further ahead!"],
+    near:["Good. Now do not flinch.", "There you are."],
+    hit1:["That is the spirit!", "Harder than that, kid."], hit2:["Better. Again!", "Now you are driving like you used to."],
+    drift:["That is my line! Nice!"], escape:["Next time, kid. You can do better."] }
+};
 const CHAPTERS = [
  { id:1, title:"The Handoff", city:"New York", target:"Dex", tcolor:"#2f6fdb", a:[40.7484,-73.9857], b:[40.7712,-73.9840], weather:"Clear", time:"Day",
-   scene:{ bg:'ny', tod:'day', wx:'clear', seed:1 }, skill:.55, vTop:24, power:1, head:90, escape:500, catchR:16, hold:2, weave:0,
+   scene:{ bg:'ny', tod:'day', wx:'clear', seed:1 }, skill:.55, vTop:24, power:1, head:90, escape:500, weave:0, block:0, drift:false, voice:VOICE["Dex"],
    intro:[ ["", "New York. Midday. Dex is first out, in a car that is not as fast as he thinks."],
      ["Vega", "Dex has page one. He is sticking to the avenues, so he will be predictable."],
      ["You", "Nobody is predictable on Fifth Avenue at noon."],
@@ -1423,7 +1479,7 @@ const CHAPTERS = [
      ["Dex", "Silas said it would be worth it. He said you would catch us. He said that was the point."],
      ["", "You do not understand yet. But the first page is in your hands."] ] },
  { id:2, title:"Hill Rats", city:"Lisbon", target:"Inês", tcolor:"#e0559b", a:[38.7075,-9.1365], b:[38.7292,-9.1536], weather:"Clear", time:"Sunset",
-   scene:{ bg:'lisbon', tod:'sunset', wx:'clear', seed:2 }, skill:.62, vTop:27, power:1.03, head:110, escape:480, catchR:16, hold:2, weave:.8,
+   scene:{ bg:'lisbon', tod:'sunset', wx:'clear', seed:2 }, skill:.62, vTop:27, power:1.03, head:110, escape:480, weave:.8, block:.5, drift:false, voice:VOICE["Inês"],
    intro:[ ["", "Lisbon at sunset. Steep streets, old tram rails, and Inês, who grew up on these hills."],
      ["Vega", "Inês has page two. She knows every shortcut in this city."],
      ["You", "Then I will learn them faster."],
@@ -1433,7 +1489,7 @@ const CHAPTERS = [
      ["Inês", "Read the first line. Then ask who has been paying your debts all these years."],
      ["", "You glance at the page. A name you know. Vega."] ] },
  { id:3, title:"Neon Wire", city:"Tokyo", target:"Ryo", tcolor:"#7b4fd1", a:[35.6595,139.7005], b:[35.6605,139.7292], weather:"Rain", time:"Night",
-   scene:{ bg:'tokyo', tod:'night', wx:'rain', seed:3 }, skill:.66, vTop:29, power:1.06, head:130, escape:450, catchR:16, hold:2, weave:1.4,
+   scene:{ bg:'tokyo', tod:'night', wx:'rain', seed:3 }, skill:.66, vTop:29, power:1.06, head:130, escape:450, weave:1.4, block:.3, drift:true, voice:VOICE["Ryo"],
    intro:[ ["", "Tokyo. Midnight rain. The streets are mirrors."],
      ["Vega", "Ryo has page three. He drifts everything. Do not try to out-slide him."],
      ["You", "I am not here to out-slide anyone."],
@@ -1443,7 +1499,7 @@ const CHAPTERS = [
      ["Ryo", "Now you know. Keep going. Anselm is next, and he is not playing around."],
      ["", "Three pages down. The picture is getting clearer, and it is not the one Vega painted."] ] },
  { id:4, title:"Whiteout", city:"Furka Pass", target:"Anselm", tcolor:"#2a9d8f", a:[46.6046,8.5062], b:[46.5727,8.4153], weather:"Fog", time:"Day",
-   scene:{ bg:'alps', tod:'day', wx:'fog', seed:4 }, skill:.64, vTop:25, power:1.06, head:70, escape:350, catchR:16, hold:2, weave:0,
+   scene:{ bg:'alps', tod:'day', wx:'fog', seed:4 }, skill:.64, vTop:25, power:1.06, head:70, escape:350, weave:0, block:.6, drift:false, voice:VOICE["Anselm"],
    intro:[ ["", "The Alps. A long climb, hairpin after hairpin, and fog thick as milk."],
      ["Vega", "Anselm has page four. You will not see him. You will see his taillights, if you are lucky."],
      ["You", "Lucky is not a plan."],
@@ -1453,7 +1509,7 @@ const CHAPTERS = [
      ["Anselm", "He is waiting in Milan. Do not let Vega know that you know."],
      ["", "Vega's call comes in a minute later. You let it ring."] ] },
  { id:5, title:"The Boss", city:"Milan", target:"Silas", tcolor:"#e0a030", a:[45.4642,9.1900], b:[45.5223,9.2186], weather:"Clear", time:"Morning",
-   scene:{ bg:'milan', tod:'dawn', wx:'clear', seed:5 }, skill:.76, vTop:33, power:1.12, head:140, escape:500, catchR:16, hold:2, weave:2,
+   scene:{ bg:'milan', tod:'dawn', wx:'clear', seed:5 }, skill:.76, vTop:33, power:1.12, head:140, escape:500, weave:2, block:1, drift:true, voice:VOICE["Silas"],
    intro:[ ["", "Milan. Dawn. The streets you grew up on, and the man who taught you to drive them."],
      ["Vega", "Silas has the last page. And the cash. Catch him and your debt is cleared."],
      ["You", "..."],
@@ -1488,14 +1544,14 @@ function sceneSvg(sh) {
   if (sh.bg === 'garage') {
     s += '<rect width="1600" height="900" fill="#0b0f17"/>';
     for (let i = 0; i < 6; i++) { const x = 80 + i * 290; s += `<rect x="${x}" y="0" width="90" height="760" fill="#1a212d"/><rect x="${x + 90}" y="0" width="14" height="760" fill="#0f141d"/>`; }
-    for (let i = 0; i < 4; i++) { const x = 200 + i * 400; s += `<polygon points="${x - 40},60 ${x + 40},60 ${x + 230},760 ${x - 230},760" fill="#ffe7a8" opacity=".07"/><rect x="${x - 60}" y="50" width="120" height="12" fill="#ffe7a8"/>`; }
-    s += '<rect y="740" width="1600" height="160" fill="#141a24"/><line x1="0" y1="800" x2="1600" y2="800" stroke="#e8e0cf" stroke-width="6" stroke-dasharray="70 60" class="dash" opacity=".5"/>';
+    for (let i = 0; i < 4; i++) { const x = 200 + i * 400; s += `<polygon points="${x - 40},220 ${x + 40},220 ${x + 230},760 ${x - 230},760" fill="#ffe7a8" opacity=".07"/><rect x="${x - 60}" y="210" width="120" height="12" fill="#ffe7a8"/>`; }
+    s += '<rect y="740" width="1600" height="400" fill="#141a24"/><line x1="0" y1="800" x2="1600" y2="800" stroke="#e8e0cf" stroke-width="6" stroke-dasharray="70 60" class="dash" opacity=".5"/>';
   } else {
     s += `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk[0]}"/><stop offset="1" stop-color="${sk[1]}"/></linearGradient><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6ebf0" stop-opacity="0"/><stop offset=".5" stop-color="#e6ebf0" stop-opacity=".8"/><stop offset="1" stop-color="#e6ebf0" stop-opacity=".95"/></linearGradient><filter id="gl"><feGaussianBlur stdDeviation="7"/></filter></defs><rect width="1600" height="900" fill="url(#sk)"/>`;
-    if (night) { for (let i = 0; i < 70; i++) s += `<circle cx="${r() * 1600}" cy="${r() * 420}" r="${.6 + r() * 1.4}" fill="#fff" opacity="${.4 + r() * .5}"/>`; s += '<circle cx="1250" cy="150" r="48" fill="#f3efe0"/>'; }
+    if (night) { for (let i = 0; i < 70; i++) s += `<circle cx="${r() * 1600}" cy="${160 + r() * 420}" r="${.6 + r() * 1.4}" fill="#fff" opacity="${.4 + r() * .5}"/>`; s += '<circle cx="1250" cy="330" r="48" fill="#f3efe0"/>'; }
     else if (tod === 'sunset') s += '<circle cx="400" cy="560" r="130" fill="#ffb066" opacity=".35"/><circle cx="400" cy="560" r="80" fill="#ffd08a"/>';
     else if (tod === 'dawn') s += '<circle cx="1200" cy="590" r="120" fill="#ffd9a6" opacity=".4"/><circle cx="1200" cy="590" r="70" fill="#fff0c8"/>';
-    else s += '<circle cx="1300" cy="150" r="70" fill="#fff6c8" opacity=".9"/>';
+    else s += '<circle cx="1300" cy="330" r="70" fill="#fff6c8" opacity=".9"/>';
     if (sh.bg === 'ny' || sh.bg === 'tokyo') {
       const tk = sh.bg === 'tokyo';
       s += row(far, tk ? 240 : 180, tk ? 520 : 420, 60, 110, 700, false) + row(near, tk ? 160 : 120, tk ? 400 : 340, 70, 130, 700, true);
@@ -1519,16 +1575,16 @@ function sceneSvg(sh) {
       s += '<circle cx="805" cy="290" r="5" fill="#e6b84a"/>' + row(near, 90, 220, 70, 120, 700, true);
     }
     if (sh.wx === 'fog') s += '<rect width="1600" height="900" fill="#dfe6ee" opacity=".3"/><rect y="260" width="1600" height="640" fill="url(#fg)"/>';
-    s += `<rect y="700" width="1600" height="200" fill="${night ? '#14171e' : '#2a2f38'}"/><rect y="694" width="1600" height="10" fill="#3b414c"/><line x1="0" y1="800" x2="1600" y2="800" stroke="#e8e0cf" stroke-width="6" stroke-dasharray="70 60" class="dash" opacity=".7"/>`;
+    s += `<rect y="700" width="1600" height="400" fill="${night ? '#14171e' : '#2a2f38'}"/><rect y="694" width="1600" height="10" fill="#3b414c"/><line x1="0" y1="800" x2="1600" y2="800" stroke="#e8e0cf" stroke-width="6" stroke-dasharray="70 60" class="dash" opacity=".7"/>`;
   }
-  const me = RR.load().color;
+  const me = RR.load().color; let top = ''; // cars and rain sit above the dialogue box; the scenery is shifted up
   if (sh.cars) {
-    if (sh.cars === 'chase') s += carSvg(sh.tcolor || '#2f6fdb', 1130, 770, .8) + carSvg(me, 470, 850, 1.15);
-    else s += carSvg(sh.tcolor || '#2f6fdb', 1030, 810, 1.05) + carSvg(me, 450, 850, 1.15);
-    if (lit || sh.wx === 'fog' || sh.wx === 'rain') s += '<polygon points="640,760 1500,700 1500,860" fill="#fff3c4" opacity=".14"/>';
+    if (sh.cars === 'chase') top += carSvg(sh.tcolor || '#2f6fdb', 1130, 585, .8) + carSvg(me, 470, 620, 1.05);
+    else top += carSvg(sh.tcolor || '#2f6fdb', 1040, 615, 1.05) + carSvg(me, 450, 620, 1.05);
+    if (lit || sh.wx === 'fog' || sh.wx === 'rain') top += '<polygon points="640,585 1500,520 1500,660" fill="#fff3c4" opacity=".14"/>';
   }
-  if (sh.wx === 'rain') { let o = ''; for (let i = 0; i < 110; i++) { const x = r() * 1800 - 100, y = r() * 1150 - 250; o += `<line x1="${x}" y1="${y}" x2="${x - 8}" y2="${y + 24}" stroke="#bcd0e8" stroke-width="2" opacity=".5"/>`; } s += `<g class="rain">${o}</g>`; }
-  return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid ${innerWidth / innerHeight > 1.2 ? 'slice' : 'meet'}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+  if (sh.wx === 'rain') { let o = ''; for (let i = 0; i < 110; i++) { const x = r() * 1800 - 100, y = r() * 1150 - 250; o += `<line x1="${x}" y1="${y}" x2="${x - 8}" y2="${y + 24}" stroke="#bcd0e8" stroke-width="2" opacity=".5"/>`; } top += `<g class="rain">${o}</g>`; }
+  return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid ${innerWidth / innerHeight > 1.2 ? 'slice' : 'meet'}" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -160)">${s}</g>${top}</svg>`;
 }
 
 /* ---------- Cutscene player ---------- */
@@ -1560,49 +1616,108 @@ addEventListener('keydown', e => {
   else if (e.code === 'Escape') cutCtl.skip();
 });
 
-/* ---------- The target car and the chase ---------- */
-const T = { ti:0, s0:8, v:0, ds:3, prof:null, caught:0, dist:999 };
-const tcar = RR.buildCar('#2f6fdb'); tcar.visible = false; scene.add(tcar);
+/* ---------- The target car: same physics as you, driven by an AI ---------- */
+const HITS = 3;
+const T = { s0:8, ds:3, prof:null, dist:999, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false };
+const A = { x:0, z:0, heading:0, course:0, speed:0, idx:5, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, drift:false, slipAng:0, smk:0,
+  off:0, boostT:0, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false };
+const AC = Object.assign({}, CLASSES.hatch), AI = { up:false, down:false, hand:false, thr:1, steer:0 };
+const tcar = RR.buildCar('#2f6fdb'); tcar.visible = false; tcar.rotation.order = 'YXZ'; scene.add(tcar);
 const tail = new THREE.PointLight(0xff3030, 1.1, 14); tail.position.set(0, 1, -2.4); tcar.add(tail);
-function buildProfile(ch) { // speed along the route: cornering and acceleration limits, like the player's hatchback
-  const Q = track.pts, n = track.n, ds = T.ds = track.length / (n - 1);
-  const aLat = 9.81 * ch.skill * (env.weather === 'Rain' ? .65 : 1), cap = new Float32Array(n);
+
+function buildProfile(ch) { // planned speed along the route: corner limits plus braking distance
+  const Q = track.pts, n = track.n, ds = T.ds = track.length / (n - 1), v = new Float32Array(n);
+  const aLat = 9.81 * ch.skill * (ch.drift ? 1.45 : 1) * (env.weather === 'Rain' ? .65 : 1);
   for (let i = 0; i < n; i++) {
     const a = Q[Math.max(0, i - 3)], b = Q[i], c = Q[Math.min(n - 1, i + 3)];
     let dh = Math.abs(Math.atan2(c.x - b.x, c.z - b.z) - Math.atan2(b.x - a.x, b.z - a.z)); if (dh > Math.PI) dh = 2 * Math.PI - dh;
-    cap[i] = Math.min(ch.vTop, Math.max(6, Math.sqrt(aLat / Math.max(dh / (3 * ds), 1e-4))));
+    v[i] = Math.min(ch.vTop, Math.max(6, Math.sqrt(aLat / Math.max(dh / (3 * ds), 1e-4))));
   }
-  const s0 = T.s0 = Math.max(8, Math.min(5 + Math.round(ch.head / ds), Math.floor(track.fin * .3))), v = Float32Array.from(cap); v[s0] = 3;
-  for (let i = s0; i < n - 1; i++) { const a = Math.max(.3, Math.min(5, 50 * ch.power / Math.max(v[i], 5) - .00038 * v[i] * v[i] - .12)); v[i + 1] = Math.min(cap[i + 1], Math.sqrt(v[i] * v[i] + 2 * a * ds)); }
-  for (let i = n - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 16 * ds));
-  T.prof = v; tcar.userData.bodyMat.color.set(ch.tcolor);
+  for (let i = n - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 14 * ds));
+  T.s0 = Math.max(8, Math.min(5 + Math.round(ch.head / ds), Math.floor(track.fin * .3))); T.prof = v; tcar.userData.bodyMat.color.set(ch.tcolor);
 }
-function resetChase() { T.ti = T.s0; T.v = 0; T.caught = 0; $('cName').textContent = 'RUN DOWN ' + CH.target.toUpperCase(); }
+function updateHits() { [...$('cHits').children].forEach((e, i) => e.className = i < A.hits ? 'on' : ''); }
+function resetChase() {
+  const Q = track.pts, p = Q[T.s0], q = Q[T.s0 + 3];
+  Object.assign(A, { x:p.x, z:p.z, heading:Math.atan2(q.x - p.x, q.z - p.z), speed:0, idx:T.s0, y:p.y, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0,
+    drift:false, slipAng:0, off:0, boostT:0, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
+  A.course = A.heading; Object.assign(T, { talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false });
+  AC.P = CLASSES.hatch.P * CH.power; $('cName').textContent = 'TAKE DOWN ' + CH.target.toUpperCase(); $('talk').style.opacity = 0; updateHits();
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function talk(kind, force) {
+  const V = CH.voice[kind]; if (!V || (!force && T.talkCd > 0)) return;
+  $('tWho').textContent = CH.target; $('tWho').style.color = WHO[CH.target] || '#9ad0ff'; $('tTxt').textContent = pick(V);
+  const e = $('talk'); e.style.opacity = 1; clearTimeout(talk.t); talk.t = setTimeout(() => { e.style.opacity = 0; }, 3600); T.talkCd = 6;
+}
+
+function aiThink(dt) { // the driver: pure-pursuit steering, speed from the planned profile, personality on top
+  const Q = track.pts, n = track.n, ds = T.ds, v = Math.max(A.speed, 0), gapAI = (A.idx - st.idx) * ds; // >0: you are behind it
+  let want = CH.weave ? Math.sin(A.idx * .07) * CH.weave : 0;
+  if (CH.block && gapAI > 0 && gapAI < 35) { const bp = Q[st.idx], bn = track.frames[st.idx]; want = ((st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z) * CH.block; } // blocks your line
+  const lim = Math.max(0, track.halfs[A.idx] - 2.2); want = Math.max(-lim, Math.min(lim, want)); A.off += (want - A.off) * Math.min(1, dt * 1.6);
+  const Ld = Math.max(8, Math.min(40, 6 + .7 * v)), j = Math.min(n - 1, A.idx + Math.round(Ld / ds)), fj = track.frames[j];
+  const err = wrapA(Math.atan2(Q[j].x + fj.x * A.off - A.x, Q[j].z + fj.z * A.off - A.z) - A.course);
+  AI.steer = Math.max(-1, Math.min(1, err * (A.drift ? 1 : 2.4)));
+  if (CH.drift && v > 13 && Math.abs(err) > .3) A.wantDrift = true; else if (Math.abs(err) < .1 || v < 8) A.wantDrift = false;
+  AI.hand = A.wantDrift && (A.drift || Math.abs(A.steer) > .3);
+  const vp = T.prof[Math.min(n - 2, A.idx)], mul = gapAI > 160 ? Math.max(.7, 1 - (gapAI - 160) / 1000) : 1; // eases off if you fall far behind
+  const vt = vp * mul * (A.boostT > 0 ? 1.3 : 1);
+  AI.up = v < vt - .3; AI.thr = Math.max(.35, Math.min(1, (vt - v) / 3)); AI.down = v > vt + 2.5;
+  T.stuckT = A.speed < 1.5 ? T.stuckT + dt : 0;
+  if (T.stuckT > 2.5) { const p = Q[A.idx], q = Q[Math.min(n - 1, A.idx + 3)]; A.x = p.x; A.z = p.z; A.heading = A.course = Math.atan2(q.x - p.x, q.z - p.z); A.speed = 5; A.off = 0; T.stuckT = 0; }
+}
+function setVel(S, vx, vz) { const sp = Math.hypot(vx, vz); if (sp < .05) { S.speed = 0; return; } S.course = Math.atan2(vx, vz); S.speed = sp; }
+function collide() { // car-to-car: two circles per car, equal masses, bounce, spin from off-centre hits
+  const R = .95, O = [-.9, .9], sx = Math.sin(st.heading), sz = Math.cos(st.heading), ax = Math.sin(A.heading), az = Math.cos(A.heading); let b = null;
+  for (const o1 of O) for (const o2 of O) {
+    const dx = A.x + ax * o2 - (st.x + sx * o1), dz = A.z + az * o2 - (st.z + sz * o1), d = Math.hypot(dx, dz);
+    if (d < 2 * R && (!b || d < b.d)) b = { d, dx, dz, o1, o2 };
+  }
+  if (!b) return;
+  const d = Math.max(b.d, .01), nx = b.dx / d, nz = b.dz / d, pen = 2 * R - d;
+  st.x -= nx * pen / 2; st.z -= nz * pen / 2; A.x += nx * pen / 2; A.z += nz * pen / 2;
+  const vp = [Math.sin(st.course) * st.speed, Math.cos(st.course) * st.speed], va = [Math.sin(A.course) * A.speed, Math.cos(A.course) * A.speed];
+  const rel = (va[0] - vp[0]) * nx + (va[1] - vp[1]) * nz; if (rel >= 0) return;
+  const j = -1.35 * rel / 2;
+  setVel(st, vp[0] - j * nx, vp[1] - j * nz); setVel(A, va[0] + j * nx, va[1] + j * nz);
+  st.heading -= b.o1 * j * (nx * Math.cos(st.heading) - nz * Math.sin(st.heading)) * .05;
+  A.heading += b.o2 * j * (nx * Math.cos(A.heading) - nz * Math.sin(A.heading)) * .05;
+  st.bump = Math.max(st.bump, -rel * 2);
+  if (-rel > 2.5 && A.hitCd <= 0) registerHit();
+}
+function registerHit() {
+  A.hits++; A.hitCd = 3.2; A.boostT = 2.8; A.flash = .45; updateHits();
+  if (A.hits >= HITS) return endChase(true);
+  talk('hit' + A.hits, true);
+}
+
 function chaseUpdate(dt) {
   if (!CH || !track || !T.prof) { tcar.visible = false; return; }
-  tcar.visible = true;
-  const Q = track.pts, n = track.n, racing = state === 'race' && !st.done;
+  tcar.visible = true; const racing = state === 'race' && !st.done;
   if (racing) {
-    const gapM = (T.ti - st.idx) * T.ds, mul = gapM > 160 ? Math.max(.7, 1 - (gapM - 160) / 1000) : 1; // gentle rubber band if you fall far behind
-    T.v += Math.max(-9 * dt, Math.min(4 * dt, T.prof[Math.min(n - 2, Math.floor(T.ti))] * mul - T.v));
-    T.ti = Math.min(n - 3, T.ti + T.v * dt / T.ds);
+    T.talkCd = Math.max(0, T.talkCd - dt);
+    aiThink(dt); AC.P = CLASSES.hatch.P * CH.power * (A.boostT > 0 ? 1.7 : 1); vehicleStep(A, AI, dt, AC);
+    A.boostT = Math.max(0, A.boostT - dt); A.hitCd = Math.max(0, A.hitCd - dt); A.flash = Math.max(0, A.flash - dt);
+    collide();
+    if (A.drift && Math.abs(A.slipAng) > .08 && A.speed > 6) emitDrift(A, dt);
+    if (A.hits) { A.dmg += dt * 7 * A.hits; while (A.dmg >= 1) { A.dmg--; puff(A.x + Math.sin(A.heading) * 1.4, A.y + .5, A.z + Math.cos(A.heading) * 1.4); } } // damaged: smoking hood
   }
-  const i = Math.floor(T.ti), f = T.ti - i, p = Q[i], q = Q[i + 1], j = Math.min(n - 1, i + 2);
-  const off = CH.weave ? Math.sin(T.ti * .07) * Math.min(CH.weave, track.halfs[i] - 2) : 0, fr = track.frames[i];
-  tcar.position.set(p.x + (q.x - p.x) * f + fr.x * off, p.y + (q.y - p.y) * f, p.z + (q.z - p.z) * f + fr.z * off);
-  tcar.rotation.y = Math.atan2(Q[j].x - p.x, Q[j].z - p.z);
-  const dx = tcar.position.x - st.x, dz = tcar.position.z - st.z, d = T.dist = Math.hypot(dx, dz);
-  if (racing && d < 3.6) { const k = (3.6 - d) / Math.max(d, .01); st.x -= dx * k; st.z -= dz * k; st.speed *= 1 - Math.min(1, 3 * dt); } // bump: no driving through the target
-  if (racing) {
-    T.caught = d <= CH.catchR ? T.caught + dt : Math.max(0, T.caught - 1.5 * dt);
-    if (T.caught >= CH.hold) endChase(true);
-    else if (d > CH.escape) endChase(false, 'You fell more than ' + CH.escape + ' m behind. ' + CH.target + ' is gone.');
-    else if (T.ti >= track.fin - 1) endChase(false, CH.target + ' reached the end of the route first.');
+  const d = T.dist = Math.hypot(A.x - st.x, A.z - st.z);
+  tcar.position.set(A.x, A.y, A.z); tcar.rotation.set(A.pitch, A.heading, A.roll);
+  for (const w of tcar.userData.wheels) w.rotation.x += A.speed * dt / .33;
+  tcar.userData.bodyMat.emissive.setHex(A.flash > 0 ? 0xaa1111 : 0);
+  if (racing && !st.done) {
+    if (!T.said) { T.said = true; setTimeout(() => { if (state === 'race') talk('start', true); }, 500); }
+    T.behindT = d > 130 ? T.behindT + dt : Math.min(0, T.behindT); if (T.behindT > 2.5) { talk('behind'); T.behindT = -10; } // taunts if you fall behind
+    T.nearT = d < 14 ? T.nearT + dt : Math.min(0, T.nearT); if (T.nearT > 2) { talk('near'); T.nearT = -12; }
+    T.driftT = st.drift && d < 45 ? T.driftT + dt : Math.min(0, T.driftT); if (T.driftT > 1) { talk('drift'); T.driftT = -25; }
+    if (d > CH.escape) endChase(false, 'You fell more than ' + CH.escape + ' m behind.');
+    else if (A.idx >= track.fin - 1) endChase(false, CH.target + ' reached the end of the route first.');
   }
   $('cDist').textContent = Math.round(d) + ' m';
   $('cBar').style.width = Math.max(0, Math.min(100, (1 - d / CH.escape) * 100)) + '%';
-  $('cCatch').style.width = Math.min(100, T.caught / CH.hold * 100) + '%';
-  $('cNote').textContent = d <= CH.catchR ? 'HOLD IT!' : '';
+  $('cNote').textContent = A.boostT > 0 ? 'BOOST!' : '';
 }
 function updateMarker() {
   if (!CH || !tcar.visible) return;
@@ -1623,7 +1738,7 @@ function renderChapters() {
   CHAPTERS.forEach((c, i) => {
     const locked = c.id > P.unlocked, d = el('div', 'ccard' + (locked ? ' locked' : '')), n = el('div', 'num'), b = el('div', 'body'), h = el('h3'), m = el('div', 'meta'), btn = el('button');
     n.textContent = locked ? '🔒' : c.id; h.textContent = c.title + ' · ' + c.city;
-    m.textContent = locked ? 'Catch ' + CHAPTERS[i - 1].target + ' to unlock' : 'Target: ' + c.target + ' · ' + c.weather + ', ' + c.time.toLowerCase() + (P.best[c.id] ? ' · ✓ best ' + P.best[c.id].toFixed(1) + ' s' : '');
+    m.textContent = locked ? 'Take down ' + CHAPTERS[i - 1].target + ' to unlock' : 'Target: ' + c.target + ' · ' + c.weather + ', ' + c.time.toLowerCase() + (P.best[c.id] ? ' · ✓ best ' + P.best[c.id].toFixed(1) + ' s' : '');
     btn.textContent = P.best[c.id] ? 'Replay' : 'Play'; btn.disabled = locked; btn.onclick = () => openChapter(i);
     b.append(h, m); d.append(n, b, btn); list.append(d);
   });
@@ -1638,8 +1753,9 @@ function openChapter(i) {
   env = { weather:c.weather, time:c.time, legal:false, shadows:S.shadows }; document.body.dataset.legal = '0'; applyEnv(); applyShadows();
   audio.on = S.sound; $('muteBtn').textContent = S.sound ? '🔊' : '🔇'; initAudio(); if (audio.master) audio.master.gain.value = audio.on ? .5 : 0;
   T.prof = null; prep = prepare(c); prep.catch(() => {});
-  const tip = ['', 'Stay within ' + c.catchR + ' m of ' + c.target + ' for ' + c.hold + ' seconds to catch them. Fall ' + c.escape + ' m behind and they are gone.'];
-  playCut(Object.assign({}, c.scene, { cars:'chase', tcolor:c.tcolor, lines:c.intro.concat([tip]) }), async () => {
+  const tips = [['', 'Ram ' + c.target + ' ' + HITS + ' times to take them down. Every hit gives them a burst of speed, so line up the next one. Fall ' + c.escape + ' m behind and they are gone.']];
+  if (c.id === 1) tips.push(['', 'New trick: hold Space while steering to drift through corners. Other drivers know it too.']);
+  playCut(Object.assign({}, c.scene, { cars:'chase', tcolor:c.tcolor, lines:c.intro.concat(tips) }), async () => {
     setState('loading'); say('Building track…');
     try { await prep; startCountdown(); }
     catch (e) { CH = null; setState('chapters'); renderChapters(); $('cmsg').textContent = 'Could not build the route: ' + e.message + ' Check your connection and try again.'; }
@@ -1657,17 +1773,17 @@ function startCountdown() {
 }
 function endChase(won, why) {
   if (state !== 'race') return;
-  st.done = true; st.speed = 0;
-  if (!won) { $('fh').textContent = 'They got away'; $('ftime').textContent = why; setState('finished'); return; }
+  st.done = true; st.speed = 0; $('talk').style.opacity = 0;
+  if (!won) { $('fh').textContent = 'They got away'; $('ftime').textContent = why + ' ' + CH.target + ': “' + pick(CH.voice.escape) + '”'; setState('finished'); return; }
   const t = st.time, c = CH; setState('won');
   P = loadP(); P.best[c.id] = Math.min(P.best[c.id] || 1e9, t); P.unlocked = Math.max(P.unlocked, Math.min(CHAPTERS.length, c.id + 1)); if (c.id === CHAPTERS.length) P.done = true; saveP();
-  const m = $('msg'); m.textContent = 'CAUGHT!'; m.style.display = 'block';
+  const m = $('msg'); m.textContent = 'TAKEN DOWN!'; m.style.display = 'block';
   setTimeout(() => { m.style.display = 'none';
-    playCut(Object.assign({}, c.scene, { cars:'caught', tcolor:c.tcolor, lines:c.outro.concat([['', 'Caught in ' + t.toFixed(1) + ' s.']]) }),
+    playCut(Object.assign({}, c.scene, { cars:'caught', tcolor:c.tcolor, lines:c.outro.concat([['', 'Taken down in ' + t.toFixed(1) + ' s.']]) }),
       () => c.id === CHAPTERS.length ? playCut(FINALE, toChapters) : toChapters());
   }, 1600);
 }
-function finishRace() { endChase(false, 'The route ended before you could catch ' + CH.target + '.'); } // called by the engine when you reach the end
+function finishRace() { endChase(false, 'The route ended before you could take down ' + CH.target + '.'); } // called by the engine when you reach the end
 function retry() { if (track && CH && (state === 'race' || state === 'finished')) startCountdown(); }
 $('retry').onclick = () => startCountdown();
 $('tomenu').onclick = toChapters; $('chapBtn').onclick = e => { e.currentTarget.blur(); toChapters(); };
