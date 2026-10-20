@@ -1649,7 +1649,7 @@ addEventListener('keydown', e => {
 
 /* ---------- The target car: same physics as you, driven by an AI ---------- */
 const HITS = 3, clampN = (v, a, b) => Math.max(a, Math.min(b, v));
-const T = { ghost:false, passSide:0, s0:8, ds:3, prof:null, cap:null, len:3.9, dist:999, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 };
+const T = { dodge:false, passSide:0, frontCd:0, s0:8, ds:3, prof:null, cap:null, len:3.9, dist:999, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 };
 const fresh = () => ({ x:0, z:0, heading:0, course:0, speed:0, idx:5, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, drift:false, slipAng:0, smk:0, oilT:0 });
 const A = Object.assign(fresh(), { off:0, boostT:0, bm:1, vt:0, heat:0, bv:60, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
 const AC = Object.assign({}, CLASSES.hatch), AI = { up:false, down:false, hand:false, thr:1, steer:0 };
@@ -1677,7 +1677,7 @@ function updateHits() { [...$('cHits').children].forEach((e, i) => e.className =
 function resetChase() {
   const Q = track.pts, p = Q[T.s0], q = Q[T.s0 + 3];
   Object.assign(A, fresh(), { x:p.x, z:p.z, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:T.s0, y:p.y, off:0, boostT:0, bm:1, vt:0, heat:0, bv:60, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
-  A.course = A.heading; Object.assign(T, { ghost:false, passSide:0, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 });
+  A.course = A.heading; Object.assign(T, { dodge:false, passSide:0, frontCd:0, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 });
   Object.assign(AC, CLASSES.hatch, { vmax:110 }); AC.P = CLASSES.hatch.P * CH.power; clearHazards();
   $('cName').textContent = 'TAKE DOWN ' + CH.target.toUpperCase(); $('talk').style.opacity = 0; $('msg').style.display = 'none'; updateHits();
 }
@@ -1692,11 +1692,13 @@ function bigMsg(t, ms) { const m = $('msg'); m.textContent = t; m.style.display 
 function aiThink(dt) { // the driver: pure-pursuit steering, speed from the planned profile, personality on top
   const Q = track.pts, n = track.n, ds = T.ds, v = Math.max(A.speed, 0), gapAI = (A.idx - st.idx) * ds, boosted = A.heat > 0; // gapAI > 0: you are behind it
   let want = CH.weave ? Math.sin(A.idx * .07) * CH.weave : 0;
-  if (T.ghost) { // you got in front of it: pull to the side with more room and floor it, so it can always get past
-    const bp = Q[A.idx], bn = track.frames[A.idx], pl = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
-    if (!T.passSide || Math.abs(pl) > 1.2) T.passSide = pl > 0 ? -1 : 1; want = T.passSide * 99; }
   if (CH.block && gapAI > 0 && gapAI < 35) { const bp = Q[st.idx], bn = track.frames[st.idx]; want = ((st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z) * CH.block; } // blocks your line
-  const lim = Math.max(0, track.halfs[A.idx] - 2.2); want = clampN(want, -lim, lim); A.off += (want - A.off) * Math.min(1, dt * 1.6);
+  { // you are in front of it (or right beside it): it always steers around you, on the side with more room, and speeds up to get past
+    const rx = st.x - A.x, rz = st.z - A.z, front = rx * Math.sin(A.heading) + rz * Math.cos(A.heading), side = rx * Math.cos(A.heading) - rz * Math.sin(A.heading);
+    T.dodge = front > -2 && front < 32 && Math.abs(side) < 5;
+    if (T.dodge) { const bp = Q[A.idx], bn = track.frames[A.idx], pl = (st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z;
+      if (!T.passSide || Math.abs(pl) > 1.2) T.passSide = pl > 0 ? -1 : 1; want = T.passSide * 99; } else T.passSide = 0; }
+  const lim = Math.max(0, track.halfs[A.idx] - 2.2); want = clampN(want, -lim, lim); A.off += (want - A.off) * Math.min(1, dt * (T.dodge ? 4 : 1.6));
   const Ld = clampN(6 + (boosted ? .45 : .7) * v, 8, 40), j = Math.min(n - 1, A.idx + Math.round(Ld / ds)), fj = track.frames[j];
   const err = wrapA(Math.atan2(Q[j].x + fj.x * A.off - A.x, Q[j].z + fj.z * A.off - A.z) - A.course);
   // curvature needed to reach the look-ahead point -> steering command, inverted through the car's own steering model (so it can really turn at any speed)
@@ -1706,7 +1708,7 @@ function aiThink(dt) { // the driver: pure-pursuit steering, speed from the plan
   AI.hand = A.wantDrift && (A.drift || Math.abs(A.steer) > .3);
   const i0 = Math.min(n - 2, A.idx), mul = gapAI > 160 ? Math.max(.7, 1 - (gapAI - 160) / 1000) : 1, vp = T.prof[i0] * mul * (1 + .1 * A.hits); // angrier (faster) after every hit
   let vt = vp;
-  if (T.ghost) vt = Math.max(vt, Math.min(Math.max(st.speed, 0) + 6, vp * 1.3 + 4));
+  if (T.dodge) vt = Math.max(vt, Math.min(Math.max(st.speed, 0) + 4, vp * 1.25 + 3));
   if (boosted) vt = Math.max(vp, vp + (Math.min(A.bv, T.planB[i0]) - vp) * A.heat); // huge speed on straights, planned braking for every corner; fades out slowly
   A.vt = vt; AI.up = v < vt - .3; AI.thr = clampN((vt - v) / 3, .35, 1); AI.down = v > vt + 2.5;
   T.stuckT = A.speed < 1.5 ? T.stuckT + dt : 0;
@@ -1720,6 +1722,7 @@ function collideCars(a, b, la, lb) { // car-to-car: two circles per car, equal m
     if (d < 2 * R && (!best || d < best.d)) best = { d, dx, dz, o1, o2 };
   }
   if (!best) return 0;
+  collideCars.o2 = best.o2; // which of b's two circles touched (positive = front half)
   const d = Math.max(best.d, .01), nx = best.dx / d, nz = best.dz / d, pen = 2 * R - d;
   a.x -= nx * pen / 2; a.z -= nz * pen / 2; b.x += nx * pen / 2; b.z += nz * pen / 2;
   const va = [Math.sin(a.course) * a.speed, Math.cos(a.course) * a.speed], vb = [Math.sin(b.course) * b.speed, Math.cos(b.course) * b.speed];
@@ -1739,7 +1742,7 @@ function registerHit() {
 }
 
 /* ---------- Last-life abilities ---------- */
-const HZ = { oil:[], sheep:[], goats:[], chasers:[] }, hzGroup = new THREE.Group(); scene.add(hzGroup);
+const NEAR = 100, HZ = { oil:[], sheep:[], goats:[], chasers:[] }, hzGroup = new THREE.Group(); scene.add(hzGroup);
 const oilGeo = new THREE.CircleGeometry(2.1, 20), oilMat = new THREE.MeshBasicMaterial({ color:0x0b0b10, transparent:true, opacity:.9, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2, depthWrite:false }); oilGeo.rotateX(-Math.PI / 2);
 const TR_N = 1500, TR = { pts:[] }, trPos = new Float32Array(TR_N * 6), trCol = new Float32Array(TR_N * 6), trGeo = new THREE.BufferGeometry(), trIdx = [];
 trGeo.setAttribute('position', new THREE.BufferAttribute(trPos, 3)); trGeo.setAttribute('color', new THREE.BufferAttribute(trCol, 3));
@@ -1773,34 +1776,35 @@ function addTrail() { // neon ribbon behind a drifting car
   trGeo.attributes.position.needsUpdate = trGeo.attributes.color.needsUpdate = true; trGeo.setDrawRange(0, Math.max(0, (P.length - 1) * 6));
 }
 function abilityUpdate(dt) {
-  T.abCd -= dt; const gap = (A.idx - st.idx) * T.ds;
+  T.abCd -= dt; const gap = (A.idx - st.idx) * T.ds, near = T.dist < NEAR; // abilities only fire while you are close to the target
+  if (!near) T.abCd = Math.max(T.abCd, 1.5); // a short grace period after you catch up
   if (CH.ability === 'oil') {
-    if (T.abCd <= 0) { const fx = Math.sin(A.heading), fz = Math.cos(A.heading), jit = (Math.random() - .5) * 3, sc = .8 + Math.random() * .5, m = new THREE.Mesh(oilGeo, oilMat);
+    if (T.abCd <= 0 && near) { const fx = Math.sin(A.heading), fz = Math.cos(A.heading), jit = (Math.random() - .5) * 3, sc = .8 + Math.random() * .5, m = new THREE.Mesh(oilGeo, oilMat);
       m.position.set(A.x - fx * 4 + Math.cos(A.heading) * jit, A.y + .05, A.z - fz * 4 - Math.sin(A.heading) * jit); m.scale.setScalar(sc); hzGroup.add(m);
-      HZ.oil.push({ m, x:m.position.x, z:m.position.z, r:2.1 * sc, t:14 }); if (HZ.oil.length > 12) hzGroup.remove(HZ.oil.shift().m); T.abCd = 1; }
+      HZ.oil.push({ m, x:m.position.x, z:m.position.z, r:2.1 * sc, t:14 }); if (HZ.oil.length > 8) hzGroup.remove(HZ.oil.shift().m); T.abCd = 2.6; }
     for (let i = HZ.oil.length - 1; i >= 0; i--) { const o = HZ.oil[i]; o.t -= dt; if (o.t <= 0) { hzGroup.remove(o.m); HZ.oil.splice(i, 1); continue; }
       if (Math.hypot(st.x - o.x, st.z - o.z) < o.r + .8) { if (!(st.oilT > 0)) { st.course += (Math.random() < .5 ? -1 : 1) * Math.min(.4, Math.abs(st.speed) * .009); showToast('Oil slick!'); talk('trick'); } st.oilT = Math.max(st.oilT, .9); } }
   } else if (CH.ability === 'sheep') {
-    if (T.abCd <= 0 && gap > 60) { const r = roadAhead(Math.min(75, gap * .6)), side = Math.random() < .5 ? -1 : 1;
+    if (T.abCd <= 0 && near && gap > 40) { const r = roadAhead(Math.min(75, gap * .6)), side = Math.random() < .5 ? -1 : 1;
       for (let k = 0; k < 3; k++) { const m = makeAnimal('sheep'), off = side * (r.half + 1.6 + k * 1.2), al = (k - 1) * 3.2 + (Math.random() - .5), vx = -side * r.fr.x * 4.5, vz = -side * r.fr.z * 4.5;
         m.rotation.y = Math.atan2(vx, vz); hzGroup.add(m); HZ.sheep.push({ m, x:r.p.x + r.fr.x * off + r.tx * al, z:r.p.z + r.fr.z * off + r.tz * al, y:r.p.y, vx, vz, r:.85, e:.15, k:1, scrub:.6, t:0, hit:false }); }
-      T.abCd = 4.5; }
+      T.abCd = 9; }
     for (let i = HZ.sheep.length - 1; i >= 0; i--) { const o = HZ.sheep[i]; o.t += dt; o.x += o.vx * dt; o.z += o.vz * dt; o.m.position.set(o.x, o.y + Math.abs(Math.sin(o.t * 9)) * .06, o.z);
       if (o.t > 5.5) { hzGroup.remove(o.m); HZ.sheep.splice(i, 1); continue; } obstacleCollide(o); }
   } else if (CH.ability === 'neon') {
     addTrail(); const P = TR.pts; T.offNeon = false;
-    if (P.length > 3 && st.idx >= P[0].idx && st.idx <= P[P.length - 1].idx) { // stay on the neon or you slow down
+    if (near && P.length > 3 && st.idx >= P[0].idx && st.idx <= P[P.length - 1].idx) { // stay on the neon or you slow down
       let lo = 0; while (lo < P.length - 1 && P[lo].idx < st.idx - 4) lo++;
       let d = 1e9; for (let k = Math.max(0, lo - 3); k < Math.min(P.length, lo + 14); k++) d = Math.min(d, Math.hypot(st.x - P[k].x, st.z - P[k].z));
       if (d > 3.2) { T.offNeon = true; st.speed *= 1 - .55 * dt; T.offT += dt; if (T.offT > 1.5) { talk('trick'); T.offT = -8; } } else T.offT = Math.min(T.offT, 0);
     }
   } else if (CH.ability === 'goats') {
-    if (T.abCd <= 0) { // appear on the road ahead of you (but behind the target), in roughly your lane
+    if (T.abCd <= 0 && near) { // appear on the road ahead of you (but behind the target), in roughly your lane
       if (gap > 40) { const s0 = Math.min(track.n - 6, st.idx + clampN(gap - 6, 34, 100) / T.ds), i = Math.floor(s0), half = track.halfs[i], m = makeAnimal('goat');
         const pl = (st.x - track.pts[st.idx].x) * track.frames[st.idx].x + (st.z - track.pts[st.idx].z) * track.frames[st.idx].z;
         m.scale.setScalar(1.25); hzGroup.add(m);
         HZ.goats.push({ m, s:s0, off:clampN(pl * .8 + (Math.random() - .5) * 3, -(half - 1), half - 1), x:0, z:0, vx:0, vz:0, r:.75, e:.5, k:.5, scrub:.9, t:0, wait:.7, hit:false, init:false });
-        showToast('Goat on the road!'); T.abCd = 4.5; }
+        showToast('Goat on the road!'); T.abCd = 9; }
       else T.abCd = .8; }
     for (let i = HZ.goats.length - 1; i >= 0; i--) { const o = HZ.goats[i]; o.t += dt;
       const ix = clampN(Math.floor(o.s), 1, track.n - 3), f = o.s - ix, p = track.pts[ix], q = track.pts[ix + 1], fr = track.frames[ix], half = track.halfs[ix];
@@ -1813,9 +1817,9 @@ function abilityUpdate(dt) {
       if (o.hit) o.t = Math.max(o.t, 8.7);
       if (o.t > 9 || o.s < st.idx - 6) { hzGroup.remove(o.m); HZ.goats.splice(i, 1); continue; } obstacleCollide(o); }
   } else if (CH.ability === 'rivals') {
-    if (T.abCd <= 0 && HZ.chasers.length < 2 && st.idx > 30) { const ix = Math.max(10, st.idx - Math.round(80 / T.ds)), c = CHAPTERS[Math.floor(Math.random() * 4)], p = track.pts[ix], q = track.pts[ix + 3];
+    if (T.abCd <= 0 && HZ.chasers.length < 1 && near && st.idx > 30) { const ix = Math.max(10, st.idx - Math.round(80 / T.ds)), c = CHAPTERS[Math.floor(Math.random() * 4)], p = track.pts[ix], q = track.pts[ix + 3];
       const m = RR.buildCar(c.tcolor, c.tstyle); m.rotation.order = 'YXZ'; hzGroup.add(m);
-      const S = Object.assign(fresh(), { x:p.x, z:p.z, y:p.y, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:ix, speed:Math.max(10, st.speed), side:Math.random() < .5 ? -1 : 1, t:0, len:m.userData.dims.L, m }); S.course = S.heading; HZ.chasers.push(S); T.abCd = 7; }
+      const S = Object.assign(fresh(), { x:p.x, z:p.z, y:p.y, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:ix, speed:Math.max(10, st.speed), side:Math.random() < .5 ? -1 : 1, t:0, len:m.userData.dims.L, m }); S.course = S.heading; HZ.chasers.push(S); T.abCd = 14; }
     for (let i = HZ.chasers.length - 1; i >= 0; i--) { const C = HZ.chasers[i]; C.t += dt;
       const ahead = C.idx - st.idx, fx = Math.sin(st.course), fz = Math.cos(st.course), px = Math.cos(st.course), pz = -Math.sin(st.course);
       const tx = st.x - fx * 1.2 + px * C.side * 1.5 + fx * st.speed * .3, tz = st.z - fz * 1.2 + pz * C.side * 1.5 + fz * st.speed * .3; // aims for your rear quarter
@@ -1839,9 +1843,13 @@ function chaseUpdate(dt) {
     aiThink(dt); vehicleStep(A, AI, dt, AC);
     if (A.heat > 0 && A.speed < A.vt - .5) A.speed += dt * (A.boostT > 0 ? 14 : 3); // nitro kick on top of the engine
     A.boostT = Math.max(0, A.boostT - dt); A.hitCd = Math.max(0, A.hitCd - dt); A.flash = Math.max(0, A.flash - dt);
-    const rx = st.x - A.x, rz = st.z - A.z, front = rx * Math.sin(A.heading) + rz * Math.cos(A.heading); // where you are relative to its nose
-    T.ghost = front > .5 || (T.ghost && Math.hypot(rx, rz) < 5.2); // you are ahead of it: no collision, so you can never block it
-    if (!T.ghost && collideCars(st, A, 3.9, T.len) > 2.5 && A.hitCd <= 0) registerHit();
+    T.frontCd = Math.max(0, T.frontCd - dt);
+    const cs = collideCars(st, A, 3.9, T.len);
+    if (cs > 2.5 && A.hitCd <= 0) {
+      if (collideCars.o2 < 0) registerHit(); // rear / side hit
+      else if (T.frontCd <= 0) { T.frontCd = 20; registerHit(); } // a hit on its front part counts once, then front hits are locked for 20 s
+      else showToast('Front hit: no damage for ' + Math.ceil(T.frontCd) + ' s');
+    }
     if (state === 'race' && T.last) abilityUpdate(dt);
     if (A.drift && Math.abs(A.slipAng) > .08 && A.speed > 6) emitDrift(A, dt);
     if (A.hits) { A.dmg += dt * 7 * A.hits; while (A.dmg >= 1) { A.dmg--; puff(A.x + Math.sin(A.heading) * 1.4, A.y + .5, A.z + Math.cos(A.heading) * 1.4); } } // damaged: smoking hood
