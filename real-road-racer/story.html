@@ -878,7 +878,7 @@ function vehicleStep(S, I, dt, C) {
   const drifting = !!I.hand && (S.drift ? v0 > 6 : (Math.abs(S.steer) > .3 && v0 > 10));
   let v = v0, a = 0;
   if (I.up && v < C.vmax) a += Math.min(C.P / Math.max(Math.abs(v), 2), trac) / C.m * I.thr;
-  if (I.down) a += v > .5 ? -Math.min(mu * G * cosT, 10) : (v > -8 ? -Math.min(.5 * C.P / Math.max(Math.abs(v), 2), .5 * trac) / C.m : 0);
+  if (I.down) a += v > .5 ? -Math.min(mu * G * cosT, C.brake || 10) : (v > -8 ? -Math.min(.5 * C.P / Math.max(Math.abs(v), 2), .5 * trac) / C.m : 0);
   if (I.hand) a -= Math.sign(v) * (drifting ? 1.2 : Math.min(mu * G * cosT, 8));
   if (!I.up && !I.down && v > 0) a -= .4;
   a -= G * sinT; v += a * dt;
@@ -887,7 +887,7 @@ function vehicleStep(S, I, dt, C) {
   if (!I.up && !I.down && !I.hand && Math.abs(v) < .4) v = 0;
   S.steer += (I.steer - S.steer) * Math.min(1, 7 * dt);
   S.drift = drifting;
-  const delta = S.steer * .45 / (1 + (v / (drifting ? 16 : 10)) ** 2);
+  const delta = S.steer * .45 * (C.steerK || 1) / (1 + (v / (drifting ? 16 : 10)) ** 2);
   let k = Math.tan(delta) / (C.len * .6);
   const kmax = mu * G * cosT / Math.max(v * v, 4);
   if (drifting) { k = Math.sign(k) * Math.min(Math.abs(k) * 1.5, kmax * 1.6); S.slip = 1; v *= 1 - .22 * dt; } // tighter than grip allows, but it costs speed
@@ -1474,7 +1474,7 @@ Object.assign(VOICE.Ryo, { last:["Stay on my light. Or fall behind.", "Follow th
 Object.assign(VOICE.Anselm, { last:["The mountain is not empty. Meet my goats.", "Listen for the bells."], trick:["The goats do not care about you.", "Even the mountain pushes back.", "Ram."] });
 Object.assign(VOICE.Silas, { last:["Remember them? You beat them all. Now beat them together!", "Give the kid a proper send-off!"], trick:["Not bad. Now try them all at once!", "I trained you for crowds.", "Old friends, kid. Old friends."] });
 const CHAPTERS = [
- { id:1, title:"The Handoff", city:"New York", target:"Dex", tcolor:"#2f6fdb", tstyle:'muscle', ability:'oil', abilName:'OIL SLICKS', boost:[1.45,1.7], boostT:2.8, a:[40.7484,-73.9857], b:[40.7712,-73.9840], weather:"Clear", time:"Day",
+ { id:1, title:"The Handoff", city:"New York", target:"Dex", tcolor:"#2f6fdb", tstyle:'muscle', ability:'oil', abilName:'OIL SLICKS', boostV:[66,76], boostT:3.2, a:[40.7484,-73.9857], b:[40.7712,-73.9840], weather:"Clear", time:"Day",
    scene:{ bg:'ny', tod:'day', wx:'clear', seed:1 }, skill:.55, vTop:24, power:1, head:90, escape:550, weave:0, block:0, drift:false, voice:VOICE["Dex"],
    intro:[ ["", "New York. Midday. Dex is first out, in a car that is not as fast as he thinks."],
      ["Vega", "Dex has page one. He is sticking to the avenues, so he will be predictable."],
@@ -1484,7 +1484,7 @@ const CHAPTERS = [
      ["You", "Why did you run, Dex?"],
      ["Dex", "Silas said it would be worth it. He said you would catch us. He said that was the point."],
      ["", "You do not understand yet. But the first page is in your hands."] ] },
- { id:2, title:"Hill Rats", city:"Lisbon", target:"Inês", tcolor:"#e0559b", tstyle:'retro', ability:'sheep', abilName:'SHEEP CROSSING', boost:[1.5,1.8], boostT:2.8, a:[38.7075,-9.1365], b:[38.7292,-9.1536], weather:"Clear", time:"Sunset",
+ { id:2, title:"Hill Rats", city:"Lisbon", target:"Inês", tcolor:"#e0559b", tstyle:'retro', ability:'sheep', abilName:'SHEEP CROSSING', boostV:[68,78], boostT:3.2, a:[38.7075,-9.1365], b:[38.7292,-9.1536], weather:"Clear", time:"Sunset",
    scene:{ bg:'lisbon', tod:'sunset', wx:'clear', seed:2 }, skill:.62, vTop:27, power:1.03, head:110, escape:520, weave:.8, block:.5, drift:false, voice:VOICE["Inês"],
    intro:[ ["", "Lisbon at sunset. Steep streets, old tram rails, and Inês, who grew up on these hills."],
      ["Vega", "Inês has page two. She knows every shortcut in this city."],
@@ -1494,7 +1494,7 @@ const CHAPTERS = [
      ["You", "Tell me what is on these pages. Why would Silas risk so much for paper?"],
      ["Inês", "Read the first line. Then ask who has been paying your debts all these years."],
      ["", "You glance at the page. A name you know. Vega."] ] },
- { id:3, title:"Neon Wire", city:"Tokyo", target:"Ryo", tcolor:"#7b4fd1", tstyle:'drift', ability:'neon', abilName:'NEON TRAIL', boost:[1.55,1.9], boostT:3, a:[35.6595,139.7005], b:[35.6605,139.7292], weather:"Rain", time:"Night",
+ { id:3, title:"Neon Wire", city:"Tokyo", target:"Ryo", tcolor:"#7b4fd1", tstyle:'drift', ability:'neon', abilName:'NEON TRAIL', boostV:[70,80], boostT:3.4, a:[35.6595,139.7005], b:[35.6605,139.7292], weather:"Rain", time:"Night",
    scene:{ bg:'tokyo', tod:'night', wx:'rain', seed:3 }, skill:.66, vTop:29, power:1.06, head:130, escape:520, weave:1.4, block:.3, drift:true, voice:VOICE["Ryo"],
    intro:[ ["", "Tokyo. Midnight rain. The streets are mirrors."],
      ["Vega", "Ryo has page three. He drifts everything. Do not try to out-slide him."],
@@ -1504,7 +1504,7 @@ const CHAPTERS = [
      ["You", "These pages are payments. Dates, names, amounts. Vega's, all of it."],
      ["Ryo", "Now you know. Keep going. Anselm is next, and he is not playing around."],
      ["", "Three pages down. The picture is getting clearer, and it is not the one Vega painted."] ] },
- { id:4, title:"Whiteout", city:"Furka Pass", target:"Anselm", tcolor:"#2a9d8f", tstyle:'rally', ability:'goats', abilName:'RAMMING GOATS', boost:[1.55,1.9], boostT:3, a:[46.6046,8.5062], b:[46.5727,8.4153], weather:"Fog", time:"Day",
+ { id:4, title:"Whiteout", city:"Furka Pass", target:"Anselm", tcolor:"#2a9d8f", tstyle:'rally', ability:'goats', abilName:'RAMMING GOATS', boostV:[66,76], boostT:3.4, a:[46.6046,8.5062], b:[46.5727,8.4153], weather:"Fog", time:"Day",
    scene:{ bg:'alps', tod:'day', wx:'fog', seed:4 }, skill:.64, vTop:25, power:1.06, head:70, escape:450, weave:0, block:.6, drift:false, voice:VOICE["Anselm"],
    intro:[ ["", "The Alps. A long climb, hairpin after hairpin, and fog thick as milk."],
      ["Vega", "Anselm has page four. You will not see him. You will see his taillights, if you are lucky."],
@@ -1514,7 +1514,7 @@ const CHAPTERS = [
      ["You", "Silas."],
      ["Anselm", "He is waiting in Milan. Do not let Vega know that you know."],
      ["", "Vega's call comes in a minute later. You let it ring."] ] },
- { id:5, title:"The Boss", city:"Milan", target:"Silas", tcolor:"#e0a030", tstyle:'sedan', ability:'rivals', abilName:'OLD RIVALS', boost:[1.8,2.2], boostT:3.4, a:[45.4642,9.1900], b:[45.5223,9.2186], weather:"Clear", time:"Morning",
+ { id:5, title:"The Boss", city:"Milan", target:"Silas", tcolor:"#e0a030", tstyle:'sedan', ability:'rivals', abilName:'OLD RIVALS', boostV:[88,100], boostT:4.2, a:[45.4642,9.1900], b:[45.5223,9.2186], weather:"Clear", time:"Morning",
    scene:{ bg:'milan', tod:'dawn', wx:'clear', seed:5 }, skill:.76, vTop:33, power:1.12, head:140, escape:650, weave:2, block:1, drift:true, voice:VOICE["Silas"],
    intro:[ ["", "Milan. Dawn. The streets you grew up on, and the man who taught you to drive them."],
      ["Vega", "Silas has the last page. And the cash. Catch him and your debt is cleared."],
@@ -1642,7 +1642,7 @@ addEventListener('keydown', e => {
 const HITS = 3, clampN = (v, a, b) => Math.max(a, Math.min(b, v));
 const T = { s0:8, ds:3, prof:null, cap:null, len:3.9, dist:999, talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 };
 const fresh = () => ({ x:0, z:0, heading:0, course:0, speed:0, idx:5, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, drift:false, slipAng:0, smk:0, oilT:0 });
-const A = Object.assign(fresh(), { off:0, boostT:0, bm:1, vt:0, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
+const A = Object.assign(fresh(), { off:0, boostT:0, bm:1, vt:0, heat:0, bv:60, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
 const AC = Object.assign({}, CLASSES.hatch), AI = { up:false, down:false, hand:false, thr:1, steer:0 };
 let tcar = null;
 function makeTarget(ch) { // every driver has their own car body
@@ -1653,23 +1653,23 @@ function makeTarget(ch) { // every driver has their own car body
   fl.rotation.x = -Math.PI / 2; fl.position.set(0, .6, -T.len / 2 - .9); fl.visible = false; tcar.add(fl); tcar.userData.flame = fl; scene.add(tcar);
 }
 function buildProfile(ch) { // planned speed along the route: corner limits plus braking distance
-  const Q = track.pts, n = track.n, ds = T.ds = track.length / (n - 1), v = new Float32Array(n);
-  const aLat = 9.81 * ch.skill * (ch.drift ? 1.45 : 1) * (env.weather === 'Rain' ? .65 : 1);
+  const Q = track.pts, n = track.n, ds = T.ds = track.length / (n - 1), v = new Float32Array(n), pb = new Float32Array(n), rain = env.weather === 'Rain' ? .65 : 1;
+  const aLat = 9.81 * ch.skill * (ch.drift ? 1.45 : 1) * rain, aB = 9.81 * 2 * rain; // boosted cars run on about 2.4x grip, planned with 2x
   for (let i = 0; i < n; i++) {
     const a = Q[Math.max(0, i - 3)], b = Q[i], c = Q[Math.min(n - 1, i + 3)];
     let dh = Math.abs(Math.atan2(c.x - b.x, c.z - b.z) - Math.atan2(b.x - a.x, b.z - a.z)); if (dh > Math.PI) dh = 2 * Math.PI - dh;
-    v[i] = Math.min(ch.vTop, Math.max(6, Math.sqrt(aLat / Math.max(dh / (3 * ds), 1e-4))));
+    const k = Math.max(dh / (3 * ds), 1e-4);
+    v[i] = Math.min(ch.vTop, Math.max(6, Math.sqrt(aLat / k))); pb[i] = Math.max(10, Math.sqrt(aB / k));
   }
-  T.cap = Float32Array.from(v);
-  for (let i = n - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 14 * ds));
-  T.s0 = Math.max(8, Math.min(5 + Math.round(ch.head / ds), Math.floor(track.fin * .3))); T.prof = v; makeTarget(ch);
+  for (let i = n - 2; i >= 0; i--) { v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 14 * ds)); pb[i] = Math.min(pb[i], Math.sqrt(pb[i + 1] * pb[i + 1] + 32 * ds)); } // boost brakes at 16 m/s2
+  T.planB = pb; T.s0 = Math.max(8, Math.min(5 + Math.round(ch.head / ds), Math.floor(track.fin * .3))); T.prof = v; makeTarget(ch);
 }
 function updateHits() { [...$('cHits').children].forEach((e, i) => e.className = i < A.hits ? 'on' : ''); }
 function resetChase() {
   const Q = track.pts, p = Q[T.s0], q = Q[T.s0 + 3];
-  Object.assign(A, fresh(), { x:p.x, z:p.z, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:T.s0, y:p.y, off:0, boostT:0, bm:1, vt:0, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
+  Object.assign(A, fresh(), { x:p.x, z:p.z, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:T.s0, y:p.y, off:0, boostT:0, bm:1, vt:0, heat:0, bv:60, hitCd:0, hits:0, flash:0, dmg:0, wantDrift:false });
   A.course = A.heading; Object.assign(T, { talkCd:0, behindT:0, nearT:0, driftT:0, stuckT:0, said:false, last:false, abCd:0, offNeon:false, offT:0 });
-  Object.assign(AC, CLASSES.hatch, { vmax:80 }); AC.P = CLASSES.hatch.P * CH.power; clearHazards();
+  Object.assign(AC, CLASSES.hatch, { vmax:110 }); AC.P = CLASSES.hatch.P * CH.power; clearHazards();
   $('cName').textContent = 'TAKE DOWN ' + CH.target.toUpperCase(); $('talk').style.opacity = 0; $('msg').style.display = 'none'; updateHits();
 }
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -1681,20 +1681,20 @@ function talk(kind, force) {
 function bigMsg(t, ms) { const m = $('msg'); m.textContent = t; m.style.display = 'block'; clearTimeout(bigMsg.t); bigMsg.t = setTimeout(() => { if (state === 'race') m.style.display = 'none'; }, ms); }
 
 function aiThink(dt) { // the driver: pure-pursuit steering, speed from the planned profile, personality on top
-  const Q = track.pts, n = track.n, ds = T.ds, v = Math.max(A.speed, 0), gapAI = (A.idx - st.idx) * ds; // >0: you are behind it
+  const Q = track.pts, n = track.n, ds = T.ds, v = Math.max(A.speed, 0), gapAI = (A.idx - st.idx) * ds, boosted = A.heat > 0; // gapAI > 0: you are behind it
   let want = CH.weave ? Math.sin(A.idx * .07) * CH.weave : 0;
   if (CH.block && gapAI > 0 && gapAI < 35) { const bp = Q[st.idx], bn = track.frames[st.idx]; want = ((st.x - bp.x) * bn.x + (st.z - bp.z) * bn.z) * CH.block; } // blocks your line
   const lim = Math.max(0, track.halfs[A.idx] - 2.2); want = clampN(want, -lim, lim); A.off += (want - A.off) * Math.min(1, dt * 1.6);
-  const Ld = clampN(6 + .7 * v, 8, 40), j = Math.min(n - 1, A.idx + Math.round(Ld / ds)), fj = track.frames[j];
+  const Ld = clampN(6 + (boosted ? .45 : .7) * v, 8, 40), j = Math.min(n - 1, A.idx + Math.round(Ld / ds)), fj = track.frames[j];
   const err = wrapA(Math.atan2(Q[j].x + fj.x * A.off - A.x, Q[j].z + fj.z * A.off - A.z) - A.course);
-  AI.steer = clampN(err * (A.drift ? 1 : 2.4), -1, 1);
+  // curvature needed to reach the look-ahead point -> steering command, inverted through the car's own steering model (so it can really turn at any speed)
+  const kdes = 2 * Math.sin(err) / Ld * (A.drift ? .7 : 1), lock = A.drift ? 16 : 10;
+  AI.steer = clampN(Math.atan(kdes * AC.len * .6) * (1 + (v / lock) ** 2) / (.45 * (AC.steerK || 1)), -1, 1);
   if (CH.drift && v > 13 && Math.abs(err) > .3) A.wantDrift = true; else if (Math.abs(err) < .1 || v < 8) A.wantDrift = false;
   AI.hand = A.wantDrift && (A.drift || Math.abs(A.steer) > .3);
-  const i0 = Math.min(n - 2, A.idx), mul = gapAI > 160 ? Math.max(.7, 1 - (gapAI - 160) / 1000) : 1, vp = T.prof[i0] * mul; let vt = vp;
-  if (A.boostT > 0) { // after a hit: a big burst of speed on the straights, but it still brakes for corners
-    vt = vp * (1 + (A.bm - 1) * clampN((vp - 10) / Math.max(1, CH.vTop - 10), 0, 1));
-    for (let k = 3; k <= 70; k += 3) { const lm = Math.sqrt(T.cap[Math.min(n - 2, A.idx + k)] ** 2 + 14 * k * ds); if (lm < vt) vt = lm; }
-  }
+  const i0 = Math.min(n - 2, A.idx), mul = gapAI > 160 ? Math.max(.7, 1 - (gapAI - 160) / 1000) : 1, vp = T.prof[i0] * mul * (1 + .1 * A.hits); // angrier (faster) after every hit
+  let vt = vp;
+  if (boosted) vt = Math.max(vp, vp + (Math.min(A.bv, T.planB[i0]) - vp) * A.heat); // huge speed on straights, planned braking for every corner; fades out slowly
   A.vt = vt; AI.up = v < vt - .3; AI.thr = clampN((vt - v) / 3, .35, 1); AI.down = v > vt + 2.5;
   T.stuckT = A.speed < 1.5 ? T.stuckT + dt : 0;
   if (T.stuckT > 2.5) { const p = Q[A.idx], q = Q[Math.min(n - 1, A.idx + 3)]; A.x = p.x; A.z = p.z; A.heading = A.course = Math.atan2(q.x - p.x, q.z - p.z); A.speed = 5; A.off = 0; T.stuckT = 0; }
@@ -1719,7 +1719,7 @@ function collideCars(a, b, la, lb) { // car-to-car: two circles per car, equal m
   return -rel;
 }
 function registerHit() {
-  A.hits++; A.bm = CH.boost[Math.min(A.hits, 2) - 1]; A.boostT = CH.boostT + .4 * A.hits; A.hitCd = A.boostT + .8; A.flash = .45; updateHits();
+  A.hits++; A.bv = CH.boostV[Math.min(A.hits, 2) - 1]; A.boostT = CH.boostT + .5 * A.hits; A.heat = 1; A.hitCd = A.boostT + 1.5; A.flash = .45; updateHits();
   if (A.hits >= HITS) return endChase(true);
   if (A.hits === HITS - 1) { T.last = true; T.abCd = 1.2; bigMsg('LAST LIFE · ' + CH.abilName, 2200); talk('last', true); } // one hit left: the driver gets desperate
   else talk('hit' + A.hits, true);
@@ -1782,13 +1782,23 @@ function abilityUpdate(dt) {
       if (d > 3.2) { T.offNeon = true; st.speed *= 1 - .55 * dt; T.offT += dt; if (T.offT > 1.5) { talk('trick'); T.offT = -8; } } else T.offT = Math.min(T.offT, 0);
     }
   } else if (CH.ability === 'goats') {
-    if (T.abCd <= 0 && gap > 70) { const r = roadAhead(Math.min(95, gap * .65)), m = makeAnimal('goat'), off = (Math.random() - .5) * r.half * 1.2; hzGroup.add(m);
-      HZ.goats.push({ m, x:r.p.x + r.fr.x * off, z:r.p.z + r.fr.z * off, y:r.p.y, vx:0, vz:0, r:.8, e:.5, k:.5, scrub:.9, t:0, hit:false }); T.abCd = 4.5; }
-    for (let i = HZ.goats.length - 1; i >= 0; i--) { const o = HZ.goats[i]; o.t += dt; // they charge straight at you
-      const tx = st.x + Math.sin(st.course) * st.speed * .25 - o.x, tz = st.z + Math.cos(st.course) * st.speed * .25 - o.z, d = Math.hypot(tx, tz) || 1;
-      o.vx = tx / d * 15; o.vz = tz / d * 15; o.x += o.vx * dt; o.z += o.vz * dt; o.m.position.set(o.x, o.y + Math.abs(Math.sin(o.t * 14)) * .1, o.z); o.m.rotation.y = Math.atan2(o.vx, o.vz);
-      const passed = (o.x - st.x) * Math.sin(st.course) + (o.z - st.z) * Math.cos(st.course) < -20;
-      if (o.hit) o.t = Math.max(o.t, 8.7); if (o.t > 9 || passed) { hzGroup.remove(o.m); HZ.goats.splice(i, 1); continue; } obstacleCollide(o); }
+    if (T.abCd <= 0) { // appear on the road ahead of you (but behind the target), in roughly your lane
+      if (gap > 40) { const s0 = Math.min(track.n - 6, st.idx + clampN(gap - 6, 34, 100) / T.ds), i = Math.floor(s0), half = track.halfs[i], m = makeAnimal('goat');
+        const pl = (st.x - track.pts[st.idx].x) * track.frames[st.idx].x + (st.z - track.pts[st.idx].z) * track.frames[st.idx].z;
+        m.scale.setScalar(1.25); hzGroup.add(m);
+        HZ.goats.push({ m, s:s0, off:clampN(pl * .8 + (Math.random() - .5) * 3, -(half - 1), half - 1), x:0, z:0, vx:0, vz:0, r:.75, e:.5, k:.5, scrub:.9, t:0, wait:.7, hit:false, init:false });
+        showToast('Goat on the road!'); T.abCd = 4.5; }
+      else T.abCd = .8; }
+    for (let i = HZ.goats.length - 1; i >= 0; i--) { const o = HZ.goats[i]; o.t += dt;
+      const ix = clampN(Math.floor(o.s), 1, track.n - 3), f = o.s - ix, p = track.pts[ix], q = track.pts[ix + 1], fr = track.frames[ix], half = track.halfs[ix];
+      if (o.wait > 0) o.wait -= dt; // a moment of pawing the ground
+      else { o.s -= 15 * dt / T.ds; const pl = (st.x - p.x) * fr.x + (st.z - p.z) * fr.z; o.off += clampN(pl - o.off, -1, 1) * dt * 1.1; } // charges down the road; only edges sideways slowly, so you can dodge
+      o.off = clampN(o.off, -(half - .9), half - .9);
+      const nx = p.x + (q.x - p.x) * f + fr.x * o.off, nz = p.z + (q.z - p.z) * f + fr.z * o.off;
+      o.vx = o.init && dt > 0 ? (nx - o.x) / dt : 0; o.vz = o.init && dt > 0 ? (nz - o.z) / dt : 0; o.x = nx; o.z = nz; o.init = true;
+      o.m.position.set(nx, groundAt(nx, nz, ix).y + (o.wait > 0 ? 0 : Math.abs(Math.sin(o.t * 14)) * .1), nz); o.m.rotation.y = Math.atan2(p.x - q.x, p.z - q.z); // sticks to the road surface, faces you
+      if (o.hit) o.t = Math.max(o.t, 8.7);
+      if (o.t > 9 || o.s < st.idx - 6) { hzGroup.remove(o.m); HZ.goats.splice(i, 1); continue; } obstacleCollide(o); }
   } else if (CH.ability === 'rivals') {
     if (T.abCd <= 0 && HZ.chasers.length < 2 && st.idx > 30) { const ix = Math.max(10, st.idx - Math.round(80 / T.ds)), c = CHAPTERS[Math.floor(Math.random() * 4)], p = track.pts[ix], q = track.pts[ix + 3];
       const m = RR.buildCar(c.tcolor, c.tstyle); m.rotation.order = 'YXZ'; hzGroup.add(m);
@@ -1810,8 +1820,11 @@ function chaseUpdate(dt) {
   tcar.visible = true; const racing = state === 'race' && !st.done;
   if (racing) {
     T.talkCd = Math.max(0, T.talkCd - dt);
-    aiThink(dt); AC.P = CLASSES.hatch.P * CH.power * (A.boostT > 0 ? A.bm ** 2.5 : 1); vehicleStep(A, AI, dt, AC);
-    if (A.boostT > 0 && A.speed < A.vt) A.speed += dt * 7 * (A.bm - 1); // nitro kick on top of the engine
+    A.heat = A.boostT > 0 ? 1 : Math.max(0, A.heat - dt / 4);
+    const g = Math.min(1, A.heat * 3); // boost mode: far more power, grip, braking and steering so it can corner at speed
+    AC.mu = CLASSES.hatch.mu * (1 + 1.4 * g); AC.brake = 10 + 10 * g; AC.steerK = 1 + .8 * g; AC.P = CLASSES.hatch.P * CH.power * (1 + 11 * g * (A.boostT > 0 ? 1 : .3));
+    aiThink(dt); vehicleStep(A, AI, dt, AC);
+    if (A.heat > 0 && A.speed < A.vt - .5) A.speed += dt * (A.boostT > 0 ? 14 : 3); // nitro kick on top of the engine
     A.boostT = Math.max(0, A.boostT - dt); A.hitCd = Math.max(0, A.hitCd - dt); A.flash = Math.max(0, A.flash - dt);
     if (collideCars(st, A, 3.9, T.len) > 2.5 && A.hitCd <= 0) registerHit();
     if (state === 'race' && T.last) abilityUpdate(dt);
