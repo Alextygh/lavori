@@ -139,7 +139,7 @@ renderer.setSize(innerWidth, innerHeight);
 document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x9bb3cc);
-scene.fog = new THREE.Fog(0x9bb3cc, 120, 900);
+scene.fog = new THREE.Fog(0x9bb3cc, 20, 320);
 const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.5, 3000);
 const hemi = new THREE.HemisphereLight(0xdfe9f5, 0x3b4a3a, 0.9); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffe2b8, 0.8);
@@ -750,15 +750,17 @@ async function buildTrack(a, b, coords) {
     update(idx, px, pz) { // load chunks within 700 m of the player, drop those further than 1100 m; terrain cells within ~1.1 km
       for (let ci = 0; ci < nCh; ci++) {
         const lo = ci * CH, hi = (ci + 1) * CH, d = (idx < lo ? lo - idx : idx > hi ? idx - hi : 0) * spc, c = chunks[ci];
-        if (!c) { if (d < 700 && active < 2 && Date.now() > failAt[ci]) loadChunk(ci); }
-        else if (c.state === 'loaded' && d > 1100) unloadChunk(ci);
+        if (!c) { if ((d < 700 || ci === 0) && active < 2 && Date.now() > failAt[ci]) loadChunk(ci); } // the first chunk (the start line) is always wanted
+        else if (c.state === 'loaded' && d > 1100 && ci > 0) unloadChunk(ci); // ...and never unloaded, so a retry never starts in an empty street
       }
       if (terr.ok && px !== undefined) {
-        const R = 1100;
-        for (let cz = Math.floor((pz - R) / CS); cz <= Math.floor((pz + R) / CS); cz++) for (let cx = Math.floor((px - R) / CS); cx <= Math.floor((px + R) / CS); cx++) {
-          const key = cx + ',' + cz; if (!cells.has(key) && Date.now() > (retryAt.get(key) || 0)) buildCell(cx, cz);
-        }
-        for (const [key, c] of cells) { const [cx, cz] = key.split(',').map(Number); if (Math.hypot((cx + .5) * CS - px, (cz + .5) * CS - pz) > R + 800) removeCell(key, c); }
+        const sp = pts[5]; // terrain around the start line stays loaded too
+        for (const [ox, oz, R] of [[px, pz, 1100], [sp.x, sp.z, 700]])
+          for (let cz = Math.floor((oz - R) / CS); cz <= Math.floor((oz + R) / CS); cz++) for (let cx = Math.floor((ox - R) / CS); cx <= Math.floor((ox + R) / CS); cx++) {
+            const key = cx + ',' + cz; if (!cells.has(key) && Date.now() > (retryAt.get(key) || 0)) buildCell(cx, cz);
+          }
+        for (const [key, c] of cells) { const [cx, cz] = key.split(',').map(Number), mx = (cx + .5) * CS, mz = (cz + .5) * CS;
+          if (Math.hypot(mx - px, mz - pz) > 1100 + 800 && Math.hypot(mx - sp.x, mz - sp.z) > 700 + 800) removeCell(key, c); }
       }
     },
     pending() { return chunks.filter(c => c && c.state === 'loading').map(c => c.promise).concat([...cells.values()].filter(c => !c.done).map(c => c.promise)); }
@@ -767,8 +769,15 @@ async function buildTrack(a, b, coords) {
   track = { pts, n: pts.length, length, halfs, frames, gap, fin:finI, t0, lims, gripS:gs, tun };
   buildMinimap(pts, runs, finI);
   streamer = streamerObj; streamer.update(5, pts[5].x, pts[5].z);
-  await Promise.race([Promise.all(streamer.pending()), new Promise(r => setTimeout(r, 8000))]); // wait briefly for the first scenery
-  resetCar();
+  // wait until the start line is fully built (first scenery chunk + terrain), then warm up the GPU
+  const t0w = Date.now(), sleep = ms => new Promise(r => setTimeout(r, ms));
+  while (Date.now() - t0w < 30000) {
+    streamer.update(5, pts[5].x, pts[5].z);
+    await Promise.race([Promise.all(streamer.pending()), sleep(2000)]);
+    const c0 = chunks[0]; if (streamer.pending().length === 0 && ((c0 && c0.state === 'loaded') || failAt[0] > 0 || !osm)) break;
+    await sleep(250);
+  }
+  resetCar(); try { renderer.compile(scene, camera); } catch (e) {}
   say(`Track ready: ${(length / 1000).toFixed(2)} km` + (osm ? `, ${runs.length} side roads (${blocks.length} blocked), scenery streams in as you drive.` : '.'));
   $('note').textContent = (elevNote + (osm ? '' : ' Roads and buildings unavailable.')).trim();
 }
@@ -1317,7 +1326,7 @@ const TIMES = {
   Sunset: { sky:0xe59a6b, hc:0xf2c9a8, gc:0x4a3a3a, hi:.5,  sc:0xff9a4d, si:1.0, sp:[300, 60, -100] },
   Night:  { sky:0x070c18, hc:0x4a5a8a, gc:0x10151f, hi:.55, sc:0x8fa0d8, si:.3,  sp:[-100, 200, 100] }
 };
-const FOGS = { Clear:[120, 900], Cloudy:[100, 700], Rain:[40, 380], Fog:[8, 160] };
+const FOGS = { Clear:[18, 300], Cloudy:[14, 250], Rain:[10, 190], Fog:[4, 100] };
 function applyEnv() {
   const T = TIMES[env.time], night = env.time === 'Night', gm = { Clear:0, Cloudy:.45, Rain:.65, Fog:.7 }[env.weather];
   const sky = new THREE.Color(T.sky).lerp(new THREE.Color(night ? 0x0a0f1a : 0x7b838f), gm);
@@ -1468,7 +1477,7 @@ $('ok').onclick = async () => {
 };
 
 function startCountdown() {
-  setState('countdown'); resetCar();
+  setState('countdown'); resetCar(); if (streamer) streamer.update(5, st.x, st.z); // bring back everything around the start line
   let n = 3; const cd = $('cd');
   const tick = () => {
     if (state !== 'countdown') return;
@@ -1479,6 +1488,7 @@ function startCountdown() {
 }
 function finishRace() {
   setState('finished');
+  if (streamer && track) streamer.update(5, track.pts[5].x, track.pts[5].z); // start reloading the start line now, so Retry is instant
   const L = (k, v) => { const d = document.createElement('div'); d.textContent = k + v; return d; };
   const rows = [L('Race time: ', st.time.toFixed(1) + ' s')];
   if (env.legal) rows.push(L('Penalties: ', st.pen / 10 + ' \u00d7 10 s = ' + st.pen + ' s'), L('Final time: ', (st.time + st.pen).toFixed(1) + ' s'));
