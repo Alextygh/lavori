@@ -13,7 +13,7 @@
 
   // Same hatchback as the game
   function buildCar(hex) {
-    const car = new THREE.Group(), L = 3.9, W = 1.75, H = .7, CAB = .55;
+    const car = new THREE.Group(); car.userData.wheels = []; const L = 3.9, W = 1.75, H = .7, CAB = .55;
     const bodyMat = new THREE.MeshLambertMaterial({ color:hex });
     const body = new THREE.Mesh(new THREE.BoxGeometry(W, H, L), bodyMat); body.position.y = .35 + H / 2;
     const cab = new THREE.Mesh(new THREE.BoxGeometry(W * .82, CAB, L * .45), new THREE.MeshLambertMaterial({ color:0x1d2633 }));
@@ -25,7 +25,7 @@
       const t = new THREE.Mesh(new THREE.CylinderGeometry(wr, wr, ww, 18), tire); t.rotation.z = Math.PI / 2;
       const hb = new THREE.Mesh(new THREE.CylinderGeometry(wr * .55, wr * .55, ww + .02, 10), hub); hb.rotation.z = Math.PI / 2;
       const sp = new THREE.Mesh(new THREE.BoxGeometry(ww + .04, wr * 1.5, .07), tire);
-      g.add(t, hb, sp); car.add(g);
+      g.add(t, hb, sp); car.add(g); car.userData.wheels.push(g);
     }
     const hl = new THREE.MeshBasicMaterial({ color:0xfff3c4 }), tl = new THREE.MeshBasicMaterial({ color:0x6b1111 });
     for (const sx of [-1, 1]) {
