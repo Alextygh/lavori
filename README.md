@@ -72,6 +72,11 @@ A simulator made only for entrainment that simulates real-life gambling games. T
 **--External Website--**
 Here you can play "Higher or Lower" with Pokémon stats. There are two modes, various languages you can pick from. It also supports local web saving, and you can optionally create an account. It gets updated every time a new Pokemon is released.
 
+### [Real Road Racer](https://alextygh.github.io/lavori/real-road-racer/index.html)
+Real Road Racer lets you race on real roads, anywhere in the world. Pick a start and a finish on the map, and the game builds a 3D track from real OpenStreetMap road data, with real terrain elevation, then drops you on the line. It has a story mode too!
+
+You can also play it on [itch.io](https://ale-11011.itch.io/real-road-racer).
+
 ### [Skylandex](https://alextygh.github.io/lavori/Skylandex/index.html)
 A mix between Skylanders and Pokémon, every Skylanders gets two types, and every gimmick Skylander gets a unique skill. I'll update it in case any new Skylanders game comes out (Please Activision I'm begging you).
 
@@ -87,7 +92,7 @@ My greatest creation. Here I publish every written work I ever did, these are bo
 Unless stated otherwise below, all the code in this repository (and in the external websites listed above) is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). You are free to share and adapt it, even commercially, as long as you give appropriate credit, provide a link to the license, and indicate if changes were made.
 
 ### All rights reserved
-**[Bunker-7](https://alextygh.github.io/lavori/Bunker-7/index.html)** and the **[Whisperheaven Library](https://alextygh.github.io/lavori/Whisperheaven/index.html)** are **not** covered by CC BY 4.0. Everything inside them, including all code, text, stories, characters and other content, is © Ale.10. All rights reserved.
+**[Bunker-7](https://alextygh.github.io/lavori/Bunker-7/index.html)**, [Real Road Racer](https://alextygh.github.io/lavori/real-road-racer/index.html) and the **[Whisperheaven Library](https://alextygh.github.io/lavori/Whisperheaven/index.html)** are **not** covered by CC BY 4.0. Everything inside them, including all code, text, stories, characters and other content, is © Ale.10. All rights reserved.
 
 ### Third-party properties
 Some pages are fan-made and use names, characters or data that belong to other people. I do not own any of them, I am not affiliated with or endorsed by their owners, and these pages are made for fun and not for profit. The CC BY 4.0 license above covers only my own code, not these third-party materials.
