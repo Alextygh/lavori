@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Settings · Real Road Racer</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  .tabs { display:flex; gap:8px; margin:8px 0 6px; }
+  .tabs .tab { flex:1; margin:0; text-align:center; cursor:pointer; opacity:.7; }
+  .tabs .tab.on { opacity:1; outline:2px solid var(--accent,#e8a23a); }
+  #ctlStatus { margin:4px 0 8px; }
+  .crow { display:grid; grid-template-columns:1fr minmax(92px,auto) minmax(92px,auto); gap:6px; align-items:center; padding:4px 0; border-top:1px solid rgba(255,255,255,.07); }
+  .crow > span { font-size:14px; }
+  .slot { margin:0; padding:6px 8px; min-height:32px; border-radius:6px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:inherit; font:inherit; font-weight:700; cursor:pointer; text-align:center; }
+  .slot:hover { background:rgba(255,255,255,.12); }
+  .slot.empty { opacity:.55; font-weight:400; }
+  .slot.listen { background:var(--accent,#e8a23a); color:#2a1c0c; border-color:transparent; opacity:1; }
+  #ctlNote { min-height:1.3em; margin:6px 0 0; color:var(--accent,#e8a23a); }
+  .ctlbar { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .ctlbar .btn { margin:0; }
+</style>
 </head>
 <body>
 <div class="page">
@@ -33,6 +48,18 @@
         <div><h2>Sound</h2><p class="desc">Whether the engine sound starts on or muted.</p></div>
         <label class="switch"><input id="sound" type="checkbox" aria-label="Sound"><span></span></label>
       </div>
+      <div class="group" id="ctl">
+        <h2>Controls</h2>
+        <p class="desc" id="ctlStatus"></p>
+        <div class="tabs" role="tablist" aria-label="Input device">
+          <button class="btn tab" role="tab" data-d="kb">⌨ Keyboard</button>
+          <button class="btn tab" role="tab" data-d="pad">🎮 Controller</button>
+        </div>
+        <div id="ctlRows"></div>
+        <p class="desc" id="ctlNote" role="status"></p>
+        <div class="ctlbar"><button class="btn" id="ctlReset">Reset keyboard controls</button></div>
+        <p class="desc">Click a slot, then press the key or controller button you want. Esc cancels, Delete clears the slot. The tab follows whichever device you used last. On a phone or tablet the touch buttons are fixed.</p>
+      </div>
       <div class="bar"><button class="btn" id="reset">Reset to defaults</button><span id="saved" role="status">Saved ✓</span></div>
     </div>
   </div>
@@ -45,8 +72,8 @@ let S = RR.load();
 const v = RR.viewer($('car3d'), { color:S.color, shadows:S.shadows });
 const PRESETS = ['#d9482b','#e8a23a','#f2d04a','#3fa34d','#2a9d8f','#2f6fdb','#7b4fd1','#e0559b','#f3ede4','#6b7280','#15171b'];
 let tm;
-function commit() {
-  const ok = RR.save(S), s = $('saved'); s.textContent = ok ? 'Saved ✓' : 'Could not save (storage blocked)';
+function commit(ctl) {
+  const ok = ctl ? RR.saveControls(CTL) : RR.save(S), s = $('saved'); s.textContent = ok ? 'Saved ✓' : 'Could not save (storage blocked)';
   s.classList.add('on'); clearTimeout(tm); tm = setTimeout(() => s.classList.remove('on'), 1500);
 }
 function showColor() {
@@ -63,6 +90,73 @@ $('hex').onblur = () => { $('hex').value = S.color; };
 for (const k of ['legal', 'shadows', 'sound']) $(k).onchange = e => { S[k] = e.target.checked; if (k === 'shadows') v.setShadows(S.shadows); commit(); };
 $('reset').onclick = () => { S = Object.assign({}, RR.DEFAULTS); showAll(); commit(); };
 showAll();
+
+/* ---------- Controls remapping ---------- */
+let CTL = RR.loadControls(), tab = 'kb', listening = null, lastDev = 'kb', note = '';
+const LABELS = Object.fromEntries(RR.ACTIONS), getPad = () => (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
+const nameOf = (d, c) => d === 'pad' ? RR.padName(c, RR.padStyle((getPad() || {}).id)) : RR.keyName(c);
+function renderCtl() {
+  document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.d === tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  const gp = getPad();
+  $('ctlStatus').textContent = tab === 'kb' ? 'Keyboard controls. Switches to the controller tab as soon as you touch your controller.'
+    : gp ? 'Controller detected: ' + gp.id : 'No controller detected. Connect one and press any button on it.';
+  $('ctlReset').textContent = 'Reset ' + (tab === 'kb' ? 'keyboard' : 'controller') + ' controls';
+  const rows = $('ctlRows'); rows.textContent = '';
+  for (const [a, label] of RR.ACTIONS) {
+    const r = document.createElement('div'); r.className = 'crow'; const l = document.createElement('span'); l.textContent = label; r.append(l);
+    for (let i = 0; i < 2; i++) {
+      const code = CTL[tab][a][i], b = document.createElement('button'), on = listening && listening.a === a && listening.i === i && listening.d === tab;
+      b.className = 'slot' + (on ? ' listen' : '') + (code || on ? '' : ' empty'); b.dataset.a = a; b.dataset.i = i;
+      b.textContent = on ? (tab === 'kb' ? 'Press a key…' : 'Press a button…') : code ? nameOf(tab, code) : '(empty)';
+      b.setAttribute('aria-label', label + ', slot ' + (i + 1) + ': ' + (code ? nameOf(tab, code) : 'empty') + '. Click to change.');
+      b.onclick = () => startListen(a, i); r.append(b);
+    }
+    rows.append(r);
+  }
+  $('ctlNote').textContent = note;
+}
+function setTab(t) { if (t === tab) return; tab = t; cancelListen(); note = ''; renderCtl(); }
+let padBase = null;
+function startListen(a, i) {
+  note = ''; listening = { a, i, d: tab }; padBase = null; renderCtl();
+}
+function cancelListen() { if (listening) { listening = null; padBase = null; renderCtl(); } }
+function assign(d, a, i, code) {
+  let moved = null;
+  if (code) for (const [b] of RR.ACTIONS) for (let j = 0; j < 2; j++) if (CTL[d][b][j] === code && !(b === a && j === i)) { CTL[d][b][j] = null; if (b !== a) moved = b; }
+  CTL[d][a][i] = code; listening = null; padBase = null;
+  note = moved ? nameOf(d, code) + ' was used for “' + LABELS[moved] + '”. That slot is now empty.' : '';
+  commit(true); renderCtl();
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.d));
+$('ctlReset').onclick = () => { CTL[tab] = RR.defaultControls()[tab]; cancelListen(); note = ''; commit(true); renderCtl(); };
+addEventListener('pointerdown', e => { if (listening && !e.target.closest('.slot.listen')) cancelListen(); });
+addEventListener('keydown', e => {
+  if (listening) {
+    if (listening.d !== 'kb') { if (e.code === 'Escape') { e.preventDefault(); cancelListen(); } return; }
+    e.preventDefault(); e.stopPropagation(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    const { a, i } = listening;
+    if (e.code === 'Escape') cancelListen(); else if (e.code === 'Delete' || e.code === 'Backspace') assign('kb', a, i, null); else assign('kb', a, i, e.code);
+    return;
+  }
+  if (!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.code !== 'Tab' && lastDev !== 'kb') { lastDev = 'kb'; setTab('kb'); }
+}, true);
+addEventListener('gamepadconnected', () => renderCtl()); addEventListener('gamepaddisconnected', () => renderCtl());
+let hadPad = false;
+(function loop() { // watches the controller: switches the tab when you use it, and captures the next button for a slot being remapped
+  requestAnimationFrame(loop);
+  const gp = getPad(); if ((!!gp) !== hadPad) { hadPad = !!gp; renderCtl(); }
+  if (!gp) return;
+  const pressed = gp.buttons.map(b => b.pressed || b.value > .5), axes = gp.axes.map(x => x || 0);
+  if (!listening || listening.d !== 'pad') {
+    if (pressed.some(Boolean) || axes.some(x => Math.abs(x) > .6)) { if (lastDev !== 'pad') { lastDev = 'pad'; setTab('pad'); } }
+    return;
+  }
+  if (!padBase) { padBase = { b:pressed.slice(), a:axes.slice() }; return; } // ignore whatever is already held when listening starts
+  for (let k = 0; k < pressed.length; k++) { if (pressed[k] && !padBase.b[k]) return assign('pad', listening.a, listening.i, 'b' + k); padBase.b[k] = pressed[k]; }
+  for (let k = 0; k < axes.length; k++) { if (Math.abs(axes[k]) > .6 && Math.abs(padBase.a[k]) < .3) return assign('pad', listening.a, listening.i, 'a' + k + (axes[k] < 0 ? '-' : '+')); padBase.a[k] = axes[k]; }
+})();
+renderCtl();
 </script>
 </body>
 </html>
