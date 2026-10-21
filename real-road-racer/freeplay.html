@@ -31,7 +31,9 @@
   #speed { font-size:54px; font-weight:700; line-height:1; }
   #speed small { font-size:16px; font-weight:400; margin-left:4px; }
   #info { font-size:14px; color:var(--ink); }
-  #help { position:fixed; left:14px; bottom:12px; font-size:12px; color:var(--muted); }
+  #help { position:fixed; left:14px; bottom:12px; max-width:min(540px,calc(100vw - 290px)); font-size:12px; line-height:2; color:var(--muted); text-shadow:0 1px 6px rgba(0,0,0,.7); pointer-events:none; }
+  #help .hk { display:inline-block; white-space:nowrap; margin-right:14px; }
+  #help kbd { font:inherit; font-weight:700; color:var(--ink); background:rgba(22,28,40,.8); border:1px solid rgba(255,255,255,.2); border-radius:4px; padding:0 6px; margin:0 1px; }
   #msg { position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); font-size:30px; font-weight:700;
     text-shadow:0 2px 12px rgba(0,0,0,.7); display:none; text-align:center; }
   #panel { max-height:calc(100% - 24px); overflow:auto; }
@@ -84,7 +86,7 @@
   .hint { font-size:12px; color:var(--muted); margin:8px 0 0; }
   #map.picking, #map.picking.leaflet-grab, #map.picking .leaflet-interactive { cursor:crosshair !important; }
   #driftTag { font-size:22px; font-weight:800; letter-spacing:2px; color:var(--accent); visibility:hidden; }
-  #touch [data-k=hand] { right:12px; bottom:106px; font-size:13px; font-weight:800; letter-spacing:.5px; }
+  #touch :is([data-k=hand],[data-k=look]) { bottom:106px; font-size:13px; font-weight:800; letter-spacing:.5px; } #touch [data-k=hand] { right:12px; } #touch [data-k=look] { left:12px; }
 </style>
 </head>
 <body>
@@ -95,7 +97,7 @@
     <div class="row2"><input id="a" type="text" placeholder="40.75800, -73.98550" autocomplete="off" inputmode="decimal"><button class="alt" id="locA" title="Use my location" aria-label="Use my location as start">📍</button><button class="alt pick" id="pickA" data-k="a">Select start</button></div>
     <label for="b">Finish (latitude, longitude)</label>
     <div class="row2"><input id="b" type="text" placeholder="40.78290, -73.96540" autocomplete="off" inputmode="decimal"><button class="alt" id="locB" title="Use my location" aria-label="Use my location as finish">📍</button><button class="alt pick" id="pickB" data-k="b">Select finish</button></div>
-    <p class="hint">Press “Select start” or “Select finish”, then click the map. Car colour, legal mode and shadows are in Settings.</p>
+    <p class="hint">Press “Select start” or “Select finish”, then click the map. Car colour, legal mode, shadows and controls are in Settings.</p>
     <div class="row2"><div style="flex:1"><label for="wx">Weather</label><select id="wx"><option>Clear</option><option>Cloudy</option><option>Rain</option><option>Fog</option></select></div>
     <div style="flex:1"><label for="tod">Time of day</label><select id="tod"><option>Morning</option><option selected>Day</option><option>Sunset</option><option>Night</option></select></div></div>
     <button id="go">Start</button>
@@ -116,11 +118,11 @@
 <div id="note"></div>
 <div id="limit"><div id="limNum">50</div><div id="limWarn"></div></div>
 <div id="toast"></div>
-<div id="tools"><a class="tool" href="index.html" title="Main menu">⌂ Menu</a><button class="tool" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera (C)">🎥 Chase</button></div>
-<div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="hand" aria-label="Handbrake / drift">DRIFT</button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button></div>
+<div id="tools"><a class="tool" href="index.html" title="Main menu">⌂ Menu</a><button class="tool" id="muteBtn" title="Sound" aria-label="Toggle sound">🔊</button><button class="tool" id="camBtn" title="Camera">🎥 Chase</button></div>
+<div id="touch"><button data-k="left" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 6l-6 6 6 6"/></svg></button><button data-k="right" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button><button data-k="down" aria-label="Brake and reverse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></button><button data-k="hand" aria-label="Handbrake / drift">DRIFT</button><button data-k="up" aria-label="Accelerate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></button><button data-k="look" aria-label="Look behind (hold)">REAR</button></div>
 <canvas id="mini" width="220" height="160"></canvas>
 <div id="hud"><div id="speed">0<small>km/h</small></div><div id="info"></div><div id="driftTag">DRIFT!</div></div>
-<div id="help">Arrows or WASD to drive &middot; Space handbrake (hold it while steering to drift) &middot; C camera &middot; M sound &middot; R restart</div>
+<div id="help"></div>
 <div id="msg"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -818,16 +820,8 @@ function groundAt(x, z, i) {
   const a = P[bi], b = P[bi + 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1;
   return { y:a.y + (b.y - a.y) * bt, slope:(b.y - a.y) / l, tx:(b.x - a.x) / l, tz:(b.z - a.z) / l };
 }
-const keys = {};
-addEventListener('keydown', e => {
-  if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-  keys[e.code] = true;
-  if (e.code === 'KeyR') retry();
-  if (!e.repeat && e.code === 'KeyC') setCam(camMode + 1);
-  if (!e.repeat && e.code === 'KeyM') toggleMute();
-  if (e.code === 'Space' && e.target === document.body) e.preventDefault();
-});
-addEventListener('keyup', e => keys[e.code] = false);
+const INP = RR.input; INP.start(); // remappable controls live in shared.js (Settings page)
+INP.on('restart', () => retry()); INP.on('cam', () => setCam(camMode + 1)); INP.on('mute', () => toggleMute());
 
 const st = { x:0, z:0, heading:0, speed:0, idx:0, time:0, done:false, y:0, steer:0, pitch:0, roll:0, slopeS:0, aLongS:0, aLat:0, slip:0, rough:0, bump:0, overT:0, pen:0, course:0, drift:false, slipAng:0, smk:0 };
 function resetCar() {
@@ -896,10 +890,8 @@ function vehicleStep(S, I, dt, C) {
 
 function step(dt) {
   if (!track || st.done || state !== 'race') return;
-  const up = keys.ArrowUp || keys.KeyW || touch.up || pad.up > .08, down = keys.ArrowDown || keys.KeyS || touch.down || pad.down > .08;
-  const left = keys.ArrowLeft || keys.KeyA || touch.left, right = keys.ArrowRight || keys.KeyD || touch.right;
-  const thr = (keys.ArrowUp || keys.KeyW || touch.up) ? 1 : pad.up, hand = !!(keys.Space || pad.hand || touch.hand);
-  vehicleStep(st, { up, down, hand, thr, steer:Math.max(-1, Math.min(1, (left ? 1 : 0) - (right ? 1 : 0) - pad.steer)) }, dt, cur);
+  const thr = INP.get('up'), up = thr > .08, down = INP.get('down') > .08, hand = INP.get('hand') > .5;
+  vehicleStep(st, { up, down, hand, thr, steer:Math.max(-1, Math.min(1, INP.get('left') - INP.get('right'))) }, dt, cur);
   if (env.legal) { // speed limit: 3 s over in a row = +10 s
     if (Math.abs(st.speed) * 3.6 > track.lims[st.idx]) { st.overT += dt; if (st.overT >= 3) { st.overT = 0; st.pen += 10; showToast('+10 s penalty: speeding'); } }
     else st.overT = 0;
@@ -933,7 +925,7 @@ const camPos = new THREE.Vector3();
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-  pollPad(); step(dt); updateAudio(); updateRain(dt); updateClouds(dt); driftFx(dt);
+  INP.poll(); step(dt); updateAudio(); updateRain(dt); updateClouds(dt); driftFx(dt);
   if (groundMesh) groundMesh.position.set(st.x, groundMesh.position.y, st.z);
   if (streamer && (state === 'race' || state === 'countdown') && (frame.sT = (frame.sT || 0) + dt) > .5) { frame.sT = 0; streamer.update(st.idx, st.x, st.z); }
   if (track) {
@@ -945,12 +937,13 @@ function frame(now) {
     if (U.wheels) {
       for (const w of U.wheels) w.rotation.x += st.speed * dt / .33;
       for (const p of U.pivots) p.rotation.y = st.steer * .4;
-      const brk = ((keys.ArrowDown || keys.KeyS || touch.down || pad.down > .08) && st.speed > .5) || keys.Space || pad.hand;
+      const brk = (INP.get('down') > .08 && st.speed > .5) || INP.get('hand') > .5;
       U.tail.color.setHex(brk ? 0xff2a2a : 0x6b1111);
     }
     const th = -st.pitch, f3 = new THREE.Vector3(Math.sin(st.heading) * Math.cos(th), Math.sin(th), Math.cos(st.heading) * Math.cos(th));
-    if (camMode >= 2) { // hood, or reverse (rear view looking back along the road)
-      const rev = camMode === 3, zo = rev ? -(cur.len / 2 - .4) : cur.len / 2 - .3, yo = rev ? 1.25 : 1.0, sg = rev ? -1 : 1;
+    const rev = INP.get('look') > .5; if (rev !== lookBack) { lookBack = rev; applyView(); }
+    if (camMode === 2 || rev) { // hood view, or the look-behind button is held (rear view looking back along the road)
+      const zo = rev ? -(cur.len / 2 - .4) : cur.len / 2 - .3, yo = rev ? 1.25 : 1.0, sg = rev ? -1 : 1;
       camera.position.set(st.x + f3.x * zo, y + yo + f3.y * zo, st.z + f3.z * zo); camPos.copy(camera.position);
       camera.lookAt(camera.position.x + f3.x * 30 * sg, camera.position.y + f3.y * 30 * sg, camera.position.z + f3.z * 30 * sg);
     } else {
@@ -1394,7 +1387,7 @@ function updateAudio() {
   const v = racing ? Math.abs(st.speed) : 0, lim = [12, 22, 33, 50]; // simple 4-speed gearbox sets the revs
   let g = 0; while (g < 3 && v > lim[g]) g++;
   const lo = g ? lim[g - 1] * .6 : 0, rpm = 900 + 5600 * Math.min(1, Math.max(0, (v - lo) / (lim[g] - lo)));
-  const thr = racing && (keys.ArrowUp || keys.KeyW || touch.up || pad.up > .08) ? 1 : 0;
+  const thr = racing && INP.get('up') > .08 ? 1 : 0;
   audio.o1.frequency.setTargetAtTime(rpm / 30, t, .04); audio.o2.frequency.setTargetAtTime(rpm / 60, t, .04);
   audio.f.frequency.setTargetAtTime(350 + rpm * .3 + thr * 500, t, .08);
   audio.eg.gain.setTargetAtTime(live ? .07 + .08 * thr + .05 * rpm / 6500 : 0, t, .06);
@@ -1408,23 +1401,17 @@ function toggleMute() { audio.on = !audio.on; if (audio.master) audio.master.gai
 $('muteBtn').onclick = e => { toggleMute(); e.currentTarget.blur(); };
 
 /* ---------- Cameras ---------- */
-const CAMS = ['Chase', 'Far', 'Hood', 'Reverse']; let camMode = 0;
-function setCam(m) {
-  camMode = m % CAMS.length; $('camBtn').textContent = '🎥 ' + CAMS[camMode];
-  camera.fov = camMode === 2 ? 78 : camMode === 3 ? 70 : 65; camera.updateProjectionMatrix(); car.visible = camMode < 2; // hide the car in hood and reverse views
-}
+const CAMS = ['Chase', 'Far', 'Hood']; let camMode = 0, lookBack = false;
+function applyView() { camera.fov = lookBack ? 70 : camMode === 2 ? 78 : 65; camera.updateProjectionMatrix(); car.visible = camMode < 2 && !lookBack; } // the car is hidden in hood view and while looking behind
+function setCam(m) { camMode = m % CAMS.length; $('camBtn').textContent = '🎥 ' + CAMS[camMode]; applyView(); }
 $('camBtn').onclick = e => { setCam(camMode + 1); e.currentTarget.blur(); };
 
 /* ---------- Gamepad + touch ---------- */
-const pad = { up:0, down:0, steer:0, hand:0 }, touch = { up:false, down:false, left:false, right:false }, prevBtn = {};
-function pollPad() {
-  const gp = (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
-  if (!gp) { pad.up = pad.down = pad.steer = pad.hand = 0; return; }
-  const btn = i => gp.buttons[i] ? gp.buttons[i].value : 0, dz = x => Math.abs(x) < .12 ? 0 : x;
-  pad.steer = dz(gp.axes[0] || 0); pad.up = btn(7); pad.down = btn(6); pad.hand = btn(2) > .5 ? 1 : 0; // stick, triggers, X button
-  const edge = (i, fn) => { const p = btn(i) > .5; if (p && !prevBtn[i]) fn(); prevBtn[i] = p; };
-  edge(3, () => setCam(camMode + 1)); edge(9, () => retry()); edge(0, toggleMute);       // Y camera, Start retry, A sound
+const touch = INP.touch; // the on-screen buttons write here (up, down, left, right, hand, look)
+function updateHelp() { // bottom-left reminder shows the bindings of whichever device you are using (keyboard or controller)
+  $('help').innerHTML = INP.helpHTML(); $('muteBtn').title = 'Sound (' + INP.label('mute') + ')'; $('camBtn').title = 'Camera (' + INP.label('cam') + ')';
 }
+INP.onDevice(updateHelp); updateHelp();
 if (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window) document.body.dataset.touch = '1';
 document.querySelectorAll('#touch button').forEach(b => { const k = b.dataset.k;
   const on = e => { e.preventDefault(); touch[k] = true; }, off = e => { e.preventDefault(); touch[k] = false; };
