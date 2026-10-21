@@ -94,5 +94,97 @@
     })(prev);
     return { car, setShadows, setColor(hex) { car.userData.bodyMat.color.set(hex); } };
   }
-  window.RR = { DEFAULTS, CARS, load, save, normHex, buildCar, viewer };
+  /* ---------- Controls: remappable keyboard + gamepad bindings, shared by every page ---------- */
+  const CTRL_KEY = 'rrControls';
+  const ACTIONS = [['up', 'Accelerate'], ['down', 'Brake / reverse'], ['left', 'Steer left'], ['right', 'Steer right'], ['hand', 'Handbrake / drift'],
+    ['look', 'Look behind (hold)'], ['cam', 'Change camera'], ['mute', 'Sound on / off'], ['restart', 'Restart']];
+  // keyboard: KeyboardEvent.code. gamepad: 'b7' = button 7, 'a0-' = axis 0 pushed negative, 'a0+' = positive. Two slots per action.
+  const CTRL_DEFAULTS = {
+    kb:  { up:['ArrowUp', 'KeyW'], down:['ArrowDown', 'KeyS'], left:['ArrowLeft', 'KeyA'], right:['ArrowRight', 'KeyD'], hand:['Space', null], look:['KeyB', null], cam:['KeyC', null], mute:['KeyM', null], restart:['KeyR', null] },
+    pad: { up:['b7', null], down:['b6', null], left:['a0-', 'b14'], right:['a0+', 'b15'], hand:['b2', null], look:['b1', null], cam:['b3', null], mute:['b0', null], restart:['b9', null] }
+  };
+  const KB_OK = /^[A-Za-z0-9]{1,24}$/, PAD_OK = /^(b\d{1,2}|a\d[+-])$/;
+  const defaultControls = () => JSON.parse(JSON.stringify(CTRL_DEFAULTS));
+  function loadControls() {
+    let s = {}; try { s = JSON.parse(localStorage.getItem(CTRL_KEY)) || {}; } catch (e) {}
+    const out = {};
+    for (const dev of ['kb', 'pad']) {
+      out[dev] = {}; const ok = dev === 'kb' ? KB_OK : PAD_OK;
+      for (const [a] of ACTIONS) {
+        const v = s[dev] && Array.isArray(s[dev][a]) ? s[dev][a] : null;
+        out[dev][a] = v ? [0, 1].map(i => typeof v[i] === 'string' && ok.test(v[i]) ? v[i] : null) : CTRL_DEFAULTS[dev][a].slice();
+      }
+    }
+    return out;
+  }
+  function saveControls(c) { try { localStorage.setItem(CTRL_KEY, JSON.stringify(c)); return true; } catch (e) { return false; } }
+
+  const KEYN = { ArrowUp:'↑', ArrowDown:'↓', ArrowLeft:'←', ArrowRight:'→', Space:'Space', Enter:'Enter', Backspace:'Backspace', Tab:'Tab', ShiftLeft:'L-Shift', ShiftRight:'R-Shift',
+    ControlLeft:'L-Ctrl', ControlRight:'R-Ctrl', AltLeft:'L-Alt', AltRight:'R-Alt', Comma:',', Period:'.', Slash:'/', Semicolon:';', Quote:"'", BracketLeft:'[', BracketRight:']',
+    Backslash:'\\', Minus:'-', Equal:'=', Backquote:'`', CapsLock:'Caps', NumpadEnter:'Num Enter', PageUp:'PgUp', PageDown:'PgDn' };
+  function keyName(c) {
+    if (!c) return '—'; if (KEYN[c]) return KEYN[c]; let m;
+    if ((m = /^Key([A-Z])$/.exec(c))) return m[1]; if ((m = /^Digit(\d)$/.exec(c))) return m[1]; if ((m = /^Numpad(\w+)$/.exec(c))) return 'Num ' + m[1];
+    return c;
+  }
+  const PAD_X = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'Back', 'Start', 'L3', 'R3', 'D-pad ↑', 'D-pad ↓', 'D-pad ←', 'D-pad →', 'Home'];
+  const PAD_P = ['✕', '○', '□', '△', 'L1', 'R1', 'L2', 'R2', 'Share', 'Options', 'L3', 'R3', 'D-pad ↑', 'D-pad ↓', 'D-pad ←', 'D-pad →', 'PS'];
+  const AXN = [['L-Stick ←', 'L-Stick →'], ['L-Stick ↑', 'L-Stick ↓'], ['R-Stick ←', 'R-Stick →'], ['R-Stick ↑', 'R-Stick ↓']];
+  const padStyle = id => /054c|playstation|dualshock|dualsense|sony/i.test(id || '') ? 'ps' : 'xbox';
+  function padName(c, style) {
+    if (!c) return '—';
+    const n = +c.slice(1, c.length - (c[0] === 'a' ? 1 : 0));
+    if (c[0] === 'b') return (style === 'ps' ? PAD_P : PAD_X)[n] || 'Button ' + n;
+    return AXN[n] ? AXN[n][c.endsWith('-') ? 0 : 1] : 'Axis ' + n + c.slice(-1);
+  }
+  const esc = t => String(t).replace(/[&<>]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[ch]));
+
+  // Runtime input used by the games. Call input.start() once, input.poll() every frame, then input.get('up') etc.
+  const input = (function () {
+    let C = loadControls(), held = {}, dev = 'kb', padId = '', padV = {}, prev = {}, started = false;
+    const touch = {}, handlers = {}, cbs = [];
+    const setDevice = d => { if (d !== dev) { dev = d; cbs.forEach(f => f(dev)); } };
+    const fire = a => (handlers[a] || []).forEach(f => f());
+    function start() {
+      if (started) return; started = true;
+      addEventListener('keydown', e => {
+        if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+        held[e.code] = true; setDevice('kb');
+        const bound = ACTIONS.filter(([a]) => C.kb[a].includes(e.code));
+        if (bound.length && /^(Space|Arrow)/.test(e.code) && e.target === document.body) e.preventDefault();
+        if (!e.repeat) bound.forEach(([a]) => fire(a));
+      });
+      addEventListener('keyup', e => { held[e.code] = false; });
+      addEventListener('blur', () => { held = {}; });
+      addEventListener('storage', e => { if (e.key === CTRL_KEY) { C = loadControls(); cbs.forEach(f => f(dev)); } });
+    }
+    function poll() {
+      const gp = (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
+      if (!gp) { padId = ''; padV = {}; prev = {}; if (dev === 'pad') setDevice('kb'); return; }
+      padId = gp.id;
+      const read = s => {
+        if (!s) return 0;
+        if (s[0] === 'b') { const b = gp.buttons[+s.slice(1)]; return b ? b.value : 0; }
+        const v = (s.endsWith('-') ? -1 : 1) * (gp.axes[+s.slice(1, -1)] || 0); return v >= .12 ? v : 0;
+      };
+      for (const [a] of ACTIONS) padV[a] = Math.max(read(C.pad[a][0]), read(C.pad[a][1]));
+      if (gp.buttons.some(b => b.pressed) || gp.axes.some(x => Math.abs(x) > .6)) setDevice('pad');
+      for (const a in handlers) { const p = padV[a] > .5; if (p && !prev[a]) fire(a); prev[a] = p; }
+    }
+    const kbHeld = a => C.kb[a].some(c => c && held[c]);
+    const get = a => Math.max(kbHeld(a) ? 1 : 0, touch[a] ? 1 : 0, padV[a] || 0); // 0..1 (analog for sticks and triggers)
+    const style = () => padStyle(padId);
+    function label(a, d) { d = d || (dev === 'pad' ? 'pad' : 'kb'); const x = (C[d][a] || []).find(Boolean); return d === 'pad' ? padName(x, style()) : keyName(x); }
+    function helpHTML() { // the controls reminder in the corner: always the bindings of the device being used
+      const d = dev === 'pad' ? 'pad' : 'kb', nm = c => d === 'pad' ? padName(c, style()) : keyName(c);
+      const ks = a => { const l = C[d][a].filter(Boolean); return (l.length ? l : [null]).map(c => '<kbd>' + esc(nm(c)) + '</kbd>').join('/'); };
+      const it = (lab, v) => '<span class="hk">' + v + ' ' + lab + '</span>';
+      return [it('accelerate', ks('up')), it('brake / reverse', ks('down')), it('steer left / right', ks('left') + ' ' + ks('right')), it('handbrake (hold + steer = drift)', ks('hand')),
+        it('look behind (hold)', ks('look')), it('camera', ks('cam')), it('sound', ks('mute')), it('restart', ks('restart'))].join('');
+    }
+    return { start, poll, get, touch, label, helpHTML, device: () => dev, padId: () => padId,
+      on(a, fn) { (handlers[a] = handlers[a] || []).push(fn); }, onDevice(fn) { cbs.push(fn); }, reload() { C = loadControls(); cbs.forEach(f => f(dev)); } };
+  })();
+
+  window.RR = { DEFAULTS, CARS, load, save, normHex, buildCar, viewer, ACTIONS, CTRL_DEFAULTS, defaultControls, loadControls, saveControls, keyName, padName, padStyle, input };
 })();
