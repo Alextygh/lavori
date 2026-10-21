@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>  
+<head> 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Story Mode · Real Road Racer</title>
@@ -50,7 +50,7 @@
   #menu { background:linear-gradient(160deg,#18202e,#26344d); padding:16px; gap:16px; align-items:stretch; }
   #menu #map { flex:1; height:auto; margin:0; min-height:240px; }
   #formPanel, #confirmPanel { align-self:flex-start; max-height:100%; overflow:auto; }
-  @media (max-width:760px) { #menu { flex-direction:column; } #formPanel, #confirmPanel { width:100%; } }
+  
   .row2 { display:flex; gap:8px; } .row2 input[type=text] { flex:1; min-width:0; } .row2 button { width:auto; margin:0; padding:0 12px; }
   input[type=color] { width:52px; height:38px; padding:2px; border:1px solid #3a475e; border-radius:6px; background:#121926; cursor:pointer; }
   button.alt { background:#26324a; color:var(--ink); }
@@ -116,6 +116,40 @@
   #talk { display:none; position:fixed; top:128px; left:50%; transform:translateX(-50%); max-width:min(560px,90%); padding:8px 14px; border-radius:10px; background:rgba(10,14,22,.82); font-size:17px; font-weight:600; text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; }
   #tWho { text-transform:uppercase; letter-spacing:1px; font-size:13px; margin-right:6px; }
   #tmark { transform:translate(-50%,-50%); padding:2px 9px; border-radius:11px; background:rgba(220,60,60,.88); color:#fff; font-weight:700; font-size:13px; white-space:nowrap; }
+
+  /* ---- mobile / small screens: everything smaller, nothing cut off ---- */
+  :root { --tb:78px; }
+  @media (max-width:520px), (max-height:480px) { :root { --tb:62px; } }
+  #touch button { width:var(--tb); height:var(--tb); bottom:14px; transition:background .08s; }
+  #touch button.on { background:rgba(242,166,90,.65); border-color:#fff; }
+  #touch [data-k=left] { left:10px; } #touch [data-k=right] { left:calc(var(--tb) + 18px); }
+  #touch [data-k=up] { right:10px; } #touch [data-k=down] { right:calc(var(--tb) + 18px); }
+  #touch :is([data-k=hand],[data-k=look]) { bottom:calc(var(--tb) + 24px); }
+  #touch [data-k=hand] { right:10px; } #touch [data-k=look] { left:10px; }
+  @media (orientation:portrait) { body[data-touch="1"] #hud { bottom:calc(var(--tb) * 2 + 40px); right:10px; } }
+  @media (orientation:landscape) { body[data-touch="1"] #hud { right:50%; transform:translateX(50%); bottom:8px; text-align:center; } body[data-touch="1"] #speed { font-size:40px; } }
+  @media (max-width:520px), (max-height:520px) {
+    #tools { top:8px; left:8px; gap:6px; } .tool, a.tool { padding:5px 9px; font-size:12px; }
+    #mini { width:120px; height:88px; top:8px; right:8px; }
+    #chase { top:44px; left:8px; transform:none; text-align:left; min-width:0; }
+    #cName { font-size:10px; letter-spacing:1px; } #cDist { font-size:26px; } #cNote { font-size:12px; min-height:1.2em; }
+    #cHits { margin-top:3px; } #cHits i { width:13px; height:13px; margin:0 3px 0 0; }
+    #talk { top:min(190px,32vh); font-size:13px; padding:6px 10px; max-width:92%; }
+    #toast { top:96px; font-size:20px; } #msg { font-size:22px; } #limit { top:100px; left:auto; right:8px; transform:none; }
+    #limNum { width:50px; height:50px; font-size:18px; line-height:38px; border-width:5px; } #limWarn { font-size:12px; margin-top:2px; }
+    .card { padding:12px; } .card h1 { font-size:18px; } #finish .card button, #finish .card a.btn { margin-top:8px; padding:8px; }
+    /* menus: compact */
+    #menu { padding:10px; gap:10px; } #menu h1 { font-size:15px; margin:0 0 4px; } #menu label { margin:5px 0 2px; font-size:12px; }
+    #menu input[type=text], #menu select { padding:5px 8px; font-size:13px; } #menu button, #menu a.btn { margin-top:8px; padding:7px; font-size:13px; } #menu .row2 button { margin:0; padding:0 10px; }
+    #menu .hint { font-size:11px; margin:5px 0 0; line-height:1.35; } #status { margin-top:6px; } #sum div { margin:4px 0; font-size:13px; }
+    /* story: chapters + cutscenes */
+    body[data-s=chapters] #chapters { padding:10px 12px 24px; } .cwrap h1 { font-size:26px; margin:8px 0 0; } .cwrap .sub { margin:0 0 8px; font-size:12px; }
+    .ccard { gap:10px; padding:9px 12px; margin:7px 0; } .ccard .num { font-size:22px; width:22px; } .ccard h3 { font-size:15px; } .ccard .meta { font-size:12px; line-height:1.3; }
+    .ccard button, .cbar button { padding:7px 12px; font-size:13px; } .cbar { margin-top:10px; } a.btn.small { padding:6px 12px; font-size:13px; }
+    #cutBox { padding:9px 14px; min-height:0; bottom:9vh; } #cutTxt { font-size:15px; line-height:1.35; } #cutWho { font-size:12px; margin-bottom:2px; } #cutHint { font-size:11px; margin-top:2px; }
+  }
+  @media (max-width:760px) and (min-height:521px) { #menu { flex-direction:column; overflow:auto; } #formPanel, #confirmPanel { flex:none; width:100%; max-height:none; overflow:visible; } #menu #map { flex:none; height:min(42vh,320px); min-height:190px; } }
+  @media (max-height:520px) { #menu { flex-direction:row; } #formPanel, #confirmPanel { width:min(340px,55%); } }
 </style>
 </head>
 <body>
@@ -912,7 +946,7 @@ function vehicleStep(S, I, dt, C) {
 
 function step(dt) {
   if (!track || st.done || state !== 'race') return;
-  const thr = INP.get('up'), up = thr > .08, down = INP.get('down') > .08, hand = INP.get('hand') > .5;
+  const down = INP.get('down') > .08, hand = INP.get('hand') > .5, thr = Math.max(INP.get('up'), touch.hand && !touch.down ? 1 : 0), up = thr > .08; // on touch, holding DRIFT keeps the gas on too
   vehicleStep(st, { up, down, hand, thr, steer:Math.max(-1, Math.min(1, INP.get('left') - INP.get('right'))) }, dt, cur);
   if (env.legal) { // speed limit: 3 s over in a row = +10 s
     if (Math.abs(st.speed) * 3.6 > track.lims[st.idx]) { st.overT += dt; if (st.overT >= 3) { st.overT = 0; st.pen += 10; showToast('+10 s penalty: speeding'); } }
@@ -1408,7 +1442,7 @@ function updateHelp() { // bottom-left reminder shows the bindings of whichever 
 INP.onDevice(updateHelp); updateHelp();
 if (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window) document.body.dataset.touch = '1';
 document.querySelectorAll('#touch button').forEach(b => { const k = b.dataset.k;
-  const on = e => { e.preventDefault(); touch[k] = true; }, off = e => { e.preventDefault(); touch[k] = false; };
+  const on = e => { e.preventDefault(); touch[k] = true; b.classList.add('on'); }, off = e => { e.preventDefault(); touch[k] = false; b.classList.remove('on'); };
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off); });
 
 /* ================= STORY MODE ================= */
