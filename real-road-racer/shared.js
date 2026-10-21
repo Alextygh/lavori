@@ -1,4 +1,4 @@
-/* Shared helpers: saved settings + 3D car viewer (needs three.js r128) */
+/* Shared helpers: saved settings + 3D car viewer (needs three.js r128) */ 
 (function () {
   const KEY = 'rrSettings', HEX = /^#[0-9a-f]{6}$/i;
   const DEFAULTS = { color:'#d9482b', legal:false, shadows:true, sound:true };
