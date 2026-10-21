@@ -1777,7 +1777,7 @@ function addTrail() { // neon ribbon behind a drifting car
 }
 function abilityUpdate(dt) {
   T.abCd -= dt; const gap = (A.idx - st.idx) * T.ds, near = T.dist < NEAR; // abilities only fire while you are close to the target
-  if (!near) T.abCd = Math.max(T.abCd, 1.5); // a short grace period after you catch up
+  if (!near && CH.ability !== 'rivals') T.abCd = Math.max(T.abCd, 1.5); // a short grace period after you catch up (rivals ignore distance: Silas outruns you, but his old rivals come for you)
   if (CH.ability === 'oil') {
     if (T.abCd <= 0 && near) { const fx = Math.sin(A.heading), fz = Math.cos(A.heading), jit = (Math.random() - .5) * 3, sc = .8 + Math.random() * .5, m = new THREE.Mesh(oilGeo, oilMat);
       m.position.set(A.x - fx * 4 + Math.cos(A.heading) * jit, A.y + .05, A.z - fz * 4 - Math.sin(A.heading) * jit); m.scale.setScalar(sc); hzGroup.add(m);
@@ -1817,9 +1817,12 @@ function abilityUpdate(dt) {
       if (o.hit) o.t = Math.max(o.t, 8.7);
       if (o.t > 9 || o.s < st.idx - 6) { hzGroup.remove(o.m); HZ.goats.splice(i, 1); continue; } obstacleCollide(o); }
   } else if (CH.ability === 'rivals') {
-    if (T.abCd <= 0 && HZ.chasers.length < 1 && near && st.idx > 30) { const ix = Math.max(10, st.idx - Math.round(80 / T.ds)), c = CHAPTERS[Math.floor(Math.random() * 4)], p = track.pts[ix], q = track.pts[ix + 3];
+    if (T.abCd <= 0 && HZ.chasers.length < 2 && st.idx > 20 && st.idx < track.n - 40) {
+      const used = HZ.chasers.map(c => c.who), pool = [0, 1, 2, 3].filter(k => !used.includes(k)), k = pool[Math.floor(Math.random() * pool.length)], c = CHAPTERS[k];
+      const ix = Math.max(5, st.idx - Math.round((50 + Math.random() * 20) / T.ds)), p = track.pts[ix], q = track.pts[Math.min(track.n - 1, ix + 3)];
       const m = RR.buildCar(c.tcolor, c.tstyle); m.rotation.order = 'YXZ'; hzGroup.add(m);
-      const S = Object.assign(fresh(), { x:p.x, z:p.z, y:p.y, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:ix, speed:Math.max(10, st.speed), side:Math.random() < .5 ? -1 : 1, t:0, len:m.userData.dims.L, m }); S.course = S.heading; HZ.chasers.push(S); T.abCd = 14; }
+      const S = Object.assign(fresh(), { x:p.x, z:p.z, y:p.y, heading:Math.atan2(q.x - p.x, q.z - p.z), idx:ix, speed:Math.max(12, st.speed), side:Math.random() < .5 ? -1 : 1, t:0, len:m.userData.dims.L, m, who:k }); S.course = S.heading;
+      m.position.set(S.x, S.y, S.z); m.rotation.set(0, S.heading, 0); HZ.chasers.push(S); showToast(c.target + ' is back for revenge!'); T.abCd = 7; }
     for (let i = HZ.chasers.length - 1; i >= 0; i--) { const C = HZ.chasers[i]; C.t += dt;
       const ahead = C.idx - st.idx, fx = Math.sin(st.course), fz = Math.cos(st.course), px = Math.cos(st.course), pz = -Math.sin(st.course);
       const tx = st.x - fx * 1.2 + px * C.side * 1.5 + fx * st.speed * .3, tz = st.z - fz * 1.2 + pz * C.side * 1.5 + fz * st.speed * .3; // aims for your rear quarter
@@ -1828,7 +1831,7 @@ function abilityUpdate(dt) {
       CI.up = C.speed < vt - .3; CI.down = C.speed > vt + 3; vehicleStep(C, CI, dt, CC);
       C.m.position.set(C.x, C.y, C.z); C.m.rotation.set(C.pitch, C.heading, C.roll); for (const w of C.m.userData.wheels) w.rotation.x += C.speed * dt / .33;
       if (collideCars(st, C, 3.9, C.len) > 4) talk('trick');
-      if (C.t > 16 || C.idx >= track.n - 6) { hzGroup.remove(C.m); HZ.chasers.splice(i, 1); } }
+      if (C.t > 20 || C.idx >= track.n - 6) { hzGroup.remove(C.m); HZ.chasers.splice(i, 1); } }
   }
 }
 
