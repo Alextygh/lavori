@@ -92,7 +92,7 @@ My greatest creation. Here I publish every written work I ever did, these are bo
 Unless stated otherwise below, all the code in this repository (and in the external websites listed above) is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). You are free to share and adapt it, even commercially, as long as you give appropriate credit, provide a link to the license, and indicate if changes were made.
 
 ### All rights reserved
-**[Bunker-7](https://alextygh.github.io/lavori/Bunker-7/index.html)**, [Real Road Racer](https://alextygh.github.io/lavori/real-road-racer/index.html) and the **[Whisperheaven Library](https://alextygh.github.io/lavori/Whisperheaven/index.html)** are **not** covered by CC BY 4.0. Everything inside them, including all code, text, stories, characters and other content, is © Ale.10. All rights reserved.
+**[Bunker-7](https://alextygh.github.io/lavori/Bunker-7/index.html)**, **[Real Road Racer](https://alextygh.github.io/lavori/real-road-racer/index.html)** and the **[Whisperheaven Library](https://alextygh.github.io/lavori/Whisperheaven/index.html)** are **not** covered by CC BY 4.0. Everything inside them, including all code, text, stories, characters and other content, is © Ale.10. All rights reserved.
 
 ### Third-party properties
 Some pages are fan-made and use names, characters or data that belong to other people. I do not own any of them, I am not affiliated with or endorsed by their owners, and these pages are made for fun and not for profit. The CC BY 4.0 license above covers only my own code, not these third-party materials.
