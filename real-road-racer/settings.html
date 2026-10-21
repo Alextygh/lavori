@@ -19,6 +19,17 @@
   #ctlNote { min-height:1.3em; margin:6px 0 0; color:var(--accent,#e8a23a); }
   .ctlbar { display:flex; gap:8px; align-items:center; margin-top:8px; }
   .ctlbar .btn { margin:0; }
+
+  @media (max-width:760px) {
+    .layout { display:grid !important; grid-template-columns:1fr !important; gap:10px !important; }
+    .preview { height:200px !important; min-height:0 !important; } .preview canvas { width:100%; height:100%; display:block; }
+  }
+  @media (max-width:520px), (max-height:520px) {
+    .page { padding:10px !important; } h1 { font-size:22px; margin:6px 0 !important; } h2 { font-size:15px; } .desc { font-size:12px; }
+    .card, .group { padding-top:8px; padding-bottom:8px; }
+    .crow { grid-template-columns:1fr 84px 84px; gap:4px; padding:3px 0; } .crow > span { font-size:12.5px; } .slot { padding:4px 4px; min-height:28px; font-size:12px; }
+    .tabs .tab { padding:7px; font-size:13px; } .swatches { flex-wrap:wrap; }
+  }
 </style>
 </head>
 <body>
@@ -160,4 +171,3 @@ renderCtl();
 </script>
 </body>
 </html>
- 
