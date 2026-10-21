@@ -1,4 +1,4 @@
-/* Shared helpers: saved settings + 3D car viewer (needs three.js r128) */ 
+/* Shared helpers: saved settings + 3D car viewer (needs three.js r128) */
 (function () {
   const KEY = 'rrSettings', HEX = /^#[0-9a-f]{6}$/i;
   const DEFAULTS = { color:'#d9482b', legal:false, shadows:true, sound:true };
@@ -87,6 +87,8 @@
       const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
       if (w !== lw || h !== lh) { renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); lw = w; lh = h; }
       if (!drag) { yaw += yawV * dt; yawV += (AUTO - yawV) * Math.min(1, dt * 1.5); }
+      const gp = navigator.getGamepads ? [...navigator.getGamepads()].find(g => g && g.connected) : null; // right stick spins / tilts the car
+      if (gp) { const rx = gp.axes[2] || 0, ry = gp.axes[3] || 0; if (Math.abs(rx) > .2) { yaw += rx * dt * 3; yawV = rx * 3; } if (Math.abs(ry) > .2) pitch = clamp(pitch + ry * dt * 1.5, .05, .9); }
       car.rotation.y = yaw;
       const d = Math.max(8, 8.9 / cam.aspect) * zoom;
       cam.position.set(0, .7 + d * Math.sin(pitch), d * Math.cos(pitch)); cam.lookAt(0, .7, 0);
@@ -103,7 +105,7 @@
     kb:  { up:['ArrowUp', 'KeyW'], down:['ArrowDown', 'KeyS'], left:['ArrowLeft', 'KeyA'], right:['ArrowRight', 'KeyD'], hand:['Space', null], look:['KeyB', null], cam:['KeyC', null], mute:['KeyM', null], restart:['KeyR', null] },
     pad: { up:['b7', null], down:['b6', null], left:['a0-', 'b14'], right:['a0+', 'b15'], hand:['b2', null], look:['b1', null], cam:['b3', null], mute:['b0', null], restart:['b9', null] }
   };
-  const KB_OK = /^[A-Za-z0-9]{1,24}$/, PAD_OK = /^(b\d{1,2}|a\d[+-])$/;
+  const KB_OK = /^[A-Za-z0-9]{1,24}$/, PAD_OK = /^(b(?!8$)\d{1,2}|a\d[+-])$/; // button 8 (Select) is reserved: it always leaves the race / opens the copyright
   const defaultControls = () => JSON.parse(JSON.stringify(CTRL_DEFAULTS));
   function loadControls() {
     let s = {}; try { s = JSON.parse(localStorage.getItem(CTRL_KEY)) || {}; } catch (e) {}
@@ -169,7 +171,7 @@
       };
       for (const [a] of ACTIONS) padV[a] = Math.max(read(C.pad[a][0]), read(C.pad[a][1]));
       if (gp.buttons.some(b => b.pressed) || gp.axes.some(x => Math.abs(x) > .6)) setDevice('pad');
-      for (const a in handlers) { const p = padV[a] > .5; if (p && !prev[a]) fire(a); prev[a] = p; }
+      for (const a in handlers) { const p = padV[a] > .5; if (p && !prev[a] && (!api.padGate || api.padGate())) fire(a); prev[a] = p; }
     }
     const kbHeld = a => C.kb[a].some(c => c && held[c]);
     const get = a => Math.max(kbHeld(a) ? 1 : 0, touch[a] ? 1 : 0, padV[a] || 0); // 0..1 (analog for sticks and triggers)
@@ -182,9 +184,143 @@
       return [it('accelerate', ks('up')), it('brake / reverse', ks('down')), it('steer left / right', ks('left') + ' ' + ks('right')), it('handbrake (hold + steer = drift)', ks('hand')),
         it('look behind (hold)', ks('look')), it('camera', ks('cam')), it('sound', ks('mute')), it('restart', ks('restart'))].join('');
     }
-    return { start, poll, get, touch, label, helpHTML, device: () => dev, padId: () => padId,
+    const api = { start, poll, get, touch, label, helpHTML, padGate:null, device: () => dev, padId: () => padId,
       on(a, fn) { (handlers[a] = handlers[a] || []).push(fn); }, onDevice(fn) { cbs.push(fn); }, reload() { C = loadControls(); cbs.forEach(f => f(dev)); } };
+    return api;
   })();
 
-  window.RR = { DEFAULTS, CARS, load, save, normHex, buildCar, viewer, ACTIONS, CTRL_DEFAULTS, defaultControls, loadControls, saveControls, keyName, padName, padStyle, input };
+  /* ---------- Gamepad menu navigation (stick / D-pad moves a blue ring, A confirms, B goes back, Select = menu / copyright) ---------- */
+  const nav = (function () {
+    let cfg = {}, cur = null, curSig = '', curIdx = 0, show = false, started = false, prev = {}, rep = {}, last = 0, chk = 0, gpIdx = null;
+    const SEL = 'a[href], button, input:not([type=hidden]):not([type=color]), select, textarea, label.switch, [role=button], [data-gp]';
+    const EXC = '#touch, #tools, .leaflet-control-container, [disabled], [inert], [aria-hidden=true]';
+    const isMain = /(^|\/)(index\.html?)?$/i.test(location.pathname);
+    const getPad = () => (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
+    const store = v => { try { v ? sessionStorage.setItem('rrGp', '1') : sessionStorage.removeItem('rrGp'); } catch (e) {} };
+    const sig = el => el.id || (el.dataset && (el.dataset.a !== undefined ? 'slot' + el.dataset.a + '.' + el.dataset.i : el.dataset.d ? 'tab' + el.dataset.d : el.dataset.c ? 'sw' + el.dataset.c : '')) || '';
+    function getRoot() { const d = document.querySelector('dialog[open]'); if (d) return d; const r = cfg.root ? cfg.root() : document.body; return r || null; }
+    function scroller(el) {
+      for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+        const o = getComputedStyle(p); if (/(auto|scroll)/.test(o.overflowY + o.overflowX) && (p.scrollHeight > p.clientHeight + 2 || p.scrollWidth > p.clientWidth + 2)) return p;
+      } return null;
+    }
+    function vis(el) { // visible part of an element once scroll containers and the screen edges clip it
+      const r = el.getBoundingClientRect(); let L = r.left, T = r.top, R = r.right, B = r.bottom;
+      for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+        const o = getComputedStyle(p);
+        if (o.overflowX !== 'visible' || o.overflowY !== 'visible') { const q = p.getBoundingClientRect(); L = Math.max(L, q.left); T = Math.max(T, q.top); R = Math.min(R, q.right); B = Math.min(B, q.bottom); }
+      }
+      L = Math.max(L, 0); T = Math.max(T, 0); R = Math.min(R, innerWidth); B = Math.min(B, innerHeight);
+      return { L, T, R, B, ok: R - L > 3 && B - T > 3 };
+    }
+    function usable(el) {
+      const r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return false;
+      if (el.checkVisibility ? !el.checkVisibility({ checkVisibilityCSS:true }) : !el.getClientRects().length) return false;
+      if (getComputedStyle(el).pointerEvents === 'none') return false;
+      const v = vis(el); let x, y, test = el;
+      if (v.ok) { x = (v.L + v.R) / 2; y = (v.T + v.B) / 2; }
+      else { // scrolled out of view: fine if its scroll container (or the page) can bring it back
+        const sc = scroller(el);
+        if (!sc) { const de = document.scrollingElement; return !!de && de.scrollHeight > innerHeight + 2 && getComputedStyle(document.body).overflowY !== 'hidden'; }
+        const q = vis(sc); if (!q.ok) return false; x = (q.L + q.R) / 2; y = (q.T + q.B) / 2; test = sc;
+      }
+      const t = document.elementFromPoint(x, y); return !!t && (t === test || test.contains(t) || t.contains(test)); // not covered by another layer
+    }
+    function cands() {
+      const root = getRoot(); if (!root) return [];
+      return [...root.querySelectorAll(SEL)].filter(el => !el.closest(EXC) && !(el.matches('input') && el.closest('label.switch')) && usable(el));
+    }
+    function defaultOf(list) {
+      return list.find(e => e.matches('[data-gp-default]')) || list.slice().sort((a, b) => { const A = a.getBoundingClientRect(), B = b.getBoundingClientRect(); return (Math.round(A.top / 24) - Math.round(B.top / 24)) || A.left - B.left; })[0];
+    }
+    function render() { document.querySelectorAll('.gp-focus').forEach(e => { if (e !== cur || !show) e.classList.remove('gp-focus'); }); if (cur && show && cur.isConnected) cur.classList.add('gp-focus'); }
+    function setCur(el, list) {
+      cur = el; curSig = el ? sig(el) : ''; if (el && list) curIdx = Math.max(0, list.indexOf(el)); render();
+      if (el && show) el.scrollIntoView({ block:'nearest', inline:'nearest', behavior:'smooth' });
+    }
+    function validate(list) { // keep the highlight on something real after a screen change or a re-render
+      if (cur && cur.isConnected && list.includes(cur)) return;
+      let n = null;
+      if (curSig) n = list.find(e => sig(e) === curSig);
+      if (!n && cur && !cur.isConnected && list.length) n = list[Math.min(curIdx, list.length - 1)]; // list was rebuilt: stay at the same position
+      setCur(n || defaultOf(list) || null, list);
+    }
+    function stepSelect(el, d, wrap) {
+      const n = el.options.length; if (!n) return; let i = el.selectedIndex + d; i = wrap ? (i + n) % n : Math.max(0, Math.min(n - 1, i));
+      if (i !== el.selectedIndex) { el.selectedIndex = i; el.dispatchEvent(new Event('input', { bubbles:true })); el.dispatchEvent(new Event('change', { bubbles:true })); }
+    }
+    function move(dir) {
+      const list = cands(); validate(list); if (!cur) return;
+      if (cur.tagName === 'SELECT' && (dir === 'left' || dir === 'right')) return stepSelect(cur, dir === 'right' ? 1 : -1, false);
+      const fr = cur.getBoundingClientRect(), cx = fr.left + fr.width / 2, cy = fr.top + fr.height / 2, vert = dir === 'up' || dir === 'down'; let best = null, bs = Infinity;
+      for (const e of list) {
+        if (e === cur) continue;
+        const r = e.getBoundingClientRect(), dx = r.left + r.width / 2 - cx, dy = r.top + r.height / 2 - cy;
+        const prim = dir === 'up' ? -dy : dir === 'down' ? dy : dir === 'left' ? -dx : dx, sec = vert ? Math.abs(dx) : Math.abs(dy);
+        if (prim < 2) continue;
+        const ov = vert ? Math.min(r.right, fr.right) - Math.max(r.left, fr.left) : Math.min(r.bottom, fr.bottom) - Math.max(r.top, fr.top);
+        const score = prim + sec * (ov > 0 ? .35 : 2.2); if (score < bs) { bs = score; best = e; }
+      }
+      if (best) setCur(best, list);
+      else if (vert) { const sc = scroller(cur); if (sc) sc.scrollBy({ top: dir === 'down' ? 160 : -160, behavior:'smooth' }); else scrollBy({ top: dir === 'down' ? 160 : -160, behavior:'smooth' }); } // nothing further: scroll the page / panel
+    }
+    function activate() {
+      const list = cands(); validate(list); const el = cur; if (!el) return;
+      if (el.tagName === 'SELECT') stepSelect(el, 1, true);
+      else if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|number|search|email|url|tel|)$/.test(el.type))) el.focus();
+      else el.click();
+      setTimeout(() => { chk = 0; }, 60);
+    }
+    function flash(el) { el.scrollIntoView({ behavior:'smooth', block:'center' }); const o = el.style.outline; el.style.outline = '3px solid #3da5ff'; setTimeout(() => { el.style.outline = o; }, 2500); }
+    function copyright() { // main menu + Select
+      const q = document.querySelector('[data-copyright], #copyright, #copyrightBtn, .copyright-btn') ||
+        [...document.querySelectorAll('a[href], button, [role=button]')].find(e => /copyright|©/i.test((e.textContent || '') + (e.getAttribute('href') || '') + (e.getAttribute('aria-label') || '') + (e.title || '')));
+      if (q) { q.click(); return true; }
+      const f = document.querySelector('footer, .copyright'); if (f) { flash(f); return true; }
+      dispatchEvent(new CustomEvent('rr:copyright')); return false;
+    }
+    function goBack() {
+      const d = document.querySelector('dialog[open]'); if (d) { d.close(); return true; }
+      const x = [...document.querySelectorAll('[data-close], .modal-close, .close')].find(e => e.getClientRects().length); if (x) { x.click(); return true; }
+      if (isMain) return false;
+      const a = document.querySelector('[data-back]') || [...document.querySelectorAll('a[href]')].find(a => a.getClientRects().length && /(^|\/)index\.html?$/i.test(new URL(a.href, location.href).pathname));
+      if (a) { a.click(); return true; } if (history.length > 1) { history.back(); return true; } return false;
+    }
+    const call = (f, ...a) => { try { return f ? f(...a) : false; } catch (e) { console.error(e); return false; } };
+    function loop(now) {
+      requestAnimationFrame(loop);
+      const gp = getPad(); if (!gp) { prev = {}; rep = {}; gpIdx = null; return; }
+      const b = i => !!(gp.buttons[i] && gp.buttons[i].pressed), ax = gp.axes, e = i => { const p = b(i), r = p && !prev[i]; prev[i] = p; return r; };
+      if (gpIdx !== gp.index) { gpIdx = gp.index; for (let i = 0; i < gp.buttons.length; i++) prev[i] = b(i); return; } // a button that is already held when the page opens must not count as a press
+      const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
+      const eA = e(0), eB = e(1), eS = e(8), eT = e(9);
+      const sx = ax[0] || 0, sy = ax[1] || 0, sd = Math.abs(sx) > Math.abs(sy) ? (sx < -.55 ? 'left' : sx > .55 ? 'right' : null) : (sy < -.55 ? 'up' : sy > .55 ? 'down' : null);
+      let act = true; if (cfg.active) act = !!call(cfg.active);
+      const eng = act && call(cfg.frame, gp, dt); // a page may take over the stick (map crosshair)
+      const down = { up: b(12) || (!eng && sd === 'up'), down: b(13) || (!eng && sd === 'down'), left: b(14) || (!eng && sd === 'left'), right: b(15) || (!eng && sd === 'right') };
+      const wasShown = show, activity = eA || eB || eS || eT || down.up || down.down || down.left || down.right || gp.buttons.some(x => x.pressed) || Math.abs(sx) > .55 || Math.abs(sy) > .55;
+      if (activity && !show) { show = true; store(true); }
+      if (eS) { const h = cfg.onSelect ? call(cfg.onSelect) : (isMain ? copyright() : goBack()); if (h) return; }   // Select works everywhere, also while racing
+      if (!act) { for (const d in down) rep[d] = down[d] ? { t:Infinity } : null; if (cur) { cur.classList.remove('gp-focus'); } return; }
+      if (chk === 0 || now - chk > 250) { chk = now || 1; const list = cands(); validate(list); render(); }
+      if (eT && call(cfg.onStart)) return;
+      if (eB) { if (!call(cfg.onB) && !goBack()) { /* nothing to go back to */ } return; }
+      if (eA) { if (call(cfg.onA, cur)) return; if (!wasShown) { const list = cands(); validate(list); render(); } else activate(); return; }
+      for (const d in down) {
+        if (down[d]) { const r = rep[d]; if (!r) { rep[d] = { t:now + 380 }; if (wasShown) move(d); else { const l = cands(); validate(l); render(); } } else if (now >= r.t) { r.t = now + 130; move(d); } }
+        else rep[d] = null;
+      }
+    }
+    function start(c) {
+      if (started) return; started = true; cfg = c || {};
+      const st = document.createElement('style'); st.textContent = '.gp-focus{outline:3px solid #3da5ff !important;outline-offset:3px !important;box-shadow:0 0 0 7px rgba(61,165,255,.35) !important;}'; document.head.appendChild(st);
+      try { show = sessionStorage.getItem('rrGp') === '1'; } catch (e) {}
+      const hide = () => { if (show) { show = false; store(false); render(); } };
+      addEventListener('mousemove', e => { if (e.movementX || e.movementY) hide(); }, true); addEventListener('pointerdown', hide, true); addEventListener('keydown', hide, true);
+      requestAnimationFrame(loop);
+    }
+    return { start, refresh() { chk = 0; }, shown: () => show, copyright, goBack, isMain };
+  })();
+
+  window.RR = { nav, DEFAULTS, CARS, load, save, normHex, buildCar, viewer, ACTIONS, CTRL_DEFAULTS, defaultControls, loadControls, saveControls, keyName, padName, padStyle, input };
 })();

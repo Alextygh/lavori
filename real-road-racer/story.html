@@ -170,7 +170,7 @@
 <div id="tmark"></div>
 <div id="loading"><div id="loadmsg">Building track…</div></div>
 <div id="countdown"><div class="big" id="cd"></div></div>
-<div id="finish"><div class="card"><h1 id="fh">They got away</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">Chapters</button></div></div>
+<div id="finish"><div class="card"><h1 id="fh">They got away</h1><div id="ftime"></div><button id="retry" data-gp-default="1">Retry</button><button id="tomenu" class="alt">Chapters</button></div></div>
 <div id="note"></div>
 <div id="limit"><div id="limNum">50</div><div id="limWarn"></div></div>
 <div id="toast"></div>
@@ -1915,7 +1915,7 @@ function renderChapters() {
     const locked = c.id > P.unlocked, d = el('div', 'ccard' + (locked ? ' locked' : '')), n = el('div', 'num'), b = el('div', 'body'), h = el('h3'), m = el('div', 'meta'), btn = el('button');
     n.textContent = locked ? '🔒' : c.id; h.textContent = c.title + ' · ' + c.city;
     m.textContent = locked ? 'Take down ' + CHAPTERS[i - 1].target + ' to unlock' : 'Target: ' + c.target + ' · ' + c.weather + ', ' + c.time.toLowerCase() + ' · last life: ' + c.abilName.toLowerCase() + (P.best[c.id] ? ' · ✓ best ' + P.best[c.id].toFixed(1) + ' s' : '');
-    btn.textContent = P.best[c.id] ? 'Replay' : 'Play'; btn.disabled = locked; btn.onclick = () => openChapter(i);
+    btn.textContent = P.best[c.id] ? 'Replay' : 'Play'; btn.disabled = locked; if (!locked && c.id === Math.min(P.unlocked, CHAPTERS.length)) btn.dataset.gpDefault = '1'; btn.onclick = () => openChapter(i);
     b.append(h, m); d.append(n, b, btn); list.append(d);
   });
 }
@@ -1965,9 +1965,24 @@ function retry() { if (track && CH && (state === 'race' || state === 'finished')
 $('retry').onclick = () => startCountdown();
 $('tomenu').onclick = toChapters; $('chapBtn').onclick = e => { e.currentTarget.blur(); toChapters(); };
 $('watchP').onclick = () => playCut(PROLOGUE, toChapters);
-$('resetP').onclick = () => { if (confirm('Reset all story progress?')) { try { localStorage.removeItem(SKEY); } catch (e) {} toChapters(); } };
+$('resetP').onclick = e => { // press twice (a browser confirm() box cannot be used with a controller)
+  const b = e.currentTarget;
+  if (!b.dataset.arm) { b.dataset.arm = '1'; b.textContent = 'Press again to confirm'; clearTimeout(b._t); b._t = setTimeout(() => { delete b.dataset.arm; b.textContent = 'Reset progress'; }, 3500); return; }
+  clearTimeout(b._t); delete b.dataset.arm; b.textContent = 'Reset progress'; try { localStorage.removeItem(SKEY); } catch (e) {} toChapters();
+};
 
 if (!P.prologue) { P.prologue = true; saveP(); playCut(PROLOGUE, toChapters); } else toChapters();
+
+/* ---------- Gamepad: menus ---------- */
+INP.padGate = () => state === 'race' || state === 'countdown'; // in menus A / B / Y must not also toggle sound, camera...
+RR.nav.start({
+  root: () => state === 'chapters' ? $('chapters') : state === 'finished' ? $('finish') : null,
+  active: () => state === 'chapters' || state === 'finished' || state === 'cutscene',
+  onA: () => { if (state === 'cutscene') { if (cutCtl) cutCtl.next(); return true; } return false; },                       // A: next line
+  onB: () => { if (state === 'cutscene') { if (cutCtl) cutCtl.skip(); return true; } if (state === 'finished') { toChapters(); return true; } return false; }, // B: skip scene / back to chapters (or main menu)
+  onSelect: () => { if (state === 'race' || state === 'countdown' || state === 'finished') { toChapters(); return true; } if (state === 'chapters') return RR.nav.goBack(); return false; }, // Select while playing: back to chapter select (from the chapter list: main menu)
+  onStart: () => { if (state === 'finished') { retry(); return true; } return false; }
+});
 </script>
 </body>
 </html>

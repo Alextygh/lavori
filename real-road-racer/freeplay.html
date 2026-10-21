@@ -121,6 +121,8 @@
   }
   @media (max-width:760px) and (min-height:521px) { #menu { flex-direction:column; overflow:auto; } #formPanel, #confirmPanel { flex:none; width:100%; max-height:none; overflow:visible; } #menu #map { flex:none; height:min(42vh,320px); min-height:190px; } }
   @media (max-height:520px) { #menu { flex-direction:row; } #formPanel, #confirmPanel { width:min(340px,55%); } }
+  #cross { position:absolute; left:50%; top:50%; width:0; height:0; z-index:900; pointer-events:none; display:none; }
+  #cross i { position:absolute; background:#3da5ff; box-shadow:0 0 0 1px #fff, 0 0 6px #000; } #cross i:nth-child(1) { left:-16px; top:-1px; width:32px; height:2px; } #cross i:nth-child(2) { left:-1px; top:-16px; width:2px; height:32px; }
 </style>
 </head>
 <body>
@@ -128,7 +130,7 @@
   <div id="formPanel" class="card">
     <h1>Real Road Racer</h1>
     <label for="a">Start (latitude, longitude)</label>
-    <div class="row2"><input id="a" type="text" placeholder="40.75800, -73.98550" autocomplete="off" inputmode="decimal"><button class="alt" id="locA" title="Use my location" aria-label="Use my location as start">📍</button><button class="alt pick" id="pickA" data-k="a">Select start</button></div>
+    <div class="row2"><input id="a" type="text" placeholder="40.75800, -73.98550" autocomplete="off" inputmode="decimal"><button class="alt" id="locA" title="Use my location" aria-label="Use my location as start">📍</button><button class="alt pick" id="pickA" data-k="a" data-gp-default="1">Select start</button></div>
     <label for="b">Finish (latitude, longitude)</label>
     <div class="row2"><input id="b" type="text" placeholder="40.78290, -73.96540" autocomplete="off" inputmode="decimal"><button class="alt" id="locB" title="Use my location" aria-label="Use my location as finish">📍</button><button class="alt pick" id="pickB" data-k="b">Select finish</button></div>
     <p class="hint">Press “Select start” or “Select finish”, then click the map. Car colour, legal mode, shadows and controls are in Settings.</p>
@@ -141,14 +143,14 @@
   <div id="confirmPanel" class="card">
     <h1>Confirm your race</h1>
     <div id="sum"></div>
-    <button id="ok">Confirm and start</button>
+    <button id="ok" data-gp-default="1">Confirm and start</button>
     <button id="back" class="alt">Back</button>
   </div>
   <div id="map"></div>
 </div>
 <div id="loading"><div id="loadmsg">Building track…</div></div>
 <div id="countdown"><div class="big" id="cd"></div></div>
-<div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry">Retry</button><button id="tomenu" class="alt">New race</button><a class="btn" href="index.html">Main menu</a></div></div>
+<div id="finish"><div class="card"><h1>Finished!</h1><div id="ftime"></div><button id="retry" data-gp-default="1">Retry</button><button id="tomenu" class="alt">New race</button><a class="btn" href="index.html">Main menu</a></div></div>
 <div id="note"></div>
 <div id="limit"><div id="limNum">50</div><div id="limWarn"></div></div>
 <div id="toast"></div>
@@ -1197,7 +1199,7 @@ function setPicking(k) {
   picking = picking === k ? null : k;
   for (const x of ['a', 'b']) $('pick' + x.toUpperCase()).classList.toggle('on', picking === x);
   $('map').classList.toggle('picking', !!picking);
-  say(picking ? 'Click the map to place the ' + (picking === 'a' ? 'start' : 'finish') + '.' : '');
+  say(picking ? (RR.nav.shown() ? 'Stick: move the map · LB / RB: zoom · A: place the ' + (picking === 'a' ? 'start' : 'finish') + ' · B: cancel' : 'Click the map to place the ' + (picking === 'a' ? 'start' : 'finish') + '.') : '');
 }
 $('pickA').onclick = () => setPicking('a'); $('pickB').onclick = () => setPicking('b');
 $('a').oninput = () => syncPin('a'); $('b').oninput = () => syncPin('b');
@@ -1518,6 +1520,29 @@ function finishRace() {
 function retry() { if (track && (state === 'race' || state === 'finished')) startCountdown(); }
 $('retry').onclick = () => startCountdown();
 $('tomenu').onclick = () => setState('menu');
+
+/* ---------- Gamepad: menus + choosing the start / finish on the map ---------- */
+INP.padGate = () => state === 'race' || state === 'countdown'; // in menus A / B / Y must not also toggle sound, camera...
+let cross = null, mapPrev = {};
+function mapPad(gp, dt) { // while "Select start / finish" is on: left stick pans the map, LB / RB (or LT / RT) zoom, A places the pin in the crosshair, B cancels
+  if (!picking || state !== 'menu') { if (cross) cross.style.display = 'none'; return false; }
+  if (!cross) { cross = document.createElement('div'); cross.id = 'cross'; cross.innerHTML = '<i></i><i></i>'; $('map').appendChild(cross); }
+  cross.style.display = 'block';
+  const dz = v => Math.abs(v) < .18 ? 0 : v, x = dz(gp.axes[0] || 0) + dz(gp.axes[2] || 0), y = dz(gp.axes[1] || 0) + dz(gp.axes[3] || 0);
+  if (x || y) map.panBy([x * 460 * dt, y * 460 * dt], { animate:false });
+  const p = i => !!(gp.buttons[i] && gp.buttons[i].pressed), zi = p(5) || p(7), zo = p(4) || p(6);
+  if (zi && !mapPrev.i) map.zoomIn(); if (zo && !mapPrev.o) map.zoomOut(); mapPrev.i = zi; mapPrev.o = zo;
+  return true;
+}
+RR.nav.start({
+  root: () => state === 'menu' ? $('formPanel') : state === 'confirm' ? $('confirmPanel') : state === 'finished' ? $('finish') : null,
+  active: () => state === 'menu' || state === 'confirm' || state === 'finished',
+  frame: mapPad,
+  onA: () => { if (state === 'menu' && picking) { map.fire('click', { latlng:map.getCenter() }); return true; } return false; },
+  onB: () => { if (state === 'menu' && picking) { setPicking(picking); return true; } if (state === 'confirm') { $('back').click(); return true; } if (state === 'finished') { $('tomenu').click(); return true; } return false; }, // in the setup menu B falls through to "main menu"
+  onSelect: () => { if (state === 'menu' && picking) { setPicking(picking); return true; } location.href = 'index.html'; return true; }, // Select: back to the main menu (also while racing)
+  onStart: () => { if (state === 'finished') { retry(); return true; } return false; }
+});
 </script>
 </body>
 </html>

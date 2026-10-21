@@ -129,7 +129,7 @@ function renderCtl() {
 function setTab(t) { if (t === tab) return; tab = t; cancelListen(); note = ''; renderCtl(); }
 let padBase = null;
 function startListen(a, i) {
-  note = ''; listening = { a, i, d: tab }; padBase = null; renderCtl();
+  note = tab === 'kb' ? 'Press a key. Esc cancels, Delete clears.' : 'Press a controller button or push a stick. Select cancels.'; listening = { a, i, d: tab, t0: performance.now() }; padBase = null; renderCtl();
 }
 function cancelListen() { if (listening) { listening = null; padBase = null; renderCtl(); } }
 function assign(d, a, i, code) {
@@ -163,11 +163,13 @@ let hadPad = false;
     if (pressed.some(Boolean) || axes.some(x => Math.abs(x) > .6)) { if (lastDev !== 'pad') { lastDev = 'pad'; setTab('pad'); } }
     return;
   }
+  if (pressed[8] || performance.now() - listening.t0 > 8000) { note = ''; return cancelListen(); } // Select (reserved: always "back / menu") or 8 s without input cancels
   if (!padBase) { padBase = { b:pressed.slice(), a:axes.slice() }; return; } // ignore whatever is already held when listening starts
-  for (let k = 0; k < pressed.length; k++) { if (pressed[k] && !padBase.b[k]) return assign('pad', listening.a, listening.i, 'b' + k); padBase.b[k] = pressed[k]; }
+  for (let k = 0; k < pressed.length; k++) { if (k === 8) continue; if (pressed[k] && !padBase.b[k]) return assign('pad', listening.a, listening.i, 'b' + k); padBase.b[k] = pressed[k]; }
   for (let k = 0; k < axes.length; k++) { if (Math.abs(axes[k]) > .6 && Math.abs(padBase.a[k]) < .3) return assign('pad', listening.a, listening.i, 'a' + k + (axes[k] < 0 ? '-' : '+')); padBase.a[k] = axes[k]; }
 })();
 renderCtl();
+RR.nav.start({ root: () => document.querySelector('.page'), active: () => !(listening && listening.d === 'pad') }); // controller: stick / D-pad to move, A to press, B / Select = main menu
 </script>
 </body>
 </html>
