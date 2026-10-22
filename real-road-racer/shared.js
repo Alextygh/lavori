@@ -1,12 +1,12 @@
 /* Shared helpers: saved settings + 3D car viewer (needs three.js r128) */
 (function () {
   const KEY = 'rrSettings', HEX = /^#[0-9a-f]{6}$/i;
-  const DEFAULTS = { color:'#d9482b', legal:false, shadows:true, sound:true };
+  const DEFAULTS = { color:'#d9482b', legal:false, shadows:true, sound:true, street:true };
   function load() {
     let s = {}; try { s = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
     const b = (v, d) => typeof v === 'boolean' ? v : d;
     return { color: HEX.test(s.color) ? s.color.toLowerCase() : DEFAULTS.color,
-      legal: b(s.legal, DEFAULTS.legal), shadows: b(s.shadows, DEFAULTS.shadows), sound: b(s.sound, DEFAULTS.sound) };
+      legal: b(s.legal, DEFAULTS.legal), shadows: b(s.shadows, DEFAULTS.shadows), sound: b(s.sound, DEFAULTS.sound), street: b(s.street, DEFAULTS.street) };
   }
   function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); return true; } catch (e) { return false; } }
   function normHex(v) { v = String(v).trim(); if (v[0] !== '#') v = '#' + v; return HEX.test(v) ? v.toLowerCase() : null; }

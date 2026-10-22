@@ -57,6 +57,10 @@
         <label class="switch"><input id="shadows" type="checkbox" aria-label="Shadows"><span></span></label>
       </div>
       <div class="group row">
+        <div><h2>Street name</h2><p class="desc">Show the name of the road you are driving on while you play.</p></div>
+        <label class="switch"><input id="street" type="checkbox" aria-label="Street name"><span></span></label>
+      </div>
+      <div class="group row">
         <div><h2>Sound</h2><p class="desc">Whether the engine sound starts on or muted.</p></div>
         <label class="switch"><input id="sound" type="checkbox" aria-label="Sound"><span></span></label>
       </div>
@@ -94,12 +98,12 @@ function showColor() {
   v.setColor(S.color);
 }
 function setColor(h) { const n = RR.normHex(h); if (!n) return; S.color = n; showColor(); commit(); }
-function showAll() { showColor(); $('legal').checked = S.legal; $('shadows').checked = S.shadows; $('sound').checked = S.sound; v.setShadows(S.shadows); }
+function showAll() { showColor(); $('legal').checked = S.legal; $('shadows').checked = S.shadows; $('sound').checked = S.sound; $('street').checked = S.street; v.setShadows(S.shadows); }
 PRESETS.forEach(c => { const b = document.createElement('button'); b.className = 'sw'; b.dataset.c = c; b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Colour ' + c); b.onclick = () => setColor(c); $('sw').append(b); });
 $('col').oninput = e => setColor(e.target.value);
 $('hex').oninput = e => setColor(e.target.value);
 $('hex').onblur = () => { $('hex').value = S.color; };
-for (const k of ['legal', 'shadows', 'sound']) $(k).onchange = e => { S[k] = e.target.checked; if (k === 'shadows') v.setShadows(S.shadows); commit(); };
+for (const k of ['legal', 'shadows', 'sound', 'street']) $(k).onchange = e => { S[k] = e.target.checked; if (k === 'shadows') v.setShadows(S.shadows); commit(); };
 $('reset').onclick = () => { S = Object.assign({}, RR.DEFAULTS); showAll(); commit(); };
 showAll();
 
