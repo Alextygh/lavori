@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flag Wars</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap">
+<style>
+:root{--bg:#f3f1ea;--panel:#fff;--ink:#1d1d1b;--mut:#6b6a63;--line:#c9c6ba;--sea:#cfe3ef;--acc:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--panel:#1e2127;--ink:#ecebe6;--mut:#9a9a93;--line:#3a3e46;--sea:#16283a}}
+:root[data-theme="dark"]{--bg:#14161a;--panel:#1e2127;--ink:#ecebe6;--mut:#9a9a93;--line:#3a3e46;--sea:#16283a}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif,"Noto Color Emoji";padding:12px}
+h1{font-size:20px;margin:0 0 8px}
+#mapwrap{position:relative;background:var(--sea);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+.row{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.wheels{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+.wh{position:relative;text-align:center;padding-top:14px}
+.wh:before{content:"▼";position:absolute;top:-2px;left:50%;transform:translateX(-50%);color:var(--acc);font-size:16px;z-index:2}
+.wheel{position:relative;border-radius:50%;border:3px solid var(--line);margin:0 auto}
+.wheel span{position:absolute;left:50%;top:50%;font-weight:700;color:#fff;text-shadow:0 1px 2px #0008;line-height:1}
+.cap{font-size:12px;color:var(--mut);margin-top:4px}
+.dice{min-height:80px;align-items:center}
+.scene{--sz:56px;position:relative;width:var(--sz);height:var(--sz);perspective:calc(var(--sz)*7);margin:7px 8px}
+.scene.best{box-shadow:0 0 0 3px #ffd400,0 0 12px #ffd400;border-radius:calc(var(--sz)*.2)}
+.cube{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.face{position:absolute;inset:0;border-radius:calc(var(--sz)*.16);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:calc(var(--sz)*.125);backface-visibility:hidden;border:1px solid rgba(0,0,0,.3);background:var(--dc);box-shadow:inset 0 0 8px rgba(0,0,0,.3)}
+.face i{border-radius:50%;margin:auto;width:calc(var(--sz)*.18);height:calc(var(--sz)*.18);background:var(--dp)}
+.f1{transform:translateZ(calc(var(--sz)/2))}.f6{transform:rotateY(180deg) translateZ(calc(var(--sz)/2))}.f2{transform:rotateY(90deg) translateZ(calc(var(--sz)/2))}.f5{transform:rotateY(-90deg) translateZ(calc(var(--sz)/2))}.f3{transform:rotateX(90deg) translateZ(calc(var(--sz)/2))}.f4{transform:rotateX(-90deg) translateZ(calc(var(--sz)/2))}
+#da .cube{--dc:#d9382c;--dp:#fff}#dd .cube{--dc:#2f6fe0;--dp:#fff}
+.dirwh:before{display:none}
+#needle{position:absolute;left:50%;top:89px;width:0;height:0;z-index:2}
+#needle:before{content:"";position:absolute;left:-6px;top:-68px;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:68px solid var(--acc)}
+#needle:after{content:"";position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--acc);border:2px solid var(--panel)}
+.dice{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--acc);color:#fff;cursor:pointer;font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+label{font-size:13px;color:var(--mut);margin-left:10px;white-space:nowrap}
+#log{position:absolute;left:0;right:0;bottom:0;background:rgba(10,12,16,.78);color:#fff;font-size:15px;line-height:1.35;padding:9px 14px;min-height:40px;z-index:3}
+#mbar{position:absolute;top:8px;right:8px;display:flex;gap:6px;z-index:3}
+#mbar button{padding:5px 10px;background:rgba(10,12,16,.7);border:1px solid rgba(255,255,255,.3)}
+#mapwrap:fullscreen,#mapwrap.pfs{background:var(--sea);display:flex;align-items:center;justify-content:center;border:0;border-radius:0}
+#mapwrap.pfs{position:fixed;inset:0;z-index:9999}
+#mapwrap:fullscreen canvas,#mapwrap.pfs canvas{width:100%;height:100%;object-fit:contain}
+#mapwrap:fullscreen #log,#mapwrap.pfs #log{font-size:clamp(16px,2.2vw,28px);padding:14px 22px}
+#hist{max-height:320px;overflow:auto;font-size:13px;margin-top:4px}
+#hist>div{padding:4px 0;border-bottom:1px solid var(--line)}
+#map{touch-action:none;cursor:grab}
+#da,#dd{max-width:380px}
+#info{position:absolute;left:8px;top:8px;max-width:min(320px,62%);max-height:55%;overflow:auto;background:rgba(10,12,16,.88);color:#fff;border-radius:8px;padding:8px 26px 8px 10px;font-size:13px;line-height:1.4;z-index:4}
+#info .cap{color:#bdbdb6}#info .il{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:3px}#info i{color:#9ad;font-size:11px}
+#info button{position:absolute;top:1px;right:3px;padding:0 6px;background:none;border:0;font-size:20px;line-height:1.2;color:#fff}
+#lb div{display:flex;gap:8px;align-items:center;padding:2px 0}
+#lb b{margin-left:auto}
+.fi{width:26px;height:17px;object-fit:cover;border-radius:2px;vertical-align:middle;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+</style>
+</head>
+<body>
+<h1>🌍 Flag Wars</h1>
+<div id="mapwrap"><canvas id="map" width="1200" height="480"></canvas>
+ <div id="mbar"><button id="ap" title="Auto-play on/off">▶ Auto</button><button id="rv" title="Reset view">⟲</button><button id="fs" title="Fullscreen">⛶</button></div>
+ <div id="info" style="display:none"></div>
+ <div id="log">Press Roll! to start. While paused: drag to move, wheel or pinch to zoom, click a country for details.</div></div>
+<div class="row">
+ <div class="card" style="flex:2;min-width:300px">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:10px">
+   <button id="go" disabled>Loading map…</button>
+   <label><input type="checkbox" id="auto"> Auto-play</label>
+   <label><input type="checkbox" id="turbo"> Turbo</label>
+  </div>
+  <div class="wheels">
+   <div class="wh"><div class="wheel" id="wc"></div><div class="cap">Attacker</div></div>
+   <div class="wh dirwh"><div class="wheel" id="wd"></div><div id="needle"></div><div class="cap">Direction (the pointer spins)</div></div>
+   <div><div class="dice" id="da"></div><div class="cap" style="text-align:center">Attacker: 1 die per territory (max 20), highest counts</div>
+        <div class="dice" id="dd" style="margin-top:8px"></div><div class="cap" style="text-align:center">Defender: same rule</div></div>
+  </div>
+  
+ </div>
+ <div class="card" style="flex:1;min-width:220px"><b>Biggest empires</b><div id="lb"></div><div class="cap" id="cnt"></div><b style="display:block;margin-top:14px">Conquest log</b><div id="hist"><div class="cap">No conquests yet.</div></div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+<script>
+window.flagLoad=iso=>{const u='https://cdn.jsdelivr.net/npm/country-flag-icons@1.5.19/string/3x2/'+iso+'.js';return import(u).then(m=>m.default).catch(()=>import(u).then(m=>m.default).catch(()=>null))};
+</script>
+<script>
+(function(){
+const W=1200,H=480,LAT0=84,LAT1=-58;
+const px=lon=>(lon+180)/360*W, py=lat=>(LAT0-lat)/(LAT0-LAT1)*H;
+const cv=document.getElementById('map'),ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id), rnd=n=>Math.floor(Math.random()*n);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const BADC=/^(DY|FX|HV|SU|UK|YU|AN|BU|CS|DD|NH|NQ|PU|PZ|RH|TP|VD|WK|YD|ZR|EU|EZ|UN|QO|XA|XB|ZZ)$/;
+const ALIAS={'Aland':'AX','Antigua and Barb.':'AG','Cayman Is.':'KY','Faeroe Is.':'FO','Heard I. and McDonald Is.':'HM','Br. Indian Ocean Ter.':'IO','Siachen Glacier':'IN','Saint Lucia':'LC','N. Mariana Is.':'MP','Fr. Polynesia':'PF','S. Geo. and S. Sandw. Is.':'GS','Saint Helena':'SH','St. Pierre and Miquelon':'PM','São Tomé and Principe':'ST','Turks and Caicos Is.':'TC','Trinidad and Tobago':'TT','Turkey':'TR','St. Vin. and Gren.':'VC','U.S. Virgin Is.':'VI','Dem. Rep. Congo':'CD','Congo':'CG','Central African Rep.':'CF','Bosnia and Herz.':'BA','Dominican Rep.':'DO','Eq. Guinea':'GQ','Czech Rep.':'CZ',"Côte d'Ivoire":'CI','Ivory Coast':'CI','S. Sudan':'SS','Solomon Is.':'SB','W. Sahara':'EH','Falkland Is.':'FK','Dem. Rep. Korea':'KP','Korea':'KR','Lao PDR':'LA','Macedonia':'MK','Myanmar':'MM','Palestine':'PS','Swaziland':'SZ','Fr. S. Antarctic Lands':'TF','Somaliland':'SO','Kosovo':'XK','N. Cyprus':'TR','Timor-Leste':'TL','Brunei':'BN','Gambia':'GM','Bahamas':'BS','Republic of Serbia':'RS','United Republic of Tanzania':'TZ','Guinea Bissau':'GW','Cabo Verde':'CV','Vatican':'VA'};
+const norm=s=>s.toLowerCase().replace(/[^a-z]/g,'');
+const flagOf=c=>String.fromCodePoint(...[...c].map(x=>0x1F1E6+x.charCodeAt(0)-65));
+function decodePoly(s,off,sc){const r=[];let X=off[0],Y=off[1];for(let i=0;i<s.length;i+=2){let x=s.charCodeAt(i)-64,y=s.charCodeAt(i+1)-64;x=(x>>1)^(-(x&1));y=(y>>1)^(-(y&1));X+=x;Y+=y;r.push([X/sc,Y/sc])}return r}
+function rings(f){const g=f.geometry,out=[];const sc=g.UTF8Scale||1024;const dec=(c,o)=>typeof c==='string'?decodePoly(c,o,sc):c;
+ if(g.type==='Polygon')g.coordinates.forEach((c,i)=>out.push(dec(c,g.encodeOffsets&&g.encodeOffsets[i])));
+ else g.coordinates.forEach((p,i)=>p.forEach((c,j)=>out.push(dec(c,g.encodeOffsets&&g.encodeOffsets[i][j]))));return out}
+
+let T=[],owner=[],nb=[],flags={},flagUrl={},busy=false,hl={a:-1,d:-1};
+
+async function init(){
+ const feats=echarts.getMap('world').geoJson.features.filter(f=>f.properties.name&&f.properties.name!=='Antarctica'&&f.properties.name!=='Fr. S. Antarctic Lands');
+ const byName={};
+ try{const dn=new Intl.DisplayNames(['en'],{type:'region'});
+  for(let a=65;a<91;a++)for(let b=65;b<91;b++){const c=String.fromCharCode(a,b);let n;try{n=dn.of(c)}catch(e){continue}if(n&&n!==c&&n!=='Unknown Region'&&!BADC.test(c)&&!byName[norm(n)])byName[norm(n)]=c}}catch(e){}
+ const key={};
+ feats.forEach((f,i)=>{
+  const name=f.properties.name,rs=rings(f);
+  const path=new Path2D();let best=null,mbb=null,ba=-1,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const keys=new Set();
+  rs.forEach(r=>{let a0=1e9,b0=1e9,a1=-1e9,b1=-1e9;
+   r.forEach(([lo,la],k)=>{const X=px(lo),Y=py(la);k?path.lineTo(X,Y):path.moveTo(X,Y);
+    a0=Math.min(a0,lo);a1=Math.max(a1,lo);b0=Math.min(b0,la);b1=Math.max(b1,la);keys.add(Math.round(lo*8)+','+Math.round(la*8))});
+   path.closePath();x0=Math.min(x0,px(a0));x1=Math.max(x1,px(a1));y0=Math.min(y0,py(b1));y1=Math.max(y1,py(b0));
+   if((a1-a0)*(b1-b0)>ba){ba=(a1-a0)*(b1-b0);best=[(a0+a1)/2,(b0+b1)/2];mbb=[px(a0),py(b1),Math.max(2,px(a1)-px(a0)),Math.max(2,py(b0)-py(b1))]}});
+  const iso=ALIAS[name]||byName[norm(name)]||null;
+  T.push({name,path,iso,emoji:iso?flagOf(iso):null,c:best,bb:[x0,y0,Math.max(2,x1-x0),Math.max(2,y1-y0)],mb:mbb,keys});
+  owner.push(i)});
+ // adjacency: shared border vertices
+ const idx={};T.forEach((t,i)=>t.keys.forEach(k=>(idx[k]=idx[k]||[]).push(i)));
+ const cnt=T.map(()=>({}));
+ Object.values(idx).forEach(l=>{for(const a of l)for(const b of l)if(a!==b)cnt[a][b]=(cnt[a][b]||0)+1});
+ T.forEach((t,i)=>{nb[i]=Object.keys(cnt[i]).filter(j=>cnt[i][j]>=2).map(Number)});
+ // islands: link to nearest by centroid
+ const dist=(a,b)=>Math.hypot(T[a].c[0]-T[b].c[0],T[a].c[1]-T[b].c[1]);
+ T.forEach((t,i)=>{if(nb[i].length===0){const o=T.map((_,j)=>j).filter(j=>j!==i).sort((p,q)=>dist(i,p)-dist(i,q)).slice(0,3);o.forEach(j=>{nb[i].push(j);if(!nb[j].includes(i))nb[j].push(i)})}});
+ const miss=[];
+ await Promise.all(T.map((t,i)=>svgFlag(t).then(c=>{if(c)flags[i]=c;else miss.push(i)})));
+ if(miss.length){try{await Promise.race([document.fonts.load('48px "Noto Color Emoji"','🇮🇹'),sleep(3000)])}catch(e){}await sleep(50);miss.forEach(i=>flags[i]=makeFlag(T[i],i))}
+ T.forEach((t,i)=>{flagUrl[i]=mini(flags[i])});
+ draw();board();
+ $('go').disabled=false;$('go').textContent='Roll!';
+}
+async function svgFlag(t){const svg=t.iso?await window.flagLoad(t.iso):null;if(!svg||typeof svg!=='string')return null;
+ return new Promise(res=>{const s=svg.replace(/<svg([^>]*)>/,(m0,a)=>'<svg'+a.replace(/\s(width|height|preserveAspectRatio)="[^"]*"/g,'')+(/xmlns=/.test(a)?'':' xmlns="http://www.w3.org/2000/svg"')+' width="240" height="160" preserveAspectRatio="none">');
+ const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=240;c.height=160;c.getContext('2d').drawImage(im,0,0,240,160);res(c)};im.onerror=()=>res(null);
+ im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);setTimeout(()=>res(null),15000)})}
+const mini=c=>{const m=document.createElement('canvas');m.width=60;m.height=40;m.getContext('2d').drawImage(c,0,0,60,40);return m.toDataURL()};
+function makeFlag(t,i){
+ const c=document.createElement('canvas');
+ if(!t.emoji){c.width=c.height=8;const g=c.getContext('2d');g.fillStyle=`hsl(${(i*47)%360} 55% 45%)`;g.fillRect(0,0,8,8);return c}
+ const b=document.createElement('canvas');b.width=b.height=220;const g=b.getContext('2d');
+ g.font='170px "Noto Color Emoji",sans-serif';g.textBaseline='middle';g.textAlign='center';g.fillText(t.emoji,110,115);
+ const d=g.getImageData(0,0,220,220).data;let x0=220,y0=220,x1=0,y1=0;
+ for(let y=0;y<220;y++)for(let x=0;x<220;x++)if(d[(y*220+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+ if(x1<=x0||y1<=y0){c.width=c.height=8;const h=c.getContext('2d');h.fillStyle=`hsl(${(i*47)%360} 55% 45%)`;h.fillRect(0,0,8,8);return c}
+ c.width=x1-x0+1;c.height=y1-y0+1;c.getContext('2d').drawImage(b,x0,y0,c.width,c.height,0,0,c.width,c.height);return c}
+const cam={cx:W/2,cy:H/2,k:1};let sel=-1;const gain={};
+function zoomTo(cx,cy,k,ms){return new Promise(res=>{const s={cx:cam.cx,cy:cam.cy,k:cam.k},t0=performance.now();(function f(n){let p=Math.min(1,(n-t0)/ms);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;cam.cx=s.cx+(cx-s.cx)*p;cam.cy=s.cy+(cy-s.cy)*p;cam.k=s.k+(k-s.k)*p;draw();p<1?requestAnimationFrame(f):res()})(t0)})}
+function zoomFit(ids,ms){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;ids.forEach(i=>{const b=T[i].bb;x0=Math.min(x0,b[0]);y0=Math.min(y0,b[1]);x1=Math.max(x1,b[0]+b[2]);y1=Math.max(y1,b[1]+b[3])});const w=Math.max(x1-x0,70),h=Math.max(y1-y0,45);return zoomTo((x0+x1)/2,(y0+y1)/2,Math.max(1,Math.min(W/(w*1.8),H/(h*1.8),8)),ms)}
+function draw(){
+ ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);const K=cam.k;ctx.setTransform(K,0,0,K,W/2-cam.cx*K,H/2-cam.cy*K);
+ T.forEach((t,i)=>{ctx.save();ctx.clip(t.path);const f=flags[owner[i]];ctx.drawImage(f,t.bb[0],t.bb[1],t.bb[2],t.bb[3]);if(t.mb&&(t.mb[2]<t.bb[2]*.8||t.mb[3]<t.bb[3]*.8))ctx.drawImage(f,t.mb[0],t.mb[1],t.mb[2],t.mb[3]);ctx.restore();
+  ctx.lineWidth=.6/K;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.stroke(t.path)});
+ [[hl.a,'#ff2d2d'],[hl.d,'#2d7bff']].forEach(([o,c])=>{if(o>=0)T.forEach((t,i)=>{if(owner[i]===o){ctx.lineWidth=3.5/K;ctx.strokeStyle=c;ctx.stroke(t.path)}})});
+ if(sel>=0)T.forEach((t,i)=>{if(owner[i]===owner[sel]){ctx.lineWidth=2.5/K;ctx.strokeStyle='#fff';ctx.stroke(t.path)}});
+ if(hl.ray){ctx.setLineDash([6/K,5/K]);ctx.lineWidth=2/K;ctx.strokeStyle='#ffd400';ctx.beginPath();ctx.moveTo(hl.ray[0],hl.ray[1]);ctx.lineTo(hl.ray[2],hl.ray[3]);ctx.stroke();ctx.setLineDash([])}
+ ctx.setTransform(1,0,0,1,0,0)}
+function board(){
+ const c={};owner.forEach(o=>c[o]=(c[o]||0)+1);
+ const l=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+ $('lb').innerHTML=l.slice(0,7).map(([o,n])=>`<div>${fi(o)}<span>${T[o].name}</span><b>${n}</b></div>`).join('');
+ $('cnt').textContent=`${l.length} empire${l.length>1?'s':''} left · ${T.length} territories`;showInfo()}
+
+// wheels
+function Wheel(el,labels,size,fs){
+ const n=labels.length,seg=360/n;el.innerHTML='';el.style.width=el.style.height=size+'px';el.style.transition='none';el.style.transform='rotate(0deg)';
+ const st=[];for(let i=0;i<n;i++)st.push(`hsl(${(i*360/n+10)%360} 45% 38%) ${i*seg}deg ${(i+1)*seg}deg`);
+ el.style.background=`conic-gradient(from ${-seg/2}deg,${st.join(',')})`;
+ labels.forEach((l,i)=>{const s=document.createElement('span');if(l&&l.img){const im=new Image();im.src=l.img;im.style.cssText='width:40px;height:27px;border-radius:3px;display:block;box-shadow:0 0 0 1.5px #fff9';s.appendChild(im)}else s.textContent=l;s.style.fontSize=fs+'px';
+  s.style.transform=`translate(-50%,-50%) rotate(${i*seg}deg) translateY(-${size*.36}px)`;el.appendChild(s)});
+ let cur=0;
+ return {spin(i,t){const tg=-i*seg;const d=(((tg-cur)%360)+360)%360;cur+=360*3+d;
+  el.style.transition=`transform ${t}ms cubic-bezier(.12,.6,.1,1)`;el.style.transform=`rotate(${cur}deg)`;return sleep(t+120)}}}
+const DIRS=['N','NE','E','SE','S','SW','W','NW'];
+Wheel($('wd'),DIRS,150,19);
+let nc=0;const wDir={spin(i,t){const d=(((i*45-nc)%360)+360)%360;nc+=360*3+d;const n=$('needle');n.style.transition=`transform ${t}ms cubic-bezier(.12,.6,.1,1)`;n.style.transform=`rotate(${nc}deg)`;return sleep(t+120)}};
+const NAMES=['north','north-east','east','south-east','south','south-west','west','north-west'];
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]},ROT={1:[0,0],6:[0,180],2:[0,-90],5:[0,90],3:[-90,0],4:[90,0]};
+function mkDice(box,n){box.innerHTML='';const sz=n<=6?56:n<=12?44:34,a=[];
+ for(let i=0;i<n;i++){const s=document.createElement('div');s.className='scene';s.style.setProperty('--sz',sz+'px');const c=document.createElement('div');c.className='cube';
+  for(let v=1;v<=6;v++){const f=document.createElement('div');f.className='face f'+v;for(let k=0;k<9;k++){const p=document.createElement('i');if(!PIPS[v].includes(k))p.style.visibility='hidden';f.appendChild(p)}c.appendChild(f)}
+  s.appendChild(c);box.appendChild(s);let cx=0,cy=0;
+  a.push({el:s,spin(v,t){const [x,y]=ROT[v];cx=x+360*(Math.ceil((cx-x)/360)+2);cy=y+360*(Math.ceil((cy-y)/360)+3);c.style.transition=`transform ${t}ms cubic-bezier(.15,.6,.15,1)`;c.style.transform=`rotateX(${cx}deg) rotateY(${cy}deg)`;return sleep(t+150)}})}
+ return a}
+mkDice($('da'),1);mkDice($('dd'),1);
+let wCountry=Wheel($('wc'),['?','?','?','?','?','?','?','?'],150,24);
+const lab=i=>flagUrl[i]?{img:flagUrl[i]}:(T[i].emoji||T[i].name.slice(0,3));
+
+async function fight(na,nd){
+ const turbo=$('turbo').checked,t=turbo?400:1300,log=$('log');
+ na=Math.min(na,20);nd=Math.min(nd,20);
+ const dA=mkDice($('da'),na),dD=mkDice($('dd'),nd);
+ const A=dA.map(()=>1+rnd(6)),D=dD.map(()=>1+rnd(6));
+ log.textContent=`🎲 Attacker rolls ${na} di${na>1?'ce':'e'} (1 per territory, max 20)…`;
+ await Promise.all(dA.map((w,i)=>w.spin(A[i],t)));await sleep(turbo?100:300);
+ log.textContent=`🎲 Defender rolls ${nd} di${nd>1?'ce':'e'}…`;
+ await Promise.all(dD.map((w,i)=>w.spin(D[i],t)));await sleep(turbo?100:500);
+ const ma=Math.max(...A),md=Math.max(...D);
+ dA.forEach((w,i)=>w.el.classList.toggle('best',A[i]===ma));dD.forEach((w,i)=>w.el.classList.toggle('best',D[i]===md));
+ lastScore=`${ma} (${na} dice) vs ${md} (${nd} dice)`;
+ log.innerHTML=`🎯 Attacker's highest: <b>${ma}</b> · Defender's highest: <b>${md}</b>`;await sleep(turbo?100:1800);
+ if(ma!==md)return ma>md;
+ const sa=mkDice($('da'),1)[0],sd=mkDice($('dd'),1)[0];let x,y;
+ do{log.textContent='🤝 Draw! One die each decides it…';await sleep(turbo?100:1200);
+  x=1+rnd(6);y=1+rnd(6);await sa.spin(x,t);await sd.spin(y,t);await sleep(turbo?100:700)}while(x===y);
+ lastScore+=` → duel ${x}–${y}`;return x>y}
+
+function castRay(o,dir){
+ ctx.setTransform(1,0,0,1,0,0);
+ const b=dir*Math.PI/4,ux=Math.sin(b),uy=-Math.cos(b);let best=null,lim=1300;
+ for(let a=0;a<T.length;a++){if(owner[a]!==o)continue;
+  const x0=px(T[a].c[0]),y0=py(T[a].c[1]);
+  for(let s=3;s<lim;s+=1.5){const x=x0+ux*s,y=y0+uy*s;if(x<0||x>W||y<0||y>H)break;
+   let hit=-1;
+   for(let j=0;j<T.length;j++){if(owner[j]===o)continue;const q=T[j].bb;if(x<q[0]||x>q[0]+q[2]||y<q[1]||y>q[1]+q[3])continue;if(ctx.isPointInPath(T[j].path,x,y)){hit=j;break}}
+   if(hit>=0){best={from:a,id:hit,line:[x0,y0,x,y]};lim=s;break}}}
+ return best}
+const terrs=o=>T.map((_,i)=>i).filter(i=>owner[i]===o);
+const fi=i=>flagUrl[i]?`<img class="fi" src="${flagUrl[i]}" alt="">`:'';
+let lastScore='',conq=0;
+const addHist=(w,l,attWon,k)=>{const h=$('hist');if(!conq)h.innerHTML='';conq++;const d=document.createElement('div');
+ d.innerHTML=`<b>#${conq}</b> ${fi(w)} <b>${T[w].name}</b> ${attWon?'conquered':'defended &amp; absorbed'} ${fi(l)} <b>${T[l].name}</b> · +${plural(k)} <span class="cap">(dice ${lastScore}, ${attWon?'attacker':'defender'} won)</span>`;h.prepend(d)};
+const plural=k=>k+' territor'+(k>1?'ies':'y');
+async function turn(){
+ if(busy)return;busy=true;$('go').disabled=true;
+ const log=$('log'),turbo=$('turbo').checked,t=turbo?500:4500;
+ const reset=async()=>{hl={a:-1,d:-1};await zoomTo(W/2,H/2,1,turbo?100:1200);busy=false;$('go').disabled=false;if($('auto').checked)setTimeout(turn,turbo?100:1200)};
+ const emp=[...new Set(owner)];
+ if(emp.length<2){log.innerHTML=`\ud83c\udfc6 ${fi(emp[0])} <b>${T[emp[0]].name}</b> rules the whole world!`;$('auto').checked=false;syncAuto();busy=false;$('go').textContent='Game over';return}
+ const o=emp[rnd(emp.length)];
+ const pool=[o,...emp.filter(e=>e!==o).sort(()=>Math.random()-.5).slice(0,7)].sort(()=>Math.random()-.5);
+ wCountry=Wheel($('wc'),pool.map(lab),150,26);
+ let dir=rnd(8);
+ hl={a:-1,d:-1};draw();
+ await zoomTo(W/2,H/2,1,turbo?100:1000);
+ log.textContent='\ud83c\udfa1 Spinning the empire wheel\u2026';
+ await wCountry.spin(pool.indexOf(o),t);
+ hl.a=o;const mine=terrs(o);
+ log.innerHTML=`\ud83d\udccd Attacker: ${fi(o)} <b>${T[o].name}</b>${mine.length>1?` (${plural(mine.length)})`:''}`;
+ await zoomFit(mine,turbo?200:2000);
+ await sleep(turbo?100:800);
+ log.innerHTML+=' \u2014 spinning the direction pointer\u2026';
+ let R=null;const tried=new Set();
+ for(;;){
+  await wDir.spin(dir,t);tried.add(dir);
+  R=castRay(o,dir);
+  if(R||tried.size>=8)break;
+  log.innerHTML=`🧭 <b>${NAMES[dir]}</b> (${DIRS[dir]}): no enemy in that direction. Spinning again…`;
+  await sleep(turbo?150:1500);
+  const rest=[0,1,2,3,4,5,6,7].filter(d=>!tried.has(d));dir=rest[rnd(rest.length)]}
+ if(!R){log.innerHTML=`${fi(o)} <b>${T[o].name}</b> sees no enemy in any direction. Turn skipped.`;
+  await sleep(turbo?150:2200);return reset()}
+ log.innerHTML=`🧭 <b>${T[o].name}</b> attacks to the <b>${NAMES[dir]}</b> (${DIRS[dir]})…`;
+ await sleep(turbo?100:1200);
+ const od=owner[R.id];hl.d=od;hl.ray=R.line;await zoomFit([R.from,R.id],turbo?200:1600);
+ log.innerHTML=`\u2694\ufe0f ${fi(o)} <b>${T[o].name}</b> (from ${T[R.from].name}) attacks ${NAMES[dir]} \u2192 ${fi(od)} <b>${T[od].name}</b> (hit at ${T[R.id].name})\u2026`;
+ await sleep(turbo?100:1200);
+ const win=await fight(mine.length,terrs(od).length);
+ const mv=(f,to)=>owner.forEach((x,i)=>{if(x===f){owner[i]=to;gain[i]=conq+1}});
+ if(win){const k=terrs(od).length;mv(od,o);log.innerHTML=`\u2705 ${fi(o)} <b>${T[o].name}</b> conquers ${fi(od)} <b>${T[od].name}</b> and takes all its ${plural(k)}!`;addHist(o,od,true,k)}
+ else{const k=terrs(o).length;mv(o,od);log.innerHTML=`\ud83d\udee1\ufe0f ${fi(od)} <b>${T[od].name}</b> defends and absorbs ${fi(o)} <b>${T[o].name}</b> with all its ${plural(k)}!`;addHist(od,o,false,k)}
+ draw();board();await sleep(turbo?200:3000);
+ return reset()}
+
+const canInteract=()=>!busy&&!$('auto').checked;
+function toWorld(ev){const r=cv.getBoundingClientRect(),sc=Math.min(r.width/W,r.height/H),ox=(r.width-W*sc)/2,oy=(r.height-H*sc)/2;
+ const cx=(ev.clientX-r.left-ox)/sc,cy=(ev.clientY-r.top-oy)/sc;return {cx,cy,sc,wx:cam.cx+(cx-W/2)/cam.k,wy:cam.cy+(cy-H/2)/cam.k}}
+function clampCam(){cam.k=Math.max(1,Math.min(25,cam.k));cam.cx=Math.max(0,Math.min(W,cam.cx));cam.cy=Math.max(0,Math.min(H,cam.cy))}
+function zoomAt(ev,f){const p=toWorld(ev),k=Math.max(1,Math.min(25,cam.k*f));cam.k=k;cam.cx=p.wx-(p.cx-W/2)/k;cam.cy=p.wy-(p.cy-H/2)/k;clampCam();draw()}
+function pick(e){const p=toWorld(e);ctx.setTransform(1,0,0,1,0,0);let hit=-1;
+ for(let i=0;i<T.length;i++){const q=T[i].bb;if(p.wx<q[0]||p.wx>q[0]+q[2]||p.wy<q[1]||p.wy>q[1]+q[3])continue;if(ctx.isPointInPath(T[i].path,p.wx,p.wy)){hit=i;break}}
+ if(hit<0){let bd=8/cam.k;T.forEach((t,i)=>{const d=Math.hypot(px(t.c[0])-p.wx,py(t.c[1])-p.wy);if(d<bd){bd=d;hit=i}})}
+ sel=hit;showInfo();draw()}
+function showInfo(){const box=$('info');if(sel<0){box.style.display='none';return}
+ const o=owner[sel],got=terrs(o).filter(i=>i!==o).sort((a,b)=>(gain[b]||0)-(gain[a]||0));
+ let h=`<button id="ix">×</button><div>${fi(sel)} <b>${T[sel].name}</b></div>`;
+ if(o!==sel)h+=`<div class="cap">Conquered — now part of ${fi(o)} <b>${T[o].name}</b>'s empire</div>`;
+ else h+=`<div class="cap">Empire of ${plural(got.length+1)}</div>`;
+ h+=got.length?`<div class="cap" style="margin-top:4px">${o!==sel?T[o].name+' has gained':'Gained'} ${plural(got.length)}:</div><div class="il">${got.map(i=>`<span>${fi(i)} ${T[i].name}${gain[i]?` <i>#${gain[i]}</i>`:''}</span>`).join('')}</div>`:`<div class="cap" style="margin-top:4px">No territories gained yet.</div>`;
+ box.innerHTML=h;box.style.display='block'}
+$('info').onclick=e=>{if(e.target.id==='ix'){sel=-1;showInfo();draw()}};
+$('rv').onclick=()=>{if(canInteract())zoomTo(W/2,H/2,1,500)};
+cv.addEventListener('wheel',e=>{if(!canInteract())return;e.preventDefault();zoomAt(e,Math.exp(-e.deltaY*0.0015))},{passive:false});
+const ptr=new Map();let drag=null,pinch=0;
+cv.addEventListener('pointerdown',e=>{if(!canInteract())return;try{cv.setPointerCapture(e.pointerId)}catch(x){}ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptr.size===1)drag={x:e.clientX,y:e.clientY,moved:false};pinch=0});
+cv.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId)||!drag)return;
+ const pr=ptr.get(e.pointerId),dx=e.clientX-pr.x,dy=e.clientY-pr.y;ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(ptr.size===2){const [p,q]=[...ptr.values()],d=Math.hypot(p.x-q.x,p.y-q.y);if(pinch)zoomAt({clientX:(p.x+q.x)/2,clientY:(p.y+q.y)/2},d/pinch);pinch=d;drag.moved=true;return}
+ if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>5)drag.moved=true;
+ if(drag.moved){const r=cv.getBoundingClientRect(),sc=Math.min(r.width/W,r.height/H);cam.cx-=dx/sc/cam.k;cam.cy-=dy/sc/cam.k;clampCam();draw()}});
+cv.addEventListener('pointerup',e=>{if(!ptr.has(e.pointerId))return;ptr.delete(e.pointerId);if(!ptr.size){if(drag&&!drag.moved)pick(e);drag=null;pinch=0}});
+cv.addEventListener('pointercancel',e=>{ptr.delete(e.pointerId);if(!ptr.size){drag=null;pinch=0}});
+$('go').onclick=turn;
+function syncAuto(){$('ap').textContent=$('auto').checked?'⏸ Auto':'▶ Auto'}
+$('ap').onclick=()=>{$('auto').checked=!$('auto').checked;$('auto').onchange()};
+$('fs').onclick=async()=>{const m=$('mapwrap');
+ if(document.fullscreenElement){document.exitFullscreen();return}
+ if(m.classList.contains('pfs')){m.classList.remove('pfs');return}
+ try{await m.requestFullscreen()}catch(e){m.classList.add('pfs')}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('mapwrap').classList.remove('pfs')});
+$('auto').onchange=()=>{syncAuto();if($('auto').checked&&!busy&&!$('go').disabled)turn()};
+if(typeof echarts==='undefined'||!echarts.getMap('world')){$('go').textContent='Map failed to load'}
+else init();
+})();
+</script>
+</body>
+</html>
