@@ -40,6 +40,10 @@ button{font:inherit;padding:9px 16px;border-radius:8px;border:1px solid var(--li
 button:disabled{opacity:.5;cursor:default}
 label{font-size:13px;color:var(--mut);margin-left:10px;white-space:nowrap}
 #log{position:absolute;left:0;right:0;bottom:0;background:rgba(10,12,16,.78);color:#fff;font-size:15px;line-height:1.35;padding:9px 14px;min-height:40px;z-index:3}
+#vs{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);display:none;align-items:center;gap:16px;background:rgba(10,12,16,.85);color:#fff;border-radius:12px;padding:8px 18px;z-index:3;white-space:nowrap;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+#vs .s{text-align:center}#vs img{display:block;width:84px;height:56px;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.55);margin:0 auto 3px}
+#vs .vsx{font-weight:800;font-size:22px;color:#ffd400}#vs .won{font-size:20px;font-weight:800;color:#ffd400}
+#mapwrap:fullscreen #vs,#mapwrap.pfs #vs{bottom:clamp(80px,10vw,120px);transform:translateX(-50%) scale(1.5);transform-origin:bottom center}
 #mbar{position:absolute;top:8px;right:8px;display:flex;gap:6px;z-index:3}
 #mbar button{padding:5px 10px;background:rgba(10,12,16,.7);border:1px solid rgba(255,255,255,.3)}
 #mapwrap:fullscreen,#mapwrap.pfs{background:var(--sea);display:flex;align-items:center;justify-content:center;border:0;border-radius:0}
@@ -63,6 +67,7 @@ label{font-size:13px;color:var(--mut);margin-left:10px;white-space:nowrap}
 <div id="mapwrap"><canvas id="map" width="1200" height="480"></canvas>
  <div id="mbar"><button id="ap" title="Auto-play on/off">▶ Auto</button><button id="rv" title="Reset view">⟲</button><button id="fs" title="Fullscreen">⛶</button></div>
  <div id="info" style="display:none"></div>
+ <div id="vs"></div>
  <div id="log">Press Roll! to start. While paused: drag to move, wheel or pinch to zoom, click a country for details.</div></div>
 <div class="row">
  <div class="card" style="flex:2;min-width:300px">
@@ -94,7 +99,7 @@ const cv=document.getElementById('map'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id), rnd=n=>Math.floor(Math.random()*n);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const BADC=/^(DY|FX|HV|SU|UK|YU|AN|BU|CS|DD|NH|NQ|PU|PZ|RH|TP|VD|WK|YD|ZR|EU|EZ|UN|QO|XA|XB|ZZ)$/;
-const ALIAS={'Aland':'AX','Antigua and Barb.':'AG','Cayman Is.':'KY','Faeroe Is.':'FO','Heard I. and McDonald Is.':'HM','Br. Indian Ocean Ter.':'IO','Siachen Glacier':'IN','Saint Lucia':'LC','N. Mariana Is.':'MP','Fr. Polynesia':'PF','S. Geo. and S. Sandw. Is.':'GS','Saint Helena':'SH','St. Pierre and Miquelon':'PM','São Tomé and Principe':'ST','Turks and Caicos Is.':'TC','Trinidad and Tobago':'TT','Turkey':'TR','St. Vin. and Gren.':'VC','U.S. Virgin Is.':'VI','Dem. Rep. Congo':'CD','Congo':'CG','Central African Rep.':'CF','Bosnia and Herz.':'BA','Dominican Rep.':'DO','Eq. Guinea':'GQ','Czech Rep.':'CZ',"Côte d'Ivoire":'CI','Ivory Coast':'CI','S. Sudan':'SS','Solomon Is.':'SB','W. Sahara':'EH','Falkland Is.':'FK','Dem. Rep. Korea':'KP','Korea':'KR','Lao PDR':'LA','Macedonia':'MK','Myanmar':'MM','Palestine':'PS','Swaziland':'SZ','Fr. S. Antarctic Lands':'TF','Somaliland':'SO','Kosovo':'XK','N. Cyprus':'TR','Timor-Leste':'TL','Brunei':'BN','Gambia':'GM','Bahamas':'BS','Republic of Serbia':'RS','United Republic of Tanzania':'TZ','Guinea Bissau':'GW','Cabo Verde':'CV','Vatican':'VA'};
+const ALIAS={'San Marino':'SM','Vatican City':'VA','Aland':'AX','Antigua and Barb.':'AG','Cayman Is.':'KY','Faeroe Is.':'FO','Heard I. and McDonald Is.':'HM','Br. Indian Ocean Ter.':'IO','Siachen Glacier':'IN','Saint Lucia':'LC','N. Mariana Is.':'MP','Fr. Polynesia':'PF','S. Geo. and S. Sandw. Is.':'GS','Saint Helena':'SH','St. Pierre and Miquelon':'PM','São Tomé and Principe':'ST','Turks and Caicos Is.':'TC','Trinidad and Tobago':'TT','Turkey':'TR','St. Vin. and Gren.':'VC','U.S. Virgin Is.':'VI','Dem. Rep. Congo':'CD','Congo':'CG','Central African Rep.':'CF','Bosnia and Herz.':'BA','Dominican Rep.':'DO','Eq. Guinea':'GQ','Czech Rep.':'CZ',"Côte d'Ivoire":'CI','Ivory Coast':'CI','S. Sudan':'SS','Solomon Is.':'SB','W. Sahara':'EH','Falkland Is.':'FK','Dem. Rep. Korea':'KP','Korea':'KR','Lao PDR':'LA','Macedonia':'MK','Myanmar':'MM','Palestine':'PS','Swaziland':'SZ','Fr. S. Antarctic Lands':'TF','Somaliland':'SO','Kosovo':'XK','N. Cyprus':'TR','Timor-Leste':'TL','Brunei':'BN','Gambia':'GM','Bahamas':'BS','Republic of Serbia':'RS','United Republic of Tanzania':'TZ','Guinea Bissau':'GW','Cabo Verde':'CV','Vatican':'VA'};
 const norm=s=>s.toLowerCase().replace(/[^a-z]/g,'');
 const flagOf=c=>String.fromCodePoint(...[...c].map(x=>0x1F1E6+x.charCodeAt(0)-65));
 function decodePoly(s,off,sc){const r=[];let X=off[0],Y=off[1];for(let i=0;i<s.length;i+=2){let x=s.charCodeAt(i)-64,y=s.charCodeAt(i+1)-64;x=(x>>1)^(-(x&1));y=(y>>1)^(-(y&1));X+=x;Y+=y;r.push([X/sc,Y/sc])}return r}
@@ -102,30 +107,55 @@ function rings(f){const g=f.geometry,out=[];const sc=g.UTF8Scale||1024;const dec
  if(g.type==='Polygon')g.coordinates.forEach((c,i)=>out.push(dec(c,g.encodeOffsets&&g.encodeOffsets[i])));
  else g.coordinates.forEach((p,i)=>p.forEach((c,j)=>out.push(dec(c,g.encodeOffsets&&g.encodeOffsets[i][j]))));return out}
 
-let T=[],owner=[],nb=[],flags={},flagUrl={},busy=false,hl={a:-1,d:-1};
+let G=[],land=[],T=[],owner=[],nb=[],flags={},flagUrl={},busy=false,hl={a:-1,d:-1};
 
 async function init(){
- const feats=echarts.getMap('world').geoJson.features.filter(f=>f.properties.name&&f.properties.name!=='Antarctica'&&f.properties.name!=='Fr. S. Antarctic Lands');
+ // Antarctica has no flag, so it stays out
+ const FAR=9; // degrees: islands/exclaves farther than this from the main landmass get their own standalone flag
+ const DROP=new Set(['Antarctica']);
+ // These only have a borrowed flag (India's, Somalia's, Turkey's): drawn as part of the country that holds them
+ const MERGE={'Siachen Glacier':'India','Somaliland':'Somalia','N. Cyprus':'Cyprus'};
+ const all=echarts.getMap('world').geoJson.features.filter(f=>f.properties.name&&!DROP.has(f.properties.name));
+ const extra={};all.forEach(f=>{const p=MERGE[f.properties.name];if(p)(extra[p]=extra[p]||[]).push(f)});
+ const oct=(lo,la,r)=>Array.from({length:8},(_,k)=>{const a=k*Math.PI/4+Math.PI/8;return [lo+r*Math.cos(a),la+r*Math.sin(a)*.9]});
+ const MICRO=[['San Marino',12.458,43.942,.13],['Vatican City',12.453,41.903,.09]].filter(m=>!all.some(f=>f.properties.name===m[0])).map(([name,lo,la,r])=>({properties:{name},geometry:{type:'Polygon',coordinates:[oct(lo,la,r)]}}));
+ let feats=all.filter(f=>!MERGE[f.properties.name]).concat(MICRO);
  const byName={};
  try{const dn=new Intl.DisplayNames(['en'],{type:'region'});
   for(let a=65;a<91;a++)for(let b=65;b<91;b++){const c=String.fromCharCode(a,b);let n;try{n=dn.of(c)}catch(e){continue}if(n&&n!==c&&n!=='Unknown Region'&&!BADC.test(c)&&!byName[norm(n)])byName[norm(n)]=c}}catch(e){}
  const key={};
+ // Remove anything that has no flag of its own (no ISO code, or no flag image available)
+ {const ok=await Promise.all(feats.map(async f=>{const n=f.properties.name,i=ALIAS[n]||byName[norm(n)]||null;return !!(i&&await window.flagLoad(i))}));
+  if(ok.filter(Boolean).length>feats.length*.5)feats=feats.filter((_,i)=>ok[i])}
  feats.forEach((f,i)=>{
-  const name=f.properties.name,rs=rings(f);
-  const path=new Path2D();let best=null,mbb=null,ba=-1,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const keys=new Set();
+  const name=f.properties.name,rs=rings(f).concat(...(extra[name]||[]).map(rings));
+  const path=new Path2D();let best=null,mbb=null,ba=-1,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const keys=new Set(),segs=[],ri=[];
   rs.forEach(r=>{let a0=1e9,b0=1e9,a1=-1e9,b1=-1e9;
    r.forEach(([lo,la],k)=>{const X=px(lo),Y=py(la);k?path.lineTo(X,Y):path.moveTo(X,Y);
     a0=Math.min(a0,lo);a1=Math.max(a1,lo);b0=Math.min(b0,la);b1=Math.max(b1,la);keys.add(Math.round(lo*8)+','+Math.round(la*8))});
+   {const n=r.length;for(let k=0;k<n;k++){const A=r[k],B=r[(k+1)%n];if(A[0]===B[0]&&A[1]===B[1])continue;segs.push([px(A[0]),py(A[1]),px(B[0]),py(B[1]),Math.round(A[0]*8)+','+Math.round(A[1]*8),Math.round(B[0]*8)+','+Math.round(B[1]*8)])}}
    path.closePath();x0=Math.min(x0,px(a0));x1=Math.max(x1,px(a1));y0=Math.min(y0,py(b1));y1=Math.max(y1,py(b0));
-   if((a1-a0)*(b1-b0)>ba){ba=(a1-a0)*(b1-b0);best=[(a0+a1)/2,(b0+b1)/2];mbb=[px(a0),py(b1),Math.max(2,px(a1)-px(a0)),Math.max(2,py(b0)-py(b1))]}});
+   if((a1-a0)*(b1-b0)>ba){ba=(a1-a0)*(b1-b0);best=[(a0+a1)/2,(b0+b1)/2];mbb=[px(a0),py(b1),Math.max(2,px(a1)-px(a0)),Math.max(2,py(b0)-py(b1))]}ri.push({r,a0,b0,a1,b1})});
+  // distant islands/exclaves (French Guiana, Canary Islands, Alaska, Hawaii...) get their own standalone flag instead of sharing the mainland's
+  let pm=path,ebm=null,ov=null;
+  if(ri.length>1){
+   const isOv=g=>Math.hypot((g.a0+g.a1)/2-best[0],(g.b0+g.b1)/2-best[1])>FAR;
+   const ovr=ri.filter(isOv),mr=ri.filter(g=>!isOv(g));
+   if(ovr.length&&mr.length){
+    const mk=l=>{const p=new Path2D();l.forEach(g=>{g.r.forEach(([lo,la],k)=>{k?p.lineTo(px(lo),py(la)):p.moveTo(px(lo),py(la))});p.closePath()});return p};
+    const bbOf=l=>{const a=Math.min(...l.map(g=>g.a0)),b=Math.max(...l.map(g=>g.b1)),c=Math.max(...l.map(g=>g.a1)),d=Math.min(...l.map(g=>g.b0));return [px(a),py(b),Math.max(.5,px(c)-px(a)),Math.max(.5,py(d)-py(b))]};
+    pm=mk(mr);ebm=bbOf(mr);ov=ovr.map(g=>({path:mk([g]),bb:bbOf([g])}))}}
   const iso=ALIAS[name]||byName[norm(name)]||null;
-  T.push({name,path,iso,emoji:iso?flagOf(iso):null,c:best,bb:[x0,y0,Math.max(2,x1-x0),Math.max(2,y1-y0)],mb:mbb,keys});
+  T.push({name,path,iso,emoji:iso?flagOf(iso):null,c:best,bb:[x0,y0,Math.max(2,x1-x0),Math.max(2,y1-y0)],mb:mbb,eb:[x0,y0,x1-x0,y1-y0],pm,ebm:ebm||[x0,y0,x1-x0,y1-y0],ov,enc:name==='San Marino'||name==='Vatican City',keys,segs});
   owner.push(i)});
  // adjacency: shared border vertices
  const idx={};T.forEach((t,i)=>t.keys.forEach(k=>(idx[k]=idx[k]||[]).push(i)));
  const cnt=T.map(()=>({}));
  Object.values(idx).forEach(l=>{for(const a of l)for(const b of l)if(a!==b)cnt[a][b]=(cnt[a][b]||0)+1});
  T.forEach((t,i)=>{nb[i]=Object.keys(cnt[i]).filter(j=>cnt[i][j]>=2).map(Number)});
+ land=T.map((_,i)=>new Set(nb[i]));
+ T.forEach((t,i)=>t.segs.forEach(g=>{const A=idx[g[4]]||[],B=idx[g[5]]||[];g.n=A.filter(j=>j!==i&&B.includes(j));g.length=4;g.n.forEach(j=>{land[i].add(j);land[j].add(i)})}));
+ [['San Marino','Italy'],['Vatican City','Italy']].forEach(([a,b])=>{const i=T.findIndex(t=>t.name===a),j=T.findIndex(t=>t.name===b);if(i>=0&&j>=0){land[i].add(j);land[j].add(i)}});
  // islands: link to nearest by centroid
  const dist=(a,b)=>Math.hypot(T[a].c[0]-T[b].c[0],T[a].c[1]-T[b].c[1]);
  T.forEach((t,i)=>{if(nb[i].length===0){const o=T.map((_,j)=>j).filter(j=>j!==i).sort((p,q)=>dist(i,p)-dist(i,q)).slice(0,3);o.forEach(j=>{nb[i].push(j);if(!nb[j].includes(i))nb[j].push(i)})}});
@@ -133,7 +163,7 @@ async function init(){
  await Promise.all(T.map((t,i)=>svgFlag(t).then(c=>{if(c)flags[i]=c;else miss.push(i)})));
  if(miss.length){try{await Promise.race([document.fonts.load('48px "Noto Color Emoji"','🇮🇹'),sleep(3000)])}catch(e){}await sleep(50);miss.forEach(i=>flags[i]=makeFlag(T[i],i))}
  T.forEach((t,i)=>{flagUrl[i]=mini(flags[i])});
- draw();board();
+ rebuild();draw();board();
  $('go').disabled=false;$('go').textContent='Roll!';
 }
 async function svgFlag(t){const svg=t.iso?await window.flagLoad(t.iso):null;if(!svg||typeof svg!=='string')return null;
@@ -153,13 +183,33 @@ function makeFlag(t,i){
 const cam={cx:W/2,cy:H/2,k:1};let sel=-1;const gain={};
 function zoomTo(cx,cy,k,ms){return new Promise(res=>{const s={cx:cam.cx,cy:cam.cy,k:cam.k},t0=performance.now();(function f(n){let p=Math.min(1,(n-t0)/ms);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;cam.cx=s.cx+(cx-s.cx)*p;cam.cy=s.cy+(cy-s.cy)*p;cam.k=s.k+(k-s.k)*p;draw();p<1?requestAnimationFrame(f):res()})(t0)})}
 function zoomFit(ids,ms){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;ids.forEach(i=>{const b=T[i].bb;x0=Math.min(x0,b[0]);y0=Math.min(y0,b[1]);x1=Math.max(x1,b[0]+b[2]);y1=Math.max(y1,b[1]+b[3])});const w=Math.max(x1-x0,70),h=Math.max(y1-y0,45);return zoomTo((x0+x1)/2,(y0+y1)/2,Math.max(1,Math.min(W/(w*1.8),H/(h*1.8),8)),ms)}
+// Rebuild empire shapes + visible borders (only borders between different empires are drawn)
+function rebuild(){
+ const m={};owner.forEach((o,i)=>(m[o]=m[o]||[]).push(i));
+ G=[];
+ Object.keys(m).forEach(k=>{const o=+k,left=new Set(m[k]);
+  while(left.size){const s0=left.values().next().value,ids=[s0];left.delete(s0);
+   for(let q=0;q<ids.length;q++)land[ids[q]].forEach(j=>{if(left.has(j)){left.delete(j);ids.push(j)}});
+   let path,bb;
+   if(ids.length===1){path=T[s0].pm;bb=T[s0].ebm}
+   else{path=new Path2D();let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;ids.forEach(i=>{path.addPath(T[i].pm);const b=T[i].ebm;x0=Math.min(x0,b[0]);y0=Math.min(y0,b[1]);x1=Math.max(x1,b[0]+b[2]);y1=Math.max(y1,b[1]+b[3])});bb=[x0,y0,x1-x0,y1-y0]}
+   const gi=G.length;ids.forEach(i=>T[i].gi=gi);G.push({o,ids,path,bb,ov:ids.flatMap(i=>T[i].ov||[])})}});
+ T.forEach((t,i)=>{const p=new Path2D(),o=owner[i];t.segs.forEach(g=>{if(g.n.some(j=>owner[j]===o))return;p.moveTo(g[0],g[1]);p.lineTo(g[2],g[3])});t.bp=p})}
 function draw(){
- ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);const K=cam.k;ctx.setTransform(K,0,0,K,W/2-cam.cx*K,H/2-cam.cy*K);
- T.forEach((t,i)=>{ctx.save();ctx.clip(t.path);const f=flags[owner[i]];ctx.drawImage(f,t.bb[0],t.bb[1],t.bb[2],t.bb[3]);if(t.mb&&(t.mb[2]<t.bb[2]*.8||t.mb[3]<t.bb[3]*.8))ctx.drawImage(f,t.mb[0],t.mb[1],t.mb[2],t.mb[3]);ctx.restore();
-  ctx.lineWidth=.6/K;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.stroke(t.path)});
- [[hl.a,'#ff2d2d'],[hl.d,'#2d7bff']].forEach(([o,c])=>{if(o>=0)T.forEach((t,i)=>{if(owner[i]===o){ctx.lineWidth=3.5/K;ctx.strokeStyle=c;ctx.stroke(t.path)}})});
- if(sel>=0)T.forEach((t,i)=>{if(owner[i]===owner[sel]){ctx.lineWidth=2.5/K;ctx.strokeStyle='#fff';ctx.stroke(t.path)}});
- if(hl.ray){ctx.setLineDash([6/K,5/K]);ctx.lineWidth=2/K;ctx.strokeStyle='#ffd400';ctx.beginPath();ctx.moveTo(hl.ray[0],hl.ray[1]);ctx.lineTo(hl.ray[2],hl.ray[3]);ctx.stroke();ctx.setLineDash([])}
+ if(!G.length)return;
+ ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);const K=cam.k,half=W/(2*K);
+ [0,-W,W].forEach(d=>{if(cam.cx+half<=d||cam.cx-half>=d+W)return;ctx.setTransform(K,0,0,K,W/2-(cam.cx-d)*K,H/2-cam.cy*K);
+ G.forEach(g=>{const f=flags[g.o];ctx.save();ctx.clip(g.path);ctx.drawImage(f,g.bb[0],g.bb[1],g.bb[2],g.bb[3]);
+  if(g.ids.length===1){const t=T[g.ids[0]];if(!t.ov&&t.mb&&(t.mb[2]<t.bb[2]*.8||t.mb[3]<t.bb[3]*.8))ctx.drawImage(f,t.mb[0],t.mb[1],t.mb[2],t.mb[3])}
+  ctx.restore();
+  g.ov.forEach(p=>{ctx.save();ctx.clip(p.path);ctx.drawImage(f,p.bb[0],p.bb[1],p.bb[2],p.bb[3]);ctx.restore()})});
+ // enclaves (San Marino, Vatican) sit inside Italy: draw them on top
+ T.forEach(t=>{if(!t.enc)return;const g=G[t.gi];ctx.save();ctx.clip(t.path);ctx.drawImage(flags[g.o],g.bb[0],g.bb[1],g.bb[2],g.bb[3]);ctx.restore()});
+ ctx.lineWidth=.6/K;ctx.strokeStyle='rgba(0,0,0,.55)';T.forEach(t=>ctx.stroke(t.bp));
+ [[hl.a,'#ff2d2d'],[hl.d,'#2d7bff']].forEach(([o,c])=>{if(o>=0)T.forEach((t,i)=>{if(owner[i]===o){ctx.lineWidth=3.5/K;ctx.strokeStyle=c;ctx.stroke(t.bp)}})});
+ if(sel>=0)T.forEach((t,i)=>{if(owner[i]===owner[sel]){ctx.lineWidth=2.5/K;ctx.strokeStyle='#fff';ctx.stroke(t.bp)}});
+ if(hl.ray){ctx.setLineDash([6/K,5/K]);ctx.lineWidth=2/K;ctx.strokeStyle='#ffd400';ctx.beginPath();hl.ray.forEach((p,i)=>{if(i===0||Math.abs(p[0]-hl.ray[i-1][0])>W*.4)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1])});ctx.stroke();ctx.setLineDash([])}
+ });
  ctx.setTransform(1,0,0,1,0,0)}
 function board(){
  const c={};owner.forEach(o=>c[o]=(c[o]||0)+1);
@@ -212,25 +262,33 @@ async function fight(na,nd){
  lastScore+=` → duel ${x}–${y}`;return x>y}
 
 function castRay(o,dir){
+ // The world is a globe: the ray follows a great circle from the territory's centre, wraps around the
+ // seam and can even cross the poles, so it eventually finds an enemy unless the whole circle is ocean/own land.
  ctx.setTransform(1,0,0,1,0,0);
- const b=dir*Math.PI/4,ux=Math.sin(b),uy=-Math.cos(b);let best=null,lim=1300;
+ const th=dir*Math.PI/4,R=Math.PI/180,STEP=.4,cth=Math.cos(th),sth=Math.sin(th);let best=null,lim=360;
  for(let a=0;a<T.length;a++){if(owner[a]!==o)continue;
-  const x0=px(T[a].c[0]),y0=py(T[a].c[1]);
-  for(let s=3;s<lim;s+=1.5){const x=x0+ux*s,y=y0+uy*s;if(x<0||x>W||y<0||y>H)break;
+  const lo1=T[a].c[0]*R,la1=T[a].c[1]*R,sl=Math.sin(la1),cl=Math.cos(la1),pts=[[px(T[a].c[0]),py(T[a].c[1])]];
+  for(let s=STEP;s<lim;s+=STEP){
+   const d=s*R,sd=Math.sin(d),cd=Math.cos(d),la2=Math.asin(Math.max(-1,Math.min(1,sl*cd+cl*sd*cth))),lo2=lo1+Math.atan2(sth*sd*cl,cd-sl*Math.sin(la2));
+   const x=px(((lo2/R+540)%360)-180),y=py(la2/R);pts.push([x,y]);
+   if(y<0||y>H)continue;
    let hit=-1;
-   for(let j=0;j<T.length;j++){if(owner[j]===o)continue;const q=T[j].bb;if(x<q[0]||x>q[0]+q[2]||y<q[1]||y>q[1]+q[3])continue;if(ctx.isPointInPath(T[j].path,x,y)){hit=j;break}}
-   if(hit>=0){best={from:a,id:hit,line:[x0,y0,x,y]};lim=s;break}}}
+   for(let j=T.length-1;j>=0;j--){if(owner[j]===o)continue;const q=T[j].bb;if(x<q[0]||x>q[0]+q[2]||y<q[1]||y>q[1]+q[3])continue;if(ctx.isPointInPath(T[j].path,x,y)){hit=j;break}}
+   if(hit>=0){best={from:a,id:hit,pts};lim=s;break}}}
  return best}
 const terrs=o=>T.map((_,i)=>i).filter(i=>owner[i]===o);
 const fi=i=>flagUrl[i]?`<img class="fi" src="${flagUrl[i]}" alt="">`:'';
 let lastScore='',conq=0;
 const addHist=(w,l,attWon,k)=>{const h=$('hist');if(!conq)h.innerHTML='';conq++;const d=document.createElement('div');
  d.innerHTML=`<b>#${conq}</b> ${fi(w)} <b>${T[w].name}</b> ${attWon?'conquered':'defended &amp; absorbed'} ${fi(l)} <b>${T[l].name}</b> · +${plural(k)} <span class="cap">(dice ${lastScore}, ${attWon?'attacker':'defender'} won)</span>`;h.prepend(d)};
+const vsSide=i=>`<div class="s"><img src="${flagUrl[i]||''}" alt=""><b>${T[i].name}</b></div>`;
+const vsShow=h=>{const v=$('vs');v.innerHTML=h;v.style.display='flex'};
+const vsHide=()=>{$('vs').style.display='none'};
 const plural=k=>k+' territor'+(k>1?'ies':'y');
 async function turn(){
  if(busy)return;busy=true;$('go').disabled=true;
  const log=$('log'),turbo=$('turbo').checked,t=turbo?500:4500;
- const reset=async()=>{hl={a:-1,d:-1};await zoomTo(W/2,H/2,1,turbo?100:1200);busy=false;$('go').disabled=false;if($('auto').checked)setTimeout(turn,turbo?100:1200)};
+ const reset=async()=>{vsHide();hl={a:-1,d:-1};await zoomTo(W/2,H/2,1,turbo?100:1200);busy=false;$('go').disabled=false;if($('auto').checked)setTimeout(turn,turbo?100:1200)};
  const emp=[...new Set(owner)];
  if(emp.length<2){log.innerHTML=`\ud83c\udfc6 ${fi(emp[0])} <b>${T[emp[0]].name}</b> rules the whole world!`;$('auto').checked=false;syncAuto();busy=false;$('go').textContent='Game over';return}
  const o=emp[rnd(emp.length)];
@@ -258,24 +316,26 @@ async function turn(){
   await sleep(turbo?150:2200);return reset()}
  log.innerHTML=`🧭 <b>${T[o].name}</b> attacks to the <b>${NAMES[dir]}</b> (${DIRS[dir]})…`;
  await sleep(turbo?100:1200);
- const od=owner[R.id];hl.d=od;hl.ray=R.line;await zoomFit([R.from,R.id],turbo?200:1600);
+ const od=owner[R.id];hl.d=od;hl.ray=R.pts;await zoomFit([R.from,R.id],turbo?200:1600);
  log.innerHTML=`\u2694\ufe0f ${fi(o)} <b>${T[o].name}</b> (from ${T[R.from].name}) attacks ${NAMES[dir]} \u2192 ${fi(od)} <b>${T[od].name}</b> (hit at ${T[R.id].name})\u2026`;
  await sleep(turbo?100:1200);
+ vsShow(vsSide(o)+'<span class="vsx">VS</span>'+vsSide(od));
  const win=await fight(mine.length,terrs(od).length);
+ {const w=win?o:od;vsShow(vsSide(w)+`<span class="won">${T[w].name} won!</span>`)}
  const mv=(f,to)=>owner.forEach((x,i)=>{if(x===f){owner[i]=to;gain[i]=conq+1}});
  if(win){const k=terrs(od).length;mv(od,o);log.innerHTML=`\u2705 ${fi(o)} <b>${T[o].name}</b> conquers ${fi(od)} <b>${T[od].name}</b> and takes all its ${plural(k)}!`;addHist(o,od,true,k)}
  else{const k=terrs(o).length;mv(o,od);log.innerHTML=`\ud83d\udee1\ufe0f ${fi(od)} <b>${T[od].name}</b> defends and absorbs ${fi(o)} <b>${T[o].name}</b> with all its ${plural(k)}!`;addHist(od,o,false,k)}
- draw();board();await sleep(turbo?200:3000);
+ rebuild();draw();board();await sleep(turbo?200:3000);
  return reset()}
 
 const canInteract=()=>!busy&&!$('auto').checked;
 function toWorld(ev){const r=cv.getBoundingClientRect(),sc=Math.min(r.width/W,r.height/H),ox=(r.width-W*sc)/2,oy=(r.height-H*sc)/2;
  const cx=(ev.clientX-r.left-ox)/sc,cy=(ev.clientY-r.top-oy)/sc;return {cx,cy,sc,wx:cam.cx+(cx-W/2)/cam.k,wy:cam.cy+(cy-H/2)/cam.k}}
-function clampCam(){cam.k=Math.max(1,Math.min(25,cam.k));cam.cx=Math.max(0,Math.min(W,cam.cx));cam.cy=Math.max(0,Math.min(H,cam.cy))}
+function clampCam(){cam.k=Math.max(1,Math.min(25,cam.k));cam.cx=((cam.cx%W)+W)%W;cam.cy=Math.max(0,Math.min(H,cam.cy))}
 function zoomAt(ev,f){const p=toWorld(ev),k=Math.max(1,Math.min(25,cam.k*f));cam.k=k;cam.cx=p.wx-(p.cx-W/2)/k;cam.cy=p.wy-(p.cy-H/2)/k;clampCam();draw()}
-function pick(e){const p=toWorld(e);ctx.setTransform(1,0,0,1,0,0);let hit=-1;
- for(let i=0;i<T.length;i++){const q=T[i].bb;if(p.wx<q[0]||p.wx>q[0]+q[2]||p.wy<q[1]||p.wy>q[1]+q[3])continue;if(ctx.isPointInPath(T[i].path,p.wx,p.wy)){hit=i;break}}
- if(hit<0){let bd=8/cam.k;T.forEach((t,i)=>{const d=Math.hypot(px(t.c[0])-p.wx,py(t.c[1])-p.wy);if(d<bd){bd=d;hit=i}})}
+function pick(e){const p=toWorld(e);p.wx=((p.wx%W)+W)%W;ctx.setTransform(1,0,0,1,0,0);let hit=-1;
+ for(let i=T.length-1;i>=0;i--){const q=T[i].bb;if(p.wx<q[0]||p.wx>q[0]+q[2]||p.wy<q[1]||p.wy>q[1]+q[3])continue;if(ctx.isPointInPath(T[i].path,p.wx,p.wy)){hit=i;break}}
+ if(hit<0){let bd=8/cam.k;T.forEach((t,i)=>{const dx=Math.abs(px(t.c[0])-p.wx),d=Math.hypot(Math.min(dx,W-dx),py(t.c[1])-p.wy);if(d<bd){bd=d;hit=i}})}
  sel=hit;showInfo();draw()}
 function showInfo(){const box=$('info');if(sel<0){box.style.display='none';return}
  const o=owner[sel],got=terrs(o).filter(i=>i!==o).sort((a,b)=>(gain[b]||0)-(gain[a]||0));
