@@ -101,7 +101,7 @@ const cv=document.getElementById('map'),ctx=cv.getContext('2d');
 const $=id=>document.getElementById(id), rnd=n=>Math.floor(Math.random()*n);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const BADC=/^(DY|FX|HV|SU|UK|YU|AN|BU|CS|DD|NH|NQ|PU|PZ|RH|TP|VD|WK|YD|ZR|EU|EZ|UN|QO|XA|XB|ZZ)$/;
-const ALIAS={'San Marino':'SM','Vatican City':'VA','Aland':'AX','Antigua and Barb.':'AG','Cayman Is.':'KY','Faeroe Is.':'FO','Heard I. and McDonald Is.':'HM','Br. Indian Ocean Ter.':'IO','Siachen Glacier':'IN','Saint Lucia':'LC','N. Mariana Is.':'MP','Fr. Polynesia':'PF','S. Geo. and S. Sandw. Is.':'GS','Saint Helena':'SH','St. Pierre and Miquelon':'PM','São Tomé and Principe':'ST','Turks and Caicos Is.':'TC','Trinidad and Tobago':'TT','Turkey':'TR','St. Vin. and Gren.':'VC','U.S. Virgin Is.':'VI','Dem. Rep. Congo':'CD','Congo':'CG','Central African Rep.':'CF','Bosnia and Herz.':'BA','Dominican Rep.':'DO','Eq. Guinea':'GQ','Czech Rep.':'CZ',"Côte d'Ivoire":'CI','Ivory Coast':'CI','S. Sudan':'SS','Solomon Is.':'SB','W. Sahara':'EH','Falkland Is.':'FK','Dem. Rep. Korea':'KP','Korea':'KR','Lao PDR':'LA','Macedonia':'MK','Myanmar':'MM','Palestine':'PS','Swaziland':'SZ','Fr. S. Antarctic Lands':'TF','Somaliland':'SO','Kosovo':'XK','N. Cyprus':'TR','Timor-Leste':'TL','Brunei':'BN','Gambia':'GM','Bahamas':'BS','Republic of Serbia':'RS','United Republic of Tanzania':'TZ','Guinea Bissau':'GW','Cabo Verde':'CV','Vatican':'VA'};
+const ALIAS={'Taiwan':'TW','Hong Kong':'HK','San Marino':'SM','Vatican City':'VA','Aland':'AX','Antigua and Barb.':'AG','Cayman Is.':'KY','Faeroe Is.':'FO','Heard I. and McDonald Is.':'HM','Br. Indian Ocean Ter.':'IO','Siachen Glacier':'IN','Saint Lucia':'LC','N. Mariana Is.':'MP','Fr. Polynesia':'PF','S. Geo. and S. Sandw. Is.':'GS','Saint Helena':'SH','St. Pierre and Miquelon':'PM','São Tomé and Principe':'ST','Turks and Caicos Is.':'TC','Trinidad and Tobago':'TT','Turkey':'TR','St. Vin. and Gren.':'VC','U.S. Virgin Is.':'VI','Dem. Rep. Congo':'CD','Congo':'CG','Central African Rep.':'CF','Bosnia and Herz.':'BA','Dominican Rep.':'DO','Eq. Guinea':'GQ','Czech Rep.':'CZ',"Côte d'Ivoire":'CI','Ivory Coast':'CI','S. Sudan':'SS','Solomon Is.':'SB','W. Sahara':'EH','Falkland Is.':'FK','Dem. Rep. Korea':'KP','Korea':'KR','Lao PDR':'LA','Macedonia':'MK','Myanmar':'MM','Palestine':'PS','Swaziland':'SZ','Fr. S. Antarctic Lands':'TF','Somaliland':'SO','Kosovo':'XK','N. Cyprus':'TR','Timor-Leste':'TL','Brunei':'BN','Gambia':'GM','Bahamas':'BS','Republic of Serbia':'RS','United Republic of Tanzania':'TZ','Guinea Bissau':'GW','Cabo Verde':'CV','Vatican':'VA'};
 const norm=s=>s.toLowerCase().replace(/[^a-z]/g,'');
 const flagOf=c=>String.fromCodePoint(...[...c].map(x=>0x1F1E6+x.charCodeAt(0)-65));
 function decodePoly(s,off,sc){const r=[];let X=off[0],Y=off[1];for(let i=0;i<s.length;i+=2){let x=s.charCodeAt(i)-64,y=s.charCodeAt(i+1)-64;x=(x>>1)^(-(x&1));y=(y>>1)^(-(y&1));X+=x;Y+=y;r.push([X/sc,Y/sc])}return r}
@@ -111,13 +111,30 @@ function rings(f){const g=f.geometry,out=[];const sc=g.UTF8Scale||1024;const dec
 
 let G=[],land=[],T=[],owner=[],nb=[],flags={},flagUrl={},busy=false,hl={a:-1,d:-1};
 
+// The bundled world map folds Taiwan and Hong Kong into China: cut their polygons out so each is its own territory with its own flag
+function splitChina(list){
+ if(list.some(f=>f.properties.name==='Taiwan'))return list;
+ const ci=list.findIndex(f=>f.properties.name==='China');if(ci<0)return list;
+ const keep=[],tw=[],hk=[];
+ rings(list[ci]).forEach(r=>{const xs=r.map(p=>p[0]),ys=r.map(p=>p[1]),cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2;
+  if(cx>120&&cx<122.5&&cy>21.5&&cy<25.4)tw.push(r);
+  else if(cx>113.5&&cx<114.6&&cy>22&&cy<22.7)hk.push(r);
+  else keep.push(r)});
+ if(!tw.length&&!hk.length)return list;
+ const mk=(props,l)=>({properties:props,geometry:{type:'MultiPolygon',coordinates:l.map(r=>[r])}});
+ // Hong Kong is only ~1 px wide at world scale, so it is enlarged a bit (like the other micro-territories) to stay visible and clickable
+ const HK=hk.map(r=>r.map(([lo,la])=>[114.1+(lo-114.1)*1.8,22.35+(la-22.35)*1.8]));
+ const out=list.slice();out[ci]=mk(list[ci].properties,keep);
+ if(tw.length)out.push(mk({name:'Taiwan'},tw));
+ if(HK.length)out.push(mk({name:'Hong Kong'},HK));
+ return out}
 async function init(){
  // Antarctica has no flag, so it stays out
  const FAR=9; // degrees: islands/exclaves farther than this from the main landmass get their own standalone flag
  const DROP=new Set(['Antarctica']);
  // These only have a borrowed flag (India's, Somalia's, Turkey's): drawn as part of the country that holds them
  const MERGE={'Siachen Glacier':'India','Somaliland':'Somalia','N. Cyprus':'Cyprus'};
- const all=echarts.getMap('world').geoJson.features.filter(f=>f.properties.name&&!DROP.has(f.properties.name));
+ const all=splitChina(echarts.getMap('world').geoJson.features.filter(f=>f.properties.name&&!DROP.has(f.properties.name)));
  const extra={};all.forEach(f=>{const p=MERGE[f.properties.name];if(p)(extra[p]=extra[p]||[]).push(f)});
  const oct=(lo,la,r)=>Array.from({length:8},(_,k)=>{const a=k*Math.PI/4+Math.PI/8;return [lo+r*Math.cos(a),la+r*Math.sin(a)*.9]});
  const MICRO=[['San Marino',12.458,43.942,.13],['Vatican City',12.453,41.903,.09]].filter(m=>!all.some(f=>f.properties.name===m[0])).map(([name,lo,la,r])=>({properties:{name},geometry:{type:'Polygon',coordinates:[oct(lo,la,r)]}}));
@@ -157,7 +174,7 @@ async function init(){
  T.forEach((t,i)=>{nb[i]=Object.keys(cnt[i]).filter(j=>cnt[i][j]>=2).map(Number)});
  land=T.map((_,i)=>new Set(nb[i]));
  T.forEach((t,i)=>t.segs.forEach(g=>{const A=idx[g[4]]||[],B=idx[g[5]]||[];g.n=A.filter(j=>j!==i&&B.includes(j));g.length=4;g.n.forEach(j=>{land[i].add(j);land[j].add(i)})}));
- [['San Marino','Italy'],['Vatican City','Italy']].forEach(([a,b])=>{const i=T.findIndex(t=>t.name===a),j=T.findIndex(t=>t.name===b);if(i>=0&&j>=0){land[i].add(j);land[j].add(i)}});
+ [['San Marino','Italy'],['Vatican City','Italy'],['Hong Kong','China']].forEach(([a,b])=>{const i=T.findIndex(t=>t.name===a),j=T.findIndex(t=>t.name===b);if(i>=0&&j>=0){land[i].add(j);land[j].add(i)}});
  // islands: link to nearest by centroid
  const dist=(a,b)=>Math.hypot(T[a].c[0]-T[b].c[0],T[a].c[1]-T[b].c[1]);
  T.forEach((t,i)=>{if(nb[i].length===0){const o=T.map((_,j)=>j).filter(j=>j!==i).sort((p,q)=>dist(i,p)-dist(i,q)).slice(0,3);o.forEach(j=>{nb[i].push(j);if(!nb[j].includes(i))nb[j].push(i)})}});
@@ -247,21 +264,21 @@ const lab=i=>flagUrl[i]?{img:flagUrl[i]}:(T[i].emoji||T[i].name.slice(0,3));
 async function fight(na,nd){
  const turbo=$('turbo').checked,t=turbo?400:1300,log=$('log');
  na=Math.min(na,20);nd=Math.min(nd,20);
- const dA=mkDice($('da'),na),dD=mkDice($('dd'),nd);
- const A=dA.map(()=>1+rnd(6)),D=dD.map(()=>1+rnd(6));
- log.textContent=`🎲 Attacker rolls ${na} di${na>1?'ce':'e'} (1 per territory, max 20)…`;
- await Promise.all(dA.map((w,i)=>w.spin(A[i],t)));await sleep(turbo?100:300);
- log.textContent=`🎲 Defender rolls ${nd} di${nd>1?'ce':'e'}…`;
- await Promise.all(dD.map((w,i)=>w.spin(D[i],t)));await sleep(turbo?100:500);
- const ma=Math.max(...A),md=Math.max(...D);
- dA.forEach((w,i)=>w.el.classList.toggle('best',A[i]===ma));dD.forEach((w,i)=>w.el.classList.toggle('best',D[i]===md));
- lastScore=`${ma} (${na} dice) vs ${md} (${nd} dice)`;
- log.innerHTML=`🎯 Attacker's highest: <b>${ma}</b> · Defender's highest: <b>${md}</b>`;await sleep(turbo?100:1800);
- if(ma!==md)return ma>md;
- const sa=mkDice($('da'),1)[0],sd=mkDice($('dd'),1)[0];let x,y;
- do{log.textContent='🤝 Draw! One die each decides it…';await sleep(turbo?100:1200);
-  x=1+rnd(6);y=1+rnd(6);await sa.spin(x,t);await sd.spin(y,t);await sleep(turbo?100:700)}while(x===y);
- lastScore+=` → duel ${x}–${y}`;return x>y}
+ let draws=0;
+ for(;;){
+  const dA=mkDice($('da'),na),dD=mkDice($('dd'),nd);
+  const A=dA.map(()=>1+rnd(6)),D=dD.map(()=>1+rnd(6));
+  log.textContent=`🎲 Attacker ${draws?'throws all ':'rolls '}${na} di${na>1?'ce':'e'}${draws?' again':' (1 per territory, max 20)'}…`;
+  await Promise.all(dA.map((w,i)=>w.spin(A[i],t)));await sleep(turbo?100:300);
+  log.textContent=`🎲 Defender ${draws?'throws all ':'rolls '}${nd} di${nd>1?'ce':'e'}${draws?' again':''}…`;
+  await Promise.all(dD.map((w,i)=>w.spin(D[i],t)));await sleep(turbo?100:500);
+  const ma=Math.max(...A),md=Math.max(...D);
+  dA.forEach((w,i)=>w.el.classList.toggle('best',A[i]===ma));dD.forEach((w,i)=>w.el.classList.toggle('best',D[i]===md));
+  lastScore=`${ma} (${na} dice) vs ${md} (${nd} dice)`+(draws?` after ${draws} draw${draws>1?'s':''}`:'');
+  log.innerHTML=`🎯 Attacker's highest: <b>${ma}</b> · Defender's highest: <b>${md}</b>`;await sleep(turbo?100:1800);
+  if(ma!==md)return ma>md;
+  draws++;
+  log.textContent='🤝 Draw! Both sides throw all their dice again…';await sleep(turbo?100:1500)}}
 
 function castRay(o,dir){
  // The world is a globe: the ray follows a great circle from the territory's centre, wraps around the
