@@ -25,7 +25,7 @@ const WORKS = [
    title:   "Mr. Bobbin Knows",
    genre:   "Story",          // e.g. "Story", "Lore", "Poetry", "Essay", "Codex", "History"
    year:    "August 2026",   // e.g. "2025" or an in-universe date
-   summary: "7 people missing.",
+   summary: "When seven people under observation stop making contact, the two are sent around the globe to check on them in person. Part mission briefing, part character study, it mixes dry humor with quieter moments, and a battered training dummy seems to know more than it lets on.",
    tags:    ["I.S.P."], // Optional short keywords.
    link:    "https://alextygh.github.io/lavori/Whisperheaven/Books/Mr.%20Bobbin%20Knows.pdf",               // URL to read the full transcription. Leave "" if not yet uploaded.
   },
