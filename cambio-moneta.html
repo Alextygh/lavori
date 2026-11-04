@@ -1,125 +1,76 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Convertitore Valuta BCE</title>
-    <!-- Evita l'errore 404 della favicon -->
-    <link rel="icon" href="data:,">
+  <meta charset="UTF-8">
+  <title>Convertitore in Euro</title>
 </head>
 <body>
+  <h1>Convertitore di valute in Euro</h1>
 
-    <h1>Convertitore Valute in Euro (BCE)</h1>
-    <p id="data-aggiornamento">Caricamento tassi di cambio in corso...</p>
+  <p>
+    Divisa:
+    <select id="divisa"></select>
+  </p>
+  <p>
+    Quantità:
+    <input type="number" id="quantita" value="1" min="0" step="any">
+  </p>
+  <p>
+    <button onclick="converti()">Converti</button>
+  </p>
 
-    <form id="converter-form">
-        <label for="quantita">Quantità:</label>
-        <input type="number" id="quantita" value="1" step="any" min="0"><br><br>
+  <p id="risultato"></p>
+  <p id="data"></p>
 
-        <label for="divisa">Seleziona Divisa:</label>
-        <select id="divisa">
-            <option value="">Caricamento divise...</option>
-        </select><br><br>
+  <script>
+    var URL_BCE = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+    var tassi = {};
 
-        <button type="button" onclick="calcola()">Calcola</button>
-    </form>
+    function carica() {
+      fetch(URL_BCE)
+        .then(function (r) { return r.text(); })
+        .then(function (testo) {
+          var xml = new DOMParser().parseFromString(testo, "application/xml");
+          var cubi = xml.getElementsByTagName("Cube");
+          var select = document.getElementById("divisa");
 
-    <br>
-    <div id="risultato"></div>
+          for (var i = 0; i < cubi.length; i++) {
+            var valuta = cubi[i].getAttribute("currency");
+            var tasso = cubi[i].getAttribute("rate");
+            var data = cubi[i].getAttribute("time");
 
-    <script>
-        const tassi = {};
-        const targetUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-
-        // Lista di proxy CORS pubblici da provare in ordine se uno fallisce
-        const proxyList = [
-            url => "https://api.cors.lol/?url=" + encodeURIComponent(url),
-            url => "https://corsproxy.io/?" + encodeURIComponent(url),
-            url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)
-        ];
-
-        // Funzione per scaricare il file XML provando i vari proxy
-        async function fetchXMLWithFallback(url) {
-            for (let i = 0; i < proxyList.length; i++) {
-                try {
-                    const proxyUrl = proxyList[i](url);
-                    const response = await fetch(proxyUrl);
-                    if (response.ok) {
-                        return await response.text();
-                    }
-                } catch (e) {
-                    console.warn(`Proxy ${i + 1} non riuscito, provo il successivo...`);
-                }
+            if (data) {
+              document.getElementById("data").textContent = "Tassi del " + data;
             }
-            throw new Error("Tutti i proxy CORS hanno fallito.");
-        }
-
-        async function caricaTassi() {
-            try {
-                const textData = await fetchXMLWithFallback(targetUrl);
-                
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(textData, "text/xml");
-
-                // Estrazione della data
-                const cubeTime = xmlDoc.querySelector("Cube[time]");
-                if (cubeTime) {
-                    document.getElementById("data-aggiornamento").innerText = "Tassi aggiornati al: " + cubeTime.getAttribute("time");
-                }
-
-                // Popolamento select con le divise
-                const cubes = xmlDoc.querySelectorAll("Cube[currency]");
-                const selectDivisa = document.getElementById("divisa");
-                selectDivisa.innerHTML = "";
-
-                cubes.forEach(cube => {
-                    const currency = cube.getAttribute("currency");
-                    const rate = parseFloat(cube.getAttribute("rate"));
-                    
-                    tassi[currency] = rate;
-
-                    const option = document.createElement("option");
-                    option.value = currency;
-                    option.textContent = currency;
-                    selectDivisa.appendChild(option);
-                });
-
-                calcola();
-
-            } catch (error) {
-                console.error("Errore nel caricamento del file XML:", error);
-                document.getElementById("data-aggiornamento").innerText = "Errore durante il caricamento dei tassi di cambio. Riprova più tardi.";
+            if (valuta && tasso) {
+              tassi[valuta] = parseFloat(tasso);
+              var opt = document.createElement("option");
+              opt.value = valuta;
+              opt.textContent = valuta;
+              select.appendChild(opt);
             }
-        }
+          }
+        })
+        .catch(function () {
+          document.getElementById("risultato").textContent =
+            "Errore nel caricamento dei tassi di cambio.";
+        });
+    }
 
-        function calcola() {
-            const quantita = parseFloat(document.getElementById("quantita").value);
-            const divisaSelezionata = document.getElementById("divisa").value;
-            const divRisultato = document.getElementById("risultato");
+    function converti() {
+      var valuta = document.getElementById("divisa").value;
+      var quantita = parseFloat(document.getElementById("quantita").value);
 
-            if (isNaN(quantita) || quantita <= 0) {
-                divRisultato.innerText = "Inserisci una quantità valida.";
-                return;
-            }
+      if (isNaN(quantita) || !tassi[valuta]) {
+        document.getElementById("risultato").textContent = "Dati non validi.";
+        return;
+      }
+      var euro = quantita / tassi[valuta];
+      document.getElementById("risultato").textContent =
+        quantita + " " + valuta + " = " + euro.toFixed(2) + " EUR";
+    }
 
-            if (!divisaSelezionata || !tassi[divisaSelezionata]) {
-                divRisultato.innerText = "Seleziona una divisa valida.";
-                return;
-            }
-
-            const tasso = tassi[divisaSelezionata];
-            const euro = quantita / tasso;
-
-            divRisultato.innerHTML = `
-                <p><strong>Controvalore:</strong> ${euro.toFixed(2)} €</p>
-                <p>Tasso applicato: 1 EUR = ${tasso} ${divisaSelezionata}</p>
-            `;
-        }
-
-        document.getElementById("quantita").addEventListener("input", calcola);
-        document.getElementById("divisa").addEventListener("change", calcola);
-
-        caricaTassi();
-    </script>
-
+    carica();
+  </script>
 </body>
 </html>
