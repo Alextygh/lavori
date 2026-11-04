@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Convertitore Valuta BCE</title>
+    <!-- Evita l'errore 404 della favicon -->
+    <link rel="icon" href="data:,">
 </head>
 <body>
 
@@ -25,31 +27,49 @@
     <div id="risultato"></div>
 
     <script>
-        // Mappa per memorizzare i tassi di cambio (Valuta -> Tasso rispetto all'Euro)
         const tassi = {};
+        const targetUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
-        // URL del file XML della Banca Centrale Europea (con proxy per evitare blocchi CORS nel browser)
-        const xmlUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+        // Lista di proxy CORS pubblici da provare in ordine se uno fallisce
+        const proxyList = [
+            url => "https://api.cors.lol/?url=" + encodeURIComponent(url),
+            url => "https://corsproxy.io/?" + encodeURIComponent(url),
+            url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)
+        ];
 
-        // Funzione per caricare e interpretare il file XML della BCE
+        // Funzione per scaricare il file XML provando i vari proxy
+        async function fetchXMLWithFallback(url) {
+            for (let i = 0; i < proxyList.length; i++) {
+                try {
+                    const proxyUrl = proxyList[i](url);
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        return await response.text();
+                    }
+                } catch (e) {
+                    console.warn(`Proxy ${i + 1} non riuscito, provo il successivo...`);
+                }
+            }
+            throw new Error("Tutti i proxy CORS hanno fallito.");
+        }
+
         async function caricaTassi() {
             try {
-                const response = await fetch(xmlUrl);
-                const textData = await response.text();
+                const textData = await fetchXMLWithFallback(targetUrl);
                 
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(textData, "text/xml");
 
-                // Estrazione della data di aggiornamento
+                // Estrazione della data
                 const cubeTime = xmlDoc.querySelector("Cube[time]");
                 if (cubeTime) {
                     document.getElementById("data-aggiornamento").innerText = "Tassi aggiornati al: " + cubeTime.getAttribute("time");
                 }
 
-                // Estrazione di tutte le divise presenti nel file XML
+                // Popolamento select con le divise
                 const cubes = xmlDoc.querySelectorAll("Cube[currency]");
                 const selectDivisa = document.getElementById("divisa");
-                selectDivisa.innerHTML = ""; // Pulizia della select
+                selectDivisa.innerHTML = "";
 
                 cubes.forEach(cube => {
                     const currency = cube.getAttribute("currency");
@@ -63,16 +83,14 @@
                     selectDivisa.appendChild(option);
                 });
 
-                // Esegui un primo calcolo automatico al caricamento
                 calcola();
 
             } catch (error) {
                 console.error("Errore nel caricamento del file XML:", error);
-                document.getElementById("data-aggiornamento").innerText = "Errore durante il caricamento dei tassi di cambio.";
+                document.getElementById("data-aggiornamento").innerText = "Errore durante il caricamento dei tassi di cambio. Riprova più tardi.";
             }
         }
 
-        // Funzione per calcolare il controvalore in Euro
         function calcola() {
             const quantita = parseFloat(document.getElementById("quantita").value);
             const divisaSelezionata = document.getElementById("divisa").value;
@@ -88,7 +106,6 @@
                 return;
             }
 
-            // Calcolo del valore in Euro (Euro = Quantità / Tasso)
             const tasso = tassi[divisaSelezionata];
             const euro = quantita / tasso;
 
@@ -98,11 +115,9 @@
             `;
         }
 
-        // Ricalcola automaticamente quando l'utente cambia quantità o divisa
         document.getElementById("quantita").addEventListener("input", calcola);
         document.getElementById("divisa").addEventListener("change", calcola);
 
-        // Avvio del caricamento dei dati all'apertura della pagina
         caricaTassi();
     </script>
 
