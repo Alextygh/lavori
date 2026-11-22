@@ -59,6 +59,10 @@ An encyclopedia of rubber ducks from the game Hitman: World of Assassination. Th
 ### [Emergency Map](https://alextygh.github.io/lavori/emergency-map.html)
 This map powered by OpenStreetMap lets you choose a location on the map (or use your device's GPS), select the emergency type you need, and it tells you how much time it would take for each selected emergency type to reach your location. It locates hospitals, fire stations and police stations up to 20km, and it shows the route from your position and the closest's emergency station and the approximate time.
 
+### [Game of the Goose]((https://alextygh.github.io/lavori/oca/index.html)
+A popular European board game, I scanned my physical copy from the 80's. You can play it locally, give it a shot, it's fun.
+It's a luck based game.
+
 ### [Google](https://alextygh.github.io/lavori/google.html)
 You know, huh, Google? The search engine? The one you used to get here (probably)? Yeah, I just copied Google's frontpage. Funny enough, only the search engine doesn't work, everything else does.
 
@@ -102,6 +106,7 @@ Some pages are fan-made and use names, characters or data that belong to other p
 - **Chessverse**: uses [Stockfish](https://stockfishchess.org/), which is free software under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.html). Game styles are based on games played on [Lichess](https://lichess.org/). The names of the opponents belong to their respective owners.
 - **Duckapedia**: Hitman: World of Assassination and its rubber ducks are © & ™ IO Interactive A/S. Hitman is a trademark of IO Interactive.
 - **Emergency Map**: map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, available under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/).
+- **Game of the Goose**: This specific copy is made by Ravensburger. W. Schmidt. Design: Ravensburger / W. Scheit. Photo: Fotostudio Rhomberg / Clive Davis. © 1998 Ravensburger Spieleverlag.
 - **Google**: Google and the Google logo are trademarks of Google LLC. This page is only a non-functional imitation of the front page.
 - **Louie's Cookbook**: Pikmin, Louie and every Pikmin enemy are © & ™ Nintendo.
 - **Pokémon**: Pokémon and all related names, characters and stats are © & ™ Nintendo, Game Freak and Creatures Inc. / The Pokémon Company.
