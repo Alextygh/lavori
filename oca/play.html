@@ -49,6 +49,9 @@ textarea{width:100%;height:64px;box-sizing:border-box;font:12px monospace;backgr
 #ncode{font:600 38px Fredoka,system-ui,sans-serif;letter-spacing:.25em;margin:4px 0 6px;padding-left:.25em}
 #gin{font:600 26px Fredoka,system-ui,sans-serif;text-transform:uppercase;width:130px;text-align:center;background:#0006;color:var(--ink);border:1px solid #fff4;border-radius:10px;padding:8px;letter-spacing:.2em}
 #nsw .sw{width:36px;height:36px}
+.lr{display:flex;align-items:center;gap:6px;justify-content:center;margin:6px 0}.lr span{min-width:92px;text-align:right;color:var(--mute);font-size:14px}.lr .sw{width:30px;height:30px}
+#ov .p{max-height:92vh;overflow:auto}
+#gsw .sw{width:36px;height:36px}
 [hidden]{display:none!important}
 </style></head><body>
 <canvas id="c"></canvas>
@@ -59,7 +62,7 @@ textarea{width:100%;height:64px;box-sizing:border-box;font:12px monospace;backgr
 <div id="pl" class="p"><button id="auto" aria-pressed="false">Auto-play: off</button><button id="spd">Speed: 1×</button></div>
 <div id="st" class="p"><a class="b" href="index.html">Menu</a><button id="mut">Sound: on</button><button class="lng">Italiano</button></div>
 <div id="ov"><div class="p"><h1 id="h1">Game of the Goose</h1><div id="sub" style="color:var(--mute)">Choose your goose</div>
-<div class="row" id="sws"></div><div id="opp" style="color:var(--mute)">Opponents (bots)</div><div class="row" id="nbs"></div>
+<div class="row" id="sws"></div><div id="opp" style="color:var(--mute)">Opponents (bots)</div><div class="row" id="nbs"></div><div id="lpk"></div>
 <div class="row"><button id="go" style="background:var(--acc);color:#2b2200">Start</button><button class="lng">Italiano</button><a class="b" href="index.html">Menu</a></div></div></div>
 <div id="nv"><div class="p">
 <h1 data-k="title">Game of the Goose</h1>
@@ -67,7 +70,7 @@ textarea{width:100%;height:64px;box-sizing:border-box;font:12px monospace;backgr
 <div id="n1" hidden><div class="mu" data-k="nyou"></div><div class="row" id="nsw"></div>
 <div class="mu" data-k="nsh"></div><div id="nqr"></div><div id="ncode"></div><div class="row"><button id="ncp" data-k="nlink"></button></div>
 <div class="mu" data-k="nplayers"></div><div id="npl"></div><div class="row"><button id="nst" data-k="nstart" disabled></button></div></div>
-<div id="n2" hidden><div class="mu" data-k="ng1"></div><div class="row"><input id="gin" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false"><button id="gok" data-k="njoinbtn"></button></div></div>
+<div id="n2" hidden><div id="gpk" hidden><div class="mu" data-k="nyou"></div><div class="row" id="gsw"></div></div><div class="mu" data-k="ng1"></div><div class="row"><input id="gin" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false"><button id="gok" data-k="njoinbtn"></button></div></div>
 <div id="nmsg" class="mu"></div>
 <div class="row"><a class="b" href="index.html">Menu</a><button class="lng">Italiano</button></div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -139,8 +142,8 @@ const SND={roll(){for(let i=0;i<9;i++)noise(.06,.25,1500+Math.random()*2500,i*.1
  win(){[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.28,'triangle',.18,i*.16))},
  jump(){tone(300,.8,'sine',.12,0,900)}};
 function snd(n){if(NET.role==='host'&&n!=='hop'&&n!=='roll'&&n!=='win')net({t:'s',n});try{SND[n]()}catch(e){}}
-const T={en:{title:'Game of the Goose',pick:'Choose your goose',opp:'Opponents (bots)',start:'Start',again:'New game',roll:'Roll the dice',follow:'Follow goose',topv:'Top view',v3:'3D view',son:'Sound: on',soff:'Sound: off',your:'Your turn',think:n=>`${n} is thinking…`,nm:(c,h)=>`${c} goose${h?' (you)':''}`,sq:s=>'square '+s,start0:'start',wait:'waiting',back:(s,n)=>`square ${s}: back ${n}`,fwd:(s,n)=>`square ${s}: forward ${n}`,bridge:'bridge: forward to 12',maze:'maze: back to 30',fall:'the goose falls: back to start',inn:'inn: wait two turns',prison:'prison: wait two turns',well:'fountain: roll again',at23:'reaches 23: wait one turn',skip:'waits a turn',dice:(a,b,n)=>`dice ${a} + ${b} = ${n}`,win:n=>`${n} wins!`,lng:'Italiano',aon:'Auto-play: on',aoff:'Auto-play: off',spd:'Speed: ',turnof:n=>`${n}: your turn`,picklocal:'Players share this device and take turns',players:'Players',nsub:'Play with people on the same Wi‑Fi',nhost:'Host a game',njoin:'Join a game',nyou:'Your goose',nplayers:'Players',nadd:'Add a player',nstart:'Start game',nscan:'Scan with camera',ncopy:'Copy code',nconn:'Connect',nback:'Cancel',nh1:'1. Let the guest scan this code, or send them the text code.',nh2:'2. Then scan or paste the answer code the guest shows you.',ng1:'Scan the host’s code with the camera, or paste the text code here.',ng2:'Show this answer code to the host.',njoinbtn:'Join',gok:'Connected! Waiting for the host to start the game…',gerr:'That code didn’t work. Try again.',hlost:'The host left the game.',waitfor:n=>`Waiting for ${n}…`,left:n=>`${n} left; a bot takes over`,nocam:'Camera not available. Paste the code instead.',toolong:'The code is too long for a QR. Copy it instead.',pjoined:'Player connected!',nfull:'Up to 6 players.',nsub:'Play with friends, each on their own device',nsh:'Friends scan this QR code with their phone camera, or choose “Join a game” and type the code.',nlink:'Copy link',ng1:'Type the game code (4 characters).',noserver:'Can’t reach the connection server. Check your internet connection.',gnone:'Game not found. Check the code.',gfull:'This game is full or has already started.',joining:'Connecting…',first:'goes first'},
-it:{title:'Gioco dell’Oca',pick:'Scegli la tua oca',opp:'Avversari (bot)',start:'Inizia',again:'Nuova partita',roll:'Tira i dadi',follow:'Segui l’oca',topv:'Dall’alto',v3:'Vista 3D',son:'Suoni: sì',soff:'Suoni: no',your:'Tocca a te',think:n=>`${n} pensa…`,nm:(c,h)=>`Oca ${c}${h?' (tu)':''}`,sq:s=>'casella '+s,start0:'partenza',wait:'ferma',back:(s,n)=>`casella ${s}: indietro di ${n}`,fwd:(s,n)=>`casella ${s}: avanti di ${n}`,bridge:'ponte: avanti fino al 12',maze:'labirinto: torna al 30',fall:'l’oca cade: torna alla partenza',inn:'locanda: ferma due giri',prison:'prigione: ferma due giri',well:'fontana: tira ancora',at23:'arriva al 23: ferma un giro',skip:'ferma un giro',dice:(a,b,n)=>`dadi ${a} + ${b} = ${n}`,win:n=>`Vince ${n}!`,lng:'English',aon:'Gioco automatico: sì',aoff:'Gioco automatico: no',spd:'Velocità: ',turnof:n=>`${n}: tocca a te`,picklocal:'I giocatori si passano il dispositivo a turno',players:'Giocatori',nsub:'Gioca con chi è sulla stessa rete Wi‑Fi',nhost:'Crea una partita',njoin:'Unisciti a una partita',nyou:'La tua oca',nplayers:'Giocatori',nadd:'Aggiungi un giocatore',nstart:'Inizia la partita',nscan:'Scansiona con la fotocamera',ncopy:'Copia il codice',nconn:'Connetti',nback:'Annulla',nh1:'1. Fai scansionare questo codice all’ospite, oppure mandagli il codice di testo.',nh2:'2. Poi scansiona o incolla il codice di risposta che ti mostra l’ospite.',ng1:'Scansiona il codice dell’host con la fotocamera, oppure incolla qui il codice di testo.',ng2:'Mostra questo codice di risposta all’host.',njoinbtn:'Unisciti',gok:'Connesso! In attesa che l’host avvii la partita…',gerr:'Quel codice non ha funzionato. Riprova.',hlost:'L’host ha lasciato la partita.',waitfor:n=>`In attesa di ${n}…`,left:n=>`${n} è uscita; un bot prende il suo posto`,nocam:'Fotocamera non disponibile. Incolla il codice.',toolong:'Il codice è troppo lungo per un QR. Copialo.',pjoined:'Giocatore connesso!',nfull:'Massimo 6 giocatori.',nsub:'Gioca con gli amici, ognuno sul proprio dispositivo',nsh:'Gli amici scansionano questo QR con la fotocamera del telefono, oppure scelgono “Unisciti a una partita” e scrivono il codice.',nlink:'Copia il link',ng1:'Scrivi il codice della partita (4 caratteri).',noserver:'Impossibile raggiungere il server di connessione. Controlla la connessione a internet.',gnone:'Partita non trovata. Controlla il codice.',gfull:'Questa partita è piena o è già iniziata.',joining:'Connessione in corso…',first:'inizia per prima'}};
+const T={en:{title:'Game of the Goose',pick:'Choose your goose',opp:'Opponents (bots)',start:'Start',again:'New game',roll:'Roll the dice',follow:'Follow goose',topv:'Top view',v3:'3D view',son:'Sound: on',soff:'Sound: off',your:'Your turn',think:n=>`${n} is thinking…`,nm:(c,h)=>`${c} goose${h?' (you)':''}`,sq:s=>'square '+s,start0:'start',wait:'waiting',back:(s,n)=>`square ${s}: back ${n}`,fwd:(s,n)=>`square ${s}: forward ${n}`,bridge:'bridge: forward to 12',maze:'maze: back to 30',fall:'the goose falls: back to start',inn:'inn: wait two turns',prison:'prison: wait two turns',well:'fountain: roll again',at23:'reaches 23: wait one turn',skip:'waits a turn',dice:(a,b,n)=>`dice ${a} + ${b} = ${n}`,win:n=>`${n} wins!`,lng:'Italiano',aon:'Auto-play: on',aoff:'Auto-play: off',spd:'Speed: ',turnof:n=>`${n}: your turn`,picklocal:'Players share this device and take turns',players:'Players',nsub:'Play with people on the same Wi‑Fi',nhost:'Host a game',njoin:'Join a game',nyou:'Your goose',nplayers:'Players',nadd:'Add a player',nstart:'Start game',nscan:'Scan with camera',ncopy:'Copy code',nconn:'Connect',nback:'Cancel',nh1:'1. Let the guest scan this code, or send them the text code.',nh2:'2. Then scan or paste the answer code the guest shows you.',ng1:'Scan the host’s code with the camera, or paste the text code here.',ng2:'Show this answer code to the host.',njoinbtn:'Join',gok:'Connected! Waiting for the host to start the game…',gerr:'That code didn’t work. Try again.',hlost:'The host left the game.',waitfor:n=>`Waiting for ${n}…`,left:n=>`${n} left; a bot takes over`,nocam:'Camera not available. Paste the code instead.',toolong:'The code is too long for a QR. Copy it instead.',pjoined:'Player connected!',nfull:'Up to 6 players.',nsub:'Play with friends, each on their own device',nsh:'Friends scan this QR code with their phone camera, or choose “Join a game” and type the code.',nlink:'Copy link',ng1:'Type the game code (4 characters).',noserver:'Can’t reach the connection server. Check your internet connection.',gnone:'Game not found. Check the code.',gfull:'This game is full or has already started.',joining:'Connecting…',first:'goes first',pl:n=>'Player '+n},
+it:{title:'Gioco dell’Oca',pick:'Scegli la tua oca',opp:'Avversari (bot)',start:'Inizia',again:'Nuova partita',roll:'Tira i dadi',follow:'Segui l’oca',topv:'Dall’alto',v3:'Vista 3D',son:'Suoni: sì',soff:'Suoni: no',your:'Tocca a te',think:n=>`${n} pensa…`,nm:(c,h)=>`Oca ${c}${h?' (tu)':''}`,sq:s=>'casella '+s,start0:'partenza',wait:'ferma',back:(s,n)=>`casella ${s}: indietro di ${n}`,fwd:(s,n)=>`casella ${s}: avanti di ${n}`,bridge:'ponte: avanti fino al 12',maze:'labirinto: torna al 30',fall:'l’oca cade: torna alla partenza',inn:'locanda: ferma due giri',prison:'prigione: ferma due giri',well:'fontana: tira ancora',at23:'arriva al 23: ferma un giro',skip:'ferma un giro',dice:(a,b,n)=>`dadi ${a} + ${b} = ${n}`,win:n=>`Vince ${n}!`,lng:'English',aon:'Gioco automatico: sì',aoff:'Gioco automatico: no',spd:'Velocità: ',turnof:n=>`${n}: tocca a te`,picklocal:'I giocatori si passano il dispositivo a turno',players:'Giocatori',nsub:'Gioca con chi è sulla stessa rete Wi‑Fi',nhost:'Crea una partita',njoin:'Unisciti a una partita',nyou:'La tua oca',nplayers:'Giocatori',nadd:'Aggiungi un giocatore',nstart:'Inizia la partita',nscan:'Scansiona con la fotocamera',ncopy:'Copia il codice',nconn:'Connetti',nback:'Annulla',nh1:'1. Fai scansionare questo codice all’ospite, oppure mandagli il codice di testo.',nh2:'2. Poi scansiona o incolla il codice di risposta che ti mostra l’ospite.',ng1:'Scansiona il codice dell’host con la fotocamera, oppure incolla qui il codice di testo.',ng2:'Mostra questo codice di risposta all’host.',njoinbtn:'Unisciti',gok:'Connesso! In attesa che l’host avvii la partita…',gerr:'Quel codice non ha funzionato. Riprova.',hlost:'L’host ha lasciato la partita.',waitfor:n=>`In attesa di ${n}…`,left:n=>`${n} è uscita; un bot prende il suo posto`,nocam:'Fotocamera non disponibile. Incolla il codice.',toolong:'Il codice è troppo lungo per un QR. Copialo.',pjoined:'Giocatore connesso!',nfull:'Massimo 6 giocatori.',nsub:'Gioca con gli amici, ognuno sul proprio dispositivo',nsh:'Gli amici scansionano questo QR con la fotocamera del telefono, oppure scelgono “Unisciti a una partita” e scrivono il codice.',nlink:'Copia il link',ng1:'Scrivi il codice della partita (4 caratteri).',noserver:'Impossibile raggiungere il server di connessione. Controlla la connessione a internet.',gnone:'Partita non trovata. Controlla il codice.',gfull:'Questa partita è piena o è già iniziata.',joining:'Connessione in corso…',first:'inizia per prima',pl:n=>'Giocatore '+n}};
 const t=(k,...a)=>{const v=T[lang][k];return typeof v==='function'?v(...a):v};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms/spd)),rnd=n=>Math.floor(Math.random()*n);
 const tween=(ms,fn)=>new Promise(res=>{const t0=performance.now();(function f(){const t=Math.min(1,(performance.now()-t0)*spd/ms);fn(t);t<1?requestAnimationFrame(f):res()})()});
@@ -200,7 +203,7 @@ if(LOCAL){$('sws').style.display='none';$('auto').style.display='none'}
 $('sws').innerHTML=COL.map((c,i)=>`<button class="sw" aria-pressed="${i==0}" style="background:${c}"></button>`).join('');
 $('nbs').innerHTML=[1,2,3,4,5].map(n=>`<button class="nb" aria-pressed="${n==(LOCAL?1:2)}">${LOCAL?n+1:n}</button>`).join('');
 [...$('sws').children].forEach((b,i)=>b.onclick=()=>{myC=i;[...$('sws').children].forEach((x,j)=>x.setAttribute('aria-pressed',j==i))});
-[...$('nbs').children].forEach((b,i)=>b.onclick=()=>{nb=i+1;[...$('nbs').children].forEach((x,j)=>x.setAttribute('aria-pressed',j==i))});
+[...$('nbs').children].forEach((b,i)=>b.onclick=()=>{nb=i+1;buildLpk();[...$('nbs').children].forEach((x,j)=>x.setAttribute('aria-pressed',j==i))});
 function idle(order){const rest=[0,1,2,3,4,5].filter(c=>!order.includes(c)),fy=base.position.y-XH/2+LK;
  rest.forEach((c,k)=>{const g=new THREE.Mesh(gg,new THREE.MeshStandardMaterial({color:COL[c],map:WOOD,roughness:.4}));g.scale.setScalar(.85);g.castShadow=true;const m=new THREE.Group();m.add(g);m.rotation.y=-Math.PI/2;
   m.position.set(base.position.x+(k-(rest.length-1)/2)*.62,fy,base.position.z);S.add(m);pawns.push(m)})}
@@ -208,18 +211,22 @@ function buildGame(order,own){pawns.forEach(m=>S.remove(m));pawns=[];$('log').in
  P=order.map((c,i)=>{const g=new THREE.Mesh(gg,new THREE.MeshStandardMaterial({color:COL[c],map:WOOD,roughness:.4}));g.scale.setScalar(.85);g.castShadow=true;const m=new THREE.Group();m.add(g);S.add(m);pawns.push(m);
   const p={c,idx:i,human:!!own[i],own:own[i],pos:0,skip:0,stuck:0,mesh:m,g,ry:-.3};place(p,0);return p});
  P.forEach(p=>place(p,0));idle(order);cur=0;pot=0;over=false;winner=null;active=null;hud();$('ov').style.display='none'}
+let LPK=[0,1,2,3,4,5];
+function buildLpk(){if(!LOCAL)return;const n=nb+1;$('lpk').innerHTML=Array.from({length:n},(_,i)=>`<div class="lr"><span>${t('pl',i+1)}</span>${COL.map((c,k)=>`<button class="sw" data-p="${i}" data-c="${k}" aria-pressed="${LPK[i]==k}" aria-label="${CN[lang][k]}" style="background:${c}"></button>`).join('')}</div>`).join('');
+ $('lpk').querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=+b.dataset.p,c=+b.dataset.c,j=LPK.findIndex((x,idx)=>x===c&&idx!==i);if(j>=0)LPK[j]=LPK[i];LPK[i]=c;buildLpk()})}
 const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
-$('go').onclick=()=>{ac();if(NETM){startNet();return}const pl=shuf([myC,...[0,1,2,3,4,5].filter(c=>c!==myC).slice(0,nb)].map((c,i)=>[c,LOCAL||i==0?'h':null])),order=pl.map(x=>x[0]),own=pl.map(x=>x[1]);buildGame(order,own);logm(`<b>${nm(P[0])}</b> · ${t('first')}`);game()};
+$('go').onclick=()=>{ac();if(NETM){startNet();return}const pl=shuf((LOCAL?LPK.slice(0,nb+1):[myC,...[0,1,2,3,4,5].filter(c=>c!==myC).slice(0,nb)]).map((c,i)=>[c,LOCAL||i==0?'h':null])),order=pl.map(x=>x[0]),own=pl.map(x=>x[1]);buildGame(order,own);logm(`<b>${nm(P[0])}</b> · ${t('first')}`);game()};
 /* ---- network play: PeerJS short code (QR opens the join link); the host runs the game ---- */
 const net=m=>{if(NET.role!=='host')return;NET.peers.forEach(q=>{try{q.conn.open&&q.conn.send(m)}catch(e){}})};
 const netTo=(id,m)=>{const q=NET.peers.find(x=>x.id===id);try{q&&q.conn.open&&q.conn.send(m)}catch(e){}};
 const PFX='alextygh-oca-',ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',mkCode=()=>Array.from({length:4},()=>ALPHA[rnd(ALPHA.length)]).join('');
 const BASEURL=location.protocol.startsWith('http')?location.href.split('?')[0].replace(/[^/]*$/,'')+'play.html':'https://alextygh.github.io/lavori/oca/play.html';
 function qr(el,text){el.innerHTML='';try{new QRCode(el,{text,width:240,height:240,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
-function renderPl(){if(NET.role!=='host')return;const hc=NET.hc,free=[0,1,2,3,4,5].filter(c=>c!==hc);
- $('npl').innerHTML=`<div><i style="background:${COL[hc]}"></i>${t('nm',CN[lang][hc],true)}</div>`+NET.peers.map((q,i)=>`<div><i style="background:${COL[free[i]]}"></i>${t('nm',CN[lang][free[i]],false)}</div>`).join('');
- $('nst').disabled=!NET.peers.length;[...$('nsw').children].forEach((b,i)=>b.setAttribute('aria-pressed',i==hc))}
-function startNet(){NET.peers=NET.peers.filter(q=>q.conn.open);NET.peers.forEach((q,i)=>q.id=i+1);const free=[0,1,2,3,4,5].filter(c=>c!==NET.hc),pl=shuf([[NET.hc,'h'],...NET.peers.map((q,i)=>[free[i],q.id])]),order=pl.map(x=>x[0]),own=pl.map(x=>x[1]);
+function renderPl(){if(NET.role!=='host')return;const hc=NET.hc;
+ $('npl').innerHTML=`<div><i style="background:${COL[hc]}"></i>${t('nm',CN[lang][hc],true)}</div>`+NET.peers.map(q=>`<div><i style="background:${COL[q.c]}"></i>${t('nm',CN[lang][q.c],false)}</div>`).join('');
+ $('nst').disabled=!NET.peers.length;[...$('nsw').children].forEach((b,i)=>{b.setAttribute('aria-pressed',i==hc);b.disabled=NET.peers.some(q=>q.c===i)});
+ if(!NET.started)NET.peers.forEach(q=>netTo(q.id,{t:'lob',cols:[hc,...NET.peers.map(x=>x.c)],you:q.c}))}
+function startNet(){NET.peers=NET.peers.filter(q=>q.conn.open);NET.peers.forEach((q,i)=>q.id=i+1);const pl=shuf([[NET.hc,'h'],...NET.peers.map(q=>[q.c,q.id])]),order=pl.map(x=>x[0]),own=pl.map(x=>x[1]);
  NET.me=own.indexOf('h');NET.started=true;NET.peers.forEach(q=>netTo(q.id,{t:'go',order,own,me:own.indexOf(q.id),s:spd}));buildGame(order,own);logm(`<b>${nm(P[0])}</b> · ${t('first')}`);$('nv').style.display='none';game()}
 function peerLost(q){if(!NET.started){NET.peers=NET.peers.filter(x=>x!==q);NET.peers.forEach((x,i)=>x.id=i+1);renderPl();return}
  const p=P.find(x=>x.own===q.id);if(p){p.human=false;p.own=null;logm(t('left',nm(p)));hud();if(P[cur]===p&&rollWait){const r=rollWait;rollWait=null;r()}}}
@@ -228,8 +235,8 @@ function hostGame(){NET.role='host';$('n0').hidden=true;$('n1').hidden=false;$('
  peer.on('open',()=>{NET.code=code;NET.url=BASEURL+'?mode=net&join='+code;qr($('nqr'),NET.url);$('ncode').textContent=code;$('nmsg').textContent='';renderPl()});
  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();hostGame()}else $('nmsg').textContent=t('noserver')});
  peer.on('connection',conn=>conn.on('open',()=>{if(NET.started||NET.peers.length>=5){conn.send({t:'full'});setTimeout(()=>conn.close(),400);return}
-  const q={conn,id:NET.peers.length+1};NET.peers.push(q);
-  conn.on('data',m=>{if(m.t==='rl'&&P[cur]&&P[cur].own===q.id&&rollWait){const r=rollWait;rollWait=null;r()}});
+  const used=[NET.hc,...NET.peers.map(x=>x.c)],q={conn,id:NET.peers.length+1,c:[0,1,2,3,4,5].find(c=>!used.includes(c))};NET.peers.push(q);
+  conn.on('data',m=>{if(m.t==='col'&&!NET.started){const c=+m.c;if(c>=0&&c<6&&c!==NET.hc&&!NET.peers.some(x=>x!==q&&x.c===c))q.c=c;renderPl()}if(m.t==='rl'&&P[cur]&&P[cur].own===q.id&&rollWait){const r=rollWait;rollWait=null;r()}});
   conn.on('close',()=>peerLost(q));renderPl();snd('hop')}))}
 function joinGame(code){code=(code||'').trim().toUpperCase();if(code.length<4)return;NET.role='guest';$('n0').hidden=true;$('n1').hidden=true;$('n2').hidden=false;$('gin').value=code;
  $('auto').style.display=$('spd').style.display='none';$('nmsg').textContent=t('joining');
@@ -239,9 +246,12 @@ function joinGame(code){code=(code||'').trim().toUpperCase();if(code.length<4)re
   conn.on('open',()=>{$('nmsg').textContent=t('gok')});
   conn.on('data',m=>{if(m.t==='full'){$('nmsg').textContent=t('gfull');return}nq.push(m);nproc()});
   conn.on('close',()=>{$('sub').textContent=t('hlost');$('go').style.display='none';$('ov').style.display='flex';$('nv').style.display='none'})})}
+function renderGs(cols,you){$('gpk').hidden=false;if(!$('gsw').children.length)$('gsw').innerHTML=COL.map((c,i)=>`<button class="sw" style="background:${c}"></button>`).join('');
+ [...$('gsw').children].forEach((b,i)=>{b.setAttribute('aria-pressed',i==you);b.disabled=cols.includes(i)&&i!==you;b.setAttribute('aria-label',CN[lang][i]);b.onclick=()=>NET.conn&&NET.conn.send({t:'col',c:i})})}
 let nq=[],nrun=false;
 async function nproc(){if(nrun)return;nrun=true;while(nq.length){const m=nq.shift();try{await ngh(m)}catch(e){}}nrun=false}
 async function ngh(m){switch(m.t){
+ case 'lob':renderGs(m.cols,m.you);break;
  case 'go':NET.me=m.me;NET.started=true;spd=m.s||1;buildGame(m.order,m.own);$('nv').style.display='none';$('ov').style.display='none';$('roll').disabled=true;$('msg').textContent='';break;
  case 'r':await roll(m.a,m.b);break;
  case 'h':{const p=P[m.i];await hop(p,m.a,m.b,m.ms,m.h);p.pos=m.b;settle();hud();break}
@@ -253,7 +263,7 @@ async function ngh(m){switch(m.t){
  case 'w':win(P[m.i]);break}}
 if(NETM){$('ov').style.display='none';$('nv').style.display='flex';$('sws').style.display=$('nbs').style.display=$('opp').style.display='none';
  $('nsw').innerHTML=COL.map((c,i)=>`<button class="sw" aria-pressed="${i==0}" style="background:${c}"></button>`).join('');
- [...$('nsw').children].forEach((b,i)=>b.onclick=()=>{NET.hc=i;renderPl()});
+ [...$('nsw').children].forEach((b,i)=>b.onclick=()=>{if(NET.peers.some(q=>q.c===i))return;NET.hc=i;renderPl()});
  $('nh').onclick=()=>{ac();hostGame()};
  $('nj').onclick=()=>{$('n0').hidden=true;$('n2').hidden=false;$('gin').focus()};
  $('gok').onclick=()=>{ac();joinGame($('gin').value)};$('gin').onkeydown=e=>{if(e.key==='Enter')$('gok').click()};
@@ -265,7 +275,7 @@ $('sub').textContent=over&&winner?t('win',nm(winner)):LOCAL?t('picklocal'):t('pi
 $('go').textContent=P.length?t('again'):t('start');$('roll').textContent=t('roll');$('fol').textContent=t('follow');
 $('top').textContent=m2?t('v3'):t('topv');$('mut').textContent=muted?t('soff'):t('son');$('auto').textContent=t(auto?'aon':'aoff');$('spd').textContent=t('spd')+spd+'×';
 document.querySelectorAll('.lng').forEach(b=>b.textContent=t('lng'));
-[...$('sws').children].forEach((b,i)=>b.setAttribute('aria-label',nm({c:i})));document.querySelectorAll('[data-k]').forEach(e=>e.textContent=t(e.dataset.k));if(NETM)renderPl();hud()}
+[...$('sws').children].forEach((b,i)=>b.setAttribute('aria-label',nm({c:i})));document.querySelectorAll('[data-k]').forEach(e=>e.textContent=t(e.dataset.k));buildLpk();if(NETM)renderPl();hud()}
 document.querySelectorAll('.lng').forEach(b=>b.onclick=()=>{lang=lang==='en'?'it':'en';try{localStorage.setItem('lang',lang)}catch(e){}applyLang()});
 applyLang();
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(m2)fit2d()}
