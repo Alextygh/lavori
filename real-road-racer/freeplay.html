@@ -168,6 +168,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="shared.js"></script>
 <script>
+/* ---------- Contracts mode: contracts.html runs this page in a frame (?contract=create | join). Nothing changes when opened normally. ---------- */
+var CT = (function () { try { const m = new URLSearchParams(location.search).get('contract'); return parent !== window && (m === 'create' || m === 'join') ? m : null; } catch (e) { return null; } })();
+var ctOn = !CT, ctLegal = null; // ctOn: this page's menus may react to the controller (the contracts page switches it)
+function ctSend(m) { try { parent.postMessage(Object.assign({ rr:'ct' }, m), location.origin); } catch (e) {} }
 const $ = id => document.getElementById(id);
 const statusEl = $('status');
 const say = (t, err) => { statusEl.textContent = t; statusEl.className = err ? 'err' : ''; $('loadmsg').textContent = t; };
@@ -1463,7 +1467,7 @@ document.querySelectorAll('#touch button').forEach(b => { const k = b.dataset.k;
 
 /* ---------- Menu flow ---------- */
 let state = 'menu', pending = null, routeLine = null;
-const setState = v => { state = v; document.body.dataset.s = v; if (v === 'menu' || v === 'confirm') setTimeout(() => map.invalidateSize(), 50); };
+const setState = v => { state = v; document.body.dataset.s = v; if (CT) ctSend({ t:'state', s:v }); if (v === 'menu' || v === 'confirm') setTimeout(() => map.invalidateSize(), 50); };
 setState('menu');
 
 async function resolvePlace(text) { // coordinates only: "lat, lon"
@@ -1494,14 +1498,14 @@ $('go').onclick = async () => {
     routeLine = L.polyline(coords.map(c => [c.lat, c.lon]), { color:'#f2a65a', weight:5 }).addTo(map);
     map.fitBounds(routeLine.getBounds(), { padding:[30, 30] });
     const row = (k, v) => { const d = document.createElement('div'), t = document.createElement('b'); t.textContent = k + ': '; d.append(t, v); return d; };
-    $('sum').replaceChildren(row('Start', a.label), row('Finish', b.label), row('Route', (len / 1000).toFixed(2) + ' km'), row('Conditions', $('wx').value + ', ' + $('tod').value.toLowerCase()), row('Legal mode', RR.load().legal ? 'On: speed limits apply' : 'Off'));
+    $('sum').replaceChildren(row('Start', a.label), row('Finish', b.label), row('Route', (len / 1000).toFixed(2) + ' km'), row('Conditions', $('wx').value + ', ' + $('tod').value.toLowerCase()), row('Legal mode', (ctLegal === null ? RR.load().legal : ctLegal) ? 'On: speed limits apply' : 'Off'));
     say(''); setState('confirm');
   } catch (e) { say(e.message, true); }
   $('go').disabled = false;
 };
 $('back').onclick = () => setState('menu');
 $('ok').onclick = async () => {
-  const S = RR.load(); env = { weather:$('wx').value, time:$('tod').value, legal:S.legal, shadows:S.shadows, street:S.street }; document.body.dataset.street = S.street ? '1' : '0'; audio.on = S.sound; $('muteBtn').textContent = S.sound ? '🔊' : '🔇'; document.body.dataset.legal = env.legal ? '1' : '0'; applyEnv(); applyShadows();
+  const S = RR.load(); env = { weather:$('wx').value, time:$('tod').value, legal:(ctLegal === null ? S.legal : ctLegal), shadows:S.shadows, street:S.street }; document.body.dataset.street = S.street ? '1' : '0'; audio.on = S.sound; $('muteBtn').textContent = S.sound ? '🔊' : '🔇'; document.body.dataset.legal = env.legal ? '1' : '0'; applyEnv(); applyShadows();
   initAudio(); if (audio.master) audio.master.gain.value = audio.on ? .5 : 0; setState('loading'); say('Building track…');
   try { await buildTrack(pending.a, pending.b, pending.coords); startCountdown(); }
   catch (e) { setState('menu'); say(e.message, true); }
@@ -1524,8 +1528,9 @@ function finishRace() {
   const rows = [L('Race time: ', st.time.toFixed(1) + ' s')];
   if (env.legal) rows.push(L('Penalties: ', st.pen / 10 + ' \u00d7 10 s = ' + st.pen + ' s'), L('Final time: ', (st.time + st.pen).toFixed(1) + ' s'));
   $('ftime').replaceChildren(...rows);
+  if (CT) ctSend({ t:'finish', time:+(st.time + (env.legal ? st.pen : 0)).toFixed(2), a:{ lat:pending.a.lat, lon:pending.a.lon }, b:{ lat:pending.b.lat, lon:pending.b.lon }, wx:env.weather, tod:env.time, legal:!!env.legal });
 }
-function retry() { if (track && (state === 'race' || state === 'finished')) startCountdown(); }
+function retry() { if (ctOn && track && (state === 'race' || state === 'finished')) startCountdown(); }
 $('retry').onclick = () => startCountdown();
 $('tomenu').onclick = () => setState('menu');
 
@@ -1542,13 +1547,40 @@ function mapPad(gp, dt) { // while "Select start / finish" is on: left stick pan
   if (zi && !mapPrev.i) map.zoomIn(); if (zo && !mapPrev.o) map.zoomOut(); mapPrev.i = zi; mapPrev.o = zo;
   return true;
 }
+/* ---------- Contracts mode hooks ---------- */
+function ctExit() { if (state === 'race' || state === 'countdown') setState('finished'); ctSend({ t:'exit' }); } // leaving mid-race stops the car
+if (CT) {
+  document.querySelectorAll('a[href="index.html"]').forEach(a => { a.href = '#'; a.textContent = a.classList.contains('tool') ? '\u2302 Contract' : 'Back to contract'; a.onclick = e => { e.preventDefault(); ctExit(); }; });
+  $('tomenu').style.display = 'none'; // the route is fixed by the contract
+  if (CT === 'join') {
+    ['a', 'b', 'wx', 'tod', 'locA', 'locB', 'pickA', 'pickB'].forEach(id => { $(id).disabled = true; });
+    $('back').textContent = 'Back to contract'; $('back').onclick = ctExit;
+    $('formPanel').querySelector('.hint').textContent = 'The route and conditions are set by the contract. Loading it\u2026';
+  }
+  addEventListener('message', e => {
+    if (e.source !== parent || e.origin !== location.origin || !e.data || e.data.rr !== 'ct') return;
+    const m = e.data;
+    if (m.t === 'active') ctOn = !!m.on;
+    else if (m.t === 'retry') { if (track && (state === 'finished' || state === 'race')) startCountdown(); }
+    else if (m.t === 'setup' && CT === 'join' && m.c && state === 'menu') {
+      const c = m.c, ok = p => p && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180;
+      if (!ok(c.a) || !ok(c.b)) return;
+      ctLegal = !!c.legal;
+      $('a').value = c.a.lat.toFixed(5) + ', ' + c.a.lon.toFixed(5); $('b').value = c.b.lat.toFixed(5) + ', ' + c.b.lon.toFixed(5); syncPin('a'); syncPin('b');
+      if (['Clear', 'Cloudy', 'Rain', 'Fog'].includes(c.wx)) $('wx').value = c.wx;
+      if (['Morning', 'Day', 'Sunset', 'Night'].includes(c.tod)) $('tod').value = c.tod;
+      $('go').click();
+    }
+  });
+  ctSend({ t:'ready' });
+}
 RR.nav.start({
   root: () => state === 'menu' ? $('formPanel') : state === 'confirm' ? $('confirmPanel') : state === 'finished' ? $('finish') : null,
-  active: () => state === 'menu' || state === 'confirm' || state === 'finished',
+  active: () => ctOn && (state === 'menu' || state === 'confirm' || state === 'finished'),
   frame: mapPad,
   onA: () => { if (state === 'menu' && picking) { map.fire('click', { latlng:map.getCenter() }); return true; } return false; },
-  onB: () => { if (state === 'menu' && picking) { setPicking(picking); return true; } if (state === 'confirm') { $('back').click(); return true; } if (state === 'finished') { $('tomenu').click(); return true; } return false; }, // in the setup menu B falls through to "main menu"
-  onSelect: () => { if (state === 'menu' && picking) { setPicking(picking); return true; } location.href = 'index.html'; return true; }, // Select: back to the main menu (also while racing)
+  onB: () => { if (CT && state !== 'confirm' && !(state === 'menu' && picking)) { ctExit(); return true; } if (state === 'menu' && picking) { setPicking(picking); return true; } if (state === 'confirm') { $('back').click(); return true; } if (state === 'finished') { $('tomenu').click(); return true; } return false; }, // in the setup menu B falls through to "main menu"
+  onSelect: () => { if (state === 'menu' && picking) { setPicking(picking); return true; } if (CT) { ctExit(); return true; } location.href = 'index.html'; return true; }, // Select: back to the main menu (also while racing)
   onStart: () => { if (state === 'finished') { retry(); return true; } return false; }
 });
 </script>
