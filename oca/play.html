@@ -284,4 +284,11 @@ addEventListener('resize',size);size();
  P.forEach(p=>{p.g.rotation.x=m2?-Math.PI/2:0;p.g.position.y=m2?.12:0;p.g.position.z=m2?.45:0;p.mesh.rotation.y=m2?0:p.ry});
  if(!m2&&follow&&active&&!over){const b=ctl.target.clone();ctl.target.lerp(active.mesh.position,.04);cam.position.add(ctl.target.clone().sub(b))}
  ctl.update();R.render(S,cam)})();
-</script></body></html>
+</script><script>
+/* favicon: a goose in a random colour on every page load */
+(function(){var P=[[0.5889, 0.9967], [0.5367, 0.9984], [0.5155, 0.9886], [0.5139, 0.9772], [0.5041, 0.9804], [0.4845, 0.9608], [0.4649, 0.9266], [0.4617, 0.8728], [0.4845, 0.6166], [0.4666, 0.5661], [0.4192, 0.5269], [0.2708, 0.4796], [0.2447, 0.4633], [0.2414, 0.4519], [0.23, 0.4535], [0.1452, 0.4144], [0.0179, 0.3964], [0.0, 0.3817], [0.0033, 0.3573], [0.0457, 0.3083], [0.0718, 0.2447], [0.1028, 0.2055], [0.2545, 0.137], [0.2626, 0.1093], [0.2447, 0.0653], [0.2447, 0.0392], [0.2529, 0.0212], [0.2773, 0.0033], [0.5922, 0.0196], [0.6183, 0.0343], [0.6199, 0.0538], [0.6036, 0.0783], [0.5041, 0.1191], [0.4845, 0.1419], [0.4829, 0.1631], [0.5024, 0.2072], [0.6411, 0.3132], [0.6688, 0.3491], [0.6819, 0.3866], [0.677, 0.4682], [0.5987, 0.7113], [0.5873, 0.7716], [0.5938, 0.8254], [0.6281, 0.8597], [0.7439, 0.8891], [0.752, 0.9152], [0.7341, 0.9331], [0.6542, 0.9592]],C=['#1f6fc1','#f05a1a','#d4152c','#f2c500','#e0609a','#1fa83a'],k=document.createElement('canvas');k.width=k.height=64;var x=k.getContext('2d');
+x.beginPath();P.forEach(function(p,i){var X=32+(p[0]-.375)*58,Y=61-p[1]*58;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.closePath();
+x.fillStyle=C[Math.floor(Math.random()*C.length)];x.fill();x.lineWidth=3;x.lineJoin='round';x.strokeStyle='rgba(255,255,255,.85)';x.stroke();
+var l=document.querySelector('link[rel~=icon]');if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l)}l.type='image/png';l.href=k.toDataURL('image/png')})();
+</script>
+</body></html>
