@@ -1,19 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/x-icon" href="icon.ico">
+<link rel="icon" type="image/x-icon" href="icon.ico">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contracts · Real Road Racer</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  [hidden] { display:none !important; }
+  .field { margin:10px 0; } .field label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+  .field input[type=text] { width:100%; }
+  #code { font-size:28px; letter-spacing:8px; text-align:center; font-weight:800; }
+  #msg { min-height:1.4em; margin:12px 0 0; font-size:14px; color:var(--muted); } #msg.err { color:#ff9c8f; }
+  .card .btn { margin-top:10px; } .card .btn.wide { width:100%; text-align:center; }
+  #game { position:fixed; inset:0; width:100%; height:100%; border:0; z-index:10; background:#18202e; }
+  #lobby { position:fixed; inset:0; z-index:20; overflow:auto; background:rgba(16,22,34,.96); padding:20px 16px 32px; }
+  .wrap { max-width:760px; margin:0 auto; } .wrap h1 { font-size:26px; margin:6px 0 14px; }
+  .share { display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:center; }
+  @media (max-width:560px) { .share { grid-template-columns:1fr; justify-items:center; text-align:center; } }
+  .big { font-size:58px; font-weight:800; letter-spacing:10px; color:var(--accent); line-height:1; }
+  #qr { background:#fff; padding:9px; border-radius:8px; width:max-content; line-height:0; }
+  .beat { font-size:34px; font-weight:800; margin:2px 0 0; }
+  #result { margin:12px 0 0; font-weight:700; } #result.win { color:#7ddc8c; } #result.lose { color:#ff9c8f; }
+  table { width:100%; border-collapse:collapse; margin-top:6px; }
+  th, td { text-align:left; padding:8px; border-bottom:1px solid #2f3b52; } th { font-size:12px; color:var(--muted); font-weight:600; }
+  tr.me td { background:rgba(242,166,90,.15); } .fast { color:#7ddc8c; } .slow { color:#ff9c8f; }
+  .tag { font-size:11px; background:#3a475e; border-radius:4px; padding:1px 6px; margin-left:6px; }
+  .info { font-size:13px; color:var(--muted); margin:4px 0; }
+</style>
 </head>
 <body>
-<main class="center">
+<main class="page" id="home">
   <h1>Contracts</h1>
-  <p class="desc">Coming soon.</p>
-  <a class="btn primary" href="index.html">Back to main menu</a>
+  <p class="desc">Pick a route, set the time, and challenge your friends to beat it.</p>
+  <div class="card" style="margin:14px 0">
+    <div class="field" style="margin:0"><label for="nm">Your name</label><input id="nm" type="text" maxlength="16" placeholder="Driver" autocomplete="nickname"></div>
+  </div>
+  <div class="layout">
+    <section class="card">
+      <h2>Create a contract</h2>
+      <p class="desc">Choose a start and a finish, then drive it. Your time becomes the time to beat, and you get a 4-digit code and a QR code to share.</p>
+      <button class="btn primary wide" id="create" data-gp-default="1">Create a contract</button>
+    </section>
+    <section class="card">
+      <h2>Join a contract</h2>
+      <p class="desc">Type the 4-digit code you were given, or scan the QR code.</p>
+      <div class="field"><input id="code" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" aria-label="Contract code"></div>
+      <button class="btn primary wide" id="join">Join</button>
+    </section>
+  </div>
+  <p id="msg" role="status"></p>
+  <p><a class="btn" href="index.html" data-back="1">Main menu</a></p>
 </main>
+
+<iframe id="game" title="Race" allow="geolocation; gamepad; autoplay; fullscreen" hidden></iframe>
+
+<section id="lobby" role="dialog" aria-label="Contract" hidden>
+  <div class="wrap">
+    <h1 id="ltitle">Contract</h1>
+    <div class="card" style="margin-bottom:14px">
+      <div class="share">
+        <div id="qr" aria-label="QR code to join this contract"></div>
+        <div>
+          <div class="info">Contract code</div>
+          <div class="big" id="lcode">0000</div>
+          <p class="info" id="lstate"></p>
+          <button class="btn" id="copy">Copy link</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="info">Time to beat</div>
+      <div class="beat" id="lbeat">–</div>
+      <p class="info" id="lroute"></p>
+      <p class="info" id="lcond"></p>
+      <p id="result" role="status"></p>
+    </div>
+    <div class="card">
+      <h2>Leaderboard</h2>
+      <table><thead><tr><th>#</th><th>Driver</th><th>Time</th><th>vs. creator</th></tr></thead><tbody id="board"></tbody></table>
+    </div>
+    <div class="bar" style="margin-top:14px">
+      <button class="btn primary" id="drive" data-gp-default="1">Drive</button>
+      <button class="btn" id="leave">Leave</button>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="shared.js"></script>
-<script>RR.nav.start(); // controller: B / Select = back to the main menu, stick scrolls</script>
+<script>
+const $ = id => document.getElementById(id), frame = $('game');
+const PFX = 'rr-contract-', WX = ['Clear', 'Cloudy', 'Rain', 'Fog'], TOD = ['Morning', 'Day', 'Sunset', 'Night'];
+let screen = 'home', mode = null, peer = null, conn = null, hostLive = false, hostPending = null;
+let contract = null, board = [], code = '', lastRun = null, fs = ''; const conns = new Set();
+
+/* ---------- helpers (everything that arrives from the network or the frame is validated) ---------- */
+const cleanName = n => String(n == null ? '' : n).replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 16) || 'Driver';
+const myName = () => cleanName($('nm').value);
+const num = (v, a, b) => typeof v === 'number' && isFinite(v) && v >= a && v <= b;
+const pt = p => p && num(p.lat, -90, 90) && num(p.lon, -180, 180) ? { lat:p.lat, lon:p.lon } : null;
+function cleanContract(c) {
+  if (!c || typeof c !== 'object') return null; const a = pt(c.a), b = pt(c.b); if (!a || !b) return null;
+  return { a, b, wx:WX.includes(c.wx) ? c.wx : 'Clear', tod:TOD.includes(c.tod) ? c.tod : 'Day', legal:!!c.legal, by:cleanName(c.by) };
+}
+function cleanBoard(l) {
+  if (!Array.isArray(l)) return [];
+  return l.slice(0, 50).filter(e => e && num(e.time, 1, 7200)).map(e => ({ k:String(e.k).slice(0, 64), name:cleanName(e.name), time:e.time, host:!!e.host })).sort((x, y) => x.time - y.time);
+}
+const fmt = t => t >= 60 ? Math.floor(t / 60) + ':' + (t % 60).toFixed(2).padStart(5, '0') : t.toFixed(2) + ' s';
+const coord = p => p.lat.toFixed(5) + ', ' + p.lon.toFixed(5);
+const beat = () => (board.find(e => e.host) || {}).time;
+const say = (t, bad) => { $('msg').textContent = t || ''; $('msg').className = bad ? 'err' : ''; };
+(function () { try { $('nm').value = localStorage.getItem('rrName') || ''; } catch (e) {} })();
+const saveName = () => { try { localStorage.setItem('rrName', myName()); } catch (e) {} };
+$('nm').addEventListener('change', saveName);
+
+/* ---------- screens: home / frame (the race) / lobby (code, QR, leaderboard) ---------- */
+const frameSend = m => { try { frame.contentWindow.postMessage(Object.assign({ rr:'ct' }, m), location.origin); } catch (e) {} };
+function show(s) {
+  screen = s; $('home').hidden = s !== 'home'; frame.hidden = s === 'home'; frame.inert = s !== 'frame'; $('lobby').hidden = s !== 'lobby';
+  frameSend({ t:'active', on:s === 'frame' });
+  if (s === 'frame') { try { frame.contentWindow.focus(); } catch (e) {} } else if (document.activeElement === frame) frame.blur();
+  RR.nav.refresh(); scrollTo(0, 0);
+}
+function openFrame(m) { fs = ''; frame.src = 'freeplay.html?contract=' + m; }
+function teardown() {
+  try { conns.forEach(c => c.close()); } catch (e) {} conns.clear();
+  try { if (conn) conn.close(); } catch (e) {} try { if (peer) peer.destroy(); } catch (e) {} peer = conn = null;
+}
+function leave() {
+  mode = null; teardown(); contract = null; board = []; code = ''; lastRun = null; hostLive = false; hostPending = null; fs = '';
+  frame.src = 'about:blank'; show('home');
+}
+function libs() { if (typeof Peer === 'undefined') { say('The connection library could not load. Check your internet connection and reload.', true); return false; } return true; }
+
+/* ---------- creating: drive the route first, then the contract goes live ---------- */
+$('create').onclick = () => {
+  if (!libs()) return; saveName(); say(''); mode = 'host'; hostLive = false; openFrame('create'); show('frame');
+};
+function openHost(tries) {
+  tries = tries || 0; code = String(Math.floor(Math.random() * 10000)).padStart(4, '0'); // the broker refuses a code already in use, so we just draw another
+  const p = peer = new Peer(PFX + code);
+  p.on('open', () => {
+    if (peer !== p) return; hostLive = true; board = []; addTime(p.id, myName(), hostPending, true); buildQR();
+  });
+  p.on('connection', c => {
+    c.on('open', () => {
+      if (conns.size >= 30) { c.close(); return; }
+      conns.add(c); c.send({ t:'contract', c:contract, board }); renderLobby();
+    });
+    c.on('data', d => {
+      if (!d || d.t !== 'time' || !num(d.time, 1, 7200)) return;
+      addTime(c.peer, cleanName(d.name), d.time, false);
+    });
+    const gone = () => { conns.delete(c); renderLobby(); }; c.on('close', gone); c.on('error', gone);
+  });
+  p.on('disconnected', () => { if (peer === p && !p.destroyed) p.reconnect(); });
+  p.on('error', e => {
+    if (peer !== p) return;
+    if (e.type === 'unavailable-id' && tries < 20) { p.destroy(); openHost(tries + 1); }
+    else { leave(); say('Could not open the contract (' + e.type + '). Try again.', true); }
+  });
+  renderLobby();
+}
+function addTime(k, name, time, host) {
+  const e = board.find(x => x.k === k);
+  if (e) { e.name = name; if (time < e.time) e.time = time; } else if (board.length < 50) board.push({ k, name, time, host:!!host });
+  board.sort((a, b) => a.time - b.time);
+  conns.forEach(c => { if (c.open) c.send({ t:'board', board }); }); renderLobby();
+}
+
+/* ---------- joining ---------- */
+$('code').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+$('code').addEventListener('keydown', e => { if (e.key === 'Enter') $('join').click(); });
+$('join').onclick = () => {
+  const c = $('code').value; if (!/^\d{4}$/.test(c)) return say('Enter the 4-digit code.', true);
+  if (!libs()) return; saveName(); say('Connecting…'); $('join').disabled = true; teardown();
+  const p = peer = new Peer(); let done = false;
+  const fail = m => { if (done) return; done = true; clearTimeout(to); if (peer === p) teardown(); $('join').disabled = false; say(m, true); };
+  const to = setTimeout(() => fail('Could not reach that contract. Check the code and try again.'), 15000);
+  p.on('error', e => fail(e.type === 'peer-unavailable' ? 'No open contract has that code.' : 'Connection problem (' + e.type + ').'));
+  p.on('open', () => {
+    const cn = conn = p.connect(PFX + c, { reliable:true });
+    cn.on('data', d => {
+      if (!d || typeof d !== 'object') return;
+      if (d.t === 'contract' && !done) {
+        const k = cleanContract(d.c); if (!k) return fail('That contract is not valid.');
+        done = true; clearTimeout(to); $('join').disabled = false; say('');
+        mode = 'join'; contract = k; board = cleanBoard(d.board); code = c; lastRun = null; buildQR(); openFrame('join'); show('lobby'); renderLobby();
+      } else if (d.t === 'board' && done) { board = cleanBoard(d.board); renderLobby(); }
+    });
+    cn.on('close', () => { if (mode === 'join' && conn === cn) { leave(); say('The host closed this contract.', true); } });
+  });
+};
+
+/* ---------- messages from the race frame ---------- */
+addEventListener('message', e => {
+  if (e.source !== frame.contentWindow || e.origin !== location.origin) return;
+  const m = e.data; if (!m || m.rr !== 'ct') return;
+  if (m.t === 'ready') { frameSend({ t:'active', on:screen === 'frame' }); if (mode === 'join' && contract) frameSend({ t:'setup', c:contract }); }
+  else if (m.t === 'state') fs = String(m.s);
+  else if (m.t === 'exit') { if (mode === 'host' && !hostLive) leave(); else if (contract) { show('lobby'); renderLobby(); } else leave(); }
+  else if (m.t === 'finish' && num(m.time, 1, 7200)) onFinish(m);
+});
+function onFinish(m) {
+  lastRun = m.time;
+  if (mode === 'host' && !hostLive) { // the creator's first run: build the contract and open it
+    const k = cleanContract({ a:m.a, b:m.b, wx:m.wx, tod:m.tod, legal:m.legal, by:myName() });
+    if (!k) { leave(); return say('Could not read that route. Try again.', true); }
+    contract = k; hostPending = m.time; show('lobby'); openHost(); return;
+  }
+  if (mode === 'host') addTime(peer.id, myName(), m.time, true);
+  else if (conn && conn.open) conn.send({ t:'time', name:myName(), time:m.time });
+  show('lobby'); renderLobby();
+}
+$('drive').onclick = () => { if (fs === 'finished') frameSend({ t:'retry' }); show('frame'); };
+$('leave').onclick = () => {
+  if (mode === 'host' && conns.size && !confirm('Closing the contract disconnects everyone who joined. Close it?')) return;
+  leave();
+};
+
+/* ---------- lobby ---------- */
+function buildQR() {
+  const el = $('qr'); el.replaceChildren(); if (typeof QRCode === 'undefined') return;
+  try { new QRCode(el, { text:shareUrl(), width:160, height:160, colorDark:'#000000', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M }); } catch (e) {}
+}
+const shareUrl = () => location.origin + location.pathname + '?c=' + code;
+$('copy').onclick = async () => {
+  const b = $('copy'); let ok = false;
+  try { await navigator.clipboard.writeText(shareUrl()); ok = true; } catch (e) {}
+  b.textContent = ok ? 'Copied!' : shareUrl(); setTimeout(() => { b.textContent = 'Copy link'; }, 2500);
+};
+function renderLobby() {
+  if (!contract) return; const host = mode === 'host', live = !host || hostLive, tb = beat();
+  $('ltitle').textContent = host ? 'Your contract' : 'Contract by ' + contract.by;
+  $('lcode').textContent = live ? code : '····'; $('qr').style.visibility = live ? 'visible' : 'hidden'; $('copy').disabled = !live;
+  $('lstate').textContent = !live ? 'Opening your contract…' : host ? (conns.size ? conns.size + (conns.size === 1 ? ' driver' : ' drivers') + ' connected. Keep this page open.' : 'Waiting for drivers. Keep this page open.') : 'Connected to the host.';
+  $('lbeat').textContent = tb ? fmt(tb) : '–';
+  $('lroute').textContent = 'Start ' + coord(contract.a) + '  →  Finish ' + coord(contract.b);
+  $('lcond').textContent = contract.wx + ', ' + contract.tod.toLowerCase() + (contract.legal ? ', legal mode (speed limits apply)' : '');
+  const r = $('result'); r.className = ''; r.textContent = '';
+  if (lastRun != null) {
+    if (host) r.textContent = 'Your time: ' + fmt(lastRun) + (conns.size ? '' : '. Now share the code!');
+    else if (tb) { const d = lastRun - tb; r.className = d < 0 ? 'win' : 'lose'; r.textContent = d < 0 ? 'You beat the time by ' + fmt(-d) + '!' : 'Your time: ' + fmt(lastRun) + '. That is ' + fmt(d) + ' slower than the time to beat.'; }
+  }
+  $('drive').textContent = lastRun == null ? 'Drive this contract' : 'Drive again'; $('leave').textContent = host ? 'Close contract' : 'Leave contract';
+  const body = $('board'); body.replaceChildren(); const my = peer && peer.id, h = tb;
+  board.forEach((e, i) => {
+    const tr = document.createElement('tr'); if (e.k === my) tr.className = 'me';
+    const c = n => { const td = document.createElement('td'); tr.appendChild(td); return td; };
+    c().textContent = i + 1; const nm = c(); nm.textContent = e.name;
+    if (e.host) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'creator'; nm.appendChild(t); }
+    c().textContent = fmt(e.time);
+    const dl = c(); if (e.host || !h) dl.textContent = '–'; else { const d = e.time - h; dl.className = d < 0 ? 'fast' : 'slow'; dl.textContent = (d < 0 ? '−' : '+') + Math.abs(d).toFixed(2) + ' s'; }
+    body.appendChild(tr);
+  });
+}
+
+/* ---------- start-up: ?c=1234 (QR code) pre-fills the code ---------- */
+(function () {
+  const c = new URLSearchParams(location.search).get('c');
+  if (c && /^\d{4}$/.test(c)) { $('code').value = c; say('Contract ' + c + ' is ready. Enter your name and press Join.'); $('nm').focus(); }
+})();
+RR.nav.start({
+  root: () => screen === 'lobby' ? $('lobby') : $('home'),
+  active: () => screen !== 'frame',
+  onB: () => { if (screen === 'lobby') { $('leave').click(); return true; } return false; },
+  onSelect: () => { if (screen === 'frame') return true; if (screen === 'lobby') { $('leave').click(); return true; } location.href = 'index.html'; return true; }
+});
+</script>
 </body>
 </html>
