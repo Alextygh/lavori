@@ -59,7 +59,7 @@ An encyclopedia of rubber ducks from the game Hitman: World of Assassination. Th
 ### [Emergency Map](https://alextygh.github.io/lavori/emergency-map.html)
 This map powered by OpenStreetMap lets you choose a location on the map (or use your device's GPS), select the emergency type you need, and it tells you how much time it would take for each selected emergency type to reach your location. It locates hospitals, fire stations and police stations up to 20km, and it shows the route from your position and the closest's emergency station and the approximate time.
 
-### [Game of the Goose]((https://alextygh.github.io/lavori/oca/index.html)
+### [Game of the Goose](https://alextygh.github.io/lavori/oca/index.html)
 A popular European board game, I scanned my physical copy from the 80's. You can play it locally, give it a shot, it's fun.
 It's a luck based game.
 
